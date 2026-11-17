@@ -1,0 +1,1726 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="description" content="Jogo de equações do 1º grau com balança: matéria (+) e antimatéria (−). Aprenda as regras da igualdade jogando.">
+<style>
+:root { color-scheme: light; padding: env(safe-area-inset-top, 0px) 0 env(safe-area-inset-bottom, 0px); }
+body { margin: 0; font: 14px system-ui, sans-serif; }
+img { max-width: 100%; }
+[hidden] { display: none !important; }
+</style>
+<title>Balança da Igualdade</title>
+<meta name="author" content="Ygor B. F. Ferreira">
+<meta name="copyright" content="© 2026 Ygor B. F. Ferreira. Uso livre em sala de aula; proibida a cópia e a revenda.">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=Bricolage+Grotesque:opsz,wght@12..96,500..800&display=swap">
+<style>
+/* Layout: a plank with the equation on top; below it a two-pan balance whose pans hold matter and antimatter pieces; controls and status underneath. */
+:root {
+  --bg: #edf0f3;
+  --surface: #ffffff;
+  --ink: #121c26;
+  --ink-2: #4a5a69;
+  --line: #c5ced7;
+  --matter: #e39a0b;
+  --on-matter: #1c1300;
+  --anti: #2d5be3;
+  --on-anti: #ffffff;
+  --ok: #1f7a45;
+  --warn: #b3380a;
+  --ring: #2d5be3;
+  --flash: #ffb800;
+  --xring: #8b5cf6;
+  --font-display: "Bricolage Grotesque", "Arial Rounded MT Bold", system-ui, sans-serif;
+  --font-body: "Atkinson Hyperlegible", system-ui, -apple-system, "Segoe UI", sans-serif;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0e141b;
+    --surface: #17212b;
+    --ink: #e8eef4;
+    --ink-2: #9db0c1;
+    --line: #2e3d4c;
+    --matter: #f0a81c;
+    --on-matter: #1c1300;
+    --anti: #6b8ef7;
+    --on-anti: #0a1226;
+    --ok: #55c887;
+    --warn: #ff9a6b;
+    --ring: #9db8ff;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0e141b;
+  --surface: #17212b;
+  --ink: #e8eef4;
+  --ink-2: #9db0c1;
+  --line: #2e3d4c;
+  --matter: #f0a81c;
+  --on-matter: #1c1300;
+  --anti: #6b8ef7;
+  --on-anti: #0a1226;
+  --ok: #55c887;
+  --warn: #ff9a6b;
+  --ring: #9db8ff;
+  color-scheme: dark;
+}
+
+[hidden] { display: none !important; }
+body {
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--font-body);
+  font-size: 16px;
+  line-height: 1.45;
+  padding-block: 20px 32px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+}
+.wrap { max-width: 640px; margin: 0 auto; }
+
+header { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 4px 16px; }
+h1 { font-family: var(--font-display); font-weight: 800; font-size: clamp(26px, 6vw, 34px); line-height: 1.1; margin: 0; text-wrap: balance; }
+.sub { color: var(--ink-2); margin: 4px 0 0; flex-basis: 100%; }
+.lvl { font-family: var(--font-display); font-weight: 600; font-size: 15px; color: var(--ink-2); font-variant-numeric: tabular-nums; }
+
+/* equation plank */
+.plank {
+  margin-top: 18px;
+  min-height: 104px;
+  display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 0 0.45em;
+  padding: 14px 12px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  box-shadow: 0 4px 0 var(--line);
+  font-family: var(--font-display); font-weight: 700;
+  font-size: clamp(28px, 8.5vw, 50px);
+  font-variant-numeric: tabular-nums;
+  line-height: 1.25;
+  text-align: center;
+}
+.plank .sym { color: var(--ink-2); }
+.plank .sym.bad { color: var(--warn); }
+.op { display: inline-block; white-space: pre; padding: 0 0.22em; border-radius: 8px; }
+.op.pos { background: var(--matter); color: var(--on-matter); }
+.op.neg { background: var(--anti); color: var(--on-anti); }
+
+/* balance */
+.scale { position: relative; margin-top: 44px; padding-top: 40px; }
+.beam { position: absolute; top: 0; left: 2%; right: 2%; height: 10px; border-radius: 6px; background: var(--ink-2); transform-origin: 50% 50%; transition: transform 0.55s cubic-bezier(0.3, 1.35, 0.5, 1); }
+.pivot { position: absolute; left: 50%; top: -4px; width: 18px; height: 18px; margin-left: -9px; border-radius: 50%; background: var(--surface); border: 3px solid var(--ink-2); z-index: 2; }
+.post { position: absolute; left: 50%; top: 10px; bottom: 0; width: 10px; margin-left: -5px; border-radius: 5px; background: linear-gradient(90deg, var(--ink-2), var(--ink), var(--ink-2)); }
+.pans { position: relative; display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.pan { position: relative; min-width: 0; min-height: 156px; padding: 10px 10px 12px; background: var(--surface); border: 1.5px solid var(--line); border-radius: 12px; transition: transform 0.55s cubic-bezier(0.3, 1.35, 0.5, 1); display: flex; flex-direction: column; gap: 10px; }
+.pan::before { content: ""; position: absolute; left: 50%; top: -35px; height: 35px; width: 2px; margin-left: -1px; background: var(--ink-2); }
+.pan-t { margin: 0; font-family: var(--font-body); font-weight: 700; font-size: 12px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink-2); }
+.pieces { display: flex; flex-wrap: wrap; align-items: flex-end; align-content: flex-start; gap: 6px; flex: 1; }
+
+.pc { display: grid; place-items: center; flex: none; border-radius: 50%; font-family: var(--font-display); font-weight: 800; line-height: 1; }
+.pc.u { width: 30px; height: 30px; font-size: 20px; }
+.pc.x { width: 58px; height: 58px; font-size: 34px; background: var(--matter); color: var(--on-matter); font-style: italic; outline: 3px dashed var(--xring); outline-offset: 3px; }
+.pc.m { background: var(--matter); color: var(--on-matter); }
+.pc.a { background-color: var(--anti); color: var(--on-anti); background-image: repeating-linear-gradient(135deg, rgba(255, 255, 255, 0.2) 0 3px, transparent 3px 7px); }
+@keyframes pop { from { transform: scale(0.3); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+/* each pair is pulled to the midpoint between its two pieces (--dx, --dy are set from the layout), flashes, then vanishes */
+@keyframes pull {
+  0% { transform: translate(0, 0) scale(1); filter: brightness(1); box-shadow: 0 0 0 0 transparent; }
+  55% { transform: translate(var(--dx, 0px), var(--dy, 0px)) scale(1.05); filter: brightness(1.3); box-shadow: 0 0 12px 4px var(--flash); }
+  80% { transform: translate(var(--dx, 0px), var(--dy, 0px)) scale(1.35); filter: brightness(2.4) saturate(0.4); box-shadow: 0 0 24px 12px var(--flash); }
+  100% { transform: translate(var(--dx, 0px), var(--dy, 0px)) scale(0); opacity: 0; filter: brightness(2.4); box-shadow: 0 0 0 0 transparent; }
+}
+.pc.new { animation: pop 0.28s ease-out; }
+.pc.boom { animation: pull var(--fd, 1.1s) ease-in var(--fdelay, 0s) forwards; }
+.pc.new.boom { animation: pop 0.28s ease-out, pull var(--fd, 1.1s) ease-in var(--fdelay, 0s) forwards; }
+
+/* parentheses drawn around the group that was just inserted; they exist only during the operation */
+.grp { position: relative; display: inline-flex; flex-wrap: wrap; align-items: flex-end; gap: 6px; max-width: 100%; padding: 4px 14px; }
+.grp::before, .grp::after { content: ""; position: absolute; top: 0; bottom: 0; width: 9px; border: 0 solid var(--ink-2); animation: parIn 0.35s ease-out both, parOut 0.4s ease-in var(--par-out, 99s) forwards; }
+.grp::before { left: 0; border-left-width: 3px; border-radius: 100% 0 0 100% / 50% 0 0 50%; }
+.grp::after { right: 0; border-right-width: 3px; border-radius: 0 100% 100% 0 / 0 50% 50% 0; }
+@keyframes parIn { from { opacity: 0; transform: scaleY(0.4); } to { opacity: 1; transform: scaleY(1); } }
+@keyframes parOut { to { opacity: 0; } }
+
+/* the two terms that fuse glow together in the equation */
+@keyframes eqpulse {
+  0% { transform: scale(1); box-shadow: 0 0 0 0 transparent; }
+  50% { transform: scale(1.1); box-shadow: 0 0 16px 5px var(--flash); }
+  100% { transform: scale(1); box-shadow: 0 0 0 0 transparent; }
+}
+.pair { display: inline-block; white-space: pre; border-radius: 8px; }
+.pair.pulse { animation: eqpulse var(--fd, 1.1s) ease-in-out var(--ed, 0s); }
+
+.legend { margin: 16px 0 0; font-size: 14px; color: var(--ink-2); display: flex; flex-wrap: wrap; align-items: center; gap: 6px 8px; }
+.key { display: inline-grid; place-items: center; width: 20px; height: 20px; border-radius: 50%; font-family: var(--font-display); font-weight: 800; font-size: 14px; line-height: 1; }
+.key.m { background: var(--matter); color: var(--on-matter); }
+.key.a { background-color: var(--anti); color: var(--on-anti); background-image: repeating-linear-gradient(135deg, rgba(255, 255, 255, 0.2) 0 3px, transparent 3px 7px); }
+.lg { display: inline-flex; align-items: center; gap: 6px; white-space: nowrap; }
+
+/* status and result */
+.status { min-height: 3em; margin: 14px 0 0; color: var(--ink-2); }
+.status.warn { color: var(--warn); }
+.status:empty { display: none; }
+.win { margin-top: 14px; padding: 16px; background: var(--surface); border: 1.5px solid var(--ok); border-radius: 12px; display: grid; gap: 8px; }
+.win h2 { margin: 0; font-family: var(--font-display); font-weight: 800; font-size: 28px; color: var(--ok); font-variant-numeric: tabular-nums; }
+.win p { margin: 0; }
+
+/* controls */
+.controls { margin-top: 18px; display: grid; gap: 16px; }
+.row { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; }
+button { font: inherit; cursor: pointer; }
+button:disabled { opacity: 0.4; cursor: not-allowed; }
+:focus-visible { outline: 3px solid var(--ring); outline-offset: 2px; }
+
+.seg { border: 0; padding: 0; margin: 0; min-width: 0; }
+.seg legend { padding: 0; margin-bottom: 6px; font-size: 14px; color: var(--ink-2); }
+.seg .opts { position: relative; display: flex; flex-wrap: wrap; gap: 6px; }
+.seg input { position: absolute; opacity: 0; width: 1px; height: 1px; }
+.seg label { padding: 8px 14px; border: 1.5px solid var(--line); border-radius: 999px; background: var(--surface); cursor: pointer; font-size: 15px; }
+.seg input:checked + label { background: var(--ink); color: var(--bg); border-color: var(--ink); }
+.seg input:focus-visible + label { outline: 3px solid var(--ring); outline-offset: 2px; }
+
+.step { display: inline-flex; align-items: center; border: 1.5px solid var(--line); border-radius: 10px; background: var(--surface); }
+.step button { width: 44px; height: 48px; border: 0; background: transparent; color: var(--ink); font-size: 22px; border-radius: 10px; }
+.step output { min-width: 34px; text-align: center; font-family: var(--font-display); font-weight: 700; font-size: 22px; font-variant-numeric: tabular-nums; }
+.act { flex: 1 1 150px; min-height: 52px; border: 0; border-radius: 10px; padding: 10px 14px; font-family: var(--font-display); font-weight: 700; font-size: 19px; }
+.act.pos { background: var(--matter); color: var(--on-matter); }
+.act.neg { background: var(--anti); color: var(--on-anti); }
+.act:not(:disabled):hover, .primary:not(:disabled):hover { filter: brightness(1.08); }
+.ghost { min-height: 42px; padding: 8px 16px; border: 1.5px solid var(--line); border-radius: 10px; background: transparent; color: var(--ink); }
+.primary { min-height: 46px; padding: 10px 18px; border: 0; border-radius: 10px; background: var(--ink); color: var(--bg); font-family: var(--font-display); font-weight: 700; font-size: 17px; justify-self: start; }
+
+.row.tools { align-items: flex-end; }
+
+/* phone: everything (equation, balance, controls) fits in one screen without scrolling */
+@media (max-width: 520px) {
+  body { padding-block: 10px 14px; }
+  h1 { font-size: 22px; }
+  .sub { display: none; }
+  .lvl { font-size: 13px; }
+  .legend { gap: 4px 12px; }
+  .plank { margin-top: 10px; min-height: 64px; padding: 8px; font-size: clamp(24px, 7.5vw, 34px); box-shadow: 0 3px 0 var(--line); }
+  .scale { margin-top: 30px; padding-top: 26px; }
+  .pan::before { top: -25px; height: 25px; }
+  .pans { gap: 10px; }
+  .pan { min-height: 96px; padding: 6px 6px 8px; gap: 6px; }
+  .pan-t { font-size: 11px; }
+  .pieces { gap: 4px; }
+  .pc.u { width: 24px; height: 24px; font-size: 16px; }
+  .pc.x { width: 44px; height: 54px; font-size: 26px; }
+  .grp { gap: 4px; padding: 3px 11px; }
+  .legend { margin-top: 10px; font-size: 12px; }
+  .status { margin-top: 8px; min-height: 2.6em; font-size: 14px; line-height: 1.3; }
+  .win { margin-top: 10px; padding: 12px; gap: 6px; }
+  .win h2 { font-size: 24px; }
+  .controls { margin-top: 10px; gap: 8px; }
+  .seg legend { margin-bottom: 3px; font-size: 13px; }
+  .seg label { padding: 6px 10px; font-size: 14px; }
+  .step button { width: 38px; height: 44px; }
+  .act { min-height: 44px; font-size: 16px; flex: 1 1 100px; padding: 6px 8px; }
+  .ghost { min-height: 38px; padding: 6px 12px; font-size: 14px; }
+  .row { gap: 8px; }
+}
+
+/* small phones inside the app: the visible area is only about 600px tall, so the whole game must fit in that */
+@media (max-width: 520px) {
+  h1 { font-size: 20px; }
+  .lvl { font-size: 12px; }
+  .plank { min-height: 78px; font-size: 26px; }
+  .scale { margin-top: 22px; padding-top: 20px; padding-bottom: 14px; }
+  .pan::before { top: -19px; height: 19px; }
+  .pan { min-height: 84px; }
+  .pc.u { width: 22px; height: 22px; font-size: 15px; }
+  .pc.x { width: 44px; height: 44px; font-size: 26px; outline-width: 2px; outline-offset: 2px; }
+  .pans { gap: 14px; }
+  .grp { flex: 1 1 0; min-width: 64px; }
+  .pieces.dense, .pieces.dense .grp { gap: 2px; }
+  .pieces.dense .pc.u { width: 17px; height: 17px; font-size: 12px; }
+  .pieces.dense .pc.x { width: 34px; height: 34px; font-size: 20px; }
+  .pieces.dense .grp { padding: 3px 9px; }
+  .legend .sent { display: none; }
+  .legend { margin-top: 8px; }
+  .status { font-size: 13px; min-height: 2.7em; }
+  .seg .opts.tg3 { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px; }
+  .seg .opts.tg3 label { padding: 8px 4px; text-align: center; font-size: 13px; white-space: nowrap; }
+  @media (max-width: 340px) { .seg .opts.tg3 label { font-size: 12px; padding: 8px 2px; white-space: normal; line-height: 1.15; } }
+  .row.ops { flex-wrap: nowrap; }
+  .row.ops .step button { width: 32px; height: 44px; font-size: 20px; }
+  .row.ops .step output { min-width: 24px; font-size: 20px; }
+  .row.ops .act { flex: 1 1 0; min-width: 0; font-size: 15px; }
+  .row.tools { flex-wrap: nowrap; gap: 6px; }
+  .row.tools .seg label { padding: 6px 9px; font-size: 13px; }
+  .row.tools .ghost { padding: 6px 9px; font-size: 13px; white-space: nowrap; }
+}
+
+/* v10: phase menu, header, fractions, fraction discs, division groups */
+a { color: inherit; }
+.menu h1 { margin-bottom: 4px; }
+.menu .sub { display: block; margin: 0 0 14px; }
+.menu .copy { margin: 10px 0 0; font-size: 11px; line-height: 1.35; color: var(--ink-2); text-align: center; }
+@media (max-width: 520px) { .menu .copy { margin-top: 6px; font-size: 10px; } }
+.phases { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+.ph { display: grid; grid-template-columns: 38px 1fr auto; align-items: center; gap: 12px; padding: 10px 12px; min-height: 54px; background: var(--surface); border: 1.5px solid var(--line); border-radius: 12px; text-decoration: none; color: var(--ink); }
+a.ph:hover { border-color: var(--ink-2); }
+.ph .no { display: grid; place-items: center; width: 34px; height: 34px; border-radius: 50%; background: var(--matter); color: var(--on-matter); font-family: var(--font-display); font-weight: 800; font-size: 18px; }
+.ph .tt { font-family: var(--font-display); font-weight: 700; font-size: 17px; line-height: 1.15; }
+.ph .eq { display: block; font-weight: 400; font-size: 13px; color: var(--ink-2); margin-top: 2px; }
+.ph .st { font-size: 12px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: var(--ok); }
+.ph.soon { opacity: 0.55; }
+.ph.soon .no { background: var(--line); color: var(--ink-2); }
+.ph.soon .st { color: var(--ink-2); }
+
+.gh { display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: nowrap; }
+.back { flex: none; font-family: var(--font-display); font-weight: 700; font-size: 15px; text-decoration: none; padding: 6px 10px 6px 4px; }
+.ph-name { flex: 1; min-width: 0; font-family: var(--font-display); font-weight: 800; font-size: 18px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.gh .lvl { flex: none; }
+
+.fr { display: inline-flex; flex-direction: column; align-items: center; vertical-align: middle; font-size: 0.6em; line-height: 1.05; margin: 0 0.12em; }
+.fr .n { border-bottom: 0.09em solid currentColor; padding: 0 0.18em; }
+.fr .d { padding: 0 0.18em; }
+.op.div { background: var(--ink); color: var(--bg); }
+
+.pc.x.sm { width: 40px; height: 40px; font-size: 24px; outline-width: 2px; outline-offset: 2px; }
+.pc.fr { position: relative; background-image: conic-gradient(var(--c) var(--fill), transparent 0); box-shadow: inset 0 0 0 2px var(--c); }
+.pc.fr.m { --c: var(--matter); background-color: transparent; }
+.pc.fr.a { --c: var(--anti); background-color: transparent; background-image: conic-gradient(var(--c) var(--fill), transparent 0); }
+.pc.fr::after { content: ""; position: absolute; inset: 0; border-radius: 50%; background: repeating-conic-gradient(var(--surface) 0 2deg, transparent 2deg var(--step)); }
+.legend.board { align-items: center; gap: 10px; font-size: 14px; color: var(--ink); }
+.legend.board .pc.big { width: 34px; height: 34px; }
+.legend.board .bt { min-width: 0; line-height: 1.2; }
+.legend.board .bf { font-size: 1.15em; }
+.legend.board .fr { font-size: 0.85em; }
+
+.dg { display: inline-flex; flex-wrap: wrap; align-items: flex-end; gap: 6px; padding: 4px; border: 2px dashed var(--ink-2); border-radius: 12px; max-width: 100%; transition: opacity 0.45s ease, transform 0.45s ease; animation: pop 0.3s ease-out; }
+.dg.keep { border-color: var(--ok); }
+.dg.gone { opacity: 0; transform: scale(0.6); }
+.pieces.dense .dg { gap: 2px; padding: 2px; }
+
+.ans { font: inherit; color: inherit; background: none; border: 0; padding: 0; text-align: left; cursor: default; }
+.ans.cyc { cursor: pointer; border-bottom: 2px dotted var(--ok); }
+.ans:disabled { opacity: 1; }
+.win .fr { font-size: 0.7em; }
+.sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+.act.div { background: var(--ink); color: var(--bg); }.pc.prev { opacity: 0.5; box-shadow: none; outline: 2px dashed var(--ink-2); outline-offset: 1px; }
+.pc.x.prev { outline-color: var(--xring); }
+.op.prev { background: transparent; color: var(--ink); border: 2px dashed var(--ink-2); }
+.act.sel { outline: 3px solid var(--ring); outline-offset: 2px; }
+.row.confirm .primary, .row.confirm .ghost { flex: 1; min-height: 44px; }
+.tick { display: none; }
+.plank.long { font-size: 20px; }
+.pc.x.fr { color: var(--ink); }
+.dg.merge { border-color: transparent; }
+.pkg { display: inline-flex; align-items: center; gap: 2px; max-width: 100%; }
+.pkg .mult { display: grid; place-items: center; min-width: 26px; height: 26px; padding: 0 4px; border-radius: 8px; background: var(--ink); color: var(--bg); font-family: var(--font-display); font-weight: 800; font-size: 17px; }
+.pkg.glow .grp::before, .pkg.glow .grp::after { border-color: var(--ring); }
+.pkg.glow .mult { box-shadow: 0 0 0 3px var(--ring); }
+.grp.cp { animation: pop 0.35s ease-out; }
+.act.open { background: var(--surface); color: var(--ink); border: 2px solid var(--ink-2); letter-spacing: 0.08em; }
+.kindbtn { flex: none; min-width: 44px; min-height: 44px; border: 2px dashed var(--xring); border-radius: 10px; background: var(--surface); color: var(--ink); font-family: var(--font-display); font-weight: 800; font-size: 18px; font-style: italic; }
+.act.mul { background: var(--surface); color: var(--ink); border: 2px solid var(--ink); }
+.op.mul { background: var(--anti); color: var(--on-anti); }
+.pc.x.neg { background-color: var(--anti); color: var(--on-anti); background-image: repeating-linear-gradient(135deg, rgba(255, 255, 255, 0.2) 0 3px, transparent 3px 7px); }
+@keyframes spinOut { to { transform: scaleX(0); filter: brightness(1.8); } }
+@keyframes spinIn { from { transform: scaleX(0); filter: brightness(1.8); } to { transform: scaleX(1); filter: none; } }
+.pc.spin { animation: spinOut 0.5s ease-in forwards; }
+.pc.fin { animation: spinIn 0.5s ease-out; }
+
+@media (max-width: 520px) {
+  body { padding-block: 8px 10px; }
+  .back { font-size: 14px; }
+  .ph-name { font-size: 15px; }
+  .pc.x.sm { width: 30px; height: 30px; font-size: 19px; }
+  .dg { gap: 3px; padding: 3px; }
+  .pieces.dense .pc.x.sm { width: 26px; height: 26px; font-size: 16px; }
+  .legend.board { margin-top: 8px; font-size: 12px; gap: 8px; }
+  .legend.board .pc.big { width: 26px; height: 26px; }
+  .legend.board { margin-top: 6px; }
+  .row.tools .ghost { flex: 1; }
+  .row.ops .act.div { font-size: 15px; }
+  .row.ops .act { font-size: 17px; }
+  .row.ops.five { gap: 5px; }
+  .row.ops.five .step button { width: 24px; }
+  .row.ops.five .step output { min-width: 16px; font-size: 18px; }
+  .row.ops.five .act { font-size: 15px; padding: 6px 2px; }
+  .kindbtn { min-width: 40px; min-height: 44px; font-size: 16px; }
+  .pieces.dense .dg { gap: 2px; padding: 2px; border-width: 1.5px; }
+  .pieces.dense .dg .pc.x { width: 26px; height: 26px; font-size: 16px; outline-width: 1.5px; outline-offset: 1px; }
+  .pieces.dense .dg .pc.u { width: 14px; height: 14px; font-size: 9px; }
+  .pieces.dense .dg { gap: 1px; }
+  #controls > * { min-width: 0; max-width: 100%; }
+  .row.ops .act { overflow: hidden; }
+  .row.ops.six { gap: 4px; }
+  .row.tools .lbl { display: none; }
+  .row.tools #pace { text-transform: capitalize; }
+  .row.tools .tick { display: inline; }
+  .row.tools .ghost { flex: 1 1 auto; min-width: 0; padding: 6px 4px; font-size: 13px; }
+  .row.ops.six .step button { width: 22px; }
+  .row.ops.six .step output { min-width: 14px; font-size: 17px; }
+  .row.ops.six .act { font-size: 14px; padding: 6px 0; min-width: 0; }
+  .pkg .mult { min-width: 22px; height: 22px; font-size: 14px; border-radius: 7px; }
+  .row.ops.four { gap: 5px; }
+  .row.ops.four .step button { width: 26px; }
+  .row.ops.four .step output { min-width: 18px; font-size: 18px; }
+  .row.ops.four .act { font-size: 15px; padding: 6px 2px; }
+  .win { gap: 4px; padding: 10px 12px; }
+  .win p { font-size: 14px; line-height: 1.3; }
+  .win .primary { min-height: 40px; padding: 8px 14px; }
+}
+@media (prefers-reduced-motion: reduce) { .dg { animation: none; transition: none; } }
+
+@media (prefers-reduced-motion: reduce) {
+  .pc.spin, .pc.fin, .pc.new, .pc.boom, .pc.new.boom, .pair.pulse, .grp::before, .grp::after { animation: none; }
+  .beam, .pan { transition: none; }
+}
+
+/* phase 8 (Master): two rows of operations, no legend, many pieces */
+#game.m8 #legend:not(.board) { display: none; }
+#game.m8 .status { min-height: 0; margin-top: 6px; }
+.brk { flex-basis: 100%; height: 0; }
+.row.ops.eight { flex-wrap: wrap; gap: 6px; }
+.row.ops.eight .act { flex: 1 1 0; min-width: 0; font-size: 15px; padding: 6px 2px; overflow: hidden; }
+.row.ops.eight .step button { width: 28px; }
+.row.ops.eight .step output { min-width: 16px; font-size: 18px; }
+.pkg .mult.f { height: auto; min-height: 26px; padding: 1px 4px; font-size: 13px; }
+.pkg .mult .fr { font-size: 0.95em; }
+.more { align-self: center; padding: 2px 8px; font-family: var(--font-display); font-weight: 800; color: var(--ink-2); transition: opacity 0.45s ease; }
+.more.gone { opacity: 0; }
+.pieces.tiny, .pieces.tiny .grp, .pieces.tiny .dg { gap: 1px; }
+.pieces.tiny .pc.u, .pieces.tiny .dg .pc.u { width: 11px; height: 11px; font-size: 0; }
+.pieces.tiny .pc.x, .pieces.tiny .dg .pc.x, .pieces.tiny .pc.x.sm { width: 24px; height: 24px; font-size: 15px; outline-width: 1.5px; outline-offset: 1px; }
+@media (max-width: 520px) { #game.m8 .plank.long { min-height: 64px; font-size: 22px; } }
+.plus { align-self: center; font-family: var(--font-display); font-weight: 800; font-size: 18px; color: var(--ink-2); padding: 0 2px; }
+.dterm { display: inline-flex; align-items: center; gap: 2px; max-width: 100%; }
+
+/* phase 9: term chips and the traditional shortcut */
+.chips { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 10px; }
+.chips .cg { display: flex; align-items: center; gap: 6px; }
+.chips .cl { font-size: 12px; color: var(--ink-2); text-transform: uppercase; letter-spacing: 0.06em; }
+.chip { min-width: 48px; min-height: 44px; padding: 6px 10px; border-radius: 12px; border: 2px solid var(--line); background: var(--surface); color: var(--ink); font: inherit; font-weight: 800; font-size: 18px; cursor: pointer; }
+.chip.pos { border-color: var(--matter); }
+.chip.neg { border-color: var(--anti); }
+.chip.fac { border-style: dashed; }
+.chip.sel { box-shadow: 0 0 0 3px var(--ring); }
+.chip:disabled { opacity: 0.5; cursor: default; }
+.grp.moved { outline: 2px dashed var(--ring); outline-offset: 1px; border-radius: 10px; }
+.row.confirm { position: sticky; bottom: 4px; z-index: 5; background: var(--bg); padding-block: 4px; }
+.op.inv { background: var(--ring); color: var(--bg); }
+
+/* calculator */
+.calc { display: flex; flex-direction: column; gap: 10px; }
+.cview { background: var(--surface); border: 1.5px solid var(--line); border-radius: 14px; padding: 10px 12px; min-height: 104px; display: flex; flex-direction: column; justify-content: center; gap: 8px; }
+.ctyped { font-family: var(--font-display); font-weight: 700; font-size: 20px; letter-spacing: 0.02em; min-height: 26px; word-break: break-all; }
+.ctyped .ph0 { color: var(--ink-2); font-weight: 400; font-size: 15px; letter-spacing: 0; }
+.cshow { font-family: var(--font-display); font-weight: 800; font-size: 22px; display: flex; align-items: center; justify-content: center; flex-wrap: wrap; gap: 6px; min-height: 40px; border-top: 1px dashed var(--line); padding-top: 6px; }
+.cshow .ceqs { color: var(--ink-2); }
+.cshow:empty { display: none; }
+.cmsg { margin: 0; min-height: 18px; font-size: 13px; color: var(--ink-2); }
+.cmsg.warn { color: var(--warn); font-weight: 700; }
+.ckeys { display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; }
+.ck { min-height: 44px; border-radius: 12px; border: 1.5px solid var(--line); background: var(--surface); color: var(--ink); font: inherit; font-weight: 800; font-size: 19px; cursor: pointer; }
+.ck.wide { grid-column: span 2; font-size: 15px; }
+.ck.op { border-color: var(--matter); }
+.cmode { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+.cmode button { min-height: 44px; border-radius: 12px; border: 2px solid var(--line); background: var(--surface); color: var(--ink); font: inherit; font-weight: 800; cursor: pointer; }
+.cmode button[aria-pressed="true"] { border-color: var(--ring); box-shadow: 0 0 0 2px var(--ring); }
+.cmode .sm { font-weight: 400; font-size: 12px; color: var(--ink-2); }
+@media (max-width: 380px) { .cmode .sm { display: none; } }
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <section class="menu" id="menu" hidden>
+    <h1>Balança da Igualdade</h1>
+    <p class="sub">Equações de 1º grau e as regras da igualdade. Escolha uma fase.</p>
+    <ul class="phases">
+      <li><a class="ph" href="#fase-1"><span class="no">1</span><span class="tt">Somar e subtrair<span class="eq">x + 3 = 5</span></span><span class="st">Jogar</span></a></li>
+      <li><a class="ph" href="#fase-2"><span class="no">2</span><span class="tt">Dividir<span class="eq">2x = 6 · 2x = 5</span></span><span class="st">Jogar</span></a></li>
+      <li><a class="ph" href="#fase-3"><span class="no">3</span><span class="tt">Os dois juntos<span class="eq">2x + 3 = 7</span></span><span class="st">Jogar</span></a></li>
+      <li><a class="ph" href="#fase-4"><span class="no">4</span><span class="tt">Oposto de x<span class="eq">−2x = 6</span></span><span class="st">Jogar</span></a></li>
+      <li><a class="ph" href="#fase-5"><span class="no">5</span><span class="tt">x nos dois lados<span class="eq">3x + 2 = x + 8</span></span><span class="st">Jogar</span></a></li>
+      <li><a class="ph" href="#fase-6"><span class="no">6</span><span class="tt">Parênteses<span class="eq">2(x + 3) = 14</span></span><span class="st">Jogar</span></a></li>
+      <li><a class="ph" href="#fase-7"><span class="no">7</span><span class="tt">Frações<span class="eq">x/2 = 4</span></span><span class="st">Jogar</span></a></li>
+      <li><a class="ph" href="#fase-8"><span class="no">8</span><span class="tt">Master<span class="eq">2(x − 4)/3 = 4(x + 2)/5</span></span><span class="st">Jogar</span></a></li>
+      <li><a class="ph" href="#fase-9"><span class="no">9</span><span class="tt">Atalho tradicional<span class="eq">x + 3 = 5, logo x = 5 − 3</span></span><span class="st">Jogar</span></a></li>
+      <li><a class="ph" href="#fase-10"><span class="no">★</span><span class="tt">Calculadora<span class="eq">Digite a sua equação e resolva</span></span><span class="st">Jogar</span></a></li>
+    </ul>
+    <p class="copy">© 2026 Ygor B. F. Ferreira · Série “A Saga dos Reinos Matemáticos” · Canal Matematkês.<br>Uso livre em sala de aula; proibida a cópia e a revenda.</p>
+  </section>
+
+  <section class="calc" id="calc" hidden>
+    <header class="gh">
+      <a class="back" href="#fases">‹ Fases</a>
+      <span class="ph-name">Calculadora</span>
+    </header>
+    <div class="cview" id="cview" aria-live="polite">
+      <div class="ctyped" id="ctyped"></div>
+      <div class="cshow" id="cshow"></div>
+    </div>
+    <p class="cmsg" id="cmsg"></p>
+    <div class="ckeys" id="ckeys"></div>
+    <div class="cmode" role="group" aria-label="Como resolver">
+      <button type="button" id="mFull" aria-pressed="true">Completo<span class="sm"> (balança)</span></button>
+      <button type="button" id="mShort" aria-pressed="false">Reduzido<span class="sm"> (atalho)</span></button>
+    </div>
+    <div class="row">
+      <button class="ghost" id="cEx" type="button">Exemplo</button>
+      <button class="primary" id="cGo" type="button" disabled>Resolver</button>
+    </div>
+  </section>
+
+  <div id="game" hidden>
+  <header class="gh">
+    <a class="back" id="back" href="#fases">‹ Fases</a>
+    <span class="ph-name" id="phName">Fase 1</span>
+    <span class="lvl" id="lvl">Desafio 1 de 5</span>
+  </header>
+
+  <div class="plank" id="plank"><span id="eqL"></span><span class="sym" id="eqS">=</span><span id="eqR"></span></div>
+
+  <div class="scale" id="scale">
+    <div class="beam" id="beam"></div>
+    <div class="pivot"></div>
+    <div class="post"></div>
+    <div class="pans">
+      <div class="pan" id="panL" role="group"><h2 class="pan-t">Lado esquerdo</h2><div class="pieces" id="pcL"></div></div>
+      <div class="pan" id="panR" role="group"><h2 class="pan-t">Lado direito</h2><div class="pieces" id="pcR"></div></div>
+    </div>
+  </div>
+
+  <p class="legend" id="legend"><span class="lg"><span class="key m" aria-hidden="true">+</span> matéria (positivo)</span> <span class="lg"><span class="key a" aria-hidden="true">−</span> antimatéria (negativo)</span> <span class="sent">Uma de cada tipo se anula.</span></p>
+
+  <p class="status" id="status" role="status" aria-live="polite"></p>
+
+  <section class="win" id="win" hidden>
+    <h2><button class="ans" id="winEq" type="button" aria-label="Resposta. Toque para ver de outro jeito"></button></h2>
+    <p id="winHint" class="hint" hidden>Toque na resposta para trocar a forma.</p>
+    <p id="winCheck"></p>
+    <p id="winMoves"></p>
+    <div class="row">
+      <button class="primary" id="next" type="button">Próximo desafio</button>
+      <button class="ghost" id="again" type="button">Tentar de novo</button>
+    </div>
+  </section>
+
+  <section class="controls" id="controls" aria-label="Operações">
+    <fieldset class="seg">
+      <legend class="sr">Aplicar a</legend>
+      <div class="opts tg3">
+        <input type="radio" name="tg" id="tg-both" value="both" checked><label for="tg-both">Nos dois lados</label>
+        <input type="radio" name="tg" id="tg-L" value="L"><label for="tg-L">Só no esquerdo</label>
+        <input type="radio" name="tg" id="tg-R" value="R"><label for="tg-R">Só no direito</label>
+      </div>
+    </fieldset>
+    <div class="chips" id="chips" hidden></div>
+    <div class="row ops" id="ops">
+      <div class="step" role="group" aria-label="Quantidade">
+        <button id="dec" type="button" aria-label="Diminuir quantidade">−</button>
+        <output id="qty">1</output>
+        <button id="inc" type="button" aria-label="Aumentar quantidade">+</button>
+      </div>
+      <button class="kindbtn" id="kind" type="button" hidden>nº</button>
+      <button class="act pos" id="addPos" type="button">Somar +1</button>
+      <button class="act neg" id="addNeg" type="button">Somar −1</button>
+      <button class="act div" id="addDiv" type="button" hidden>Dividir por 2</button>
+      <span class="brk" id="brk" hidden></span>
+      <button class="act mul" id="addMulN" type="button" hidden aria-label="Multiplicar por n">×2</button>
+      <button class="act open" id="addOpen" type="button" hidden aria-label="Abrir o parêntese">( )</button>
+      <button class="act mul" id="addMul" type="button" hidden aria-label="Multiplicar por menos um">×−1</button>
+    </div>
+    <div class="row tools" id="tools">
+      <button class="ghost" id="pace" type="button" aria-pressed="true">Ritmo: lento</button>
+      <button class="ghost" id="conf" type="button" aria-pressed="true">Confirmar: sim</button>
+      <button class="ghost" id="undo" type="button">Desfazer</button>
+      <button class="ghost" id="restart" type="button">Recomeçar</button>
+    </div>
+    <div class="row confirm" id="confirmRow" hidden>
+      <button class="ghost" id="cancelOp" type="button">Cancelar</button>
+      <button class="primary" id="okOp" type="button">Confirmar</button>
+    </div>
+  </section>
+  </div>
+</div>
+
+<script>
+(function () {
+  // ---------- fractions: [numerator, denominator], always reduced, denominator > 0 ----------
+  var gcd = function (a, b) { a = Math.abs(a); b = Math.abs(b); while (b) { var t = a % b; a = b; b = t; } return a || 1; };
+  var F = function (n, d) { d = d === undefined ? 1 : d; if (d < 0) { n = -n; d = -d; } var g = gcd(n, d); return [n / g, d / g]; };
+  var add = function (a, b) { return F(a[0] * b[1] + b[0] * a[1], a[1] * b[1]); };
+  var sub = function (a, b) { return F(a[0] * b[1] - b[0] * a[1], a[1] * b[1]); };
+  var mul = function (a, b) { return F(a[0] * b[0], a[1] * b[1]); };
+  var divN = function (a, k) { return F(a[0], a[1] * k); };
+  var isInt = function (f) { return f[1] === 1; };
+  var abs = function (f) { return [Math.abs(f[0]), f[1]]; };
+
+  var $ = function (id) { return document.getElementById(id); };
+  var rnd = function (lo, hi) { return lo + Math.floor(Math.random() * (hi - lo + 1)); };
+  var num = function (v) { return v < 0 ? '−' + (-v) : '' + v; };
+
+  function frHTML(n, d) { return '<span class="fr"><span class="n">' + n + '</span><span class="d">' + d + '</span></span>'; }
+  function decimal(n, d) {
+    var ip = Math.floor(n / d), rem = n % d, digits = '', i;
+    for (i = 0; i < 4 && rem; i++) { rem *= 10; digits += Math.floor(rem / d); rem = rem % d; }
+    return ip + (digits ? ',' + digits : '') + (rem ? '…' : '');
+  }
+  // forms of a number: 'frac' (5/2), 'mixed' (2 1/2), 'dec' (2,5)
+  function fx(f, mode) {
+    var neg = f[0] < 0 ? '−' : '', n = Math.abs(f[0]), d = f[1];
+    if (d === 1) return neg + n;
+    if (mode === 'dec') return neg + decimal(n, d);
+    if (mode === 'mixed' && n > d) return neg + Math.floor(n / d) + frHTML(n % d, d);
+    return neg + frHTML(n, d);
+  }
+  function txt(f) { return f[1] === 1 ? num(f[0]) : (f[0] < 0 ? '−' : '') + Math.abs(f[0]) + '/' + f[1]; }
+
+  // ---------- phases ----------
+  var PH = {
+    1: { name: 'Somar e subtrair', levels: [[3, 5], [2, 7], [-4, 1], [6, 2], [-2, -5]] },       // x + a = b
+    2: { name: 'Dividir', levels: [[2, 6], [3, 12], [4, 8], [5, 15], [2, 5], [3, 4]] },        // k·x = c
+    3: { name: 'Os dois juntos', levels: [[2, 3, 7], [3, -2, 10], [2, 5, 1], [4, -6, 6], [5, 1, 11]] }, // k·x + a = b
+    5: { name: 'x nos dois lados', levels: [[3, 2, 1, 8], [5, -4, 2, 8], [2, 1, 5, -8], [4, 0, 1, 9], [1, 7, 3, -1]] }, // kL·x + aL = kR·x + aR
+    6: { name: 'Parênteses', levels: [[2, 1, 3, 0, 14], [3, 1, -1, 0, 12], [2, 1, 1, 3, 11], [-1, 1, 2, 0, 5], [5, 1, -1, -3, 2]] }, // m(x + pc) + c = b
+    7: { name: 'Frações', levels: [[1, 2, 0, 0, 1, 4], [1, 3, 1, 0, 1, 5], [2, 3, 0, 0, 1, 4], [1, 2, -3, 0, 1, 1], [1, 2, 0, 1, 3, 1]] }, // kL·x/dL + aL = kR·x/dR + aR
+    9: { name: 'Atalho tradicional', levels: [[1, 3, 0, 5], [1, -4, 0, 3], [2, 0, 0, 6], [2, 3, 0, 11], [3, -2, 0, 10], [3, 2, 1, 8], [5, -4, 2, 8], [4, 0, 1, 9]] },  // kL·x + aL = kR·x + aR
+    8: { name: 'Master', levels: [   // L e R: [m, md, k dentro, c dentro, k fora, c fora]
+      { L: [2, 1, 1, -3, 0, 4], R: [0, 1, 0, 0, 1, 5], x: 7, mn: 3, goal: 3 },
+      { L: [5, 1, 1, -2, 0, 0], R: [3, 1, 1, 2, 0, 0], x: 8, mn: 4, goal: 4 },
+      { L: [-2, 1, 1, -1, 0, 0], R: [0, 1, 0, 0, 1, 11], x: -3, mn: 4, goal: 4 },
+      { L: [1, 2, 1, 1, 0, 0], R: [1, 3, 1, -1, 0, 2], x: 7, mn: 4, goal: 4 },
+      { L: [2, 3, 1, -4, 0, 0], R: [4, 5, 1, 2, 0, 0], x: -32, mn: 5, goal: 6 }
+    ] },
+    4: { name: 'Oposto de x', levels: [[-1, 0, 3], [-1, 2, 5], [-2, 0, 6], [-3, 1, -8], [-1, 4, 1]] }  // k·x + a = b, k < 0
+  };
+  var origS, curMn = 1, curGoal = 1, calc = false, cmode = 'full', calcInit = null;
+  var phase = 1, level = 0, S, X, hist = [], orig, busy = false, solved = false, n = 1, target = 'both', pace = 'slow', run = 0;
+  var generated = { 1: [], 2: [], 3: [], 4: [], 5: [], 6: [], 7: [], 8: [], 9: [] }; var kind = 'n', ans = null, pend = null, confirmOn = true, ansMode = 0;
+  var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  function getLevel(i) {
+    var L = PH[phase].levels;
+    if (i < L.length) return L[i];
+    var k = i - L.length, g = generated[phase];
+    if (!g[k]) {
+      var a, x, b, kk, c;
+      if (phase === 1) {
+        do { a = rnd(-9, 9); x = rnd(-9, 9); b = x + a; } while (a === 0 || x === 0 || b === 0 || Math.abs(b) > 12);
+        g[k] = [a, b];
+      } else if (phase === 8) {
+        var a8, b8, p8, q8, c8, d8, x8;
+        do {
+          a8 = rnd(3, 5); b8 = rnd(2, a8 - 1); p8 = rnd(-5, 5); q8 = rnd(-5, 5); c8 = rnd(0, 2) === 0 ? 0 : rnd(-6, 6); x8 = rnd(-6, 8);
+          d8 = a8 * (x8 + p8) + c8 - b8 * (x8 + q8);
+        } while (!p8 || !q8 || !x8 || Math.abs(d8) > 15);
+        var mn8 = 2 + ((a8 * p8 + c8) !== 0 ? 1 : 0) + (a8 - b8 > 1 ? 1 : 0);
+        g[k] = { L: [a8, 1, 1, p8, 0, c8], R: [b8, 1, 1, q8, 0, d8], x: x8, mn: mn8, goal: mn8 + 1 };
+      } else if (phase === 7) {
+        var dd, k7, a7, t7;
+        do { dd = rnd(2, 5); k7 = rnd(1, 3); t7 = rnd(-3, 5); a7 = rnd(0, 3) === 0 ? 0 : rnd(-5, 5); x = dd * t7; b = k7 * t7 + a7; } while (t7 === 0 || b === 0 || Math.abs(b) > 15);
+        g[k] = [k7, dd, a7, 0, 1, b];
+      } else if (phase === 6) {
+        var mm = [2, 3, 4, 5, -1, -2][rnd(0, 5)], pc6, c6;
+        do { pc6 = rnd(-5, 5); x = rnd(-4, 8); c6 = rnd(0, 3) === 0 ? 0 : rnd(-6, 6); b = mm * (x + pc6) + c6; } while (pc6 === 0 || x === 0 || b === 0 || Math.abs(b) > 20);
+        g[k] = [mm, 1, pc6, c6, b];
+      } else if (phase === 9) {
+        var kr9, al9, ar9;
+        do { kk = rnd(1, 5); kr9 = rnd(0, 3); x = rnd(2, 8); al9 = rnd(-8, 8); ar9 = al9 + (kk - kr9) * x; } while (kk <= kr9 || (al9 === 0 && kr9 === 0) || Math.abs(ar9) > 14);
+        g[k] = [kk, al9, kr9, ar9];
+      } else if (phase === 5) {
+        var kr, al, ar;
+        do { kk = rnd(1, 6); kr = rnd(0, 4); x = rnd(2, 8); al = rnd(-8, 8); ar = al + (kk - kr) * x; } while (kk <= kr || kr === 0 || Math.abs(ar) > 12);
+        g[k] = [kk, al, kr, ar];
+      } else if (phase === 4) {
+        do { kk = -rnd(1, 5); x = rnd(-6, 7); a = rnd(0, 3) === 0 ? 0 : rnd(-8, 8); b = kk * x + a; } while (x === 0 || b === 0 || Math.abs(b) > 14);
+        g[k] = [kk, a, b];
+      } else if (phase === 3) {
+        do { kk = rnd(2, 5); x = rnd(-6, 7); a = rnd(-8, 8); b = kk * x + a; } while (x === 0 || a === 0 || b === 0 || Math.abs(b) > 14);
+        g[k] = [kk, a, b];
+      } else {
+        do { kk = rnd(2, 5); c = rnd(2, 15); } while ((k % 2 === 0) !== (c % kk === 0) || (c / kk === 1));
+        g[k] = [kk, c];
+      }
+    }
+    return g[k];
+  }
+
+  // ---------- state helpers ----------
+  var pmF = function (p) { return F(p.m, p.md || 1); };
+  var mkp = function (p, f) { return { m: f[0], md: f[1], k: p.k, c: p.c }; };
+  var valueOf = function (s) { var v = add(mul(kfr(s), X), s.c); if (s.p) v = add(v, mul(pmF(s.p), add(mul(F(s.p.k), X), F(s.p.c)))); return v; };
+  var diff = function () { return sub(valueOf(S.L), valueOf(S.R)); };   // zero means balanced
+  var neqNow = function () { return diff()[0] !== 0; };
+  var cnt = function (c) { var v = c[0]; return v > 0 ? { m: v, a: 0 } : { m: 0, a: -v }; };
+
+  // ---------- drawing the pieces ----------
+  function dense(id) {
+    var el = $(id), c = (el.innerHTML.match(/class="pc (u|x)/g) || []).length;
+    el.className = 'pieces' + (c > 8 ? ' dense' : '') + (c > 18 ? ' tiny' : '');
+  }
+  function xs(s) {
+    var kd = s.kd || 1, a = Math.abs(s.k), whole = Math.floor(a / kd), r = a % kd, tot = whole + (r ? 1 : 0), i, h = '';
+    for (i = 0; i < whole; i++) h += '<div class="pc x' + (s.k < 0 ? ' neg' : '') + (tot > 1 ? ' sm' : '') + '" aria-hidden="true">x</div>';
+    if (r) h += '<div class="pc x fr ' + (s.k < 0 ? 'a' : 'm') + (tot > 1 ? ' sm' : '') + '" style="--fill:' + (r * 360 / kd) + 'deg;--step:' + (360 / kd) + 'deg" aria-hidden="true">x</div>';
+    return h;
+  }
+  var kfr = function (s) { return F(s.k, s.kd || 1); };
+  var lcm = function (a, b) { return a / gcd(a, b) * b; };
+  // a constant: whole discs, plus one disc cut in q equal slices with r of them painted
+  function discs(c) {
+    var h = '', t = c[0] < 0 ? 'a' : 'm', ab = Math.abs(c[0]), w = Math.floor(ab / c[1]), r = ab % c[1], i;
+    for (i = 0; i < w; i++) h += '<div class="pc u ' + t + '" aria-hidden="true">' + (t === 'm' ? '+' : '−') + '</div>';
+    if (r) h += '<div class="pc u fr ' + t + '" style="--fill:' + (r * 360 / c[1]) + 'deg;--step:' + (360 / c[1]) + 'deg" aria-hidden="true"></div>';
+    return h;
+  }
+  // a package: m copies of (k x + c), drawn inside parentheses with the multiplier in front
+  function pkgHtml(q) {
+    if (!q) return '';
+    var f = [q.m, q.md || 1], badge;
+    if (f[0] === 1 && f[1] === 1) badge = '';
+    else if (f[1] === 1) badge = '<span class="mult" aria-hidden="true">' + (f[0] === -1 ? '−' : num(f[0])) + '</span>';
+    else badge = '<span class="mult f" aria-hidden="true">' + (f[0] < 0 ? '−' : '') + frHTML(Math.abs(f[0]), f[1]) + '</span>';
+    return '<span class="pkg">' + badge + '<span class="grp">' + xs({ k: q.k }) + discs(F(q.c)) + '</span></span>';
+  }
+  var sidePieces = function (s) { return pkgHtml(s.p) + xs(s) + discs(s.c); };
+
+  function unit(t, fuseAt, isNew, role) {
+    return '<div class="pc u ' + t + (isNew ? ' new' : '') + (fuseAt !== null ? ' boom' : '') + (role ? ' ' + role : '') + '"' +
+      (fuseAt !== null ? ' style="--fdelay:' + fuseAt + 'ms"' : '') + ' aria-hidden="true">' + (t === 'm' ? '+' : '−') + '</div>';
+  }
+
+  // While an addition plays, all of the side's units and the inserted ones share one pair of parentheses.
+  function pendingPieces(k, p, plan, T) {
+    var pl = plan[k];
+    if (!pl) return sidePieces(S[k]);
+    var old = p[k], oldT = old.m > 0 ? 'm' : (old.a > 0 ? 'a' : null), oldN = oldT ? old[oldT] : 0, i, h = pkgHtml(S[k].p) + xs(S[k]);
+    var at = function (j) { return T.hold + j * T.st; };
+    h += '<span class="grp" style="--par-out:' + T.parOut + 'ms">';
+    for (i = pl.k; i < oldN; i++) h += unit(oldT, null, false, '');
+    for (i = 0; i < pl.k; i++) h += unit(oldT, at(i), false, 'pa');
+    for (i = 0; i < pl.ins; i++) h += unit(pl.insT, i < pl.k ? at(i) : null, true, i < pl.k ? 'pb' : '');
+    h += '</span>';
+    return h;
+  }
+
+  function attract(box) {
+    try {
+      if (!box || !box.querySelectorAll) return;
+      var A = box.querySelectorAll('.pc.pa'), B = box.querySelectorAll('.pc.pb'), i;
+      for (i = 0; i < A.length && i < B.length; i++) {
+        var dx = (B[i].offsetLeft - A[i].offsetLeft) / 2, dy = (B[i].offsetTop - A[i].offsetTop) / 2;
+        A[i].style.setProperty('--dx', dx + 'px'); A[i].style.setProperty('--dy', dy + 'px');
+        B[i].style.setProperty('--dx', (-dx) + 'px'); B[i].style.setProperty('--dy', (-dy) + 'px');
+      }
+    } catch (e) { /* decoration only */ }
+  }
+
+  function describe(k) {
+    var s = S[k], t = [];
+    if (s.p) t.push(txt(pmF(s.p)) + ' vezes o pacote (' + sideText({ k: s.p.k, c: F(s.p.c) }) + ')');
+    if (s.k) t.push((s.k < 0 ? 'antimatéria ' : '') + ((s.kd || 1) > 1 ? txt(abs(kfr(s))) + ' de x' : (Math.abs(s.k) === 1 ? 'um x' : Math.abs(s.k) + ' x')));
+    if (s.c[0]) t.push((s.c[0] > 0 ? 'matéria ' : 'antimatéria ') + txt(abs(s.c)));
+    return (k === 'L' ? 'Lado esquerdo: ' : 'Lado direito: ') + (t.join(', ') || 'vazio');
+  }
+
+  function tilt() {
+    var d = diff(), a = Math.max(-10, Math.min(10, d[0] / d[1] * 4));
+    $('beam').style.transform = 'rotate(' + (-a) + 'deg)';
+    var dy = Math.tan(a * Math.PI / 180) * $('scale').offsetWidth * 0.25;
+    $('panL').style.transform = 'translateY(' + dy + 'px)';
+    $('panR').style.transform = 'translateY(' + (-dy) + 'px)';
+  }
+
+  // The sign is "≠" whenever the sides differ: the game holds one hidden x, so < and > would imply a solution set it does not teach yet.
+  function setEq(l, r, neq) {
+    $('eqL').innerHTML = l;
+    $('eqR').innerHTML = r;
+    $('plank').classList.toggle('long', ($('eqL').textContent + $('eqR').textContent).length > (phase === 8 || calc ? 19 : 26));
+    var s = $('eqS');
+    s.textContent = neq ? '≠' : '=';
+    s.className = 'sym' + (neq ? ' bad' : '');
+  }
+  function wrapSide(s) { var t = sideText(s); return termCount(s) > 1 ? '(' + t + ')' : t; }
+  function sideText(s) {
+    var terms = [], i, out = '';
+    if (s.p) {
+      var inner = sideText({ k: s.p.k, c: F(s.p.c) }), rd = s.p.md || 1, am = Math.abs(s.p.m), body = (am === 1 && rd > 1 ? '' : (am === 1 ? '' : am)) + '(' + inner + ')';
+      terms.push({ neg: s.p.m < 0, t: rd > 1 ? frHTML(body, rd) : body });
+    }
+    if (s.k) {
+      var ak = Math.abs(s.k), xt = (ak === 1 ? '' : ak) + 'x';
+      terms.push({ neg: s.k < 0, t: (s.kd || 1) > 1 ? frHTML(xt, s.kd) : xt });
+    }
+    if (s.c[0]) terms.push({ neg: s.c[0] < 0, t: fx(abs(s.c), 'frac') });
+    if (!terms.length) return '0';
+    for (i = 0; i < terms.length; i++) {
+      out += i === 0 ? (terms[i].neg ? '−' : '') + terms[i].t : (terms[i].neg ? ' − ' : ' + ') + terms[i].t;
+    }
+    return out;
+  }
+  function termCount(s) { return (s.p ? 1 : 0) + (s.k ? 1 : 0) + (s.c[0] ? 1 : 0); }
+
+  // fraction board: when a disc is cut in slices, show it with the painted slices named
+  function setBoard(list) {
+    var el = $('legend'), f = null, i;
+    for (i = 0; i < list.length; i++) if (!isInt(list[i])) { f = list[i]; break; }
+    if (!f) { el.className = 'legend'; el.innerHTML = LEGEND; return; }
+    var q = f[1], r = Math.abs(f[0]) % q, t = f[0] < 0 ? 'a' : 'm';
+    el.className = 'legend board';
+    el.innerHTML = '<span class="pc u fr ' + t + ' big" style="--fill:' + (r * 360 / q) + 'deg;--step:' + (360 / q) + 'deg" aria-hidden="true"></span>' +
+      '<span class="bt">Disco em <b>' + q + '</b> partes iguais, <b>' + r + '</b> pintada' + (r > 1 ? 's' : '') + ': <b class="bf">' + frHTML(r, q) + '</b></span>';
+  }
+  var LEGEND = '';
+
+  function render() {
+    $('pcL').innerHTML = sidePieces(S.L);
+    $('pcR').innerHTML = sidePieces(S.R);
+    dense('pcL'); dense('pcR');
+    $('panL').setAttribute('aria-label', describe('L'));
+    $('panR').setAttribute('aria-label', describe('R'));
+    setEq(sideText(S.L), sideText(S.R), neqNow());
+    setBoard([S.L.c, S.R.c, kfr(S.L), kfr(S.R)]);
+    tilt();
+  }
+
+  function setStatus(t, warn) {
+    var el = $('status');
+    el.textContent = t;
+    el.className = 'status' + (warn ? ' warn' : '');
+  }
+
+  function timing() {
+    if (reduce) return { hold: 500, fuse: 0, s: 0, cap: 0, tail: 300 };
+    return pace === 'slow'
+      ? { hold: 1500, fuse: 1100, s: 120, cap: 600, tail: 500 }
+      : { hold: 700, fuse: 550, s: 60, cap: 300, tail: 250 };
+  }
+
+  function hiOf() { return phase === 2 ? 6 : (phase === 8 || calc ? 40 : 9); }
+  function updateControls() {
+    var lock = busy || solved, lo = phase === 2 ? 2 : 1, hi = hiOf(), lb = phase >= 3 ? '' : null, sc = calc && phase === 9;
+    $('addPos').hidden = phase === 2 || sc; $('addNeg').hidden = phase === 2 || sc; $('addDiv').hidden = phase === 1 || sc; $('addMul').hidden = sc || (phase !== 4 && phase !== 6 && phase !== 8); $('addOpen').hidden = !sc && phase !== 6 && phase !== 8; $('addOpen').disabled = lock || !(S.L.p || S.R.p); $('addMul').disabled = lock;
+    $('addPos').disabled = lock; $('addNeg').disabled = lock; $('addDiv').disabled = lock || n < 2;
+    $('dec').disabled = lock || n <= lo;
+    $('inc').disabled = lock || n >= hi;
+    $('undo').disabled = busy || hist.length === 0;
+    $('restart').disabled = busy;
+    $('qty').textContent = n;
+    var sx = (phase === 5 || phase === 7 || phase === 8) && kind === 'x' ? 'x' : '';
+    $('addPos').innerHTML = (lb === '' ? '' : '<span class="lbl">Somar </span>') + '+' + n + sx;
+    $('addNeg').innerHTML = (lb === '' ? '' : '<span class="lbl">Somar </span>') + '−' + n + sx;
+    $('addMul').innerHTML = '×−1'; $('addOpen').innerHTML = '( )';
+    $('brk').hidden = phase !== 8;
+    $('ops').className = 'row ops' + (phase === 8 || sc ? ' eight' : phase === 4 ? ' four' : (phase === 5 ? ' five' : (phase === 6 || phase === 7 ? ' six' : '')));
+    $('kind').hidden = sc || (phase !== 5 && phase !== 7 && phase !== 8); $('kind').disabled = lock;
+    $('addMulN').hidden = !sc && phase !== 7 && phase !== 8; $('addMulN').disabled = lock || n < 2; $('addMulN').innerHTML = '×' + n;
+    $('kind').textContent = kind === 'x' ? 'x' : 'nº';
+    $('kind').setAttribute('aria-label', 'Peça a somar: ' + (kind === 'x' ? 'x' : 'número') + '. Toque para trocar');
+    $('addDiv').innerHTML = (lb === '' ? '' : '<span class="lbl">Dividir por </span>') + '÷' + n;
+    document.querySelector('.seg').hidden = phase === 9 || !!(pend && pend.t === 'open');
+    $('ops').hidden = phase === 9 && !calc; buildChips(lock);
+    $('tools').hidden = !!pend; $('confirmRow').hidden = !pend;
+    var sel = function (id, on) { $(id).classList.toggle('sel', !!on); };
+    var isAdd = pend && (pend.t === 'add' || pend.t === 'addx');
+    sel('addPos', isAdd && pend.sign > 0); sel('addNeg', isAdd && pend.sign < 0);
+    sel('addDiv', pend && pend.t === 'div'); sel('addMul', pend && pend.t === 'mul'); sel('addOpen', pend && pend.t === 'open'); sel('addMulN', pend && pend.t === 'mulN');
+    $('pace').innerHTML = '<span class="lbl">Ritmo: </span>' + (pace === 'slow' ? 'lento' : 'normal');
+    $('conf').innerHTML = 'Confirmar<span class="lbl">: ' + (confirmOn ? 'sim' : 'não') + '</span><span class="tick"> ' + (confirmOn ? '✓' : '✗') + '</span>';
+    $('conf').setAttribute('aria-pressed', confirmOn ? 'true' : 'false');
+    $('conf').disabled = busy;
+    $('pace').setAttribute('aria-pressed', pace === 'slow' ? 'true' : 'false');
+  }
+
+  function loadLevel(i) {
+    run++;
+    level = i;
+    var lv = calc ? null : getLevel(i);
+    orig = lv;
+    if (calc) {
+      S = JSON.parse(JSON.stringify(calcInit.S)); S.moves = 0;
+      X = calcInit.X.slice();
+      origS = JSON.parse(JSON.stringify(S));
+    } else if (phase === 1) {
+      S = { L: { k: 1, c: F(lv[0]) }, R: { k: 0, c: F(lv[1]) }, moves: 0 };
+      X = F(lv[1] - lv[0]);
+    } else if (phase === 8) {
+      var s8 = function (a) { return { k: a[4], c: F(a[5]), p: a[0] ? { m: a[0], md: a[1], k: a[2], c: a[3] } : null }; };
+      S = { L: s8(lv.L), R: s8(lv.R), moves: 0 };
+      X = F(lv.x);
+      origS = JSON.parse(JSON.stringify(S));
+      curMn = lv.mn; curGoal = lv.goal;
+    } else if (phase === 7) {
+      S = { L: { k: lv[0], kd: lv[1], c: F(lv[2]), p: null }, R: { k: lv[3], kd: lv[4], c: F(lv[5]), p: null }, moves: 0 };
+      var den7 = sub(F(lv[0], lv[1]), F(lv[3], lv[4]));
+      X = F((lv[5] - lv[2]) * den7[1], den7[0]);
+    } else if (phase === 6) {
+      S = { L: { k: 0, c: F(lv[3]), p: { m: lv[0], k: lv[1], c: lv[2] } }, R: { k: 0, c: F(lv[4]), p: null }, moves: 0 };
+      X = sub(F(lv[4] - lv[3], lv[0]), F(lv[2]));
+    } else if (phase === 5 || phase === 9) {
+      S = { L: { k: lv[0], c: F(lv[1]) }, R: { k: lv[2], c: F(lv[3]) }, moves: 0 };
+      X = F(lv[3] - lv[1], lv[0] - lv[2]);
+    } else if (phase >= 3) {
+      S = { L: { k: lv[0], c: F(lv[1]) }, R: { k: 0, c: F(lv[2]) }, moves: 0 };
+      X = F(lv[2] - lv[1], lv[0]);
+    } else {
+      S = { L: { k: lv[0], c: F(0) }, R: { k: 0, c: F(lv[1]) }, moves: 0 };
+      X = F(lv[1], lv[0]);
+    }
+    hist = []; busy = false; solved = false; ans = null; kind = 'n'; pend = null;
+    if (phase === 2 && n < 2) n = 2;
+    if (phase === 1 && n > 9) n = 9;
+    $('win').hidden = true;
+    $('controls').hidden = false;
+    var total = calc ? 0 : PH[phase].levels.length;
+    var small = window.matchMedia && window.matchMedia('(max-width: 520px)').matches;
+    $('next').textContent = calc ? 'Nova equação' : 'Próximo desafio';
+    $('lvl').textContent = calc ? (cmode === 'full' ? 'Completo' : 'Reduzido') : (phase === 8 && i === 4) ? (small ? 'Chefe final' : 'Chefe final: a equação suprema') : i < total ? (small ? (i + 1) + '/' + total : 'Desafio ' + (i + 1) + ' de ' + total) : (small ? 'Extra ' : 'Desafio extra ') + (i - total + 1);
+    setStatus(calc ? (cmode === 'full' ? 'Resolva com as operações da balança. Tudo o que fizer de um lado, faça do outro.' : 'Passe os termos de lado. Para abrir parênteses e tirar denominadores, use ( ) e ×.') : phase === 9 ? 'Toque num termo para passá-lo para o outro lado. Depois o jogo mostra a balança por trás.' : phase === 8 ? 'Master: sem dicas. Meta: até ' + curGoal + (curGoal === 1 ? ' jogada.' : ' jogadas.') : phase === 1
+      ? 'Deixe o x sozinho de um lado. Tudo o que você fizer em um lado, faça também no outro.'
+      : phase === 2 ? 'Deixe o x sozinho. Dividir é repartir cada lado em grupos iguais e ficar com um grupo.'
+      : phase === 7 ? 'x/2 é meio x. Multiplique os dois lados para juntar as partes e tirar o denominador.'
+      : phase === 6 ? 'O número na frente do parêntese vale para tudo o que está dentro. Abra o parêntese ou divida.'
+      : phase === 5 ? 'Agora o x também pode ser somado: o botão nº/x escolhe a peça. Junte os x em um lado só.'
+      : phase === 4 ? 'O x azul é antimatéria. Multiplicar por −1 troca matéria por antimatéria nos dois lados.'
+      : 'Deixe o x sozinho. Há duas operações: some para tirar o que está junto do x e divida para repartir.');
+    render();
+    updateControls();
+  }
+
+  // ---------- phase 1: add ----------
+  function pendingX(k, p, plan, T) {
+    var pl = plan[k];
+    if (!pl) return sidePieces(S[k]);
+    var old = p[k], oldT = old.m > 0 ? 'm' : (old.a > 0 ? 'a' : null), oldN = oldT ? old[oldT] : 0, i;
+    var sm = oldN + pl.ins > 1;
+    var at = function (j) { return T.hold + j * T.st; };
+    var xe = function (t, fuseAt, isNew, role) {
+      return '<div class="pc x' + (t === 'a' ? ' neg' : '') + (sm ? ' sm' : '') + (isNew ? ' new' : '') + (fuseAt !== null ? ' boom' : '') + (role ? ' ' + role : '') + '"' +
+        (fuseAt !== null ? ' style="--fdelay:' + fuseAt + 'ms"' : '') + ' aria-hidden="true">x</div>';
+    };
+    var h = '<span class="grp" style="--par-out:' + T.parOut + 'ms">';
+    for (i = pl.k; i < oldN; i++) h += xe(oldT, null, false, '');
+    for (i = 0; i < pl.k; i++) h += xe(oldT, at(i), false, 'pa');
+    for (i = 0; i < pl.ins; i++) h += xe(pl.insT, i < pl.k ? at(i) : null, true, i < pl.k ? 'pb' : '');
+    return pkgHtml(S[k].p) + h + '</span>' + discs(S[k].c);
+  }
+
+  function apply(v, isX) {
+    if (busy || solved) return;
+    if (isX && sidesOf().some(function (k) { return (S[k].kd || 1) > 1; })) {
+      setStatus('Primeiro tire os denominadores: multiplique os dois lados.', true);
+      return;
+    }
+    var before = JSON.parse(JSON.stringify(S)), tok = run;
+    hist.push(JSON.stringify(S));
+    var p = { L: isX ? cnt(F(S.L.k)) : cnt(S.L.c), R: isX ? cnt(F(S.R.k)) : cnt(S.R.c) };
+    var sides = target === 'both' ? ['L', 'R'] : [target];
+    sides.forEach(function (k) { if (isX) S[k].k += v * (S[k].kd || 1); else S[k].c = add(S[k].c, F(v)); });
+    S.moves++;
+    busy = true;
+    var T = timing();
+    var plan = {}, maxK = 0;
+    sides.forEach(function (k) {
+      var oldT = p[k].m > 0 ? 'm' : (p[k].a > 0 ? 'a' : null);
+      var insT = v > 0 ? 'm' : 'a';
+      var kk = (oldT && oldT !== insT) ? Math.min(p[k][oldT], Math.abs(v)) : 0;
+      plan[k] = { insT: insT, ins: Math.abs(v), k: kk };
+      if (kk > maxK) maxK = kk;
+    });
+    T.st = maxK > 1 ? Math.min(T.s, Math.floor(T.cap / (maxK - 1))) : 0;
+    var fusionEnd = T.hold + (maxK > 0 ? (maxK - 1) * T.st + T.fuse : 200);
+    T.parOut = Math.max(T.hold, fusionEnd - 400);
+    ['pcL', 'pcR', 'plank'].forEach(function (id) { $(id).style.setProperty('--fd', T.fuse + 'ms'); });
+    $('pcL').innerHTML = isX ? pendingX('L', p, plan, T) : pendingPieces('L', p, plan, T);
+    $('pcR').innerHTML = isX ? pendingX('R', p, plan, T) : pendingPieces('R', p, plan, T);
+    dense('pcL'); dense('pcR');
+    attract($('pcL')); attract($('pcR'));
+    tilt();
+
+    var sg = v > 0 ? '+' : '−', pt = isX ? (Math.abs(v) === 1 ? '' : Math.abs(v)) + 'x' : '' + Math.abs(v), vs = '(' + sg + pt + ')';
+    var pill = '<span class="op ' + (v > 0 ? 'pos' : 'neg') + '">' + vs + '</span>';
+    if (isX) {
+      var termSide = function (k) {
+        var b = before[k], pl = plan[k];
+        if (!pl) return sideText(S[k]);
+        var core = b.k === 0 ? pill : '<span class="pair' + (pl.k > 0 ? ' pulse' : '') + '" style="--ed:' + T.hold + 'ms">(' + sideText({ k: b.k, c: F(0) }) + ' + ' + pill + ')</span>';
+        var c = b.c;
+        if (b.p) core = sideText({ k: 0, c: F(0), p: b.p }) + ' + ' + core;
+        return core + (c[0] === 0 ? '' : (c[0] > 0 ? ' + ' : ' − ') + fx(abs(c), 'frac'));
+      };
+      setEq(termSide('L'), termSide('R'), neqNow());
+    } else {
+      var constSide = function (k) {
+        var pl = plan[k];
+        if (!pl) return sideText(S[k]);
+        var base = before[k].c[0];
+        var core = base === 0 ? pill : '<span class="pair' + (pl.k > 0 ? ' pulse' : '') + '" style="--ed:' + T.hold + 'ms">(' + num(base) + ' + ' + pill + ')</span>';
+        var rest = (S[k].k === 0 && !S[k].p) ? '' : sideText({ k: S[k].k, kd: S[k].kd, c: F(0), p: S[k].p });
+        return rest ? rest + ' + ' + core : core;
+      };
+      setEq(constSide('L'), constSide('R'), neqNow());
+    }
+    var where = target === 'both' ? 'nos dois lados' : (target === 'L' ? 'só no lado esquerdo' : 'só no lado direito');
+    setStatus('Somando ' + vs + ' ' + where + '.' + (maxK ? (isX ? ' Os x opostos se atraem e desaparecem.' : ' Os opostos se atraem e desaparecem.') : ''));
+    updateControls();
+    window.__cancelled = maxK > 0;
+    setTimeout(function () { if (tok === run) resolve(); }, fusionEnd + T.tail);
+  }
+
+  // ---------- phase 2: divide ----------
+  // a package multiplied by 1 is just loose pieces: dissolve its parentheses
+  function norm(q) {
+    if (q.p && q.p.m === (q.p.md || 1)) { q.k += q.p.k * (q.kd || 1); q.c = add(q.c, F(q.p.c)); q.p = null; }
+    return q;
+  }
+  function divBad(q) { return phase >= 7 ? false : (q.k % n !== 0 || (q.p && q.p.m % n !== 0)); }
+  function divK(q) {
+    var kd = q.kd || 1;
+    if (kd === 1 && q.k % n === 0) return { k: q.k / n, kd: 1 };
+    var f = F(q.k, kd * n);
+    return { k: f[0], kd: f[1] };
+  }
+  function divMsg(q) {
+    return q.k % n !== 0 ? 'Não dá para repartir ' + Math.abs(q.k) + ' x em ' + n + ' grupos iguais. Tente outro número.'
+      : 'Não dá para repartir o ' + Math.abs(q.p.m) + ' do parêntese em ' + n + ' grupos iguais. Tente outro número.';
+  }
+  // n dashed copies of a side (phase 8 draws at most 2 and a "⋯" for the rest, so big numbers still fit)
+  function groupsHtml(q, cnt) {
+    var h = '', j, show = phase === 8 ? (cnt <= 2 ? cnt : 1) : cnt;
+    for (j = 0; j < show; j++) h += '<span class="dg' + (j ? ' x2' : ' keep') + '">' + sidePieces(q) + '</span>';
+    if (show < cnt) h += '<span class="more x2" aria-hidden="true">⋯ ×' + cnt + '</span>';
+    return h;
+  }
+  function applyDiv() {
+    if (busy || solved) return;
+    var sides = target === 'both' ? ['L', 'R'] : [target], tok = run, i;
+    for (i = 0; i < sides.length; i++) {
+      if (divBad(S[sides[i]])) {
+        setStatus(divMsg(S[sides[i]]), true);
+        return;
+      }
+    }
+    hist.push(JSON.stringify(S));
+    S.moves++;
+    busy = true;
+    var T = timing(), fade = reduce ? 0 : 500, after = {}, leftover = false;
+    sides.forEach(function (k) {
+      var dk = divK(S[k]);
+      after[k] = norm({ k: dk.k, kd: dk.kd, c: divN(S[k].c, n), p: S[k].p ? mkp(S[k].p, divN(pmF(S[k].p), n)) : null });
+      if (!isInt(after[k].c)) leftover = true;
+    });
+    var groups = function (s) { return groupsHtml(s, n); };
+    ['L', 'R'].forEach(function (k) {
+      $(k === 'L' ? 'pcL' : 'pcR').innerHTML = after[k] ? groups(after[k]) : sidePieces(S[k]);
+    });
+    dense('pcL'); dense('pcR');
+    if (n >= 4) { $('pcL').classList.add('dense'); $('pcR').classList.add('dense'); }
+    var pill = '<span class="op div">÷' + n + '</span>';
+    setEq((after.L ? wrapSide(S.L) + ' ' + pill : sideText(S.L)), (after.R ? wrapSide(S.R) + ' ' + pill : sideText(S.R)), neqNow());
+    setBoard([after.L ? after.L.c : S.L.c, after.R ? after.R.c : S.R.c]);
+    var where = target === 'both' ? 'nos dois lados' : (target === 'L' ? 'só no lado esquerdo' : 'só no lado direito');
+    var stuck = phase >= 3 && phase !== 8 && !calc && sides.some(function (k) { return after[k].k !== 0 && after[k].c[0] !== 0 && !isInt(after[k].c); });
+    setStatus((target === 'both' ? 'Dividindo por ' + n + ': ' + n + ' grupos iguais em cada lado.' : 'Dividindo por ' + n + ' ' + where + '.') +
+      (leftover ? ' O disco que sobrou vira ' + n + ' fatias.' : ''));
+    window.__stuck = stuck;
+    updateControls();
+    tilt();
+    setTimeout(function () {
+      if (tok !== run) return;
+      Array.prototype.forEach.call(document.querySelectorAll('.dg.x2, .more.x2'), function (e) { e.classList.add('gone'); });
+      setStatus('Fica um grupo de cada lado.');
+      setTimeout(function () {
+        if (tok !== run) return;
+        sides.forEach(function (k) { S[k] = after[k]; });
+        window.__cancelled = false;
+        resolve();
+        if (window.__stuck && !solved) setStatus('O disco cortado ficou junto do x e não sai com somas inteiras. Desfaça e some antes de dividir.', true);
+      }, fade + T.tail);
+    }, T.hold + (reduce ? 0 : 500));
+  }
+
+  // distributive step shown in the equation: m(kx + c) becomes m·kx + m·c
+  function distText(s) {
+    var q = s.p, f = [q.m, q.md || 1], ms = (f[1] === 1) ? (f[0] < 0 ? '(' + num(f[0]) + ')' : '' + f[0]) : (f[0] < 0 ? '(−' : '') + frHTML(Math.abs(f[0]), f[1]) + (f[0] < 0 ? ')' : '');
+    var parts = [ms + '·' + (q.k === 1 ? 'x' : q.k + 'x')];
+    if (q.c) parts.push(ms + '·' + (q.c < 0 ? '(' + num(q.c) + ')' : q.c));
+    var out = parts.join(' + '), rest = (s.k === 0 && s.c[0] === 0) ? '' : ' + ' + sideText({ k: s.k, kd: s.kd, c: s.c });
+    return out + rest;
+  }
+  function applyOpen() {
+    if (busy || solved) return;
+    var sides = ['L', 'R'].filter(function (k) { return S[k].p; }), tok = run, after = {};
+    if (!sides.length) { setStatus('Não há parêntese para abrir.', true); return; }
+    hist.push(JSON.stringify(S));
+    S.moves++;
+    busy = true;
+    var T = timing();
+    sides.forEach(function (k) {
+      var q = S[k].p, mf = pmF(q), kf = add(kfr(S[k]), F(mf[0] * q.k, mf[1]));
+      after[k] = { k: kf[0], kd: kf[1], c: add(S[k].c, mul(mf, F(q.c))), p: null };
+    });
+    // copies are drawn only for small whole multipliers; otherwise the result is shown directly
+    var direct = sides.some(function (k) { var f = pmF(S[k].p); return !isInt(f) || Math.abs(f[0]) > 5; });
+    var m0 = Math.abs(pmF(S[sides[0]].p)[0]);
+    sides.forEach(function (k) { $(k === 'L' ? 'pcL' : 'pcR').querySelector('.pkg').classList.add('glow'); });
+    setStatus('O número na frente vale para tudo o que está dentro do parêntese.');
+    updateControls();
+    setTimeout(function () {
+      if (tok !== run) return;
+      var txtParts = {};
+      sides.forEach(function (k) {
+        var q = S[k].p;
+        if (direct) {
+          $(k === 'L' ? 'pcL' : 'pcR').innerHTML = sidePieces(after[k]);
+          txtParts[k] = distText(S[k]);
+          return;
+        }
+        var pf1 = pmF(q), sgn = pf1[0] < 0 ? -1 : 1, am = Math.abs(pf1[0]), j, h = '', copy = { k: sgn * q.k, c: F(sgn * q.c) }, ct = [];
+        for (j = 0; j < am; j++) {
+          h += '<span class="grp cp">' + xs(copy) + discs(copy.c) + '</span>';
+          ct.push('(' + sideText(copy) + ')');
+        }
+        var rest = (S[k].k === 0 && S[k].c[0] === 0) ? '' : ' + ' + sideText({ k: S[k].k, kd: S[k].kd, c: S[k].c });
+        $(k === 'L' ? 'pcL' : 'pcR').innerHTML = h + xs(S[k]) + discs(S[k].c);
+        txtParts[k] = distText(S[k]);
+      });
+      ['L', 'R'].forEach(function (k) { if (!txtParts[k]) txtParts[k] = sideText(S[k]); });
+      dense('pcL'); dense('pcR');
+      setEq(txtParts.L, txtParts.R, neqNow());
+      setStatus(direct
+        ? 'Distributividade: o número da frente multiplica cada termo de dentro.'
+        : 'Distributividade: o pacote foi copiado ' + m0 + (m0 === 1 ? ' vez' : ' vezes') + (pmF(S[sides[0]].p)[0] < 0 ? ', com os sinais trocados.' : '.'));
+      setTimeout(function () {
+        if (tok !== run) return;
+        sides.forEach(function (k) { S[k] = after[k]; });
+        window.__cancelled = false;
+        resolve();
+        sides.forEach(function (k) {
+          Array.prototype.forEach.call($(k === 'L' ? 'pcL' : 'pcR').querySelectorAll('.pc'), function (e) { e.classList.add('fin'); });
+        });
+      }, T.hold + (reduce ? 0 : 400));
+    }, T.hold);
+  }
+
+  function applyMulN() {
+    if (busy || solved) return;
+    var sides = sidesOf(), tok = run, after = {};
+    hist.push(JSON.stringify(S));
+    S.moves++;
+    busy = true;
+    var T = timing(), merge = reduce ? 0 : 600;
+    sides.forEach(function (k) { var f = F(S[k].k * n, S[k].kd || 1); after[k] = norm({ k: f[0], kd: f[1], c: mul(S[k].c, F(n)), p: S[k].p ? mkp(S[k].p, mul(pmF(S[k].p), F(n))) : null }); });
+    var groups = function (q) { return groupsHtml(q, n); };
+    ['L', 'R'].forEach(function (k) { $(k === 'L' ? 'pcL' : 'pcR').innerHTML = after[k] ? groups(S[k]) : sidePieces(S[k]); });
+    dense('pcL'); dense('pcR');
+    if (n >= 4) { $('pcL').classList.add('dense'); $('pcR').classList.add('dense'); }
+    var pill = '<span class="op mul">×' + n + '</span>';
+    setEq(after.L ? wrapSide(S.L) + ' ' + pill : sideText(S.L), after.R ? wrapSide(S.R) + ' ' + pill : sideText(S.R), neqNow());
+    setStatus('Multiplicando por ' + n + ' ' + whereTxt() + ': cada lado é copiado ' + n + ' vezes.');
+    updateControls();
+    tilt();
+    setTimeout(function () {
+      if (tok !== run) return;
+      Array.prototype.forEach.call(document.querySelectorAll('.dg'), function (e) { e.classList.add('merge'); });
+      Array.prototype.forEach.call(document.querySelectorAll('.more'), function (e) { e.classList.add('gone'); });
+      setStatus('As cópias se juntam: as partes de x formam x inteiros.');
+      setTimeout(function () {
+        if (tok !== run) return;
+        sides.forEach(function (k) { S[k] = after[k]; });
+        window.__cancelled = false;
+        resolve();
+        sides.forEach(function (k) {
+          Array.prototype.forEach.call($(k === 'L' ? 'pcL' : 'pcR').querySelectorAll('.pc'), function (e) { e.classList.add('fin'); });
+        });
+      }, merge + T.tail);
+    }, T.hold);
+  }
+
+  function applyMul() {
+    if (busy || solved) return;
+    var sides = target === 'both' ? ['L', 'R'] : [target], tok = run, after = {};
+    hist.push(JSON.stringify(S));
+    S.moves++;
+    busy = true;
+    var T = timing(), spin = reduce ? 0 : 500;
+    sides.forEach(function (k) { after[k] = norm({ k: -S[k].k, c: F(-S[k].c[0], S[k].c[1]), p: S[k].p ? mkp(S[k].p, F(-pmF(S[k].p)[0], pmF(S[k].p)[1])) : null }); });
+    ['L', 'R'].forEach(function (k) {
+      $(k === 'L' ? 'pcL' : 'pcR').innerHTML = after[k] ? '<span class="grp">' + sidePieces(S[k]) + '</span>' : sidePieces(S[k]);
+    });
+    dense('pcL'); dense('pcR');
+    var pill = '<span class="op mul">×(−1)</span>';
+    setEq(after.L ? wrapSide(S.L) + ' ' + pill : sideText(S.L), after.R ? wrapSide(S.R) + ' ' + pill : sideText(S.R), neqNow());
+    var where = target === 'both' ? 'nos dois lados' : (target === 'L' ? 'só no lado esquerdo' : 'só no lado direito');
+    setStatus('Multiplicando por (−1) ' + where + ': matéria vira antimatéria e antimatéria vira matéria.');
+    updateControls();
+    tilt();
+    setTimeout(function () {
+      if (tok !== run) return;
+      Array.prototype.forEach.call(document.querySelectorAll('.grp .pc'), function (e) { e.classList.add('spin'); });
+      setTimeout(function () {
+        if (tok !== run) return;
+        sides.forEach(function (k) { S[k] = after[k]; });
+        window.__cancelled = false;
+        resolve();
+        sides.forEach(function (k) {
+          Array.prototype.forEach.call($(k === 'L' ? 'pcL' : 'pcR').querySelectorAll('.pc'), function (e) { e.classList.add('fin'); });
+        });
+      }, spin + 60);
+    }, T.hold);
+  }
+
+  // ---------- confirm step: choose, preview, then confirm ----------
+  // pend = { t: 'add' | 'addx' | 'div' | 'mul', sign: 1 | -1 } (declared with the other state variables)
+  function sidesOf() { return target === 'both' ? ['L', 'R'] : [target]; }
+  function whereTxt() { return target === 'both' ? 'nos dois lados' : (target === 'L' ? 'só no lado esquerdo' : 'só no lado direito'); }
+  function canDiv() {
+    var sides = sidesOf(), i;
+    for (i = 0; i < sides.length; i++) {
+      if (divBad(S[sides[i]])) {
+        setStatus(divMsg(S[sides[i]]), true);
+        return false;
+      }
+    }
+    return true;
+  }
+  function simNeq() {
+    var c = JSON.parse(JSON.stringify(S)), v = pend.sign * n;
+    sidesOf().forEach(function (k) {
+      var q = c[k];
+      if (pend.t === 'add') q.c = add(q.c, F(v));
+      else if (pend.t === 'addx') q.k += v;
+      else if (pend.t === 'div') { var dk = divK(q); q.k = dk.k; q.kd = dk.kd; q.c = divN(q.c, n); if (q.p) q.p = mkp(q.p, divN(pmF(q.p), n)); }
+      else if (pend.t === 'mulN') { var fm = F(q.k * n, q.kd || 1); q.k = fm[0]; q.kd = fm[1]; q.c = mul(q.c, F(n)); if (q.p) q.p = mkp(q.p, mul(pmF(q.p), F(n))); }
+      else { q.k = -q.k; q.c = F(-q.c[0], q.c[1]); if (q.p) q.p = mkp(q.p, F(-pmF(q.p)[0], pmF(q.p)[1])); }
+    });
+    var l = valueOf(c.L), r = valueOf(c.R);
+    return sub(l, r)[0] !== 0;
+  }
+  function showPreview() {
+    render();
+    if (pend.t === 'move' || pend.t === 'shdiv' || pend.t === 'neg') {
+      if (pend.t === 'neg') { setEq(wrapSide(S.L) + ' <span class="op prev">×(−1)</span>', wrapSide(S.R) + ' <span class="op prev">×(−1)</span>', false); setStatus('Escolhido: trocar o sinal dos dois lados. Toque em Confirmar.'); return; }
+      shortcutView(pend);
+      setStatus('Operação inversa: ' + invInfo(pend).word + '. Confirme para ver por trás.');
+      return;
+    }
+    if (pend.t === 'open') {
+      var pk = (S.L.p || S.R.p);
+      var eqs = {};
+      ['L', 'R'].forEach(function (k) {
+        var q = S[k];
+        if (!q.p) { eqs[k] = sideText(q); return; }
+        var h = '', pp = q.p, rest = xs(q) + discs(q.c);
+        if (pp.k) h += pkgHtml({ m: pp.m, md: pp.md, k: pp.k, c: 0 });
+        if (pp.c) h += '<span class="dterm">' + (pp.k ? '<span class="plus" aria-hidden="true">+</span>' : '') + pkgHtml({ m: pp.m, md: pp.md, k: 0, c: pp.c }) + '</span>';
+        $(k === 'L' ? 'pcL' : 'pcR').innerHTML = h + rest;
+        eqs[k] = distText(q);
+      });
+      dense('pcL'); dense('pcR');
+      setEq(eqs.L, eqs.R, neqNow());
+      setStatus('Distributividade: o número da frente multiplica cada termo de dentro. Toque em Confirmar.');
+      return;
+    }
+    var sides = sidesOf(), t = pend.t, v = pend.sign * n, pill, i;
+    if (t === 'add' || t === 'addx') {
+      var ty = v > 0 ? 'm' : 'a';
+      sides.forEach(function (k) {
+        var h = '';
+        for (i = 0; i < n; i++) h += t === 'add'
+          ? '<div class="pc u ' + ty + ' prev" aria-hidden="true">' + (ty === 'm' ? '+' : '−') + '</div>'
+          : '<div class="pc x' + (ty === 'a' ? ' neg' : '') + ' prev" aria-hidden="true">x</div>';
+        $(k === 'L' ? 'pcL' : 'pcR').insertAdjacentHTML('beforeend', h);
+      });
+      dense('pcL'); dense('pcR');
+      pill = '(' + (v > 0 ? '+' : '−') + (t === 'addx' ? (n === 1 ? '' : n) + 'x' : n) + ')';
+    } else if (t === 'div') {
+      pill = '÷' + n;
+    } else if (t === 'mulN') {
+      pill = '×' + n;
+    } else {
+      pill = '×(−1)';
+    }
+    var g = '<span class="op prev">' + pill + '</span>';
+    var one = function (k) {
+      if (sides.indexOf(k) < 0) return sideText(S[k]);
+      if (t === 'add' || t === 'addx') return sideText(S[k]) + ' + ' + g;
+      return wrapSide(S[k]) + ' ' + g;
+    };
+    setEq(one('L'), one('R'), simNeq());
+    var what = (t === 'add' || t === 'addx') ? 'somar ' + pill : (t === 'div' ? 'dividir por ' + n : (t === 'mulN' ? 'multiplicar por ' + n : 'multiplicar por (−1)'));
+    setStatus('Escolhido: ' + what + ' ' + whereTxt() + (phase === 8 ? '. Toque em Confirmar.' : '. Veja a equação e as peças e toque em Confirmar.'));
+  }
+  // ---------- phase 9: the traditional shortcut ("passa para o outro lado") ----------
+  function chipList() {
+    var out = [];
+    ['L', 'R'].forEach(function (k) {
+      var q = S[k];
+      if (q.k && (q.kd || 1) === 1) out.push({ t: 'move', w: 'x', side: k, v: q.k, key: 'x' + k });
+      if (q.c[0] && q.c[1] === 1) out.push({ t: 'move', w: 'c', side: k, v: q.c[0], d: q.c[1], key: 'c' + k });
+    });
+    [['L', 'R'], ['R', 'L']].forEach(function (pr) {
+      var a = S[pr[0]], o = S[pr[1]];
+      if (a.k && (a.kd || 1) === 1 && a.c[0] === 0 && o.k === 0 && !a.p && !o.p) {
+        if (a.k < 0) out.push({ t: 'neg', side: pr[0], key: 'neg' });
+        else if (a.k > 1) out.push({ t: 'shdiv', side: pr[0], k: a.k, key: 'div' });
+      }
+    });
+    return out;
+  }
+  function chipLabel(c) {
+    if (c.t === 'neg') return '×(−1)';
+    if (c.t === 'shdiv') return '÷' + c.k;
+    var ab = Math.abs(c.v), sg = c.v < 0 ? '−' : '+';
+    return sg + (c.w === 'x' ? (ab === 1 ? '' : ab) + 'x' : (c.d && c.d > 1 ? ab + '/' + c.d : ab));
+  }
+  function buildChips(lock) {
+    var box = $('chips');
+    box.hidden = phase !== 9;
+    if (phase !== 9 || !S) return;
+    var list = chipList(), h = '', groups = [['L', 'Esq.'], ['R', 'Dir.'], ['F', 'Fator']];
+    groups.forEach(function (g) {
+      var items = list.filter(function (c) { return g[0] === 'F' ? (c.t !== 'move') : (c.t === 'move' && c.side === g[0]); });
+      if (!items.length) return;
+      h += '<span class="cg"><span class="cl">' + g[1] + '</span>';
+      items.forEach(function (c) {
+        h += '<button type="button" class="chip ' + (c.t === 'move' ? (c.v > 0 ? 'pos' : 'neg') : 'fac') + (pend && pend.key === c.key ? ' sel' : '') + '" data-key="' + c.key + '"' + (lock ? ' disabled' : '') + '>' + chipLabel(c) + '</button>';
+      });
+      h += '</span>';
+    });
+    box.innerHTML = h;
+    Array.prototype.forEach.call(box.querySelectorAll('.chip'), function (b) {
+      b.addEventListener('click', function () {
+        var c = chipList().filter(function (x) { return x.key === b.getAttribute('data-key'); })[0];
+        if (c) stageMove(c);
+      });
+    });
+  }
+  // the inverse operation tied to a term: +3 pairs with −3, 2x (2 times x) pairs with ÷2
+  function invInfo(op) {
+    if (op.t === 'shdiv') return { from: '×' + op.k, to: '÷' + op.k, word: 'x está multiplicado por ' + op.k + '; o inverso é ÷' + op.k };
+    var ab = Math.abs(op.v), body = op.w === 'x' ? (ab === 1 ? '' : ab) + 'x' : (op.d && op.d > 1 ? ab + '/' + op.d : ab);
+    var a = (op.v < 0 ? '−' : '+') + body, b = (op.v < 0 ? '+' : '−') + body;
+    return { from: a, to: b, word: 'o inverso de ' + a + ' é ' + b };
+  }
+  function shortcutView(op) {
+    var o = op.side, d = o === 'L' ? 'R' : 'L', A = JSON.parse(JSON.stringify(S)), id = function (k) { return $(k === 'L' ? 'pcL' : 'pcR'); }, tx = {};
+    if (op.t === 'shdiv') {
+      A[o].k = 1;
+      id(o).innerHTML = sidePieces(A[o]);
+      id(d).innerHTML = sidePieces(S[d]) + '<span class="op div">÷' + op.k + '</span>';
+      tx[o] = 'x'; tx[d] = wrapSide(S[d]) + ' <span class="op inv">÷ ' + op.k + '</span>';
+    } else {
+      var fl = -op.v, ab = Math.abs(op.v), mv, term;
+      if (op.w === 'x') { A[o].k = 0; mv = xs({ k: fl }); term = (ab === 1 ? '' : ab) + 'x'; }
+      else { A[o].c = F(0); mv = discs(F(fl, op.d || 1)); term = fx(F(ab, op.d || 1), 'frac'); }
+      id(o).innerHTML = sidePieces(A[o]);
+      id(d).innerHTML = sidePieces(S[d]) + '<span class="grp moved">' + mv + '</span>';
+      tx[o] = sideText(A[o]);
+      var dt = sideText(S[d]);
+      tx[d] = (dt === '0' ? '' : dt + ' ') + '<span class="op inv">' + (fl < 0 ? '−' : '+') + (dt === '0' ? '' : ' ') + term + '</span>';
+    }
+    dense('pcL'); dense('pcR');
+    setEq(tx.L, tx.R, false);
+  }
+  function stageMove(op) {
+    if (busy || solved) return;
+    pend = op;
+    if (!confirmOn) { confirmOp(); return; }
+    showPreview();
+    updateControls();
+  }
+  function playMove(op) {
+    if (op.t === 'move') apply(-op.v, op.w === 'x');
+    else if (op.t === 'shdiv') { n = op.k; target = 'both'; applyDiv(); }
+    else applyMul();
+    if (op.t !== 'neg') setStatus('Por trás: ' + invInfo(op).word + (op.t === 'shdiv' ? ', nos dois lados.' : ', somado nos dois lados.'));
+  }
+  function stageOp(t, sign) {
+    if (busy || solved) return;
+    pend = null;
+    if (t === 'div' && !canDiv()) { render(); updateControls(); return; }
+    if (t === 'open' && !(S.L.p || S.R.p)) return;
+    if ((t === 'add' || t === 'addx') && t === 'addx' && sidesOf().some(function (k) { return (S[k].kd || 1) > 1; })) {
+      setStatus('Primeiro tire os denominadores: multiplique os dois lados.', true);
+      render(); updateControls();
+      return;
+    }
+    pend = { t: t, sign: sign };
+    if (!confirmOn) { confirmOp(); return; }
+    showPreview();
+    updateControls();
+  }
+  function cancelOp(msg) {
+    pend = null;
+    render();
+    setStatus(msg || 'Operação cancelada. Escolha outra.');
+    updateControls();
+  }
+  function refreshPreview() {
+    if (!pend) return;
+    if (pend.t === 'div' && !canDiv()) { pend = null; render(); updateControls(); return; }
+    showPreview();
+    updateControls();
+  }
+  function confirmOp() {
+    if (!pend || busy || solved) return;
+    var op = pend, v = op.sign * n;
+    pend = null;
+    render();
+    updateControls();
+    if (op.t === 'move' || op.t === 'shdiv' || op.t === 'neg') {
+      if (confirmOn || op.t === 'neg') { playMove(op); return; }
+      var tk = run;
+      busy = true; shortcutView(op); setStatus('Operação inversa: ' + invInfo(op).word + '.'); updateControls();
+      setTimeout(function () { if (tk !== run) return; busy = false; playMove(op); }, timing().hold + 300);
+      return;
+    }
+    if (op.t === 'add') apply(v, false);
+    else if (op.t === 'addx') apply(v, true);
+    else if (op.t === 'div') applyDiv();
+    else if (op.t === 'open') applyOpen();
+    else if (op.t === 'mulN') applyMulN();
+    else applyMul();
+  }
+
+  function resolve() {
+    busy = false;
+    render();
+    var neq = neqNow();
+    ans = null;
+    if (!neq) {
+      if (S.L.p || S.R.p) ans = null;
+      else if (S.L.k === 1 && (S.L.kd || 1) === 1 && S.L.c[0] === 0 && S.R.k === 0) ans = S.R.c;
+      else if (S.R.k === 1 && (S.R.kd || 1) === 1 && S.R.c[0] === 0 && S.L.k === 0) ans = S.L.c;
+    }
+    if (ans) {
+      solved = true;
+      showWin();
+    } else {
+      var t = (window.__cancelled && !neq) ? 'Os opostos se anularam. ' : '';
+      if (!neq) {
+        setStatus(t + 'A balança está equilibrada.');
+      } else {
+        setStatus(t + 'A igualdade quebrou: o lado ' + (diff()[0] > 0 ? 'esquerdo' : 'direito') + ' ficou mais pesado. Use Desfazer.', true);
+      }
+    }
+    updateControls();
+  }
+
+  function answerModes() {
+    var x = ans;
+    if (isInt(x)) return ['int'];
+    return Math.abs(x[0]) > x[1] ? ['frac', 'mixed', 'dec'] : ['frac', 'dec'];
+  }
+  function renderAnswer() {
+    var modes = answerModes(), m = modes[ansMode % modes.length], x = ans;
+    $('winEq').innerHTML = 'x = ' + fx(x, m);
+    $('winEq').className = 'ans' + (modes.length > 1 ? ' cyc' : '');
+    $('winEq').disabled = modes.length < 2;
+    $('winHint').hidden = modes.length < 2;
+    if (phase === 8 || calc) {
+      var vL = valueOf(origS.L);
+      $('winCheck').innerHTML = 'Confere: com x = ' + fx(x, m) + ', os dois lados dão ' + fx(vL, m) + ' ✓';
+    } else if (phase === 7) {
+      var xs7 = x[0] < 0 ? '(' + fx(x, m) + ')' : fx(x, m);
+      var side7 = function (k, d, c) {
+        var t = k === 0 ? '' : (k === 1 ? xs7 : '(' + k + ' × ' + xs7 + ')') + (d > 1 ? ' ÷ ' + d : '');
+        return t + (c === 0 ? '' : (t ? (c > 0 ? ' + ' + c : ' − ' + (-c)) : num(c)));
+      };
+      var v7 = add(mul(F(orig[0], orig[1]), x), F(orig[2]));
+      $('winCheck').innerHTML = 'Confere: ' + side7(orig[0], orig[1], orig[2]) + ' = ' + side7(orig[3], orig[4], orig[5]) + ', os dois dão ' + fx(v7, m) + ' ✓';
+    } else if (phase === 6) {
+      var xs6 = x[0] < 0 ? '(' + fx(x, m) + ')' : fx(x, m), m6 = orig[0], pc = orig[2], c6 = orig[3];
+      $('winCheck').innerHTML = 'Confere: ' + (m6 === 1 ? '' : (m6 < 0 ? '(' + num(m6) + ')' : m6) + ' × ') + '(' + xs6 + (pc >= 0 ? ' + ' + pc : ' − ' + (-pc)) + ')' + (c6 === 0 ? '' : (c6 > 0 ? ' + ' + c6 : ' − ' + (-c6))) + ' = ' + num(orig[4]) + ' ✓';
+    } else if (phase === 5 || phase === 9) {
+      var xs5 = x[0] < 0 ? '(' + fx(x, m) + ')' : fx(x, m);
+      var side5 = function (k, c) { if (k === 0) return num(c); return (k === 1 ? xs5 : k + ' × ' + xs5) + (c === 0 ? '' : (c > 0 ? ' + ' + c : ' − ' + (-c))); };
+      var val = add(mul(F(orig[0]), x), F(orig[1]));
+      $('winCheck').innerHTML = 'Confere: ' + side5(orig[0], orig[1]) + ' = ' + side5(orig[2], orig[3]) + ', os dois dão ' + fx(val, m) + ' ✓';
+    } else if (phase >= 3) {
+      var a3 = orig[1], k3 = orig[0];
+      $('winCheck').innerHTML = 'Confere: ' + (k3 < 0 ? '(' + num(k3) + ')' : k3) + ' × ' + (x[0] < 0 ? '(' + fx(x, m) + ')' : fx(x, m)) + (a3 === 0 ? '' : (a3 > 0 ? ' + ' + a3 : ' − ' + (-a3))) + ' = ' + num(orig[2]) + ' ✓';
+    } else if (phase === 1) {
+      var a = orig[0], b = orig[1];
+      $('winCheck').innerHTML = 'Confere: ' + num(x[0]) + (a >= 0 ? ' + ' + a : ' − ' + (-a)) + ' = ' + num(b) + ' ✓';
+    } else {
+      $('winCheck').innerHTML = 'Confere: ' + orig[0] + ' × ' + fx(x, m) + ' = ' + orig[1] + ' ✓';
+    }
+  }
+  function showWin() {
+    ansMode = 0;
+    renderAnswer();
+    if (calc) {
+      $('winMoves').textContent = 'Resolvido em ' + S.moves + (S.moves === 1 ? ' jogada.' : ' jogadas.');
+      $('again').hidden = false;
+      $('controls').hidden = true;
+      $('win').hidden = false;
+      setStatus('');
+      return;
+    }
+    var mn = phase === 9 ? ((orig[2] !== 0 ? 1 : 0) + (orig[1] !== 0 ? 1 : 0) + (orig[0] - orig[2] > 1 ? 1 : 0)) : phase === 8 ? curMn : phase === 7 ? (function () {
+      var D = lcm(orig[1], orig[4]), kL = orig[0] * D / orig[1], kR = orig[3] * D / orig[4], aL = orig[2] * D, aR = orig[5] * D;
+      var big = kL > kR ? aL : aR;
+      return (D > 1 ? 1 : 0) + (kL !== 0 && kR !== 0 ? 1 : 0) + (big !== 0 ? 1 : 0) + (Math.abs(kL - kR) > 1 ? 1 : 0);
+    })() : phase === 6 ? (function () {
+      var m6 = orig[0];
+      return (orig[3] !== 0 ? 1 : 0) + (m6 > 0 ? (m6 > 1 ? 1 : 0) : (m6 === -1 ? 1 : 2)) + (orig[2] !== 0 ? 1 : 0);
+    })() : phase === 5 ? (function () {
+      var big = orig[0] > orig[2] ? 0 : 2, kk = Math.abs(orig[0] - orig[2]);
+      return (orig[0] !== 0 && orig[2] !== 0 ? 1 : 0) + (orig[big + 1] !== 0 ? 1 : 0) + (kk > 1 ? 1 : 0);
+    })() : phase === 3 ? 2 : (phase === 4 ? ((orig[1] !== 0 ? 1 : 0) + (orig[0] === -1 ? 1 : 2)) : 1);
+    $('winMoves').textContent = S.moves <= mn
+      ? 'Resolvido em ' + S.moves + (S.moves === 1 ? ' jogada' : ' jogadas') + ', o mínimo possível.'
+      : (phase === 8 && S.moves > curGoal)
+        ? 'Resolvido em ' + S.moves + ' jogadas, acima da meta de ' + curGoal + '. Tente de novo.'
+        : (phase === 8 ? 'Resolvido em ' + S.moves + ' jogadas, dentro da meta (até ' + curGoal + '). ' : 'Resolvido em ' + S.moves + ' jogadas. ') + 'Dá para chegar lá em ' + mn + (mn === 1 ? ' jogada' : ' jogadas') + '. Qual seria?';
+    $('again').hidden = S.moves <= mn;
+    $('controls').hidden = true;
+    $('win').hidden = false;
+    setStatus('');
+  }
+
+  // ---------- events ----------
+  $('addPos').addEventListener('click', function () { stageOp(kind === 'x' ? 'addx' : 'add', 1); });
+  $('addNeg').addEventListener('click', function () { stageOp(kind === 'x' ? 'addx' : 'add', -1); });
+  $('kind').addEventListener('click', function () {
+    kind = kind === 'x' ? 'n' : 'x';
+    if (pend && (pend.t === 'add' || pend.t === 'addx')) pend.t = kind === 'x' ? 'addx' : 'add';
+    updateControls(); refreshPreview();
+  });
+  $('addDiv').addEventListener('click', function () { stageOp('div', 1); });
+  $('addMul').addEventListener('click', function () { stageOp('mul', 1); });
+  $('addOpen').addEventListener('click', function () { stageOp('open', 1); });
+  $('addMulN').addEventListener('click', function () { stageOp('mulN', 1); });
+  $('okOp').addEventListener('click', confirmOp);
+  $('cancelOp').addEventListener('click', function () { cancelOp(); });
+  $('inc').addEventListener('click', function () { if (n < hiOf()) { n++; updateControls(); refreshPreview(); } });
+  $('dec').addEventListener('click', function () { if (n > (phase === 2 ? 2 : 1)) { n--; updateControls(); refreshPreview(); } });
+  function holdRepeat(id, dir) {
+    var el = $(id), t1 = null, t2 = null, held = false;
+    var stop = function () { clearTimeout(t1); clearInterval(t2); };
+    var step = function () {
+      var ok = dir > 0 ? n < hiOf() : n > (phase === 2 ? 2 : 1);
+      if (!ok || busy || solved) { stop(); return; }
+      n += dir; updateControls(); refreshPreview();
+    };
+    el.addEventListener('pointerdown', function () { held = false; t1 = setTimeout(function () { held = true; t2 = setInterval(step, 70); }, 450); });
+    ['pointerup', 'pointerleave', 'pointercancel'].forEach(function (ev) { el.addEventListener(ev, stop); });
+    el.addEventListener('click', function (e) { if (held) { e.stopImmediatePropagation(); held = false; } }, true);
+  }
+  holdRepeat('inc', 1); holdRepeat('dec', -1);
+  $('undo').addEventListener('click', function () {
+    if (busy || !hist.length) return;
+    S = JSON.parse(hist.pop());
+    solved = false;
+    $('win').hidden = true;
+    $('controls').hidden = false;
+    render();
+    setStatus(!neqNow() ? 'Jogada desfeita.' : 'Jogada desfeita. A balança ainda está desequilibrada.', neqNow());
+    updateControls();
+  });
+  $('restart').addEventListener('click', function () { if (!busy) loadLevel(level); });
+  $('next').addEventListener('click', function () { if (calc) { run++; show('calc'); return; } loadLevel(level + 1); });
+  $('again').addEventListener('click', function () { loadLevel(level); setStatus('Tente deixar o x sozinho em menos jogadas.'); });
+  $('winEq').addEventListener('click', function () { ansMode++; renderAnswer(); });
+  $('pace').addEventListener('click', function () { pace = pace === 'slow' ? 'normal' : 'slow'; save('bi-pace', pace); updateControls(); });
+  $('conf').addEventListener('click', function () { confirmOn = !confirmOn; save('bi-confirm', confirmOn ? '1' : '0'); updateControls(); });
+  Array.prototype.forEach.call(document.querySelectorAll('input[name="tg"]'), function (r) {
+    r.addEventListener('change', function () { if (r.checked) { target = r.value; refreshPreview(); } });
+  });
+  window.addEventListener('resize', function () { if (S) tilt(); });
+
+  function save(k, v) { try { localStorage.setItem(k, v); } catch (e) { /* optional convenience */ } }
+
+
+  // ---------- calculator: type an equation, then solve it with the balance (full) or the shortcut (reduced) ----------
+  // Accepted shape: each side is a sum of numbers, kx, x/d and at most one package m(kx + c)/d, also written [m(kx + c)]/d.
+  function parseSide(str) {
+    var pos = 0;
+    var peek = function () { return str.charAt(pos); };
+    var isD = function (c) { return c >= '0' && c <= '9' && c !== ''; };
+    var fail = function (m) { throw new Error(m); };
+    var readInt = function () { var t = ''; while (isD(peek())) { t += peek(); pos++; } return t === '' ? null : parseInt(t, 10); };
+    var isOpen = function (c) { return c === '(' || c === '['; };
+    var isClose = function (c) { return c === ')' || c === ']'; };
+    function parseSum(inGroup) {
+      var items = [], first = true, sg;
+      for (;;) {
+        var c = peek();
+        if (c === '') { if (inGroup) fail('Falta fechar um parêntese.'); break; }
+        if (isClose(c)) { if (!inGroup) fail('Parêntese fechado sem abrir.'); break; }
+        sg = 1;
+        if (c === '+' || c === '-') { while (peek() === '+' || peek() === '-') { if (peek() === '-') sg = -sg; pos++; } }
+        else if (!first) fail('Falta um sinal + ou − entre os termos.');
+        items.push(parseItem(sg)); first = false;
+      }
+      if (!items.length) fail('Falta algo dentro dos parênteses ou do lado.');
+      return items;
+    }
+    function group() {   // returns { pkg } for [m(kx+c)] or { k, c } for (kx + c)
+      pos++;
+      var inner = parseSum(true), k = F(0), c = F(0), pk = null, i;
+      pos++;   // the closing mark
+      if (inner.length === 1 && inner[0].kind === 'pkg') return { pkg: inner[0] };
+      for (i = 0; i < inner.length; i++) {
+        if (inner[i].kind === 'pkg') fail('Um parêntese dentro de outro só vale no formato [2(x−3)]/4.');
+        if (inner[i].kind === 'x') k = add(k, inner[i].v); else c = add(c, inner[i].v);
+      }
+      if (!isInt(k) || !isInt(c)) fail('Dentro do parêntese só aceito números inteiros.');
+      return { k: k[0], c: c[0] };
+    }
+    function pack(m, md, g) {
+      if (g.pkg) { if (m !== 1) fail('Escreva assim: [2(x−3)]/4.'); return { kind: 'pkg', m: g.pkg.m, md: g.pkg.md * md, k: g.pkg.k, c: g.pkg.c }; }
+      return { kind: 'pkg', m: m, md: md, k: g.k, c: g.c };
+    }
+    function parseItem(sg) {
+      var c = peek(), coef = null, d = 1, g;
+      if (isD(c)) coef = readInt();
+      c = peek();
+      if (isOpen(c)) {
+        g = group();
+        if (peek() === '/') { pos++; d = readInt(); if (d === null) fail('Depois da barra vem um número inteiro (x no denominador não é aceito).'); if (d === 0) fail('Denominador zero.'); }
+        var it = pack(coef === null ? 1 : coef, d, g);
+        it.m *= sg;
+        return it;
+      }
+      if (c === 'x' || c === 'X') {
+        pos++;
+        if (peek() === 'x' || peek() === 'X' || isD(peek())) fail('Só aceito x (sem potência).');
+        if (peek() === '/') { pos++; d = readInt(); if (d === null) fail('Depois da barra vem um número inteiro.'); if (d === 0) fail('Denominador zero.'); }
+        return { kind: 'x', v: F(sg * (coef === null ? 1 : coef), d) };
+      }
+      if (coef === null) fail('Não entendi "' + (c || 'o fim') + '".');
+      if (c === '/') {
+        pos++; d = readInt();
+        if (d === null) fail('Depois da barra vem um número inteiro (x no denominador não é aceito).');
+        if (d === 0) fail('Denominador zero.');
+        if (isOpen(peek())) { g = group(); var it2 = pack(coef, d, g); it2.m *= sg; return it2; }
+        if (peek() === 'x' || peek() === 'X') { pos++; return { kind: 'x', v: F(sg * coef, d) }; }
+        return { kind: 'num', v: F(sg * coef, d) };
+      }
+      return { kind: 'num', v: F(sg * coef) };
+    }
+    var items = parseSum(false), k = F(0), cc = F(0), pk = null;
+    items.forEach(function (it) {
+      if (it.kind === 'num') cc = add(cc, it.v);
+      else if (it.kind === 'x') k = add(k, it.v);
+      else if (it.k === 0) cc = add(cc, F(it.m * it.c, it.md));
+      else if (it.c === 0) k = add(k, F(it.m * it.k, it.md));
+      else { if (pk) fail('Só aceito um parêntese em cada lado.'); pk = { m: it.m, md: it.md, k: it.k, c: it.c }; }
+    });
+    return { k: k[0], kd: k[1], c: cc, p: pk };
+  }
+  function parseEquation(text) {
+    var t = text.replace(/[−–—]/g, '-').replace(/÷/g, '/').replace(/\s+/g, ''), parts = t.split('=');
+    if (!t) throw new Error('Digite uma equação, por exemplo 2(x-3)/4=3(x+1)/3.');
+    if (/[^0-9xX+\-/()\[\]=]/.test(t)) throw new Error('Só aceito números, x, + − / ( ) e =.');
+    if (parts.length < 2 || parts[1] === '') throw new Error(parts.length < 2 ? 'Falta o sinal de igual (=).' : 'Falta o lado direito.');
+    if (parts.length > 2) throw new Error('Só pode haver um sinal de igual (=).');
+    if (parts[0] === '') throw new Error('Falta o lado esquerdo.');
+    var L = parseSide(parts[0]), R = parseSide(parts[1]);
+    [L, R].forEach(function (q) { if (Math.abs(q.k) / (q.kd || 1) > 20 || Math.abs(q.c[0]) / q.c[1] > 60) throw new Error("Número grande demais para desenhar as peças: use x até 20 e números soltos até 60 em cada lado (dá para dividir tudo por um fator comum antes)."); });
+    var lin = function (q) { var a = kfr(q), c = q.c; if (q.p) { var pf = pmF(q.p); a = add(a, mul(pf, F(q.p.k))); c = add(c, mul(pf, F(q.p.c))); } return [a, c]; };
+    var l = lin(L), r = lin(R), da = sub(l[0], r[0]), dc = sub(r[1], l[1]);
+    if (da[0] === 0) throw new Error(dc[0] === 0 ? 'Essa equação vale para qualquer x (identidade), não há um valor para achar.' : 'Essa equação não tem solução: não existe x que a satisfaça.');
+    return { S: { L: L, R: R, moves: 0 }, X: mul(dc, F(da[1], da[0])) };
+  }
+
+  var cs = '', cOK = null;
+  var CKEYS = [['7'], ['8'], ['9'], ['('], [')'], ['4'], ['5'], ['6'], ['+', 'op'], ['−', 'op'], ['1'], ['2'], ['3'], ['/', 'op'], ['=', 'op'], ['0'], ['x'], ['⌫'], ['Limpar', 'wide']];
+  function buildKeys() {
+    var h = '';
+    CKEYS.forEach(function (k) { h += '<button type="button" class="ck' + (k[1] ? ' ' + k[1] : '') + '" data-k="' + k[0] + '">' + k[0] + '</button>'; });
+    $('ckeys').innerHTML = h;
+    Array.prototype.forEach.call($('ckeys').querySelectorAll('.ck'), function (b) { b.addEventListener('click', function () { typeKey(b.getAttribute('data-k')); }); });
+  }
+  function typeKey(k) {
+    if (k === '⌫') cs = cs.slice(0, -1);
+    else if (k === 'Limpar') cs = '';
+    else if (cs.length < 40) cs += (k === '−' ? '-' : k);
+    calcRefresh();
+  }
+  function calcRefresh() {
+    $('ctyped').innerHTML = cs ? cs.replace(/-/g, '−').replace(/&/g, '&amp;').replace(/</g, '&lt;') : '<span class="ph0">Digite a equação com o teclado</span>';
+    var msg = $('cmsg'), shown = $('cshow');
+    cOK = null; shown.innerHTML = ''; msg.className = 'cmsg'; msg.textContent = '';
+    if (cs) {
+      try {
+        cOK = parseEquation(cs);
+        shown.innerHTML = sideText(cOK.S.L) + '<span class="ceqs">=</span>' + sideText(cOK.S.R);
+        msg.textContent = 'Entendi assim. Escolha como resolver e toque em Resolver.';
+      } catch (e) { msg.textContent = e.message; }
+    } else msg.textContent = 'Exemplo: 2(x-3)/4=3(x+1)/3';
+    $('cGo').disabled = !cOK;
+  }
+  function setMode(m) {
+    cmode = m;
+    $('mFull').setAttribute('aria-pressed', m === 'full' ? 'true' : 'false');
+    $('mShort').setAttribute('aria-pressed', m === 'short' ? 'true' : 'false');
+  }
+  function startCalc() {
+    if (!cOK) return;
+    calc = true;
+    calcInit = { S: JSON.parse(JSON.stringify(cOK.S)), X: cOK.X.slice() };
+    phase = cmode === 'full' ? 8 : 9; n = 1; target = 'both';
+    run++;
+    show('game');
+    $('game').classList.add('m8');
+    $('tg-both').checked = true;
+    $('phName').textContent = 'Calculadora';
+    $('back').textContent = '‹ Equação';
+    loadLevel(0);
+    resolve();   // an equation typed already solved ends right away
+    if (!solved) setStatus(cmode === 'full' ? 'Resolva com as operações da balança. Tudo o que fizer de um lado, faça do outro.' : 'Passe os termos de lado. Para abrir parênteses e tirar denominadores, use ( ) e ×.');
+  }
+  $('mFull').addEventListener('click', function () { setMode('full'); });
+  $('mShort').addEventListener('click', function () { setMode('short'); });
+  $('cGo').addEventListener('click', startCalc);
+  $('cEx').addEventListener('click', function () { cs = '2(x-3)/4=3(x+1)/3'; calcRefresh(); });
+  $('back').addEventListener('click', function (e) { if (calc && !$('game').hidden) { e.preventDefault(); run++; show('calc'); } });
+  document.addEventListener('keydown', function (e) {
+    if ($('calc').hidden || e.ctrlKey || e.metaKey || e.altKey) return;
+    var k = e.key, t = e.target && e.target.tagName;
+    if (t === 'BUTTON' && (k === 'Enter' || k === ' ')) return;
+    if (/^[0-9xX+\-\/()=\[\]]$/.test(k)) { typeKey(k === '-' ? '−' : k.toLowerCase()); e.preventDefault(); }
+    else if (k === 'Backspace') { typeKey('⌫'); e.preventDefault(); }
+    else if (k === 'Enter' && cOK) { startCalc(); e.preventDefault(); }
+  });
+  buildKeys(); calcRefresh();
+
+  // ---------- phase menu and hash routes (#fases, #fase-1, #fase-2) ----------
+  function show(view) { $('menu').hidden = view !== 'menu'; $('game').hidden = view !== 'game'; $('calc').hidden = view !== 'calc'; if (view !== 'game') { calc = false; $('back').textContent = '‹ Fases'; $('game').classList.remove('m8'); } }
+  function startPhase(p) {
+    phase = p; n = p === 2 ? 2 : 1; target = 'both';
+    $('game').classList.toggle('m8', p === 8 || p === 9);
+    $('tg-both').checked = true;
+    $('phName').textContent = 'Fase ' + p + ': ' + PH[p].name;
+    loadLevel(0);
+  }
+  function route() {
+    var m = /^fase-(\d+)$/.exec((location.hash || '').slice(1));
+    if (m && +m[1] === 10) {
+      run++;
+      show('calc');
+    } else if (m && PH[+m[1]]) {
+      calc = false;
+      run++;
+      show('game');
+      startPhase(+m[1]);
+    } else {
+      run++;
+      show('menu');
+    }
+  }
+  window.addEventListener('hashchange', route);
+  LEGEND = $('legend').innerHTML;
+  try {
+    if (localStorage.getItem('bi-pace') === 'normal') pace = 'normal';
+    if (localStorage.getItem('bi-confirm') === '0') confirmOn = false;
+  } catch (e) { /* storage may be blocked: defaults stay */ }
+  route();
+})();
+</script>
+
+</body>
+</html>
