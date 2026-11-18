@@ -272,7 +272,9 @@ a.ph:hover { border-color: var(--ink-2); }
 .ph.soon .st { color: var(--ink-2); }
 
 .gh { display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: nowrap; }
-.back { flex: none; font-family: var(--font-display); font-weight: 700; font-size: 15px; text-decoration: none; padding: 6px 10px 6px 4px; }
+.back { flex: none; display: inline-flex; align-items: center; gap: 4px; min-height: 40px; box-sizing: border-box; font-family: var(--font-display); font-weight: 700; font-size: 16px; text-decoration: none; padding: 0 14px 0 10px; color: var(--ink); background: var(--surface); border: 2px solid var(--ink-2); border-radius: 999px; }
+.back:active { background: var(--line); }
+.back:focus-visible { outline: 3px solid var(--ring); outline-offset: 2px; }
 .ph-name { flex: 1; min-width: 0; font-family: var(--font-display); font-weight: 800; font-size: 18px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .gh .lvl { flex: none; }
 
@@ -328,7 +330,7 @@ a.ph:hover { border-color: var(--ink-2); }
 
 @media (max-width: 520px) {
   body { padding-block: 8px 10px; }
-  .back { font-size: 14px; }
+  .back { font-size: 15px; min-height: 36px; padding: 0 12px 0 8px; }
   .ph-name { font-size: 15px; }
   .pc.x.sm { width: 30px; height: 30px; font-size: 19px; }
   .dg { gap: 3px; padding: 3px; }
