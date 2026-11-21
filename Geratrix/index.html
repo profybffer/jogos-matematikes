@@ -100,6 +100,10 @@ button:focus-visible{outline:calc(var(--u)*2) solid var(--accent);outline-offset
 .key:active{background:var(--soft)}
 .rever{position:absolute;top:calc(var(--u)*5);right:calc(var(--u)*6);font-size:calc(var(--u)*11);font-weight:700;color:var(--accent);border:calc(var(--u)*2) solid var(--line);border-radius:calc(var(--u)*12);padding:calc(var(--u)*2) calc(var(--u)*8);background:var(--panel)}
 .hid{visibility:hidden}
+#conta .atrow{display:flex;gap:calc(var(--u)*4);align-items:center;justify-content:center}
+.atl{width:calc(var(--u)*44);font-size:calc(var(--u)*11);color:var(--muted);font-weight:700}
+.opt{width:calc(var(--u)*30);height:calc(var(--u)*26);border:calc(var(--u)*2) solid var(--line);background:var(--panel);border-radius:calc(var(--u)*8);font-size:calc(var(--u)*15);font-weight:800}
+.opt.on{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
 #conta .vazio{font-size:calc(var(--u)*12.5);color:var(--muted);font-weight:600;text-align:center;display:block;animation:none}
 #conta .ok{color:var(--ok)}
 @keyframes fadein{from{opacity:0;transform:translateY(calc(var(--u)*4))}to{opacity:1;transform:none}}
@@ -249,6 +253,7 @@ var PH=[
   {nome:'Com parte inteira',desc:'Como 2,(3): o inteiro vem na frente',gen:g3},
   {nome:'Dízima composta',desc:'Como 0,1(6): primeiro vem um dígito que não repete',gen:g4},
   {nome:'O desafio do 7',desc:'Período de 6 dígitos, como 0,(142857)',gen:g5},
+  {nome:'Atalho dos noves e zeros',desc:'Sem fitas: escreva a fração direto',atalho:true,gen:function(){var r=rnd(0,3);return r===0?g2():r===1?g3():g4()}},
   {nome:'Calculadora',desc:'Digite uma dízima do livro ou da prova',calc:true}
 ];
 
@@ -259,7 +264,7 @@ try{
   var raw=localStorage.getItem(KEY);
   if(raw){
     var o=JSON.parse(raw);
-    if(o&&Array.isArray(o.feitas)&&(o.feitas.length===PH.length||o.feitas.length===PH.length-1)){
+    if(o&&Array.isArray(o.feitas)&&(o.feitas.length>=5&&o.feitas.length<=PH.length)){
       store.feitas=PH.map(function(_,i){return Math.max(0,Math.min(ROUNDS,+o.feitas[i]||0))});
     }
     if(o&&['auto','light','dark'].indexOf(o.tema)>=0)store.tema=o.tema;
@@ -271,7 +276,7 @@ function save(){try{localStorage.setItem(KEY,JSON.stringify(store))}catch(e){}}
 
 /* ---------- estado ---------- */
 var S={fase:0,rodada:0,t:null,ks:[],mark:[],step:0,msg:'',flash:null,animar:false,lastKey:'',shown:-1,
-  entrada:false,ent:{I:'',com:false,D:'',pi:-1},descendo:false,hide:false,tokD:0,fusMs:1800};
+  at:{n:null,z:null},entrada:false,ent:{I:'',com:false,D:'',pi:-1},descendo:false,hide:false,tokD:0,fusMs:1800};
 
 /* ---------- a dízima: dígitos e papéis ---------- */
 function stream(t,i){
@@ -330,7 +335,7 @@ function novaRodada(){
   var p=PH[S.fase];
   S.ks=[];S.mark=[];S.step=0;S.msg='';S.flash=null;S.animar=false;S.shown=-1;
   if(p.calc){S.ent={I:'',com:false,D:'',pi:-1};S.entrada=true;S.t=null;render();return}
-  S.entrada=false;
+  S.entrada=false;S.at={n:null,z:null};
   var t,key,n=0;
   do{t=p.gen();key=t.I+'|'+t.A+'|'+t.P;n++}while(key===S.lastKey&&n<30);
   S.lastKey=key;S.t=t;
@@ -389,7 +394,7 @@ function limparEntrada(){S.ent={I:'',com:false,D:'',pi:-1};S.msg='';render()}
 
 /* ---------- ações ---------- */
 function toggleChip(k){
-  if(S.step>0||S.entrada)return;
+  if(S.step>0||S.entrada||PH[S.fase].atalho)return;
   var i=S.ks.indexOf(k);
   S.msg='';
   if(i>=0){S.ks.splice(i,1);var m=S.mark.indexOf(k);if(m>=0)S.mark.splice(m,1)}
@@ -398,7 +403,7 @@ function toggleChip(k){
   render();
 }
 function toggleMark(k){
-  if(S.step>0||S.entrada)return;
+  if(S.step>0||S.entrada||PH[S.fase].atalho)return;
   S.msg='';
   var m=S.mark.indexOf(k);
   if(m>=0)S.mark.splice(m,1);
@@ -487,9 +492,16 @@ function rever(){
   render();
   iniciaDescida(false);
 }
+function conferirAt(){
+  var t=S.t,a=t.A.length,p=t.P.length,q=S.at;
+  if(q.n===null||q.z===null)return;
+  if(q.n!==p){S.msg='Cada dígito do período vira um 9. O período '+(p===1?'tem 1 dígito':'tem '+p+' dígitos')+', então são '+p+' '+plural(p,'nove','noves')+'.';render();return}
+  if(q.z!==a){S.msg=a===0?'Nenhum dígito fica entre a vírgula e o período, então não há zeros.':'Cada dígito entre a vírgula e o período vira um 0. Aqui '+(a===1?'há 1 dígito':'há '+a+' dígitos')+', então '+(a===1?'1 zero':a+' zeros')+'.';render();return}
+  S.msg='';S.step=1;S.animar=false;render();
+}
 function dividir(){
   if(S.step!==1||S.descendo)return;
-  S.step=fracao(S.t).g>1?2:3;
+  S.step=(fracao(S.t).g>1&&!PH[S.fase].atalho)?2:3;
   fim();render();
 }
 function simplificar(){
@@ -502,7 +514,8 @@ function fim(){
 function go(){
   if(S.entrada){resolver();return}
   if(S.descendo)return;
-  if(S.step===0)subtrair();
+  if(S.step===0&&PH[S.fase].atalho)conferirAt();
+  else if(S.step===0)subtrair();
   else if(S.step===1)dividir();
   else if(S.step===2)simplificar();
   else if(PH[S.fase].calc){S.ent={I:'',com:false,D:'',pi:-1};cancelaDescida();S.entrada=true;S.step=0;S.ks=[];S.mark=[];S.msg='';render()}
@@ -511,7 +524,7 @@ function go(){
 }
 function reiniciar(){
   if(S.entrada){limparEntrada();return}
-  cancelaDescida();
+  cancelaDescida();S.at={n:null,z:null};
   if(PH[S.fase].calc){S.entrada=true}
   S.ks=[];S.mark=[];S.step=0;S.msg='';S.flash=null;S.animar=false;S.shown=-1;render();
 }
@@ -522,11 +535,13 @@ function par(){
   var t=S.t,coef=pot(hi)-pot(lo),nh=parseInt(intStr(t,hi),10),nl=parseInt(intStr(t,lo),10);
   return {lo:lo,hi:hi,coef:coef,nh:nh,nl:nl,rhs:nh-nl};
 }
+function repete(ch,n){var r='';for(var i=0;i<n;i++)r+=ch;return r}
+function parAt(fa,t){return {coef:fa.den,rhs:fa.n,nh:parseInt(t.I+t.A+t.P,10),nl:parseInt(t.I+t.A,10),hi:0,lo:0}}
 function chipsEstado(){
   Array.prototype.forEach.call(document.querySelectorAll('#chips .chip'),function(b){
     var k=+b.dataset.k;
     b.classList.toggle('on',!S.entrada&&S.ks.indexOf(k)>=0);
-    b.disabled=S.entrada||S.step>0;
+    b.disabled=S.entrada||S.step>0||!!PH[S.fase].atalho;
   });
 }
 function renderEntrada(){
@@ -594,7 +609,7 @@ function render(){
   S.fusMs=(W+1)*90+950;
   rows.forEach(function(k){nI=Math.max(nI,intStr(t,k).length)});
   var ncols=nI+0.5+W+0.7,fs=Math.min(22,Math.floor(254/ncols*0.88*10)/10);
-  var h='',pr=S.step>=1?par():null;
+  var atalho=!!PH[S.fase].atalho,h='',pr=S.step>=1?(atalho?parAt(fa,t):par()):null;
   rows.forEach(function(k){
     var c=t.I.length+k,ip=intStr(t,k),pad=nI-ip.length;
     var mk=S.mark.indexOf(k)>=0;
@@ -626,16 +641,26 @@ function render(){
   /* conta */
   var c='';
   $('conta').className='panel';
-  if(S.step===0){
+  if(atalho&&S.step===0){
+    var q=S.at,nn=q.n===null?'?':repete('9',q.n),zz=q.z===null?'?':repete('0',q.z),bt=function(tp,i){return '<button class="opt'+(q[tp]===i?' on':'')+'" data-at="'+tp+':'+i+'">'+i+'</button>'},r1='',r2='',i2;
+    for(i2=1;i2<=6;i2++)r1+=bt('n',i2);
+    for(i2=0;i2<=3;i2++)r2+=bt('z',i2);
+    c='<div class="atrow"><span class="atl">noves</span>'+r1+'</div><div class="atrow"><span class="atl">zeros</span>'+r2+'</div>'+
+      '<div class="ln"><span>denominador: <span class="cP0">'+nn+'</span><span class="cA">'+zz+'</span></span></div>';
+  }else if(S.step===0){
     c='<span class="vazio">A conta aparece aqui, depois que você subtrair duas fitas.</span>';
   }else{
     var an=anim?' an':'',H=S.hide?'hid':'';
+    if(atalho){
+      c+='<div class="ln sm'+an+'">numerador: '+pr.nh+' − '+pr.nl+' = '+pr.rhs+' · denominador: '+repete('9',p)+repete('0',a)+'</div>';
+    }else{
     c+='<div class="ln'+an+'"><span><span id="t-hi" class="'+H+'">'+lab(pr.hi)+'</span><span id="o1" class="'+H+'"> − </span><span id="t-lo" class="'+H+'">'+lab(pr.lo)+
        '</span><span id="o2" class="'+H+'"> = </span><span id="t-nh" class="'+H+'">'+pr.nh+'</span><span id="o3" class="'+H+'"> − </span><span id="t-nl" class="'+H+'">'+pr.nl+'</span></span></div>';
     c+='<div id="l2" class="'+H+'"><div class="ln'+an+'"><span>'+pr.coef+'x = '+pr.rhs+'</span></div>'+
        '<div class="ln sm'+an+'">'+pot(pr.hi)+' − '+pot(pr.lo)+' = '+pr.coef+' · '+pr.nh+' − '+pr.nl+' = '+pr.rhs+'</div></div>';
+    }
     var mix=fa.sn>fa.sd?'<span>= '+Math.floor(fa.sn/fa.sd)+'</span>'+fr(fa.sn%fa.sd,fa.sd):'';
-    if(S.step>=2)c+='<div class="ln'+an+(S.step===3&&fa.g===1&&!mix?' res':'')+'"><span>x =</span> '+fr(pr.rhs,pr.coef)+(S.step===3&&fa.g===1?mix:'')+'</div>';
+    if(S.step>=2||(atalho&&S.step>=1))c+='<div class="ln'+an+(S.step===3&&fa.g===1&&!mix?' res':'')+'"><span>x =</span> '+fr(pr.rhs,pr.coef)+(S.step===3&&fa.g===1?mix:'')+'</div>';
     if(S.step===3){
       if(fa.g>1&&fa.sd===1)c+='<div class="ln res'+an+'"><span>x = '+fa.sn+'</span></div>';
       else if(fa.g>1)c+='<div class="ln res'+an+'"><span>x =</span> '+fr(fa.sn,fa.sd)+mix+'</div>';
@@ -643,7 +668,7 @@ function render(){
       if(/^9+$/.test(t.P))c+='<div class="ln sm'+an+'">Curiosidade: com período 9, a dízima é igual a '+decimalOf(fa.sn,fa.sd)+'.</div>';
       c+='<div class="ln sm ok'+an+'"><span>Confira: '+fa.sn+' ÷ '+fa.sd+' = <span class="dzi">'+fmtStr(decimalOf(fa.sn,fa.sd),store.notac)+'</span></span></div>';
     }
-    if(S.step===1&&!S.descendo)c+='<button id="rever" class="rever">↻ ver de novo</button>';
+    if(S.step===1&&!S.descendo&&!atalho)c+='<button id="rever" class="rever">↻ ver de novo</button>';
   }
   $('conta').innerHTML=c;
 
@@ -651,6 +676,8 @@ function render(){
   var hint;
   if(S.msg)hint=S.msg;
   else if(S.descendo)hint='Veja de onde vêm os números: eles descem das fitas. (Toque na conta para pular.)';
+  else if(atalho&&S.step===0)hint='Sem fitas: cada dígito que repete vira um 9, e cada dígito entre a vírgula e o período vira um 0.';
+  else if(atalho&&S.step===1)hint='Numerador: o número até o fim do período, menos o que vem antes do período.';
   else if(S.step===0){
     if(S.ks.length===0)hint='Multiplique x para a vírgula andar e as caudas ficarem iguais. Escolha por quanto.';
     else if(S.mark.length<2)hint='Toque em duas fitas para marcá-las e depois subtraia.';
@@ -664,7 +691,9 @@ function render(){
   var g=$('go');
   g.className='';g.disabled=false;
   if(S.descendo){g.textContent='Descendo a conta…';g.disabled=true}
+  else if(atalho&&S.step===0){g.textContent='Conferir o denominador';g.disabled=S.at.n===null||S.at.z===null}
   else if(S.step===0){g.textContent='Subtrair as duas fitas';g.disabled=S.mark.length!==2}
+  else if(atalho&&S.step===1){g.textContent=fa.g>1?'Simplificar: ÷ '+fa.g:'Conferir a resposta'}
   else if(S.step===1){g.textContent='Isolar x: dividir por '+pr.coef}
   else if(S.step===2){g.textContent='Simplificar: ÷ '+fa.g}
   else{g.className='next';g.textContent=calc?'Nova dízima':(S.rodada<ROUNDS-1?'Próxima ▶':'Fase concluída! Ver fases')}
@@ -712,8 +741,9 @@ $('fitas').addEventListener('click',function(e){
   if(f)toggleMark(+f.dataset.k);
 });
 $('conta').addEventListener('click',function(e){
-  var t=e.target.closest?e.target.closest('[data-key],#rever'):null;
+  var t=e.target.closest?e.target.closest('[data-key],[data-at],#rever'):null;
   if(t&&t.dataset&&t.dataset.key){tecla(t.dataset.key);return}
+  if(t&&t.dataset&&t.dataset.at&&S.step===0){var qq=t.dataset.at.split(':');S.at[qq[0]]=+qq[1];S.msg='';render();return}
   if(t&&t.id==='rever'){rever();return}
   if(S.descendo)finDesc();
 });
