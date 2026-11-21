@@ -1,0 +1,732 @@
+<!doctype html>
+<html lang="pt-BR" data-theme="auto">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="light dark">
+<title>Periodus · Matematkês</title>
+<!-- © Ygor B. F. Ferreira · Série “A Saga dos Reinos Matemáticos” · Canal Matematkês · uso livre em sala, proibida a cópia e a revenda -->
+<style>
+:root{
+  --u:min(.27778vw,.166667vh);
+  --bg:#f4f0e4; --panel:#fffdf6; --ink:#272634; --muted:#6b6877; --line:#d8d0b9; --soft:#ebe5d1;
+  --accent:#5b3fd6; --accent-ink:#ffffff; --ok:#12a383; --warn:#c2410c; --ga:#2f6fdc;
+}
+@supports (height:100dvh){:root{--u:min(.27778vw,.166667dvh)}}
+:root[data-theme="dark"]{
+  --bg:#15141c; --panel:#1f1d2b; --ink:#ece9f7; --muted:#a29fb4; --line:#3a3752; --soft:#2a2839;
+  --accent:#9b86ff; --accent-ink:#15141c; --ok:#35c9a8; --warn:#ff9a5c; --ga:#5b9bff;
+}
+@media (prefers-color-scheme:dark){
+  :root[data-theme="auto"]{
+    --bg:#15141c; --panel:#1f1d2b; --ink:#ece9f7; --muted:#a29fb4; --line:#3a3752; --soft:#2a2839;
+    --accent:#9b86ff; --accent-ink:#15141c; --ok:#35c9a8; --warn:#ff9a5c; --ga:#5b9bff;
+  }
+}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+html,body{height:100%;margin:0;background:var(--bg);color:var(--ink);overflow:hidden;
+  font-family:system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+  -webkit-tap-highlight-color:transparent;-webkit-text-size-adjust:100%}
+button{font:inherit;color:inherit;border:0;background:none;cursor:pointer;touch-action:manipulation;padding:0}
+button:disabled{opacity:.4;cursor:default}
+button:focus-visible,input:focus-visible{outline:calc(var(--u)*2) solid var(--accent);outline-offset:calc(var(--u)*1)}
+#app{position:relative;width:calc(var(--u)*360);height:100vh;height:100dvh;margin:0 auto;display:flex;flex-direction:column;
+  gap:calc(var(--u)*5);padding:calc(var(--u)*6) calc(var(--u)*8) calc(var(--u)*8)}
+
+/* cabeçalho */
+#top{display:flex;align-items:center;gap:calc(var(--u)*8);height:calc(var(--u)*38);flex:none}
+#btnMenu{height:calc(var(--u)*34);padding:0 calc(var(--u)*10);border:calc(var(--u)*2) solid var(--line);border-radius:calc(var(--u)*17);font-size:calc(var(--u)*13);font-weight:600;background:var(--panel)}
+#ttl{flex:1;min-width:0;text-align:center;line-height:1.15}
+#ttl b{display:block;font-size:calc(var(--u)*17);letter-spacing:.02em}
+#ttl small{display:block;font-size:calc(var(--u)*10.5);color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#btnNum{height:calc(var(--u)*36);padding:0 calc(var(--u)*16);border-radius:calc(var(--u)*18);background:var(--accent);color:var(--accent-ink);font-size:calc(var(--u)*14);font-weight:800;box-shadow:0 calc(var(--u)*2) calc(var(--u)*6) rgba(0,0,0,.25)}
+
+.panel{background:var(--panel);border:calc(var(--u)*2) solid var(--line);border-radius:calc(var(--u)*10)}
+
+/* entrada */
+#entrada{flex:none;display:flex;gap:calc(var(--u)*6);align-items:center;padding:calc(var(--u)*4) calc(var(--u)*5);height:calc(var(--u)*42)}
+#inp{flex:1;min-width:0;height:calc(var(--u)*32);border:calc(var(--u)*2) solid var(--line);border-radius:calc(var(--u)*16);background:var(--bg);color:var(--ink);
+  font:inherit;font-size:max(16px,calc(var(--u)*16));font-weight:700;padding:0 calc(var(--u)*12)}
+#inp::placeholder{color:var(--muted);font-weight:500}
+#ver{flex:none;height:calc(var(--u)*32);padding:0 calc(var(--u)*16);border-radius:calc(var(--u)*16);background:var(--ga);color:#fff;font-size:calc(var(--u)*14);font-weight:800}
+:root[data-theme="dark"] #ver{color:#10131c}
+@media (prefers-color-scheme:dark){:root[data-theme="auto"] #ver{color:#10131c}}
+#chips{flex:none;display:flex;gap:calc(var(--u)*4)}
+.chip{flex:1;height:calc(var(--u)*26);border:calc(var(--u)*2) solid var(--line);border-radius:calc(var(--u)*13);background:var(--panel);font-size:calc(var(--u)*12.5);font-weight:800;padding:0}
+.chip:active{background:var(--soft)}
+
+/* o número */
+#num{flex:none;padding:calc(var(--u)*6) calc(var(--u)*8);min-height:calc(var(--u)*48);display:flex;align-items:center;justify-content:center;text-align:center;overflow:hidden}
+#numT{font-size:calc(var(--u)*22);font-weight:800;white-space:nowrap;line-height:1.35;font-variant-numeric:tabular-nums}
+#numT .lab{color:var(--muted);font-size:.8em;font-weight:700}
+.bar{display:inline-block;border-top:calc(var(--u)*3) solid var(--accent);line-height:1.1;padding-top:calc(var(--u)*1);color:var(--accent)}
+
+/* a fita */
+#fitaBox{position:relative;flex:1;min-height:calc(var(--u)*110);overflow:hidden}
+#cv{position:absolute;inset:0;width:100%;height:100%;display:block}
+#modo{position:absolute;top:calc(var(--u)*4);right:calc(var(--u)*5);height:calc(var(--u)*24);padding:0 calc(var(--u)*10);border:calc(var(--u)*2) solid var(--line);border-radius:calc(var(--u)*12);background:var(--panel);font-size:calc(var(--u)*11);font-weight:700;color:var(--muted)}
+#vazio{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;padding:calc(var(--u)*14);text-align:center;color:var(--muted);font-size:calc(var(--u)*13);line-height:1.35;pointer-events:none}
+
+/* controles */
+.row{flex:none;display:flex;align-items:center;gap:calc(var(--u)*5);height:calc(var(--u)*34)}
+.row .lbl{flex:none;font-size:calc(var(--u)*11.5);font-weight:700;color:var(--muted);width:calc(var(--u)*52)}
+.sq{flex:none;width:calc(var(--u)*34);height:calc(var(--u)*34);border:calc(var(--u)*2) solid var(--line);border-radius:50%;background:var(--panel);font-size:calc(var(--u)*18);font-weight:800;line-height:1}
+.sq:active{background:var(--soft)}
+#wr{flex:1;min-width:0;height:calc(var(--u)*30);accent-color:var(--accent);margin:0}
+#wv{flex:none;min-width:calc(var(--u)*40);text-align:center;font-size:calc(var(--u)*15);font-weight:800;font-variant-numeric:tabular-nums}
+.btn{flex:1;height:calc(var(--u)*34);border:calc(var(--u)*2) solid var(--line);border-radius:calc(var(--u)*17);background:var(--panel);font-size:calc(var(--u)*12.5);font-weight:800;padding:0 calc(var(--u)*4);white-space:nowrap}
+.btn:active{background:var(--soft)}
+.btn.on{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+.btn.main{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+
+/* mensagem */
+#msg{flex:none;padding:calc(var(--u)*7) calc(var(--u)*10);min-height:calc(var(--u)*72);max-height:calc(var(--u)*150);overflow:auto;font-size:calc(var(--u)*12.5);line-height:1.38;color:var(--ink)}
+#msg.ok{border-color:var(--ok)}
+#msg b{color:var(--accent)}
+#msg.ok b{color:var(--ok)}
+#msg .dim{color:var(--muted)}
+
+/* menu e números */
+.sheet{position:absolute;inset:0;z-index:20;background:var(--bg);display:flex;flex-direction:column;gap:calc(var(--u)*8);padding:calc(var(--u)*12) calc(var(--u)*12) calc(var(--u)*10);overflow:auto}
+.sheet h2{margin:0;font-size:calc(var(--u)*22);text-align:center}
+.blk{background:var(--panel);border:calc(var(--u)*2) solid var(--line);border-radius:calc(var(--u)*10);padding:calc(var(--u)*8) calc(var(--u)*10)}
+.blk h3{margin:0 0 calc(var(--u)*4);font-size:calc(var(--u)*13);color:var(--accent)}
+.blk ol,.blk p{margin:0;font-size:calc(var(--u)*12.5);line-height:1.38}
+.blk ol{padding-left:calc(var(--u)*18)}
+.blk ol li+li{margin-top:calc(var(--u)*3)}
+.seg{display:flex;background:var(--soft);border-radius:calc(var(--u)*17);padding:calc(var(--u)*3);gap:calc(var(--u)*3);height:calc(var(--u)*34)}
+.seg button{flex:1;border-radius:calc(var(--u)*14);font-size:calc(var(--u)*12.5);font-weight:700;color:var(--muted)}
+.seg button.on{background:var(--accent);color:var(--accent-ink)}
+.ghost{width:100%;height:calc(var(--u)*34);border:calc(var(--u)*2) solid var(--line);border-radius:calc(var(--u)*17);font-size:calc(var(--u)*12.5);font-weight:700;color:var(--muted)}
+.autoria{margin:0;font-size:calc(var(--u)*11.5);line-height:1.4;text-align:center;color:var(--muted);padding:calc(var(--u)*6) calc(var(--u)*4)}
+.sheet .big{flex:none;height:calc(var(--u)*44);border-radius:calc(var(--u)*22);background:var(--accent);color:var(--accent-ink);font-size:calc(var(--u)*16);font-weight:800;margin-top:auto}
+.grp{margin:calc(var(--u)*4) calc(var(--u)*2) 0;font-size:calc(var(--u)*12);font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.05em}
+.ex{display:flex;align-items:center;gap:calc(var(--u)*10);text-align:left;width:100%;background:var(--panel);border:calc(var(--u)*2) solid var(--line);border-radius:calc(var(--u)*12);padding:calc(var(--u)*8) calc(var(--u)*10)}
+.ex:active{background:var(--soft)}
+.ex .n{flex:none;min-width:calc(var(--u)*70);font-size:calc(var(--u)*16);font-weight:800;color:var(--accent)}
+.ex .t{flex:1;min-width:0;font-size:calc(var(--u)*12);color:var(--muted);line-height:1.3}
+#listaNum{display:flex;flex-direction:column;gap:calc(var(--u)*6)}
+</style>
+</head>
+<body>
+<div id="app">
+  <header id="top">
+    <button id="btnMenu" aria-label="Abrir o menu">☰ Menu</button>
+    <div id="ttl"><b>Periodus</b><small>Laboratório · repete ou não repete?</small></div>
+    <button id="btnNum" aria-label="Escolher um número de exemplo">Números</button>
+  </header>
+
+  <form id="entrada" class="panel" autocomplete="off">
+    <input id="inp" type="text" enterkeyhint="go" placeholder="Digite: 1/7, √2, π, 0,25" aria-label="Digite um número">
+    <button id="ver" type="submit">Ver</button>
+  </form>
+  <div id="chips"></div>
+
+  <div id="num" class="panel"><div id="numT"></div></div>
+
+  <div id="fitaBox" class="panel">
+    <canvas id="cv" role="img" aria-label="Fita dos algarismos"></canvas>
+    <div id="vazio">Digite uma fração ou um número, ou toque em “Números” para escolher um exemplo.</div>
+    <button id="modo" aria-label="Trocar entre colunas e cores">Colunas</button>
+  </div>
+
+  <div class="row" id="ctlW">
+    <span class="lbl">Largura</span>
+    <button class="sq" id="wm" aria-label="Diminuir a largura">−</button>
+    <input id="wr" type="range" min="1" max="120" value="7" aria-label="Largura da fita, em algarismos por linha">
+    <button class="sq" id="wp" aria-label="Aumentar a largura">+</button>
+    <output id="wv">7</output>
+  </div>
+  <div class="row" id="ctlP">
+    <button class="btn" id="pp">⏸ Pausar</button>
+    <button class="btn" id="sp">⏩ ×1</button>
+    <button class="btn" id="all">Revelar tudo</button>
+  </div>
+  <div class="row" id="ctlD">
+    <button class="btn" id="dica">💡 Largura certa</button>
+    <button class="btn" id="varrer">🔍 Varrer</button>
+    <button class="btn" id="rst">⟲ Do início</button>
+  </div>
+
+  <div id="msg" class="panel" aria-live="polite"></div>
+
+  <section id="sheetNum" class="sheet" hidden>
+    <h2>Números</h2>
+    <div id="listaNum"></div>
+    <button class="big" data-close>Voltar ao jogo</button>
+  </section>
+
+  <section id="sheetMenu" class="sheet" hidden>
+    <h2>Menu</h2>
+    <div class="blk">
+      <h3>Como jogar</h3>
+      <ol>
+        <li>Digite uma fração (1/7), uma raiz (√2, raiz de 7), π, e, φ ou um decimal (0,25). Os algarismos vão aparecendo na fita.</li>
+        <li>A fita é enrolada em linhas. Mexa na <b>largura</b> até as colunas ficarem iguais, formando listras.</li>
+        <li>Se as listras aparecem e duram, as cópias se juntam num só bloco com a <b>barra em cima</b>: é o período.</li>
+        <li>Se nenhuma largura segura as listras, a dízima não é periódica.</li>
+      </ol>
+    </div>
+    <div class="blk">
+      <h3>O que a fita mostra, e o que não prova</h3>
+      <p>Olhar uma parte dos algarismos dá uma pista, não uma prova. Uma fração sempre repete, mesmo que o período seja enorme (tente 1/9973). E ter um padrão não é ter período (tente 0,1010010001…). O que prova que √2 ou π não repetem é a Matemática, não a fita.</p>
+    </div>
+    <div class="blk">
+      <h3>Aparência</h3>
+      <div class="seg" id="segTema">
+        <button data-t="auto">Automático</button>
+        <button data-t="light">Claro</button>
+        <button data-t="dark">Escuro</button>
+      </div>
+      <div class="seg" id="segLinha" style="margin-top:calc(var(--u)*6)">
+        <button data-l="1">Com linha ligando os topos</button>
+        <button data-l="0">Sem linha</button>
+      </div>
+    </div>
+    <button class="ghost" id="btnZerar">Apagar minhas escolhas salvas</button>
+    <p class="autoria">© Ygor B. F. Ferreira · Série “A Saga dos Reinos Matemáticos” · Canal Matematkês · uso livre em sala, proibida a cópia e a revenda</p>
+    <button class="big" data-close>Voltar ao jogo</button>
+  </section>
+</div>
+
+<script>
+/*ENGINE_START*/
+var Engine=(function(){
+'use strict';
+function gcd(a,b){while(b){var t=a%b;a=b;b=t}return a}
+function isqrt(n){
+  if(n<2n)return n;
+  var x=1n<<BigInt((n.toString(2).length+1)>>1);
+  for(;;){var y=(x+n/x)>>1n;if(y>=x)return x;x=y}
+}
+function p10(k){return 10n**BigInt(k)}
+function split(v,K){
+  var s=v.toString();
+  while(s.length<=K)s='0'+s;
+  return {ip:s.slice(0,s.length-K),frac:s.slice(s.length-K)};
+}
+function sqrtDigits(n,K){return split(isqrt(BigInt(n)*p10(2*K)),K)}
+function atanInv(x,unity){
+  var xx=BigInt(x),x2=xx*xx,term=unity/xx,sum=term,k=1n,sg=-1n;
+  while(term>0n){term=term/x2;k+=2n;sum+=sg*(term/k);sg=-sg}
+  return sum;
+}
+function piDigits(K){var G=10,u=p10(K+G);return split((16n*atanInv(5,u)-4n*atanInv(239,u))/p10(G),K)}
+function eDigits(K){
+  var G=10,u=p10(K+G),term=u,sum=0n,k=0n;
+  while(term>0n){sum+=term;k+=1n;term=term/k}
+  return split(sum/p10(G),K);
+}
+function phiDigits(K){var G=10,u=p10(K+G),s=isqrt(5n*u*u);return split(((u+s)/2n)/p10(G),K)}
+
+var NIRR=2000;
+function mkIrr(label,parts,why,key){
+  var f=parts.frac,N=f.length,D=new Uint8Array(N);
+  for(var i=0;i<N;i++)D[i]=f.charCodeAt(i)-48;
+  return {kind:'irr',key:key||label,label:label,ip:parts.ip,N:N,why:why,dig:function(i){return i<N?D[i]:0}};
+}
+function mkPattern(label,why,key,fn){
+  var D=new Uint8Array(NIRR);
+  for(var i=0;i<NIRR;i++)D[i]=fn(i);
+  var s='';for(var j=0;j<NIRR;j++)s+=D[j];
+  return mkIrr(label,{ip:'0',frac:s},why,key);
+}
+function padUns(i){ /* 1 nas posições triangulares: 0,101001000100001… */
+  var p=i+1,k=Math.floor((Math.sqrt(8*p+1)-1)/2);
+  return (k*(k+1)/2===p)?1:0;
+}
+var CH='';(function(){var k=1;while(CH.length<NIRR+10){CH+=k;k++}})();
+function padNat(i){return CH.charCodeAt(i)-48}
+
+function mkSqrt(n){
+  var r=Math.floor(Math.sqrt(n));
+  while(r*r>n)r--;while((r+1)*(r+1)<=n)r++;
+  if(r*r===n)return buildRac(r,1,'√'+n);
+  return mkIrr('√'+n,sqrtDigits(n,NIRR),'√'+n+' é irracional: raiz de número inteiro que não é quadrado perfeito nunca é racional.','sqrt'+n);
+}
+function mkKey(key){
+  if(key==='pi')return mkIrr('π',piDigits(NIRR),'π é irracional (provado por Lambert no século XVIII).','pi');
+  if(key==='e')return mkIrr('e',eDigits(NIRR),'e é irracional (provado por Euler no século XVIII).','e');
+  if(key==='phi')return mkIrr('φ',phiDigits(NIRR),'φ = (1+√5)/2 é irracional porque √5 é irracional.','phi');
+  if(key==='pad1')return mkPattern('0,1010010001…','O 1 volta com cada vez mais zeros no meio: há padrão, mas nenhum bloco se repete sempre igual. <b>Ter padrão não é ter período.</b> Não é periódica, logo é irracional.','pad1',padUns);
+  if(key==='pad2')return mkPattern('0,123456789101112…','Lista 1, 2, 3, 4…: há padrão, mas nenhum bloco se repete sempre igual. Não é periódica, logo é irracional.','pad2',padNat);
+  return null;
+}
+
+function buildRac(n0,d0,label){
+  var g=gcd(n0,d0),n=n0/g,d=d0/g,ip=Math.floor(n/d),r=n%d;
+  var base=[],pre=0,per=1;
+  if(r===0){base=[0]}
+  else{
+    var seen=new Int32Array(d).fill(-1),i=0;
+    while(r!==0&&seen[r]<0){seen[r]=i;r*=10;base.push(Math.floor(r/d));r%=d;i++}
+    if(r===0){pre=base.length;per=1;base.push(0)}
+    else{pre=seen[r];per=i-seen[r]}
+  }
+  return {kind:'rac',key:label,label:label||(n0+'/'+d0),n:n,d:d,ip:String(ip),pre:pre,per:per,
+    dig:function(i){return i<pre?base[i]:base[pre+((i-pre)%per)]}};
+}
+
+function norm(s){return String(s).toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'').replace(/\s+/g,' ').trim()}
+function parse(raw){
+  var s=norm(raw).replace(/\./g,',');
+  if(!s)return {ok:false,msg:'Digite um número, como 1/7, √2 ou 0,25.'};
+  var m;
+  if(s==='pi'||s==='π')return {ok:true,x:mkKey('pi')};
+  if(s==='e')return {ok:true,x:mkKey('e')};
+  if(s==='fi'||s==='phi'||s==='φ')return {ok:true,x:mkKey('phi')};
+  if((m=/^(?:√|raiz(?: de)?|sqrt)\s*\(?\s*(\d{1,4})\s*\)?$/.exec(s))){
+    return {ok:true,x:mkSqrt(parseInt(m[1],10))};
+  }
+  if((m=/^(\d{1,6})\s*\/\s*(\d{1,5})$/.exec(s))){
+    var n=parseInt(m[1],10),d=parseInt(m[2],10);
+    if(d===0)return {ok:false,msg:'Não existe divisão por zero. Tente outro denominador.'};
+    return {ok:true,x:buildRac(n,d,n+'/'+d)};
+  }
+  if(/^\d+\s*\/\s*\d+$/.test(s))return {ok:false,msg:'Número grande demais. Use numerador até 6 algarismos e denominador até 5.'};
+  if((m=/^(\d{1,6})(?:,(\d{1,5}))?$/.exec(s))){
+    if(m[2]){var k=m[2].length;return {ok:true,x:buildRac(parseInt(m[1]+m[2],10),Math.pow(10,k),m[1]+','+m[2])}}
+    return {ok:true,x:buildRac(parseInt(m[1],10),1,m[1])};
+  }
+  return {ok:false,msg:'Não entendi. Tente 1/7, √2, raiz de 7, π, e, φ ou 0,25.'};
+}
+
+function tailRun(x,W,n){var L=0;for(var i=n-W-1;i>=0;i--){if(x.dig(i)===x.dig(i+W))L++;else break}return L}
+function persists(x,W,n){return tailRun(x,W,n)>=Math.max(2*W,24,Math.floor(n/2))}
+
+return {gcd:gcd,isqrt:isqrt,sqrtDigits:sqrtDigits,piDigits:piDigits,eDigits:eDigits,phiDigits:phiDigits,
+  buildRac:buildRac,mkKey:mkKey,mkSqrt:mkSqrt,parse:parse,tailRun:tailRun,persists:persists,NIRR:NIRR};
+})();
+/*ENGINE_END*/
+</script>
+
+<script>
+(function(){
+'use strict';
+var E=Engine;
+var $=function(id){return document.getElementById(id)};
+var KEY='periodus.v1';
+var store={tema:'auto',modo:'col',linha:1,ult:'1/7'};
+try{
+  var raw=localStorage.getItem(KEY);
+  if(raw){
+    var o=JSON.parse(raw);
+    if(o&&['auto','light','dark'].indexOf(o.tema)>=0)store.tema=o.tema;
+    if(o&&(o.modo==='col'||o.modo==='cor'))store.modo=o.modo;
+    if(o&&(o.linha===0||o.linha===1))store.linha=o.linha;
+    if(o&&typeof o.ult==='string'&&o.ult.length<40)store.ult=o.ult;
+  }
+}catch(e){}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(store))}catch(e){}}
+
+var reduced=!!(window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches);
+var PAL=['#6b7280','#e6584b','#f08a24','#e8c21b','#8bc34a','#1faa7a','#19a7c9','#3a6fe0','#7b4fd6','#c9429b'];
+var PALTX=['#fff','#fff','#1a1200','#1a1200','#102000','#fff','#00222b','#fff','#fff','#fff'];
+var PALRGB=PAL.map(function(h){return [parseInt(h.substr(1,2),16),parseInt(h.substr(3,2),16),parseInt(h.substr(5,2),16)]});
+var SPEEDS=[10,40,200,1000],SPLAB=['×1','×4','×20','×100'];
+var REVCAP=120000;
+
+var S={x:null,W:7,rev:0,play:true,spd:0,col:false,ct:0,cs:0,sweep:false,sweepLim:60,sweepTimer:0,fim:false,
+  dirty:true,lastN:-1,last:0,numHtml:''};
+
+/* ---------- utilidades ---------- */
+function esc(s){return String(s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})}
+function digStr(a,b){var s='';for(var i=a;i<b;i++)s+=S.x.dig(i);return s}
+function plural(n,a,b){return n===1?a:b}
+function Wmax(){return S.x&&S.x.kind==='rac'?Math.max(120,S.x.per):300}
+function revCap(){return S.x.kind==='rac'?REVCAP:S.x.N}
+function ease(t){return t<.5?2*t*t:1-Math.pow(-2*t+2,2)/2}
+
+/* ---------- mensagens ---------- */
+function setMsg(h,ok){var m=$('msg');m.innerHTML=h;m.className='panel'+(ok?' ok':'')}
+function msgBusca(){
+  if(!S.x)return 'Digite um número e toque em <b>Ver</b>.';
+  return 'Mexa na <b>largura</b> até as colunas ficarem iguais, formando <b>listras</b>. Se elas durarem, as cópias vão se juntar.';
+}
+function msgColapso(){
+  var x=S.x,p=x.per,pre=x.pre,W=S.W,h;
+  var term=(p===1&&x.dig(pre)===0);
+  if(term){
+    h='<b>Terminou!</b> Depois de '+x.ip+(pre?','+digStr(0,pre):'')+' só vêm zeros, e eles se juntaram num <b>zero com barra em cima</b>. Número que termina também é racional.';
+  }else{
+    h='<b>Repetiu!</b> As cópias se juntaram num só bloco: o <b>período</b> tem '+p+' '+plural(p,'algarismo','algarismos')+(p<=20?' ('+digStr(pre,pre+p)+')':'')+' e recebe a barra em cima.';
+    if(pre>0)h+=' Antes dele há '+pre+' '+plural(pre,'algarismo que não repete','algarismos que não repetem')+': é uma dízima composta.';
+    h+=' Como veio de uma fração, é racional.';
+    if(p>100)h+=' O período é enorme, mas existe: toda fração acaba repetindo.';
+  }
+  if(W!==p)h+='<br><span class="dim">A largura '+W+' também funciona (é múltiplo de '+p+'), mas o menor período é '+p+'.</span>';
+  return h;
+}
+function msgIrr(lim){
+  var x=S.x,n=Math.floor(S.rev),ok=true;
+  for(var w=1;w<=lim;w++){if(E.persists(x,w,n)){ok=false;break}}
+  var h=ok?'Olhei '+n+' algarismos em larguras de 1 a '+lim+' e nenhuma manteve as listras do começo ao fim. '
+          :'Olhei '+n+' algarismos e não vi uma repetição sustentada. ';
+  h+='Isso é uma <b>pista</b>, não uma prova. '+x.why;
+  return h;
+}
+
+/* ---------- carregar um número ---------- */
+function setNumber(x,txt){
+  stopSweep();
+  S.x=x;S.rev=0;S.col=false;S.ct=0;S.play=true;S.fim=false;S.lastN=-1;
+  $('vazio').hidden=true;
+  var m=Wmax();
+  $('wr').max=m;
+  if(S.W>m)S.W=m;
+  syncCtl();
+  if(txt!==undefined){store.ult=txt;save()}
+  setMsg(msgBusca());
+  S.dirty=true;
+}
+function loadText(t){
+  var r=E.parse(t);
+  if(!r.ok){setMsg(esc(r.msg));return false}
+  setNumber(r.x,t);
+  return true;
+}
+function loadKey(k){setNumber(E.mkKey(k),k)}
+
+/* ---------- largura e controles ---------- */
+function setW(w,manual){
+  if(!S.x)return;
+  w=Math.max(1,Math.min(Wmax(),Math.round(w)));
+  if(manual)stopSweep();
+  if(w===S.W)return;
+  S.W=w;
+  var estavaColapsado=S.col;
+  S.col=false;S.ct=0;
+  if(estavaColapsado||S.fim){S.fim=false;S.play=true}
+  syncCtl();
+  if(S.x.kind==='irr'&&Math.floor(S.rev)>=S.x.N&&!S.sweep){
+    setMsg(E.persists(S.x,w,S.x.N)?msgBusca():'Largura '+w+': as colunas não ficam iguais. Tente outras.');
+  }else if(estavaColapsado){setMsg(msgBusca())}
+  S.dirty=true;
+}
+function syncCtl(){
+  $('wr').value=S.W;$('wv').textContent=S.W;
+  $('pp').textContent=S.col?'⟲ De novo':(S.play?'⏸ Pausar':'▶ Continuar');
+  $('sp').textContent='⏩ '+SPLAB[S.spd];
+  $('varrer').classList.toggle('on',S.sweep);
+  $('varrer').textContent=S.sweep?'■ Parar':'🔍 Varrer';
+  $('modo').textContent=store.modo==='col'?'Colunas':'Cores';
+}
+function checkAlign(){
+  var x=S.x;
+  if(!x||S.col||x.kind!=='rac')return;
+  if(S.W%x.per!==0)return;
+  var need=x.pre+3*S.W;
+  if(S.rev>=need){
+    S.rev=need;S.col=true;S.cs=x.pre;S.ct=reduced?1:0;S.play=false;S.dirty=true;
+    syncCtl();
+    if(reduced)finishCollapse();
+  }
+}
+function finishCollapse(){
+  stopSweep();
+  setMsg(msgColapso(),true);
+  S.dirty=true;
+}
+function stopSweep(){
+  if(S.sweepTimer){clearInterval(S.sweepTimer);S.sweepTimer=0}
+  if(S.sweep){S.sweep=false;syncCtl()}
+}
+function ensureRev(w){
+  var x=S.x,need=(x.kind==='rac'?x.pre:0)+5*w+12;
+  need=Math.min(need,revCap());
+  if(S.rev<need)S.rev=need;
+}
+function startSweep(){
+  if(!S.x)return;
+  stopSweep();
+  S.sweep=true;
+  S.sweepLim=S.x.kind==='rac'?Math.min(120,Wmax()):60;
+  S.col=false;S.ct=0;S.fim=false;S.play=true;
+  S.W=1;ensureRev(1);syncCtl();S.dirty=true;
+  setMsg('Testando a largura <b>1</b>…');
+  S.sweepTimer=setInterval(sweepTick,300);
+}
+function sweepTick(){
+  if(S.col){stopSweep();return}
+  var w=S.W+1;
+  if(w>S.sweepLim){
+    stopSweep();
+    if(S.x.kind==='irr'){S.rev=Math.max(S.rev,Math.min(S.x.N,S.x.N));S.play=false;setMsg(msgIrr(S.sweepLim))}
+    else setMsg('Até a largura '+S.sweepLim+' nenhuma alinhou, mas isso não prova nada: por ser fração, ela <b>repete</b>; só que o período é maior que '+S.sweepLim+'. Toque em “Largura certa”.');
+    return;
+  }
+  S.W=w;S.dirty=true;ensureRev(w);syncCtl();
+  setMsg('Testando a largura <b>'+w+'</b>…');
+}
+
+/* ---------- desenho ---------- */
+var cv=$('cv'),cx=cv.getContext('2d'),CW=0,CH=0,DPR=1,U=1;
+var tmpA=document.createElement('canvas'),tmpB=document.createElement('canvas');
+function resize(){
+  var b=$('fitaBox'),r=b.getBoundingClientRect();
+  DPR=window.devicePixelRatio||1;
+  U=$('app').clientWidth/360;
+  CW=Math.max(10,Math.floor(r.width-4*U));CH=Math.max(10,Math.floor(r.height-4*U));
+  cv.width=Math.floor(CW*DPR);cv.height=Math.floor(CH*DPR);
+  S.dirty=true;
+}
+function cssv(n){return getComputedStyle(document.documentElement).getPropertyValue(n).trim()}
+
+function draw(){
+  var c=cx,n=Math.floor(S.rev),W=S.W;
+  c.setTransform(DPR,0,0,DPR,0,0);c.clearRect(0,0,CW,CH);
+  if(!S.x||n<=0)return;
+  var ink=cssv('--ink'),accent=cssv('--accent');
+  var padX=6*U,padT=32*U,padB=6*U,gap=3*U;
+  var rows=Math.ceil(n/W),minBand=12*U,maxBand=46*U,availH=CH-padT-padB;
+  var vr=Math.max(1,Math.min(rows,Math.floor((availH+gap)/(minBand+gap))));
+  var bandH=Math.min(maxBand,(availH-(vr-1)*gap)/vr);
+  var r0=rows-vr,cw=(CW-2*padX)/W;
+  var col=S.col,e=col?ease(S.ct):0,cs=S.cs;
+  var useImg=cw<1.5||vr*W>3500;
+  var mode=(store.modo==='col'&&cw>=4)?'col':'cor';
+  function rowY(r){return padT+(r-r0)*(bandH+gap)}
+  function pos(i){return [padX+(i%W)*cw,rowY(Math.floor(i/W))]}
+
+  if(useImg){
+    var Wpx=Math.max(1,Math.floor((CW-2*padX)*DPR));
+    var build=function(filter,tc){
+      tc.width=Wpx;tc.height=vr;
+      var tx=tc.getContext('2d'),id=tx.createImageData(Wpx,vr),dd=id.data;
+      for(var r=0;r<vr;r++){
+        for(var px=0;px<Wpx;px++){
+          var c0=Math.floor(px*W/Wpx),c1=Math.max(c0+1,Math.floor((px+1)*W/Wpx)),tot=c1-c0,R=0,G=0,B=0,k=0;
+          for(var cc=c0;cc<c1&&cc<W;cc++){
+            var i=(r0+r)*W+cc;
+            if(i<n&&filter(i)){var p=PALRGB[S.x.dig(i)];R+=p[0];G+=p[1];B+=p[2];k++}
+          }
+          if(k){var o=(r*Wpx+px)*4;dd[o]=R/k;dd[o+1]=G/k;dd[o+2]=B/k;dd[o+3]=255*k/tot}
+        }
+      }
+      tx.putImageData(id,0,0);
+    };
+    var cut=cs+W;
+    build(function(i){return !col||i<cut},tmpA);
+    c.imageSmoothingEnabled=false;
+    for(var r=0;r<vr;r++)c.drawImage(tmpA,0,r,Wpx,1,padX,rowY(r0+r),Wpx/DPR,bandH);
+    if(col){
+      build(function(i){return i>=cut},tmpB);
+      c.globalAlpha=1-e;
+      for(var r2=0;r2<vr;r2++)c.drawImage(tmpB,0,r2,Wpx,1,padX,rowY(r0+r2),Wpx/DPR,bandH);
+      c.globalAlpha=1;
+    }
+  }else{
+    var drawCell=function(i,x,y){
+      var d=S.x.dig(i);c.fillStyle=PAL[d];
+      if(mode==='col'){
+        var bw=Math.max(1,cw*0.78),h=3+(bandH-5)*d/9;
+        c.fillRect(x+(cw-bw)/2,y+bandH-h,bw,h);
+      }else{
+        c.fillRect(x,y,Math.max(1,cw-1),bandH);
+        if(cw>=15&&bandH>=15){
+          c.fillStyle=PALTX[d];c.font='700 '+Math.min(bandH*0.6,cw*0.62)+'px system-ui,sans-serif';
+          c.textAlign='center';c.textBaseline='middle';c.fillText(String(d),x+cw/2,y+bandH/2+1);
+        }
+      }
+    };
+    var first=Math.max(0,r0*W);
+    if(!col){
+      for(var i=first;i<n;i++){var p=pos(i);drawCell(i,p[0],p[1])}
+      if(mode==='col'&&store.linha){
+        c.strokeStyle=ink;c.globalAlpha=.55;c.lineWidth=Math.max(1,1.2*U);
+        for(var rr=r0;rr<rows;rr++){
+          c.beginPath();var st=false;
+          for(var cc2=0;cc2<W;cc2++){
+            var ii=rr*W+cc2;if(ii>=n)break;
+            var h2=3+(bandH-5)*S.x.dig(ii)/9,xx=padX+cc2*cw+cw/2,yy=rowY(rr)+bandH-h2;
+            if(!st){c.moveTo(xx,yy);st=true}else c.lineTo(xx,yy);
+          }
+          c.stroke();
+        }
+        c.globalAlpha=1;
+      }
+    }else{
+      for(var a=first;a<Math.min(cs,n);a++){var pa=pos(a);drawCell(a,pa[0],pa[1])}
+      for(var b=n-1;b>=cs+W;b--){
+        var tgt=cs+((b-cs)%W),p0=pos(b),p1=pos(tgt);
+        drawCell(b,p0[0]+(p1[0]-p0[0])*e,p0[1]+(p1[1]-p0[1])*e);
+      }
+      for(var k=cs;k<Math.min(cs+W,n);k++){var pk=pos(k);drawCell(k,pk[0],pk[1])}
+    }
+  }
+  if(col&&e>0){
+    c.strokeStyle=accent;c.lineWidth=3*U;c.globalAlpha=e;c.lineCap='butt';
+    var fr=Math.floor(cs/W),lr=Math.floor((cs+W-1)/W);
+    for(var r3=fr;r3<=lr;r3++){
+      if(r3<r0)continue;
+      var i0=Math.max(cs,r3*W),i1=Math.min(cs+W-1,(r3+1)*W-1);
+      var x0=padX+(i0%W)*cw,x1=padX+(i1%W+1)*cw,y0=rowY(r3)-4*U;
+      c.beginPath();c.moveTo(x0,y0);c.lineTo(x1,y0);c.stroke();
+    }
+    c.globalAlpha=1;
+  }
+  cv.setAttribute('aria-label','Fita com '+n+' algarismos de '+S.x.label+', em linhas de '+W);
+}
+
+function numHTML(){
+  var x=S.x,n=Math.floor(S.rev);
+  var h=/^pad/.test(x.key)?'':'<span class="lab">'+esc(x.label)+' =</span> ';
+  if(S.col&&S.ct>=1&&x.kind==='rac'){
+    var pre=digStr(0,x.pre),per=digStr(x.pre,x.pre+Math.min(x.per,12));
+    return h+x.ip+','+pre+'<span class="bar">'+per+'</span>'+(x.per>12?'…':'');
+  }
+  var k=Math.min(n,12);
+  return h+x.ip+','+digStr(0,k)+'…';
+}
+function updateNum(){
+  if(!S.x){$('numT').innerHTML='';return}
+  var h=numHTML();
+  if(h!==S.numHtml){S.numHtml=h;$('numT').innerHTML=h}
+}
+
+/* ---------- laço principal ---------- */
+function loop(ts){
+  var dt=Math.min(.1,(ts-(S.last||ts))/1000);S.last=ts;
+  if(S.x){
+    var cap=revCap();
+    if(S.play&&!S.col&&S.rev<cap){
+      S.rev=Math.min(cap,S.rev+SPEEDS[S.spd]*Math.max(1,S.W/10)*dt);
+    }
+    checkAlign();
+    var n=Math.floor(S.rev);
+    if(n!==S.lastN){S.lastN=n;S.dirty=true}
+    if(S.x.kind==='irr'&&S.rev>=cap&&!S.fim&&!S.col&&!S.sweep){
+      S.fim=true;S.play=false;syncCtl();setMsg(msgIrr(Math.min(60,Wmax())));
+    }
+    if(S.col&&S.ct<1){
+      S.ct=Math.min(1,S.ct+dt/1.8);S.dirty=true;
+      if(S.ct>=1)finishCollapse();
+    }
+    if(S.dirty){S.dirty=false;draw();updateNum()}
+  }
+  requestAnimationFrame(loop);
+}
+
+/* ---------- eventos ---------- */
+$('entrada').addEventListener('submit',function(e){e.preventDefault();loadText($('inp').value);$('inp').blur()});
+$('wr').addEventListener('input',function(){setW(+this.value,true)});
+$('wm').addEventListener('click',function(){setW(S.W-1,true)});
+$('wp').addEventListener('click',function(){setW(S.W+1,true)});
+$('pp').addEventListener('click',function(){
+  if(!S.x)return;
+  stopSweep();
+  if(S.col){var w=S.W;S.col=false;S.ct=0;S.rev=0;S.play=true;S.fim=false;setMsg(msgBusca());S.W=w}
+  else S.play=!S.play;
+  syncCtl();S.dirty=true;
+});
+$('sp').addEventListener('click',function(){S.spd=(S.spd+1)%SPEEDS.length;syncCtl()});
+$('all').addEventListener('click',function(){
+  if(!S.x)return;
+  stopSweep();
+  var x=S.x;
+  S.rev=Math.max(S.rev,x.kind==='rac'?Math.min(REVCAP,Math.max(x.pre+6*x.per+30,4*S.W+x.pre)):x.N);
+  S.dirty=true;
+});
+$('rst').addEventListener('click',function(){
+  if(!S.x)return;
+  stopSweep();
+  S.rev=0;S.col=false;S.ct=0;S.play=true;S.fim=false;S.lastN=-1;
+  setMsg(msgBusca());syncCtl();S.dirty=true;
+});
+$('dica').addEventListener('click',function(){
+  if(!S.x)return;
+  stopSweep();
+  var x=S.x;
+  if(x.kind==='rac'){
+    var p=x.per;
+    S.W=Math.min(p,Wmax());S.col=false;S.ct=0;S.fim=false;S.play=true;
+    var need=x.pre+3*S.W;
+    if(need>2000)S.rev=Math.max(S.rev,need);
+    syncCtl();S.dirty=true;
+    setMsg('A largura certa é <b>'+p+'</b>: é de quanto em quanto tempo os algarismos voltam. Veja as cópias se juntarem.');
+  }else{
+    setMsg('Para este número eu não vou entregar a largura. Use <b>Varrer</b> e veja se alguma largura consegue segurar as listras.');
+  }
+});
+$('varrer').addEventListener('click',function(){if(S.sweep)stopSweep();else startSweep()});
+$('modo').addEventListener('click',function(){store.modo=store.modo==='col'?'cor':'col';save();syncCtl();S.dirty=true});
+
+/* chips e exemplos */
+var CHIPS=['1/3','1/7','1/6','1/97','√2','π'];
+CHIPS.forEach(function(t){
+  var b=document.createElement('button');b.className='chip';b.type='button';b.textContent=t;
+  b.addEventListener('click',function(){$('inp').value=t;loadText(t)});
+  $('chips').appendChild(b);
+});
+var EXS=[
+  {g:'Terminam'},
+  {t:'1/4',d:'0,25 e depois só zeros: o zero fica com a barra'},
+  {t:'1/8',d:'0,125 e depois só zeros'},
+  {g:'Repetem (são frações)'},
+  {t:'1/3',d:'período de 1 algarismo'},
+  {t:'1/6',d:'dízima composta: o 1 não repete, o 6 sim'},
+  {t:'1/7',d:'período de 6 algarismos: 142857'},
+  {t:'1/11',d:'período de 2 algarismos'},
+  {t:'1/97',d:'período de 96 algarismos: parece bagunça, mas repete'},
+  {t:'1/9973',d:'período de 554 algarismos. Será que repete mesmo? É fração, então sim'},
+  {g:'Não repetem'},
+  {t:'√2',d:'raiz de 2, irracional'},
+  {t:'√7',d:'raiz de 7, irracional'},
+  {t:'π',d:'a razão entre a circunferência e o diâmetro'},
+  {t:'e',d:'o número de Euler'},
+  {t:'φ',d:'o número de ouro'},
+  {g:'Têm padrão, mas não são periódicas'},
+  {k:'pad1',t:'0,1010010001…',d:'o 1 volta com cada vez mais zeros no meio'},
+  {k:'pad2',t:'0,123456789101112…',d:'os números naturais, um depois do outro'}
+];
+EXS.forEach(function(ex){
+  var host=$('listaNum');
+  if(ex.g){var g=document.createElement('div');g.className='grp';g.textContent=ex.g;host.appendChild(g);return}
+  var b=document.createElement('button');b.className='ex';b.type='button';
+  b.innerHTML='<span class="n">'+esc(ex.t)+'</span><span class="t">'+esc(ex.d)+'</span>';
+  b.addEventListener('click',function(){
+    fechar();
+    if(ex.k){$('inp').value=ex.t;loadKey(ex.k)}
+    else{$('inp').value=ex.t;loadText(ex.t)}
+  });
+  host.appendChild(b);
+});
+
+/* menu, números, tema */
+function mostrar(id){$(id).hidden=false}
+function fechar(){Array.prototype.forEach.call(document.querySelectorAll('.sheet'),function(s){s.hidden=true})}
+function tema(t){
+  document.documentElement.setAttribute('data-theme',t);store.tema=t;save();
+  Array.prototype.forEach.call($('segTema').children,function(b){b.classList.toggle('on',b.dataset.t===t)});
+  S.dirty=true;
+}
+function linhaSet(v){
+  store.linha=v;save();
+  Array.prototype.forEach.call($('segLinha').children,function(b){b.classList.toggle('on',+b.dataset.l===v)});
+  S.dirty=true;
+}
+$('btnMenu').addEventListener('click',function(){mostrar('sheetMenu')});
+$('btnNum').addEventListener('click',function(){mostrar('sheetNum')});
+$('segTema').addEventListener('click',function(e){var t=e.target.dataset&&e.target.dataset.t;if(t)tema(t)});
+$('segLinha').addEventListener('click',function(e){var l=e.target.dataset&&e.target.dataset.l;if(l!==undefined)linhaSet(+l)});
+$('btnZerar').addEventListener('click',function(){
+  if(confirm('Apagar as escolhas salvas (aparência e último número)?')){try{localStorage.removeItem(KEY)}catch(e){}store.tema='auto';store.modo='col';store.linha=1;store.ult='1/7';tema('auto');linhaSet(1);syncCtl()}
+});
+Array.prototype.forEach.call(document.querySelectorAll('[data-close]'),function(b){b.addEventListener('click',fechar)});
+if(window.ResizeObserver)new ResizeObserver(resize).observe($('fitaBox'));
+window.addEventListener('resize',resize);
+
+/* início */
+tema(store.tema);linhaSet(store.linha);syncCtl();resize();
+(function(){
+  var t=store.ult,ok=false;
+  if(t==='pad1'||t==='pad2'){loadKey(t);ok=true;$('inp').value=t==='pad1'?'0,1010010001…':'0,123456789101112…'}
+  else{ok=loadText(t);if(ok)$('inp').value=t}
+  if(!ok){loadText('1/7');$('inp').value='1/7'}
+})();
+requestAnimationFrame(loop);
+})();
+</script>
+</body>
+</html>
