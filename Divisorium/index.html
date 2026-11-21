@@ -60,6 +60,7 @@ button:focus-visible{outline:calc(var(--u)*2) solid var(--accent);outline-offset
 #eq.col{flex:none;width:calc(var(--u)*108);flex-direction:column;align-items:flex-start;justify-content:center;gap:calc(var(--u)*5);font-size:calc(var(--u)*21)}
 #eq b{font-weight:800}
 #eq .res{color:var(--accent)}
+.bar{text-decoration:overline;text-decoration-thickness:calc(var(--u)*2);text-underline-offset:0}
 #eq .res.xs{font-size:calc(var(--u)*13)}
 .opb,.rsb,.rs{display:inline-flex;align-items:center;gap:calc(var(--u)*4);text-align:left;border-radius:calc(var(--u)*8);padding:calc(var(--u)*1) calc(var(--u)*4);font-size:inherit;line-height:1.1}
 .opb em,.rsb em{font-style:normal;font-size:calc(var(--u)*10);color:var(--muted)}
@@ -521,7 +522,7 @@ function notacao(remsAll,digs){
   for(var j=1;j<remsAll.length;j++){
     for(var i=0;i<j;i++){
       if(remsAll[i]===remsAll[j]){
-        return {txt:digs[0]+','+digs.slice(1,i+1).join('')+'('+digs.slice(i+1,j+1).join('')+')',
+        return {txt:digs[0]+','+digs.slice(1,i+1).join('')+'<span class="bar">'+digs.slice(i+1,j+1).join('')+'</span>',
                 per:digs.slice(i+1,j+1).join(''),resto:remsAll[j]};
       }
     }
