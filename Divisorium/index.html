@@ -150,6 +150,7 @@ button:focus-visible{outline:calc(var(--u)*2) solid var(--accent);outline-offset
 .sheet h2{margin:0;font-size:calc(var(--u)*22);text-align:center}
 .blk{background:var(--panel);border:calc(var(--u)*2) solid var(--line);border-radius:calc(var(--u)*10);padding:calc(var(--u)*8) calc(var(--u)*10)}
 .blk h3{margin:0 0 calc(var(--u)*4);font-size:calc(var(--u)*13);color:var(--accent)}
+.blk .seg+h3{margin-top:calc(var(--u)*5)}
 .blk ol{margin:0;padding-left:calc(var(--u)*18);font-size:calc(var(--u)*12.5);line-height:1.35}
 .blk ol li+li{margin-top:calc(var(--u)*3)}
 .blk .seg{height:calc(var(--u)*34)}
@@ -229,11 +230,11 @@ button:focus-visible{outline:calc(var(--u)*2) solid var(--accent);outline-offset
     <div class="blk">
       <h3>Como jogar</h3>
       <ol>
-        <li>As bolinhas do dividendo (esquerda) são repartidas em grupos do tamanho do divisor.</li>
+        <li>As bolinhas do dividendo são repartidas em grupos do tamanho do divisor.</li>
         <li>Toque em “Formar grupo”: o grupo vai para a malha do quociente. O que sobra no fim é o resto.</li>
-        <li>Troque entre linhas e colunas: 5 × 7 e 7 × 5 dão o mesmo total.</li>
-        <li>Nas dízimas, o resto vai para o banco e vira 10 vezes mais peças da casa seguinte (1 unidade = 10 décimos). O quadro de ordens guarda os dígitos.</li>
-        <li>Toque na conta (8 ÷ 5) para ver a fração; toque no resultado para trocar a forma.</li>
+        <li>Linhas ou colunas: 5 × 7 e 7 × 5 dão o mesmo total.</li>
+        <li>Nas dízimas, o resto vai para o banco e vira 10 vezes mais peças da casa seguinte. O quadro guarda os dígitos.</li>
+        <li>Toque na conta para ver a fração; toque no resultado para trocar a forma.</li>
       </ol>
     </div>
     <div class="blk">
@@ -242,6 +243,12 @@ button:focus-visible{outline:calc(var(--u)*2) solid var(--accent);outline-offset
         <button data-t="auto">Automático</button>
         <button data-t="light">Claro</button>
         <button data-t="dark">Escuro</button>
+      </div>
+      <h3>Escrita da dízima periódica</h3>
+      <div class="seg" id="segNot">
+        <button data-n="0">Barra</button>
+        <button data-n="1">Parênteses</button>
+        <button data-n="2">Reticências</button>
       </div>
     </div>
     <button class="ghost" id="btnZerar">Apagar meu progresso nas fases</button>
@@ -268,7 +275,7 @@ var PH=[
 
 /* ---------- progresso guardado ---------- */
 var KEY='divisorium.v1';
-var store={feitas:PH.map(function(){return 0}),tema:'auto',fase:0};
+var store={feitas:PH.map(function(){return 0}),tema:'auto',fase:0,notac:0};
 try{
   var raw=localStorage.getItem(KEY);
   if(raw){
@@ -280,6 +287,7 @@ try{
       store.feitas=f;
     }
     if(o&&['auto','light','dark'].indexOf(o.tema)>=0)store.tema=o.tema;
+    if(o&&(o.notac===0||o.notac===1||o.notac===2))store.notac=o.notac;
     if(o&&o.fase>=0&&o.fase<PH.length)store.fase=o.fase|0;
   }
 }catch(e){}
@@ -522,8 +530,11 @@ function notacao(remsAll,digs){
   for(var j=1;j<remsAll.length;j++){
     for(var i=0;i<j;i++){
       if(remsAll[i]===remsAll[j]){
-        return {txt:digs[0]+','+digs.slice(1,i+1).join('')+'<span class="bar">'+digs.slice(i+1,j+1).join('')+'</span>',
-                per:digs.slice(i+1,j+1).join(''),resto:remsAll[j]};
+        var A=digs.slice(1,i+1).join(''),P=digs.slice(i+1,j+1).join(''),tx;
+        if(store.notac===1)tx=digs[0]+','+A+'('+P+')';
+        else if(store.notac===2){var q='',n=0;while(n<2||(A.length+q.length)<6){q+=P;n++}tx=digs[0]+','+A+q+'…'}
+        else tx=digs[0]+','+A+'<span class="bar">'+P+'</span>';
+        return {txt:tx,per:P,resto:remsAll[j]};
       }
     }
   }
@@ -711,6 +722,11 @@ function iniciarFase(i){
   if(PH[i].livre){S.N0=8;S.d=5}
   fechar();novaRodada();
 }
+function notac(n){
+  store.notac=n;save();
+  Array.prototype.forEach.call($('segNot').children,function(b){b.classList.toggle('on',+b.dataset.n===n)});
+  if(S.N0)atualizar();
+}
 function tema(t){
   store.tema=t;save();
   document.documentElement.setAttribute('data-theme',t);
@@ -739,6 +755,7 @@ document.addEventListener('click',function(e){
 });
 $('btnFases').addEventListener('click',abrirFases);
 $('btnMenu').addEventListener('click',function(){mostrar('sheetMenu')});
+$('segNot').addEventListener('click',function(e){var n=e.target.dataset&&e.target.dataset.n;if(n!==undefined)notac(+n)});
 $('segTema').addEventListener('click',function(e){var t=e.target.dataset&&e.target.dataset.t;if(t)tema(t)});
 $('btnZerar').addEventListener('click',function(){
   if(window.confirm('Apagar o progresso de todas as fases neste aparelho?')){store.feitas=PH.map(function(){return 0});save()}
@@ -748,7 +765,7 @@ document.addEventListener('keydown',function(e){if(e.key==='Escape')fechar()});
 if(window.ResizeObserver){new ResizeObserver(function(){relayout(true)}).observe($('main'))}
 window.addEventListener('resize',function(){relayout(true)});
 
-tema(store.tema);
+tema(store.tema);notac(store.notac);
 requestAnimationFrame(function(){iniciarFase(store.fase)});
 
 /* usado só nos testes automáticos */
