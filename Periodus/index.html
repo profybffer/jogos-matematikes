@@ -107,6 +107,41 @@ button:focus-visible,input:focus-visible{outline:calc(var(--u)*2) solid var(--ac
 .ex .n{flex:none;min-width:calc(var(--u)*70);font-size:calc(var(--u)*16);font-weight:800;color:var(--accent)}
 .ex .t{flex:1;min-width:0;font-size:calc(var(--u)*12);color:var(--muted);line-height:1.3}
 #listaNum{display:flex;flex-direction:column;gap:calc(var(--u)*6)}
+
+/* abas e vistas */
+.view{flex:1;min-height:0;display:flex;flex-direction:column;gap:calc(var(--u)*5)}
+#tabs{flex:none;height:calc(var(--u)*32);padding:calc(var(--u)*2.5)}
+.dh{flex:none;padding:calc(var(--u)*5) calc(var(--u)*8);display:flex;flex-direction:column;gap:calc(var(--u)*4);align-items:center}
+.dh .t{font-size:calc(var(--u)*12.5);font-weight:800;color:var(--muted);text-align:center}
+.rs{display:flex;flex-wrap:wrap;gap:calc(var(--u)*3);justify-content:center}
+.rs i{font-style:normal;min-width:calc(var(--u)*22);height:calc(var(--u)*20);padding:0 calc(var(--u)*3);border:calc(var(--u)*1.5) solid var(--line);border-radius:calc(var(--u)*10);font-size:calc(var(--u)*10.5);font-weight:700;display:flex;align-items:center;justify-content:center;color:var(--muted)}
+.rs i.seen{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+.rs i.rep{background:var(--ok);border-color:var(--ok);color:#fff}
+.lst{flex:1;min-height:calc(var(--u)*80);overflow:auto;padding:calc(var(--u)*4) calc(var(--u)*5)}
+.rw{display:grid;grid-template-columns:calc(var(--u)*58) 1fr calc(var(--u)*40) calc(var(--u)*50);align-items:center;gap:calc(var(--u)*4);padding:calc(var(--u)*3) calc(var(--u)*6);border-radius:calc(var(--u)*8);font-size:calc(var(--u)*13);font-weight:700;font-variant-numeric:tabular-nums;border:calc(var(--u)*2) solid transparent}
+.rw.hd{position:sticky;top:calc(var(--u)*-4);background:var(--panel);color:var(--muted);font-size:calc(var(--u)*10.5);z-index:1}
+.rw .q{font-size:calc(var(--u)*19);font-weight:800;text-align:center}
+.rw .c{color:var(--muted);white-space:nowrap;font-size:calc(var(--u)*11.5)}
+.rw .rr{text-align:center}
+.rw.per{background:var(--soft)}
+.rw.rep{border-color:var(--accent)}
+.rw.end{border-color:var(--ok)}
+.rw.dots{display:block;text-align:center;color:var(--muted);font-weight:600}
+.none{flex:1;display:flex;align-items:center;justify-content:center;padding:calc(var(--u)*14);text-align:center;color:var(--muted);font-size:calc(var(--u)*13);line-height:1.4}
+.ap{display:grid;grid-template-columns:calc(var(--u)*34) 1fr auto 1fr;gap:calc(var(--u)*5);align-items:center;padding:calc(var(--u)*3) calc(var(--u)*4);font-size:calc(var(--u)*13);font-weight:700;font-variant-numeric:tabular-nums}
+.ap .k{color:var(--muted);font-size:calc(var(--u)*11)}
+.ap .lo{text-align:right}
+.ap .lo b{color:var(--accent)}
+.ap .mid{color:var(--muted);font-size:calc(var(--u)*11)}
+.ap .sqr{grid-column:2 / 5;font-size:calc(var(--u)*10.5);color:var(--muted);font-weight:600;text-align:center}
+.ap.hd{color:var(--muted);font-size:calc(var(--u)*10.5)}
+.hh{margin:calc(var(--u)*8) calc(var(--u)*2) calc(var(--u)*4);font-size:calc(var(--u)*11.5);font-weight:800;color:var(--accent);line-height:1.3}
+.fr{display:grid;grid-template-columns:calc(var(--u)*84) 1fr;grid-template-rows:auto auto;gap:0 calc(var(--u)*6);text-align:left;width:100%;border:calc(var(--u)*2) solid var(--line);border-radius:calc(var(--u)*10);padding:calc(var(--u)*4) calc(var(--u)*8);margin-bottom:calc(var(--u)*4);background:var(--bg)}
+.fr:active{background:var(--soft)}
+.fr .f{grid-row:1 / 3;align-self:center;font-size:calc(var(--u)*15);font-weight:800}
+.fr .dc{font-size:calc(var(--u)*13);font-weight:700;color:var(--muted);font-variant-numeric:tabular-nums;white-space:nowrap;overflow:hidden}
+.fr .dc b{color:var(--accent)}
+.fr .pp{font-size:calc(var(--u)*10.5);color:var(--muted)}
 </style>
 </head>
 <body>
@@ -123,8 +158,15 @@ button:focus-visible,input:focus-visible{outline:calc(var(--u)*2) solid var(--ac
   </form>
   <div id="chips"></div>
 
+  <div class="seg" id="tabs" role="tablist">
+    <button data-v="div">Divisão</button>
+    <button data-v="apx">Aproximação</button>
+    <button data-v="fita">Fita</button>
+  </div>
+
   <div id="num" class="panel"><div id="numT"></div></div>
 
+  <div id="viewFita" class="view" hidden>
   <div id="fitaBox" class="panel">
     <canvas id="cv" role="img" aria-label="Fita dos algarismos"></canvas>
     <div id="vazio">Digite uma fração ou um número, ou toque em “Números” para escolher um exemplo.</div>
@@ -149,6 +191,37 @@ button:focus-visible,input:focus-visible{outline:calc(var(--u)*2) solid var(--ac
     <button class="btn" id="rst">⟲ Do início</button>
   </div>
 
+  </div>
+
+  <div id="viewDiv" class="view">
+    <div id="dvNone" class="none panel" hidden></div>
+    <div id="dvBody" class="view">
+      <div class="dh panel"><button class="btn" id="dvBack" type="button" hidden style="flex:none;width:auto;height:calc(var(--u)*26);padding:0 calc(var(--u)*12)"></button><div class="t" id="dvT"></div><div class="rs" id="dvRs"></div><div class="t" id="dvC"></div></div>
+      <div class="lst panel" id="dvL"></div>
+      <div class="row">
+        <button class="btn" id="dvPasso">Passo ▶</button>
+        <button class="btn" id="dvAuto">▶ Auto</button>
+        <button class="btn" id="dvVel">⏩ ×1</button>
+      </div>
+      <div class="row">
+        <button class="btn main" id="dvAte">Até fechar</button>
+        <button class="btn" id="dvRst">⟲ Reiniciar</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="viewApx" class="view" hidden>
+    <div id="apxNone" class="none panel" hidden></div>
+    <div id="apxBody" class="view">
+      <div class="lst panel" id="apL"></div>
+      <div class="row">
+        <button class="btn" id="apPasso">Próximo algarismo</button>
+        <button class="btn" id="apAuto">▶ Auto</button>
+        <button class="btn" id="apAll">Mostrar tudo</button>
+      </div>
+    </div>
+  </div>
+
   <div id="msg" class="panel" aria-live="polite"></div>
 
   <section id="sheetNum" class="sheet" hidden>
@@ -162,14 +235,14 @@ button:focus-visible,input:focus-visible{outline:calc(var(--u)*2) solid var(--ac
     <div class="blk">
       <h3>Como jogar</h3>
       <ol>
-        <li>Digite uma fração (1/7), uma raiz (√2, raiz de 7), π, e, φ ou um decimal (0,25). Os algarismos vão aparecendo na fita.</li>
-        <li>A fita é enrolada em linhas. Mexa na <b>largura</b> até as colunas ficarem iguais, formando listras.</li>
-        <li>Se as listras aparecem e duram, as cópias se juntam num só bloco com a <b>barra em cima</b>: é o período.</li>
-        <li>Se nenhuma largura segura as listras, a dízima não é periódica.</li>
+        <li>Digite uma fração (1/7), uma raiz (√2, raiz de 7), π, e, φ ou um decimal (0,25).</li>
+        <li><b>Divisão</b>, para frações: faça a conta passo a passo e acompanhe os restos. Se um resto volta, o período fecha. Se o resto for 0, o número termina.</li>
+        <li><b>Aproximação</b>, para números como √2 e π: prenda o número entre dois vizinhos, casa a casa, e veja as frações que se parecem com ele. Toque numa para abrir a divisão dela.</li>
+        <li><b>Fita</b>: os algarismos em linhas. Mexa na largura até as colunas formarem listras.</li>
       </ol>
     </div>
     <div class="blk">
-      <h3>O que a fita mostra, e o que não prova</h3>
+      <h3>O que olhar não prova</h3>
       <p>Olhar uma parte dos algarismos dá uma pista, não uma prova. Uma fração sempre repete, mesmo que o período seja enorme (tente 1/9973). E ter um padrão não é ter período (tente 0,1010010001…). O que prova que √2 ou π não repetem é a Matemática, não a fita.</p>
     </div>
     <div class="blk">
@@ -292,10 +365,47 @@ function parse(raw){
   return {ok:false,msg:'Não entendi. Tente 1/7, √2, raiz de 7, π, e, φ ou 0,25.'};
 }
 
+
+function divStart(n,d){
+  var st={n:n,d:d,ip:Math.floor(n/d),r:[n%d],q:[],seen:new Int32Array(d).fill(-1),closed:false,term:false,pre:0,per:0,j:-1};
+  if(st.r[0]===0){st.closed=true;st.term=true;st.pre=0;st.per=1}else st.seen[st.r[0]]=0;
+  return st;
+}
+function divStep(st){
+  if(st.closed)return false;
+  var r=st.r[st.r.length-1],R=r*10,q=Math.floor(R/st.d),r2=R%st.d;
+  st.q.push(q);st.r.push(r2);
+  if(r2===0){st.closed=true;st.term=true;st.pre=st.q.length;st.per=1}
+  else if(st.seen[r2]>=0){st.closed=true;st.term=false;st.j=st.seen[r2];st.pre=st.j;st.per=st.q.length-st.j}
+  else st.seen[r2]=st.q.length;
+  return true;
+}
+function fmtBig(I,k){var t=I.toString();while(t.length<=k)t='0'+t;return k?t.slice(0,t.length-k)+','+t.slice(t.length-k):t}
+function bounds(x,k){
+  var t=x.ip;for(var i=0;i<k;i++)t+=x.dig(i);
+  var lo=BigInt(t);
+  return {lo:fmtBig(lo,k),hi:fmtBig(lo+1n,k),loI:lo,hiI:lo+1n};
+}
+function sqStr(I,k){return fmtBig(I*I,2*k)}
+function convergents(x,maxN,maxD,maxCount){
+  if(!x.N)return [];
+  var use=Math.min(x.N,1500),t=x.ip;
+  for(var i=0;i<use;i++)t+=x.dig(i);
+  var num=BigInt(t),den=10n**BigInt(use),hm1=1n,hm2=0n,km1=0n,km2=1n,out=[],MN=BigInt(maxN),MD=BigInt(maxD);
+  while(den!==0n&&out.length<maxCount){
+    var a=num/den,h=a*hm1+hm2,kk=a*km1+km2;
+    if(kk>MD||h>MN)break;
+    out.push({n:Number(h),d:Number(kk)});
+    hm2=hm1;hm1=h;km2=km1;km1=kk;
+    var rest=num-a*den;num=den;den=rest;
+  }
+  return out;
+}
+
 function tailRun(x,W,n){var L=0;for(var i=n-W-1;i>=0;i--){if(x.dig(i)===x.dig(i+W))L++;else break}return L}
 function persists(x,W,n){return tailRun(x,W,n)>=Math.max(2*W,24,Math.floor(n/2))}
 
-return {gcd:gcd,isqrt:isqrt,sqrtDigits:sqrtDigits,piDigits:piDigits,eDigits:eDigits,phiDigits:phiDigits,
+return {divStart:divStart,divStep:divStep,bounds:bounds,sqStr:sqStr,convergents:convergents,gcd:gcd,isqrt:isqrt,sqrtDigits:sqrtDigits,piDigits:piDigits,eDigits:eDigits,phiDigits:phiDigits,
   buildRac:buildRac,mkKey:mkKey,mkSqrt:mkSqrt,parse:parse,tailRun:tailRun,persists:persists,NIRR:NIRR};
 })();
 /*ENGINE_END*/
@@ -327,6 +437,8 @@ var PALRGB=PAL.map(function(h){return [parseInt(h.substr(1,2),16),parseInt(h.sub
 var SPEEDS=[10,40,200,1000],SPLAB=['×1','×4','×20','×100'];
 var REVCAP=120000;
 
+var BACK=null;
+var V='div',M={div:['',false],apx:['',false],fita:['',false]},D=null,A=null;
 var S={x:null,W:7,rev:0,play:true,spd:0,col:false,ct:0,cs:0,sweep:false,sweepLim:60,sweepTimer:0,fim:false,
   dirty:true,lastN:-1,last:0,numHtml:''};
 
@@ -339,7 +451,9 @@ function revCap(){return S.x.kind==='rac'?REVCAP:S.x.N}
 function ease(t){return t<.5?2*t*t:1-Math.pow(-2*t+2,2)/2}
 
 /* ---------- mensagens ---------- */
-function setMsg(h,ok){var m=$('msg');m.innerHTML=h;m.className='panel'+(ok?' ok':'')}
+function paintMsg(h,ok){var m=$('msg');m.innerHTML=h;m.className='panel'+(ok?' ok':'')}
+function setMsg(h,ok){M.fita=[h,ok];if(V==='fita')paintMsg(h,ok)}
+function msgV(v,h,ok){M[v]=[h,ok];if(V===v)paintMsg(h,ok)}
 function msgBusca(){
   if(!S.x)return 'Digite um número e toque em <b>Ver</b>.';
   return 'Mexa na <b>largura</b> até as colunas ficarem iguais, formando <b>listras</b>. Se elas durarem, as cópias vão se juntar.';
@@ -379,6 +493,9 @@ function setNumber(x,txt){
   if(txt!==undefined){store.ult=txt;save()}
   setMsg(msgBusca());
   S.dirty=true;
+  D=null;A=null;BACK=null;
+  if(V!=='fita')V=(x.kind==='rac')?'div':'apx';
+  setView(V);
 }
 function loadText(t){
   var r=E.parse(t);
@@ -588,6 +705,8 @@ function updateNum(){
 /* ---------- laço principal ---------- */
 function loop(ts){
   var dt=Math.min(.1,(ts-(S.last||ts))/1000);S.last=ts;
+  if(V==='div'){tickDiv(dt);requestAnimationFrame(loop);return}
+  if(V==='apx'){tickApx(dt);requestAnimationFrame(loop);return}
   if(S.x){
     var cap=revCap();
     if(S.play&&!S.col&&S.rev<cap){
@@ -606,6 +725,160 @@ function loop(ts){
     if(S.dirty){S.dirty=false;draw();updateNum()}
   }
   requestAnimationFrame(loop);
+}
+
+
+/* ---------- abas ---------- */
+var VIEWS={div:'viewDiv',apx:'viewApx',fita:'viewFita'};
+function paintNum(h){if(h!==S.numHtml){S.numHtml=h;$('numT').innerHTML=h}}
+function numLab(x){return /^pad/.test(x.key)?'':'<span class="lab">'+esc(x.label)+' =</span> '}
+function setView(v){
+  V=v;
+  for(var k in VIEWS)$(VIEWS[k]).hidden=(k!==v);
+  Array.prototype.forEach.call($('tabs').children,function(b){b.classList.toggle('on',b.dataset.v===v)});
+  S.numHtml='';
+  if(v==='div')renderDiv();
+  else if(v==='apx')renderApx();
+  else{S.dirty=true;resize();updateNum()}
+  paintMsg(M[v][0],M[v][1]);
+}
+
+/* ---------- divisão ---------- */
+var DSPD=[2,8,40],DLAB=['×1','×4','×20'];
+function bar(t){return '<span class="bar">'+t+'</span>'}
+function divInit(){var x=S.x;D={x:x,st:Engine.divStart(x.n,x.d),play:false,spd:0,acc:0}}
+function divCnt(){var st=D.st;return st.closed?st.r.length-1:st.r.length}
+function divNum(){
+  var x=D.x,st=D.st,ds=st.q.join(''),h=numLab(x)+st.ip;
+  var cut=function(t){return t.length>12?t.slice(0,12)+'…':t};
+  if(!st.closed)return h+','+(ds.length>12?ds.slice(0,12):ds)+'…';
+  if(st.term)return h+','+cut(ds)+bar('0');
+  var pre=ds.slice(0,st.pre),per=ds.slice(st.pre);
+  return h+','+cut(pre)+bar(per.length>12?per.slice(0,12):per)+(per.length>12?'…':'');
+}
+function rwHtml(k){
+  var st=D.st,L=st.q.length,per=false,rep=false;
+  if(st.closed&&!st.term){per=(k>=st.j+1&&k<=L);rep=(k===st.j||k===L)}
+  var end=st.closed&&st.term&&k===L&&L>0;
+  var cls='rw'+(per?' per':'')+(rep?' rep':'')+(end?' end':'');
+  if(k===0)return '<div class="'+cls+'"><span class="c">início</span><span>'+st.n+' ÷ '+st.d+'</span><span class="q">'+st.ip+'</span><span class="rr">'+st.r[0]+'</span></div>';
+  return '<div class="'+cls+'"><span class="c">passo '+k+'</span><span>'+(st.r[k-1]*10)+' ÷ '+st.d+'</span><span class="q">'+st.q[k-1]+'</span><span class="rr">'+st.r[k]+'</span></div>';
+}
+function divPaint(){
+  var x=D.x,st=D.st,L=st.q.length,d=st.d,k;
+  $('dvT').innerHTML=st.n+' ÷ '+d+(x.label!==(st.n+'/'+d)?' <span style="font-weight:600">(de '+esc(x.label)+')</span>':'');
+  var rs='';
+  if(d>1&&d<=31){
+    var rep=(st.closed&&!st.term)?st.r[L]:-1;
+    for(k=1;k<d;k++)rs+='<i class="'+(k===rep?'rep':(st.seen[k]>=0?'seen':''))+'">'+k+'</i>';
+  }
+  $('dvRs').innerHTML=rs;
+  $('dvC').textContent=d>1?'Restos diferentes vistos: '+divCnt()+' de '+(d-1):'Só existe o resto 0.';
+  var h='<div class="rw hd"><span></span><span>conta</span><span class="rr">dígito</span><span class="rr">resto</span></div>';
+  if(L<=60){for(k=0;k<=L;k++)h+=rwHtml(k)}
+  else{for(k=0;k<5;k++)h+=rwHtml(k);h+='<div class="rw dots">… '+(L-44)+' passos … </div>';for(k=L-39;k<=L;k++)h+=rwHtml(k)}
+  $('dvL').innerHTML=h;
+  paintNum(divNum());
+  $('dvPasso').disabled=st.closed;$('dvAuto').disabled=st.closed;
+  $('dvAuto').textContent=D.play?'⏸ Pausa':'▶ Auto';
+  $('dvVel').textContent='⏩ '+DLAB[D.spd];
+}
+function divAfter(){
+  var st=D.st,L=st.q.length,d=st.d,n=st.n;
+  if(st.closed&&st.term&&L===0){msgV('div','<b>Resto 0 logo no início:</b> a divisão é exata ('+n+' ÷ '+d+' = '+st.ip+'). Número inteiro também é racional, e fica com o zero barrado.',true);return}
+  if(st.closed&&st.term){msgV('div','<b>Resto 0!</b> A divisão acabou: depois disso só vêm zeros, que ficam com a <b>barra em cima</b>. Número que termina também é racional.',true);return}
+  if(st.closed){
+    var per=st.q.slice(st.pre).join('');
+    msgV('div','<b>O resto '+st.r[L]+' já tinha aparecido '+(st.j===0?'no início':'no passo '+st.j)+'!</b> A conta seguinte depende só do resto, então a partir daqui tudo se repete. O <b>período</b> tem '+st.per+' '+plural(st.per,'algarismo','algarismos')+(st.per<=20?' ('+per+')':'')+' e recebe a barra em cima.'+(st.pre>0?' Antes dele '+(st.pre===1?'há 1 algarismo que não repete':'há '+st.pre+' que não repetem')+': dízima composta.':'')+(st.per>100?' O período é enorme, mas tinha que fechar: só existem '+(d-1)+' restos possíveis.':''),true);
+    return;
+  }
+  if(L===0){msgV('div','Dividindo por '+d+', os restos só podem ser 0, 1, …, '+(d-1)+'. Por isso, em no máximo '+d+' passos aparece o resto 0 (termina) ou um resto volta (repete). Toque em <b>Passo</b>.');return}
+  msgV('div','<b>Passo '+L+'</b>: '+(st.r[L-1]*10)+' ÷ '+d+' dá <b>'+st.q[L-1]+'</b> e sobra <b>'+st.r[L]+'</b>. É um resto novo: já vimos '+divCnt()+' de '+(d-1)+'.');
+}
+function divRender(){divPaint();divAfter();var l=$('dvL');l.scrollTop=l.scrollHeight}
+function renderDiv(){
+  var x=S.x,has=!!x&&x.kind==='rac';
+  $('dvBody').hidden=!has;$('dvNone').hidden=has;
+  $('dvBack').hidden=!BACK;
+  if(BACK)$('dvBack').textContent='‹ voltar a '+(BACK==='pad1'?'0,1010010001…':BACK==='pad2'?'0,123456789101112…':BACK);
+  if(!has){
+    $('dvNone').innerHTML=x?'<span><b>'+esc(x.label)+'</b> não é uma fração de inteiros, então nenhuma divisão o gera. Veja a aba <b>Aproximação</b>: lá há frações que se parecem com ele, e você pode abrir a divisão de cada uma.</span>':'Digite um número.';
+    paintNum(x?numLab(x):'');
+    msgV('div','Toda fração tem uma divisão que a gera. Números irracionais não têm.');
+    return;
+  }
+  if(!D||D.x!==x)divInit();
+  divRender();
+}
+function tickDiv(dt){
+  if(!D||!D.play||D.st.closed)return;
+  D.acc+=dt*DSPD[D.spd];
+  var moved=false;
+  while(D.acc>=1&&!D.st.closed){D.acc-=1;Engine.divStep(D.st);moved=true}
+  if(D.st.closed)D.play=false;
+  if(moved)divRender();
+}
+
+/* ---------- aproximação ---------- */
+var KMAX=12;
+function cvInfo(c,x){
+  var r=Engine.buildRac(c.n,c.d,c.n+'/'+c.d),term=(r.per===1&&r.dig(r.pre)===0);
+  var shown=term?r.pre:12,ds='',m=0,i;
+  for(i=0;i<shown;i++)ds+=r.dig(i);
+  if(r.ip===x.ip){while(m<shown&&r.dig(m)===x.dig(m))m++}
+  var h=r.ip+(shown?',':'')+(m?'<b>'+ds.slice(0,m)+'</b>':'')+ds.slice(m)+(term?'':'…');
+  return {n:c.n,d:c.d,h:h,lab:term?'termina':'repete a cada '+r.per+(r.per===1?' algarismo':' algarismos')};
+}
+function apxInit(){
+  var x=S.x;
+  A={x:x,k:0,play:false,acc:0,cv:Engine.convergents(x,999999,99999,12).map(function(c){return cvInfo(c,x)})};
+}
+function apRow(k){
+  var x=A.x,b=Engine.bounds(x,k),lo=b.lo,pad=/^pad/.test(x.key);
+  var loH=k?lo.slice(0,-1)+'<b>'+lo.slice(-1)+'</b>':lo;
+  var h='<div class="ap" id="ap'+k+'"><span class="k">'+k+'</span><span class="lo">'+loH+'</span><span class="mid">&lt; '+(pad?'x':esc(x.label))+' &lt;</span><span>'+b.hi+'</span>';
+  var m=/^sqrt(\d+)$/.exec(x.key);
+  if(m&&k<=4)h+='<div class="sqr">ao quadrado: '+Engine.sqStr(b.loI,k)+' &lt; '+m[1]+' &lt; '+Engine.sqStr(b.hiI,k)+'</div>';
+  return h+'</div>';
+}
+function apxRender(scroll){
+  var x=A.x,k,h='<div class="ap hd"><span>casas</span><span class="lo">fica acima de</span><span></span><span>e abaixo de</span></div>';
+  for(k=0;k<=A.k;k++)h+=apRow(k);
+  if(A.k>=KMAX){
+    h+='<div class="hh" id="apH">'+(x.key==='phi'?'Frações que se parecem com φ: são as razões de Fibonacci (1/1, 2/1, 3/2, 5/3, 8/5…)':'Frações que se parecem com '+(/^pad/.test(x.key)?'ele':esc(x.label)))+'. Em destaque, os algarismos que coincidem. Toque numa para ver a divisão.</div>';
+    A.cv.forEach(function(c){
+      h+='<button class="fr" type="button" data-f="'+c.n+'/'+c.d+'"><span class="f">'+c.n+'/'+c.d+'</span><span class="dc">'+c.h+'</span><span class="pp">'+c.lab+'</span></button>';
+    });
+  }
+  $('apL').innerHTML=h;
+  var ds='';for(k=0;k<A.k;k++)ds+=x.dig(k);
+  paintNum(numLab(x)+x.ip+','+ds+'…');
+  $('apPasso').disabled=A.k>=KMAX;$('apAuto').disabled=A.k>=KMAX;
+  $('apAuto').textContent=A.play?'⏸ Pausa':'▶ Auto';
+  $('apAll').disabled=A.k>=KMAX;
+  var b=Engine.bounds(x,A.k);
+  if(A.k===0)msgV('apx','Vamos prender <b>'+(/^pad/.test(x.key)?'o número':esc(x.label))+'</b> entre dois vizinhos, uma casa decimal de cada vez. Toque em <b>Próximo algarismo</b>.');
+  else if(A.k<KMAX)msgV('apx','<b>'+b.lo+' &lt; x &lt; '+b.hi+'</b>. Cada passo acrescenta um algarismo e a conta <b>nunca termina</b>.');
+  else msgV('apx','E assim, sem fim. Aqui não existe uma lista curta de restos que obrigue a repetir, como na divisão. Mas olhar não prova nada: '+x.why+' Abaixo estão frações que se parecem com ele; toque numa para ver que a divisão dela repete.');
+  var e=(A.k>=KMAX&&scroll)?$('apH'):$('ap'+A.k);
+  if(scroll&&e)e.scrollIntoView({block:'nearest'});
+}
+function renderApx(){
+  var x=S.x,has=!!x&&x.kind==='irr';
+  $('apxBody').hidden=!has;$('apxNone').hidden=has;
+  if(!has){
+    $('apxNone').innerHTML=x?'<span><b>'+esc(x.label)+'</b> é uma fração, então não precisa de aproximação: a aba <b>Divisão</b> mostra o número inteiro, casa por casa.</span>':'Digite um número.';
+    paintNum(x?numLab(x):'');
+    msgV('apx','A aproximação serve para números que não são frações, como √2, π, e e φ.');
+    return;
+  }
+  if(!A||A.x!==x)apxInit();
+  apxRender(false);
+}
+function tickApx(dt){
+  if(!A||!A.play||A.k>=KMAX)return;
+  A.acc+=dt*1.2;
+  if(A.acc>=1){A.acc-=1;A.k++;if(A.k>=KMAX)A.play=false;apxRender(true)}
 }
 
 /* ---------- eventos ---------- */
@@ -651,6 +924,26 @@ $('dica').addEventListener('click',function(){
 });
 $('varrer').addEventListener('click',function(){if(S.sweep)stopSweep();else startSweep()});
 $('modo').addEventListener('click',function(){store.modo=store.modo==='col'?'cor':'col';save();syncCtl();S.dirty=true});
+
+
+$('tabs').addEventListener('click',function(e){var v=e.target.dataset&&e.target.dataset.v;if(v)setView(v)});
+$('dvPasso').addEventListener('click',function(){if(D&&!D.st.closed){Engine.divStep(D.st);divRender()}});
+$('dvAuto').addEventListener('click',function(){if(D&&!D.st.closed){D.play=!D.play;divPaint()}});
+$('dvVel').addEventListener('click',function(){if(D){D.spd=(D.spd+1)%DSPD.length;divPaint()}});
+$('dvAte').addEventListener('click',function(){if(!D)return;while(!D.st.closed)Engine.divStep(D.st);D.play=false;divRender()});
+$('dvRst').addEventListener('click',function(){if(S.x&&S.x.kind==='rac'){divInit();divRender()}});
+$('apPasso').addEventListener('click',function(){if(A&&A.k<KMAX){A.k++;apxRender(true)}});
+$('apAuto').addEventListener('click',function(){if(A&&A.k<KMAX){A.play=!A.play;apxRender(false)}});
+$('apAll').addEventListener('click',function(){if(A){A.k=KMAX;A.play=false;apxRender(true)}});
+$('apL').addEventListener('click',function(e){
+  var b=e.target.closest&&e.target.closest('.fr');
+  if(b){var prev=store.ult,f=b.dataset.f;$('inp').value=f;loadText(f);BACK=prev;renderDiv();paintMsg(M.div[0],M.div[1])}
+});
+function restore(t){
+  if(t==='pad1'||t==='pad2'){$('inp').value=t==='pad1'?'0,1010010001…':'0,123456789101112…';loadKey(t)}
+  else{$('inp').value=t;loadText(t)}
+}
+$('dvBack').addEventListener('click',function(){if(BACK)restore(BACK)});
 
 /* chips e exemplos */
 var CHIPS=['1/3','1/7','1/6','1/97','√2','π'];
