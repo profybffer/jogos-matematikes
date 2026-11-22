@@ -142,6 +142,15 @@ button:focus-visible,input:focus-visible{outline:calc(var(--u)*2) solid var(--ac
 .fr .dc{font-size:calc(var(--u)*13);font-weight:700;color:var(--muted);font-variant-numeric:tabular-nums;white-space:nowrap;overflow:hidden}
 .fr .dc b{color:var(--accent)}
 .fr .pp{font-size:calc(var(--u)*10.5);color:var(--muted)}
+.why{background:var(--panel);border:calc(var(--u)*2) solid var(--line);border-radius:calc(var(--u)*10);padding:calc(var(--u)*8) calc(var(--u)*10);font-size:calc(var(--u)*13);line-height:1.4}
+.why.now{border-color:var(--accent)}
+.why .n{display:inline-flex;align-items:center;justify-content:center;width:calc(var(--u)*20);height:calc(var(--u)*20);border-radius:50%;background:var(--accent);color:var(--accent-ink);font-size:calc(var(--u)*11.5);font-weight:800;margin-right:calc(var(--u)*6)}
+.why b{color:var(--accent)}
+.why .eqn{display:block;text-align:center;font-size:calc(var(--u)*16);font-weight:800;margin:calc(var(--u)*4) 0}
+.why .tb{display:grid;grid-template-columns:repeat(10,1fr);gap:calc(var(--u)*2);margin:calc(var(--u)*5) 0;text-align:center;font-size:calc(var(--u)*11);font-weight:700;font-variant-numeric:tabular-nums}
+.why .tb span{border-radius:calc(var(--u)*5);padding:calc(var(--u)*2) 0;background:var(--soft)}
+.why .tb .ev{background:var(--accent);color:var(--accent-ink)}
+.why .bad{color:var(--warn);font-weight:800}
 </style>
 </head>
 <body>
@@ -214,6 +223,7 @@ button:focus-visible,input:focus-visible{outline:calc(var(--u)*2) solid var(--ac
     <div id="apxNone" class="none panel" hidden></div>
     <div id="apxBody" class="view">
       <div class="lst panel" id="apL"></div>
+      <div class="row" id="apWhyRow" hidden><button class="btn main" id="apWhy">❓ Por que √2 não é uma fração?</button></div>
       <div class="row">
         <button class="btn" id="apPasso">Próximo algarismo</button>
         <button class="btn" id="apAuto">▶ Auto</button>
@@ -228,6 +238,13 @@ button:focus-visible,input:focus-visible{outline:calc(var(--u)*2) solid var(--ac
     <h2>Números</h2>
     <div id="listaNum"></div>
     <button class="big" data-close>Voltar ao jogo</button>
+  </section>
+
+  <section id="sheetWhy" class="sheet" hidden>
+    <h2>Por que √2 não é fração?</h2>
+    <div id="whyBody" style="display:flex;flex-direction:column;gap:calc(var(--u)*8)"></div>
+    <div class="row" style="margin-top:auto"><button class="btn main" id="whyNext">Próximo passo ▶</button><button class="btn" id="whyRst">⟲ Recomeçar</button></div>
+    <button class="big" data-close style="margin-top:0">Voltar ao jogo</button>
   </section>
 
   <section id="sheetMenu" class="sheet" hidden>
@@ -789,7 +806,7 @@ function divAfter(){
   if(st.closed&&st.term){msgV('div','<b>Resto 0!</b> A divisão acabou: depois disso só vêm zeros, que ficam com a <b>barra em cima</b>. Número que termina também é racional.',true);return}
   if(st.closed){
     var per=st.q.slice(st.pre).join('');
-    msgV('div','<b>O resto '+st.r[L]+' já tinha aparecido '+(st.j===0?'no início':'no passo '+st.j)+'!</b> A conta seguinte depende só do resto, então a partir daqui tudo se repete. O <b>período</b> tem '+st.per+' '+plural(st.per,'algarismo','algarismos')+(st.per<=20?' ('+per+')':'')+' e recebe a barra em cima.'+(st.pre>0?' Antes dele '+(st.pre===1?'há 1 algarismo que não repete':'há '+st.pre+' que não repetem')+': dízima composta.':'')+(st.per>100?' O período é enorme, mas tinha que fechar: só existem '+(d-1)+' restos possíveis.':''),true);
+    msgV('div','<b>O resto '+st.r[L]+' já tinha aparecido '+(st.j===0?'no início':'no passo '+st.j)+'!</b> A conta seguinte depende só do resto, então a partir daqui tudo se repete. O <b>período</b> tem '+st.per+' '+plural(st.per,'algarismo','algarismos')+(st.per<=20?' ('+per+')':'')+' e recebe a barra em cima.'+(st.pre>0?' Antes dele '+(st.pre===1?'há 1 algarismo que não repete':'há '+st.pre+' que não repetem')+': dízima composta.':'')+(st.per>100?' O período é enorme, mas tinha que fechar: só existem '+(d-1)+' restos possíveis.':'')+(st.per===1&&st.pre===0?' Foi rápido porque o primeiro resto já voltou. Tente 1/7, 1/13 ou 1/97 para ver o mesmo mecanismo com um período maior.':''),true);
     return;
   }
   if(L===0){msgV('div','Dividindo por '+d+', os restos só podem ser 0, 1, …, '+(d-1)+'. Por isso, em no máximo '+d+' passos aparece o resto 0 (termina) ou um resto volta (repete). Toque em <b>Passo</b>.');return}
@@ -866,6 +883,7 @@ function apxRender(scroll){
 function renderApx(){
   var x=S.x,has=!!x&&x.kind==='irr';
   $('apxBody').hidden=!has;$('apxNone').hidden=has;
+  $('apWhyRow').hidden=!(has&&x.key==='sqrt2');
   if(!has){
     $('apxNone').innerHTML=x?'<span><b>'+esc(x.label)+'</b> é uma fração, então não precisa de aproximação: a aba <b>Divisão</b> mostra o número inteiro, casa por casa.</span>':'Digite um número.';
     paintNum(x?numLab(x):'');
@@ -879,6 +897,33 @@ function tickApx(dt){
   if(!A||!A.play||A.k>=KMAX)return;
   A.acc+=dt*1.2;
   if(A.acc>=1){A.acc-=1;A.k++;if(A.k>=KMAX)A.play=false;apxRender(true)}
+}
+
+
+/* ---------- por que √2 não é fração ---------- */
+var WHY=null;
+function whySteps(){
+  var tb='<div class="tb">',i;
+  for(i=1;i<=10;i++)tb+='<span>'+i+'</span>';
+  for(i=1;i<=10;i++)tb+='<span class="'+(i%2===0?'ev':'')+'">'+(i*i)+'</span>';
+  tb+='</div>';
+  return [
+    'Vamos supor o contrário: <b>√2 é uma fração</b> a/b, já simplificada, ou seja, a e b <b>não têm fator comum</b> (como 3/4, e não 6/8).',
+    'Elevando ao quadrado os dois lados: a²/b² = 2, então <span class="eqn">a² = 2 · b²</span>',
+    'a² é 2 vezes alguma coisa, então <b>a² é par</b>.',
+    'Se a² é par, então <b>a é par</b>. Veja os quadrados de 1 a 10 (em roxo, os números pares):'+tb+'Quadrado de ímpar dá ímpar. Então um quadrado par só pode vir de um número par.',
+    'Sendo a par, a = 2k (k é um inteiro). Trocando na equação: <span class="eqn">(2k)² = 2 · b²  →  4k² = 2 · b²  →  b² = 2 · k²</span>',
+    'Agora <b>b² também é par</b>, e pelo mesmo motivo <b>b é par</b>.',
+    '<span class="bad">Contradição:</span> a e b são os dois pares, então têm o fator 2 em comum. Mas tínhamos dito que a/b já estava simplificada.',
+    '<b>Conclusão:</b> a suposição era impossível. √2 <b>não é uma fração</b>: é irracional: nenhuma divisão de dois inteiros o gera, e por isso os algarismos dele nunca se fecham num período. Esta prova só vale para √2; a de π é bem mais difícil (Lambert, 1761).'
+  ];
+}
+function whyRender(){
+  var st=whySteps(),h='';
+  for(var i=0;i<=WHY;i++)h+='<div class="why'+(i===WHY?' now':'')+'"><span class="n">'+(i+1)+'</span>'+st[i]+'</div>';
+  $('whyBody').innerHTML=h;
+  $('whyNext').disabled=WHY>=st.length-1;
+  var sh=$('sheetWhy');sh.scrollTop=sh.scrollHeight;
 }
 
 /* ---------- eventos ---------- */
@@ -932,6 +977,9 @@ $('dvAuto').addEventListener('click',function(){if(D&&!D.st.closed){D.play=!D.pl
 $('dvVel').addEventListener('click',function(){if(D){D.spd=(D.spd+1)%DSPD.length;divPaint()}});
 $('dvAte').addEventListener('click',function(){if(!D)return;while(!D.st.closed)Engine.divStep(D.st);D.play=false;divRender()});
 $('dvRst').addEventListener('click',function(){if(S.x&&S.x.kind==='rac'){divInit();divRender()}});
+$('apWhy').addEventListener('click',function(){WHY=0;whyRender();mostrar('sheetWhy')});
+$('whyNext').addEventListener('click',function(){if(WHY!==null&&WHY<whySteps().length-1){WHY++;whyRender()}});
+$('whyRst').addEventListener('click',function(){WHY=0;whyRender();$('sheetWhy').scrollTop=0});
 $('apPasso').addEventListener('click',function(){if(A&&A.k<KMAX){A.k++;apxRender(true)}});
 $('apAuto').addEventListener('click',function(){if(A&&A.k<KMAX){A.play=!A.play;apxRender(false)}});
 $('apAll').addEventListener('click',function(){if(A){A.k=KMAX;A.play=false;apxRender(true)}});
