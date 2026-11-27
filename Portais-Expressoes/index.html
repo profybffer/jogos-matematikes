@@ -1,0 +1,3707 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Portais das Expressões — Reinos da Energia Lógica</title>
+  <style>
+    /* =====================================================================
+       DESIGN SYSTEM — ALTO CONTRASTE, COMPACTO E RESPONSIVO
+       (Celular, PC, Projetor de Sala e Janela de Preview do Chat)
+       ===================================================================== */
+    :root {
+      --bg-deep: #0b1120;
+      --bg-main: #0f172a;
+      --bg-card: rgba(30, 41, 59, 0.92);
+      --bg-soft: #162033;
+      --border: #334155;
+      --border-light: #475569;
+
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+      --text-dim: #64748b;
+
+      --pos: #38bdf8;         /* Matéria (+) */
+      --pos-bg: rgba(56, 189, 248, 0.14);
+      --neg: #fb923c;         /* Antimatéria (−) */
+      --neg-bg: rgba(251, 146, 60, 0.14);
+      --gold: #facc15;        /* Energia Lógica / Destaque / Chaves */
+      --gold-bg: rgba(250, 204, 21, 0.15);
+
+      --delim-paren: #67e8f9; /* Parênteses ( ) */
+      --delim-brack: #a78bfa; /* Colchetes [ ] */
+      --delim-brace: #34d399; /* Chaves { } */
+
+      --mage: #c084fc;        /* Mago 1 */
+      --mage-bg: rgba(192, 132, 252, 0.16);
+      --mage-border: rgba(192, 132, 252, 0.52);
+
+      --err: #f87171;         /* Retrocesso / Erro */
+      --err-bg: rgba(248, 113, 113, 0.15);
+      --ok: #4ade80;
+      --ok-bg: rgba(74, 222, 128, 0.15);
+
+      --radius: 13px;
+      --radius-sm: 9px;
+      --shadow: 0 10px 28px rgba(0, 0, 0, 0.42);
+      --font: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html, body {
+      min-height: 100dvh;
+      font-family: var(--font);
+      background: radial-gradient(circle at top, #172554 0%, var(--bg-main) 50%, var(--bg-deep) 100%);
+      color: var(--text-main);
+      line-height: 1.38;
+      overflow-x: hidden;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* =====================================================================
+       SHELL PRINCIPAL (FLEXBOX VERTICAL)
+       ===================================================================== */
+    .app-shell {
+      width: 100%;
+      max-width: 980px;
+      min-height: 100dvh;
+      margin: 0 auto;
+      padding: clamp(6px, 1.2vh, 12px) clamp(8px, 1.6vw, 14px);
+      display: flex;
+      flex-direction: column;
+      gap: clamp(7px, 1.2vh, 11px);
+    }
+
+    /* Telas (A: Demo, B: Portais, C: Resolução) */
+    .screen {
+      display: none;
+      flex-direction: column;
+      flex: 1;
+      gap: clamp(7px, 1.2vh, 11px);
+      min-height: 0;
+    }
+
+    .screen.active {
+      display: flex;
+    }
+
+    /* Cards translúcidos */
+    .card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: clamp(10px, 1.5vh, 15px) clamp(11px, 1.8vw, 17px);
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(8px);
+    }
+
+    /* Cabeçalho compacto compartilhado */
+    .top-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 7px 12px;
+      box-shadow: var(--shadow);
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      min-width: 0;
+    }
+
+    .brand-icon {
+      width: 30px;
+      height: 30px;
+      border-radius: 9px;
+      background: linear-gradient(135deg, #0369a1, #1e3a8a);
+      border: 1.5px solid rgba(250, 204, 21, 0.55);
+      display: grid;
+      place-items: center;
+      flex-shrink: 0;
+    }
+
+    .brand h1 {
+      font-size: clamp(0.86rem, 1.8vw, 1.12rem);
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .top-actions {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      flex-shrink: 0;
+    }
+
+    /* Botões base */
+    .btn {
+      font-family: inherit;
+      font-weight: 700;
+      font-size: clamp(0.76rem, 1.3vw, 0.86rem);
+      border-radius: var(--radius-sm);
+      padding: 7px 12px;
+      border: 1.5px solid var(--border);
+      background: var(--bg-soft);
+      color: var(--text-main);
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      transition: all 0.16s ease;
+      min-height: 34px;
+      white-space: nowrap;
+    }
+
+    .btn:hover:not(:disabled) {
+      border-color: var(--border-light);
+      background: #243249;
+    }
+
+    .btn:disabled {
+      opacity: 0.48;
+      cursor: not-allowed;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, #0284c7, #2563eb);
+      border-color: #38bdf8;
+      color: #fff;
+      box-shadow: 0 5px 16px rgba(2, 132, 199, 0.35);
+    }
+
+    .btn-primary:hover:not(:disabled) {
+      filter: brightness(1.08);
+      transform: translateY(-1px);
+    }
+
+    .btn-gold {
+      background: linear-gradient(135deg, #ca8a04, #eab308);
+      border-color: #fef08a;
+      color: #0f172a;
+      font-weight: 900;
+      box-shadow: 0 5px 18px rgba(250, 204, 21, 0.35);
+    }
+
+    .btn-gold:hover:not(:disabled) {
+      filter: brightness(1.06);
+      transform: translateY(-1px);
+    }
+
+    .btn-mage {
+      background: rgba(192, 132, 252, 0.12);
+      border-color: var(--mage-border);
+      color: #e9d5ff;
+    }
+
+    .btn-mage.active {
+      background: linear-gradient(135deg, #7e22ce, #a855f7);
+      border-color: #e9d5ff;
+      color: #fff;
+      box-shadow: 0 0 12px rgba(192, 132, 252, 0.42);
+    }
+
+    .btn-ghost {
+      background: rgba(15, 23, 42, 0.72);
+      color: var(--text-muted);
+      border-color: var(--border);
+      font-size: 0.76rem;
+      padding: 5px 9px;
+      min-height: 30px;
+    }
+
+    .btn-ghost:hover {
+      color: var(--text-main);
+    }
+
+    /* =====================================================================
+       ESTILOS MATEMÁTICOS EM CASCATA (DELIMITADORES, MATÉRIA/ANTIMATÉRIA, MAGO 1)
+       ===================================================================== */
+    .math-expr {
+      font-variant-numeric: tabular-nums;
+      letter-spacing: 0.01em;
+      font-weight: 800;
+      display: inline-flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: center;
+      gap: 2px;
+    }
+
+    .d-paren { color: var(--delim-paren); font-weight: 900; }
+    .d-brack { color: var(--delim-brack); font-weight: 900; }
+    .d-brace { color: var(--delim-brace); font-weight: 900; }
+    .m-pos { color: var(--pos); }
+    .m-neg { color: var(--neg); }
+    .m-op { color: #cbd5e1; margin: 0 2px; }
+
+    /* Mago 1 inline expansível */
+    .mage-one {
+      display: inline-flex;
+      align-items: center;
+      color: var(--mage);
+      font-weight: 900;
+      max-width: 0;
+      opacity: 0;
+      overflow: hidden;
+      white-space: nowrap;
+      transition: max-width 0.3s ease, opacity 0.25s ease, margin 0.25s ease;
+    }
+
+    .mage-active .mage-one {
+      max-width: 48px;
+      opacity: 1;
+      margin: 0 2px;
+      text-shadow: 0 0 10px rgba(192, 132, 252, 0.7);
+    }
+
+    /* Cápsula dourada pulsante do bloco alvo */
+    .focus-block {
+      display: inline-flex;
+      align-items: center;
+      padding: 2px 9px;
+      margin: 0 2px;
+      border-radius: 9px;
+      background: rgba(250, 204, 21, 0.16);
+      border: 2px solid var(--gold);
+      box-shadow: 0 0 14px rgba(250, 204, 21, 0.32);
+      animation: focusPulse 1.7s ease-in-out infinite;
+    }
+
+    @keyframes focusPulse {
+      0%, 100% { box-shadow: 0 0 10px rgba(250, 204, 21, 0.26); }
+      50% { box-shadow: 0 0 18px rgba(250, 204, 21, 0.56); }
+    }
+
+    .resolved-block {
+      display: inline-flex;
+      align-items: center;
+      padding: 1px 7px;
+      border-radius: 7px;
+      background: rgba(74, 222, 128, 0.14);
+      border: 1px solid rgba(74, 222, 128, 0.45);
+      color: #86efac;
+    }
+
+    /* =====================================================================
+       TELA A — DEMONSTRAÇÃO GUIADA (LIMPA, APENAS BOTÃO PRÓXIMO)
+       ===================================================================== */
+    .demo-stage {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      gap: 12px;
+      position: relative;
+    }
+
+    .demo-corner-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .demo-badge {
+      font-size: 0.76rem;
+      font-weight: 800;
+      color: var(--gold);
+      background: rgba(15, 23, 42, 0.85);
+      border: 1px solid rgba(250, 204, 21, 0.42);
+      padding: 4px 10px;
+      border-radius: 999px;
+    }
+
+    .demo-title {
+      text-align: center;
+      font-size: clamp(0.95rem, 2vw, 1.2rem);
+      font-weight: 800;
+      color: var(--gold);
+    }
+
+    .cascade-box {
+      background: var(--bg-main);
+      border: 1.5px solid var(--border);
+      border-radius: var(--radius);
+      padding: clamp(10px, 1.6vh, 16px);
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      flex: 1;
+      min-height: 155px;
+      max-height: 44dvh;
+      overflow-y: auto;
+    }
+
+    .cascade-row {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 8px 12px;
+      border-radius: 10px;
+      background: rgba(30, 41, 59, 0.55);
+      border: 1px solid rgba(51, 65, 85, 0.75);
+      font-size: clamp(1.06rem, 2.3vw, 1.5rem);
+      animation: slideStepIn 0.28s ease-out;
+    }
+
+    .cascade-row.is-origin {
+      background: rgba(15, 23, 42, 0.95);
+      border-color: var(--border-light);
+      position: sticky;
+      top: 0;
+      z-index: 2;
+    }
+
+    .cascade-row.is-active {
+      background: rgba(30, 41, 59, 0.96);
+      border-color: rgba(250, 204, 21, 0.55);
+    }
+
+    .cascade-row.is-final {
+      background: rgba(74, 222, 128, 0.14);
+      border-color: rgba(74, 222, 128, 0.6);
+      color: #86efac;
+    }
+
+    .row-tag {
+      font-size: 0.68rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      color: var(--text-muted);
+      background: rgba(15, 23, 42, 0.85);
+      border: 1px solid var(--border);
+      padding: 2px 7px;
+      border-radius: 6px;
+      flex-shrink: 0;
+    }
+
+    @keyframes slideStepIn {
+      from { opacity: 0; transform: translateY(-6px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .demo-note {
+      text-align: center;
+      font-size: clamp(0.84rem, 1.5vw, 0.98rem);
+      color: #e2e8f0;
+      background: rgba(15, 23, 42, 0.75);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 9px 12px;
+      min-height: 44px;
+      display: grid;
+      place-items: center;
+    }
+
+    .demo-footer {
+      display: flex;
+      justify-content: center;
+    }
+
+    .btn-next-hero {
+      width: 100%;
+      max-width: 360px;
+      min-height: 48px;
+      padding: 11px 24px;
+      border-radius: 12px;
+      border: 1.5px solid #7dd3fc;
+      background: linear-gradient(135deg, #0284c7, #2563eb);
+      color: #fff;
+      font-family: inherit;
+      font-size: clamp(0.96rem, 1.8vw, 1.08rem);
+      font-weight: 800;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      box-shadow: 0 6px 20px rgba(2, 132, 199, 0.42);
+      transition: transform 0.16s ease, filter 0.16s ease;
+    }
+
+    .btn-next-hero:hover {
+      transform: translateY(-1px);
+      filter: brightness(1.08);
+    }
+
+    .btn-next-hero.is-enter {
+      background: linear-gradient(135deg, #ca8a04, #eab308);
+      border-color: #fef08a;
+      color: #0f172a;
+      box-shadow: 0 6px 22px rgba(250, 204, 21, 0.4);
+    }
+
+    /* =====================================================================
+       TELA B — CÂMARA DOS PORTAIS (PASSAGEM + INSTRUTOR DO REINO)
+       ===================================================================== */
+    .hud-keys {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(15, 23, 42, 0.9);
+      border: 1px solid rgba(250, 204, 21, 0.45);
+      border-radius: 999px;
+      padding: 4px 11px;
+      font-size: 0.8rem;
+      font-weight: 800;
+      color: var(--gold);
+    }
+
+    .cycle-switch {
+      display: inline-flex;
+      background: var(--bg-main);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 2px;
+      gap: 2px;
+    }
+
+    .cycle-btn {
+      border: none;
+      background: transparent;
+      color: var(--text-muted);
+      font-family: inherit;
+      font-size: 0.74rem;
+      font-weight: 800;
+      padding: 4px 8px;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+
+    .cycle-btn.active {
+      background: rgba(56, 189, 248, 0.2);
+      color: var(--pos);
+      box-shadow: inset 0 0 0 1px rgba(56, 189, 248, 0.55);
+    }
+
+    /* Palco da Passagem (SVG responsivo) */
+    .passage-stage {
+      background: linear-gradient(180deg, #111a2e 0%, #0b1120 100%);
+      border: 1.5px solid var(--border);
+      border-radius: var(--radius);
+      padding: 10px 10px 8px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    #passage-svg {
+      width: 100%;
+      height: auto;
+      max-height: clamp(185px, 34dvh, 260px);
+      display: block;
+    }
+
+    .gate-svg-group {
+      cursor: pointer;
+      transition: transform 0.2s ease;
+    }
+
+    .gate-svg-group.is-locked {
+      cursor: not-allowed;
+      opacity: 0.72;
+    }
+
+    .gate-svg-group.is-active .gate-arch {
+      animation: gateGlow 1.8s ease-in-out infinite;
+    }
+
+    @keyframes gateGlow {
+      0%, 100% { filter: drop-shadow(0 0 4px rgba(250, 204, 21, 0.45)); }
+      50% { filter: drop-shadow(0 0 12px rgba(250, 204, 21, 0.92)); }
+    }
+
+    /* Barra rápida dos 5 portões (acessível em toque no celular) */
+    .gates-strip {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 6px;
+      margin-top: 8px;
+    }
+
+    .gate-chip {
+      background: rgba(15, 23, 42, 0.88);
+      border: 1.5px solid var(--border);
+      border-radius: 9px;
+      padding: 6px 5px;
+      color: var(--text-muted);
+      font-family: inherit;
+      font-size: 0.72rem;
+      font-weight: 700;
+      text-align: center;
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 2px;
+      transition: all 0.16s ease;
+    }
+
+    .gate-chip strong {
+      font-size: 0.76rem;
+      color: var(--text-main);
+    }
+
+    .gate-chip.is-active {
+      border-color: var(--gold);
+      background: rgba(250, 204, 21, 0.14);
+      color: #fef08a;
+      box-shadow: 0 0 12px rgba(250, 204, 21, 0.24);
+    }
+
+    .gate-chip.is-open {
+      border-color: rgba(74, 222, 128, 0.55);
+      background: rgba(74, 222, 128, 0.1);
+      color: #bbf7d0;
+    }
+
+    .gate-chip.is-locked {
+      opacity: 0.52;
+      cursor: not-allowed;
+    }
+
+    /* Painel do Instrutor do Reino */
+    .instructor-card {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      background: var(--bg-card);
+      border: 1.5px solid var(--border);
+      border-radius: var(--radius);
+      padding: 11px 14px;
+      transition: all 0.25s ease;
+    }
+
+    .instructor-card.is-alert {
+      background: linear-gradient(135deg, rgba(127, 29, 29, 0.36), rgba(30, 41, 59, 0.96));
+      border-color: var(--err);
+      box-shadow: 0 0 18px rgba(248, 113, 113, 0.24);
+    }
+
+    .instructor-card.is-victory {
+      background: linear-gradient(135deg, rgba(20, 83, 45, 0.38), rgba(30, 41, 59, 0.96));
+      border-color: var(--gold);
+      box-shadow: 0 0 22px rgba(250, 204, 21, 0.24);
+    }
+
+    .instructor-avatar {
+      width: 54px;
+      height: 54px;
+      border-radius: 12px;
+      background: rgba(15, 23, 42, 0.9);
+      border: 1.5px solid var(--border-light);
+      display: grid;
+      place-items: center;
+      flex-shrink: 0;
+    }
+
+    .instructor-body {
+      flex: 1;
+      min-width: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .instructor-head {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      flex-wrap: wrap;
+    }
+
+    .instructor-name {
+      font-size: 0.82rem;
+      font-weight: 800;
+      color: var(--gold);
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+
+    .instructor-badge {
+      font-size: 0.68rem;
+      font-weight: 800;
+      padding: 2px 7px;
+      border-radius: 999px;
+      background: rgba(56, 189, 248, 0.16);
+      color: var(--pos);
+      border: 1px solid rgba(56, 189, 248, 0.4);
+    }
+
+    .instructor-card.is-alert .instructor-badge {
+      background: var(--err-bg);
+      color: #fecaca;
+      border-color: rgba(248, 113, 113, 0.6);
+    }
+
+    .instructor-text {
+      font-size: clamp(0.8rem, 1.45vw, 0.93rem);
+      color: #e2e8f0;
+    }
+
+    .passage-cta-row {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+
+    /* =====================================================================
+       TELA C — RESOLUÇÃO EM CASCATA (DESAFIO DO PORTÃO)
+       ===================================================================== */
+    .res-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .res-gate-title {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: clamp(0.86rem, 1.6vw, 1.04rem);
+      font-weight: 800;
+      color: var(--gold);
+    }
+
+    .res-warrior-mini {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(15, 23, 42, 0.85);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 4px 10px;
+    }
+
+    .res-prompt {
+      text-align: center;
+      font-size: clamp(0.84rem, 1.5vw, 0.98rem);
+      font-weight: 700;
+      color: #fef08a;
+      background: rgba(250, 204, 21, 0.08);
+      border: 1px solid rgba(250, 204, 21, 0.35);
+      border-radius: var(--radius-sm);
+      padding: 7px 12px;
+    }
+
+    /* 4 Cards de Resposta sempre visíveis */
+    .choices-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 9px;
+    }
+
+    .choice-card {
+      background: var(--bg-main);
+      border: 1.5px solid var(--border-light);
+      border-radius: 11px;
+      padding: clamp(10px, 1.5vh, 14px) 12px;
+      color: var(--text-main);
+      font-family: inherit;
+      font-size: clamp(1.02rem, 2.1vw, 1.32rem);
+      font-weight: 900;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 52px;
+      transition: all 0.16s ease;
+    }
+
+    .choice-card:hover:not(:disabled) {
+      border-color: var(--gold);
+      background: #1e293b;
+      transform: translateY(-1px);
+      box-shadow: 0 5px 16px rgba(250, 204, 21, 0.18);
+    }
+
+    .choice-card.is-correct {
+      border-color: var(--ok);
+      background: var(--ok-bg);
+      color: #bbf7d0;
+    }
+
+    .choice-card.is-wrong {
+      border-color: var(--err);
+      background: var(--err-bg);
+      color: #fecaca;
+    }
+
+    .choice-card:disabled {
+      cursor: not-allowed;
+    }
+
+    /* Painel de Chave Forjada (ao concluir o portão) */
+    .key-forged-box {
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      gap: 10px;
+      text-align: center;
+      background: linear-gradient(135deg, rgba(202, 138, 4, 0.2), rgba(15, 23, 42, 0.94));
+      border: 1.5px solid var(--gold);
+      border-radius: var(--radius);
+      padding: 14px;
+      animation: slideStepIn 0.3s ease-out;
+    }
+
+    .key-forged-box.show {
+      display: flex;
+    }
+
+    /* Overlay de Game Over Local (Retrocesso) */
+    .retro-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(11, 17, 32, 0.82);
+      backdrop-filter: blur(5px);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+      z-index: 50;
+    }
+
+    .retro-overlay.show {
+      display: flex;
+      animation: fadeIn 0.2s ease-out;
+    }
+
+    .retro-modal {
+      width: 100%;
+      max-width: 440px;
+      background: linear-gradient(180deg, #2a1215 0%, #1e293b 100%);
+      border: 2px solid var(--err);
+      border-radius: 16px;
+      padding: 20px;
+      text-align: center;
+      box-shadow: 0 18px 46px rgba(0, 0, 0, 0.65);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 11px;
+    }
+
+    .retro-title {
+      font-size: 1.18rem;
+      font-weight: 900;
+      color: #fca5a5;
+    }
+
+    .retro-msg {
+      font-size: 0.9rem;
+      color: #f1f5f9;
+    }
+
+    /* Animações do Escudo */
+    .shield-pulse {
+      animation: shieldPulseAnim 0.55s ease-out;
+    }
+
+    @keyframes shieldPulseAnim {
+      0% { filter: drop-shadow(0 0 0px #facc15); transform: scale(1); }
+      45% { filter: drop-shadow(0 0 14px #facc15); transform: scale(1.12); }
+      100% { filter: drop-shadow(0 0 0px #facc15); transform: scale(1); }
+    }
+
+    .shield-crack {
+      animation: shieldShake 0.42s ease-in-out;
+    }
+
+    @keyframes shieldShake {
+      0%, 100% { transform: translateX(0); }
+      20% { transform: translateX(-5px) rotate(-6deg); }
+      40% { transform: translateX(5px) rotate(6deg); }
+      60% { transform: translateX(-4px) rotate(-4deg); }
+      80% { transform: translateX(4px) rotate(4deg); }
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    /* Destaque suave (~1.5s) do trecho recém-substituído ao voltar da Câmara de Execução */
+    .cascade-row.is-fresh {
+      animation: freshRowReveal 0.42s cubic-bezier(0.22, 1, 0.36, 1);
+    }
+
+    @keyframes freshRowReveal {
+      from { opacity: 0; transform: translateY(-10px) scale(0.985); }
+      to { opacity: 1; transform: translateY(0) scale(1); }
+    }
+
+    .newly-forged {
+      display: inline-flex;
+      align-items: center;
+      padding: 2px 9px;
+      margin: 0 2px;
+      border-radius: 8px;
+      background: rgba(52, 211, 153, 0.22);
+      border: 2px solid #34d399;
+      color: #a7f3d0;
+      box-shadow: 0 0 18px rgba(52, 211, 153, 0.55), 0 0 8px rgba(250, 204, 21, 0.45);
+      animation: forgedGlow 1.5s ease-out forwards;
+    }
+
+    @keyframes forgedGlow {
+      0% {
+        background: rgba(250, 204, 21, 0.32);
+        border-color: #facc15;
+        box-shadow: 0 0 22px rgba(250, 204, 21, 0.72);
+        transform: scale(1.06);
+      }
+      45% {
+        background: rgba(52, 211, 153, 0.25);
+        border-color: #34d399;
+        box-shadow: 0 0 16px rgba(52, 211, 153, 0.55);
+        transform: scale(1.02);
+      }
+      100% {
+        background: rgba(52, 211, 153, 0.12);
+        border-color: rgba(52, 211, 153, 0.45);
+        box-shadow: none;
+        transform: scale(1);
+      }
+    }
+
+    /* =====================================================================
+       TELA D — CÂMARA DE EXECUÇÃO ISOLADA (PROCESSO DE CÁLCULO LENTO)
+       ===================================================================== */
+    .exec-card {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      gap: 10px;
+      background: linear-gradient(180deg, rgba(22, 32, 51, 0.96) 0%, rgba(15, 23, 42, 0.98) 100%);
+      border: 1.5px solid rgba(250, 204, 21, 0.45);
+      animation: fadeIn 0.26s ease-out;
+    }
+
+    .exec-top-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .exec-type-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.76rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      color: var(--gold);
+      background: rgba(250, 204, 21, 0.12);
+      border: 1px solid rgba(250, 204, 21, 0.45);
+      padding: 4px 10px;
+      border-radius: 999px;
+    }
+
+    .exec-phase-pill {
+      font-size: 0.74rem;
+      font-weight: 800;
+      color: var(--pos);
+      background: rgba(56, 189, 248, 0.12);
+      border: 1px solid rgba(56, 189, 248, 0.4);
+      padding: 3px 9px;
+      border-radius: 999px;
+    }
+
+    .exec-stage {
+      flex: 1;
+      min-height: 190px;
+      background: radial-gradient(circle at center, rgba(30, 41, 59, 0.75) 0%, rgba(11, 17, 32, 0.94) 100%);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: clamp(12px, 2vh, 18px) clamp(10px, 2vw, 18px);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .exec-phase-block {
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      opacity: 0;
+      transform: translateY(8px);
+      transition: opacity 0.45s ease, transform 0.45s ease;
+    }
+
+    .exec-phase-block.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .exec-hero-math {
+      font-size: clamp(1.35rem, 3.2vw, 2.05rem);
+      font-weight: 900;
+      padding: 6px 14px;
+      border-radius: 12px;
+      background: rgba(15, 23, 42, 0.85);
+      border: 1.5px solid var(--border-light);
+    }
+
+    .exec-sub-label {
+      font-size: clamp(0.74rem, 1.35vw, 0.84rem);
+      font-weight: 700;
+      color: var(--text-muted);
+      text-align: center;
+    }
+
+    .exec-role-row {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+    }
+
+    .exec-role-box {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 3px;
+      padding: 7px 13px;
+      border-radius: 11px;
+      background: rgba(15, 23, 42, 0.9);
+      border: 1.5px solid var(--border-light);
+    }
+
+    .exec-role-box.is-wait {
+      border-color: var(--gold);
+      background: rgba(250, 204, 21, 0.1);
+    }
+
+    .exec-role-box.is-pos {
+      border-color: var(--pos);
+      background: var(--pos-bg);
+    }
+
+    .exec-role-box.is-neg {
+      border-color: var(--neg);
+      background: var(--neg-bg);
+    }
+
+    .exec-role-tag {
+      font-size: 0.65rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--text-muted);
+    }
+
+    .exec-role-val {
+      font-size: clamp(1.15rem, 2.5vw, 1.65rem);
+      font-weight: 900;
+    }
+
+    /* Expansão de fatores e giro de escudo */
+    .exec-factors-row {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      font-size: clamp(1.15rem, 2.4vw, 1.55rem);
+      font-weight: 900;
+    }
+
+    .exec-factor-chip {
+      padding: 4px 11px;
+      border-radius: 9px;
+      background: rgba(30, 41, 59, 0.95);
+      border: 1.5px solid var(--border-light);
+      opacity: 0;
+      transform: scale(0.82);
+      transition: opacity 0.45s ease, transform 0.45s ease;
+    }
+
+    .exec-factor-chip.show {
+      opacity: 1;
+      transform: scale(1);
+    }
+
+    .exec-shield-spin-wrap {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 5px 12px;
+      border-radius: 999px;
+      background: rgba(250, 204, 21, 0.12);
+      border: 1px solid rgba(250, 204, 21, 0.5);
+      font-size: 0.78rem;
+      font-weight: 800;
+      color: #fef08a;
+    }
+
+    .exec-shield-spin-svg {
+      transition: transform 0.75s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
+    .exec-shield-spin-svg.flipped {
+      transform: rotateY(180deg) scale(1.15);
+      filter: drop-shadow(0 0 10px #facc15);
+    }
+
+    /* SVG dos Arcos da Distributiva */
+    .dist-svg {
+      width: 100%;
+      max-width: 440px;
+      height: auto;
+      display: block;
+      overflow: visible;
+    }
+
+    .dist-arc {
+      fill: none;
+      stroke-width: 3;
+      stroke-linecap: round;
+      stroke-dasharray: 260;
+      stroke-dashoffset: 260;
+      transition: stroke-dashoffset 1.05s cubic-bezier(0.22, 1, 0.36, 1);
+    }
+
+    .dist-arc.draw {
+      stroke-dashoffset: 0;
+    }
+
+    /* Visualização de Fusão Matéria / Antimatéria */
+    .fusion-wrap {
+      width: 100%;
+      max-width: 480px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .fusion-bars {
+      width: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      min-height: 44px;
+    }
+
+    .fusion-bar {
+      height: 30px;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.85rem;
+      font-weight: 900;
+      padding: 0 10px;
+      transition: transform 0.7s ease, opacity 0.6s ease, filter 0.5s ease;
+    }
+
+    .fusion-bar.pos {
+      background: linear-gradient(135deg, rgba(56, 189, 248, 0.32), rgba(2, 132, 199, 0.52));
+      border: 1.5px solid var(--pos);
+      color: #e0f2fe;
+    }
+
+    .fusion-bar.neg {
+      background: linear-gradient(135deg, rgba(251, 146, 60, 0.32), rgba(234, 88, 12, 0.52));
+      border: 1.5px solid var(--neg);
+      color: #ffedd5;
+    }
+
+    .fusion-clash-badge {
+      padding: 3px 10px;
+      border-radius: 999px;
+      font-size: 0.74rem;
+      font-weight: 800;
+      background: rgba(250, 204, 21, 0.16);
+      border: 1px solid var(--gold);
+      color: var(--gold);
+      opacity: 0;
+      transform: scale(0.85);
+      transition: opacity 0.45s ease, transform 0.45s ease;
+    }
+
+    .fusion-clash-badge.show {
+      opacity: 1;
+      transform: scale(1);
+    }
+
+    /* Fase 3: Cápsula do Resultado Final */
+    .exec-result-capsule {
+      display: inline-flex;
+      align-items: center;
+      gap: 9px;
+      padding: 8px 20px;
+      border-radius: 13px;
+      font-size: clamp(1.35rem, 3vw, 1.95rem);
+      font-weight: 900;
+      border: 2px solid var(--gold);
+      background: rgba(250, 204, 21, 0.14);
+      color: var(--gold);
+      box-shadow: 0 0 22px rgba(250, 204, 21, 0.35);
+    }
+
+    .exec-result-capsule.is-pos {
+      border-color: var(--pos);
+      background: var(--pos-bg);
+      color: var(--pos);
+      box-shadow: 0 0 22px rgba(56, 189, 248, 0.38);
+    }
+
+    .exec-result-capsule.is-neg {
+      border-color: var(--neg);
+      background: var(--neg-bg);
+      color: var(--neg);
+      box-shadow: 0 0 22px rgba(251, 146, 60, 0.38);
+    }
+
+    .exec-narration {
+      text-align: center;
+      font-size: clamp(0.82rem, 1.45vw, 0.94rem);
+      color: #e2e8f0;
+      background: rgba(15, 23, 42, 0.78);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 8px 12px;
+      min-height: 40px;
+      display: grid;
+      place-items: center;
+    }
+
+    .exec-progress-track {
+      width: 100%;
+      height: 6px;
+      border-radius: 999px;
+      background: rgba(51, 65, 85, 0.75);
+      overflow: hidden;
+    }
+
+    .exec-progress-fill {
+      width: 0%;
+      height: 100%;
+      border-radius: 999px;
+      background: linear-gradient(90deg, #38bdf8, #facc15, #34d399);
+      transition: width 0.08s linear;
+    }
+
+    .exec-controls {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+    }
+
+    .exec-controls-left {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+
+    /* Legenda discreta de delimitadores */
+    .delim-legend {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 12px;
+      font-size: 0.74rem;
+      font-weight: 700;
+      color: var(--text-muted);
+    }
+
+    /* =====================================================================
+       RESPONSIVIDADE PARA TELAS PEQUENAS (360px+)
+       ===================================================================== */
+    @media (max-width: 620px) {
+      .gates-strip { grid-template-columns: repeat(5, 1fr); gap: 4px; }
+      .gate-chip { padding: 5px 2px; font-size: 0.65rem; }
+      .gate-chip span.gate-sub { display: none; }
+      .instructor-card { flex-direction: column; text-align: center; gap: 8px; }
+      .instructor-head { justify-content: center; }
+      .lbl-hide-sm { display: none; }
+      .cascade-box { max-height: 36dvh; }
+    }
+  </style>
+</head>
+<body>
+  <div class="app-shell">
+    <!-- CABEÇALHO SUPERIOR -->
+    <header class="top-bar">
+      <div class="brand">
+        <div class="brand-icon" aria-hidden="true">
+          <svg width="19" height="19" viewBox="0 0 32 32" fill="none">
+            <path d="M16 3L26 7.5V15.5C26 22 21.5 26.8 16 29C10.5 26.8 6 22 6 15.5V7.5L16 3Z" fill="#38bdf8" fill-opacity="0.25" stroke="#facc15" stroke-width="2.2"/>
+            <circle cx="16" cy="15.5" r="4" fill="#facc15"/>
+          </svg>
+        </div>
+        <h1>Portais das Expressões — Reinos da Energia Lógica</h1>
+      </div>
+      <div class="top-actions">
+        <button id="btn-sound" class="btn btn-ghost" title="Ativar ou silenciar som">
+          🔊 <span class="lbl-hide-sm">Som</span>
+        </button>
+      </div>
+    <button id="autoriaBtn" type="button" aria-label="Autoria" onclick="document.getElementById('autoriaTxt').classList.toggle('on')" style="flex:0 0 auto;width:20px;height:20px;margin:0 4px;border-radius:50%;border:1px solid rgba(128,128,128,.5);background:transparent;color:inherit;font:11px/18px sans-serif;text-align:center;padding:0;cursor:pointer;opacity:.5">©</button></header>
+
+    <!-- =================================================================
+         TELA A — DEMONSTRAÇÃO GUIADA (TELA INICIAL)
+         ================================================================= -->
+    <section id="screen-demo" class="screen active" aria-label="Demonstração Guiada">
+      <div class="card demo-stage">
+        <div class="demo-corner-row">
+          <span id="demo-counter" class="demo-badge">Demo 1/4</span>
+          <div style="display:flex; gap:6px; align-items:center;">
+            <button id="demo-mage-btn" class="btn btn-mage" style="min-height:30px; padding:4px 10px; font-size:0.76rem;">1· Mago 1</button>
+            <button id="demo-skip-btn" class="btn btn-ghost">Pular → Portais</button>
+          </div>
+        </div>
+
+        <div id="demo-title" class="demo-title">1. Ordem das Operações</div>
+
+        <div id="demo-cascade" class="cascade-box" aria-live="polite"></div>
+
+        <div id="demo-note" class="demo-note"></div>
+
+        <div class="delim-legend">
+          <span><strong class="m-pos">+ Matéria</strong></span>
+          <span><strong class="m-neg">− Antimatéria</strong></span>
+          <span><strong class="d-paren">( )</strong> Parênteses</span>
+          <span><strong class="d-brack">[ ]</strong> Colchetes</span>
+          <span><strong class="d-brace">{ }</strong> Chaves</span>
+        </div>
+
+        <div class="demo-footer">
+          <button id="demo-next-btn" class="btn-next-hero">Próximo ▶</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- =================================================================
+         TELA B — CÂMARA DOS PORTAIS (TELA DA PASSAGEM)
+         ================================================================= -->
+    <section id="screen-portals" class="screen" aria-label="Câmara dos Portais">
+      <div class="card" style="padding:8px 12px;">
+        <div style="display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:8px;">
+          <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
+            <span class="hud-keys" id="hud-keys">🔑 Chaves: 0/5</span>
+            <div class="cycle-switch" role="group" aria-label="Alternar ciclo de desafios">
+              <button id="cycle-a-btn" class="cycle-btn active">Ciclo A</button>
+              <button id="cycle-b-btn" class="cycle-btn">Ciclo B</button>
+            </div>
+          </div>
+          <div style="display:flex; align-items:center; gap:6px;">
+            <button id="btn-review-demo" class="btn btn-ghost">📖 Demonstração</button>
+            <button id="btn-reset-cycle" class="btn btn-ghost" title="Reiniciar ciclo atual">↺ Reiniciar</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Palco da Passagem com Guerreiro (Escudo) e os 5 Portões Selados -->
+      <div class="passage-stage">
+        <svg id="passage-svg" viewBox="0 0 920 220" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <linearGradient id="pathGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+              <stop offset="0%" stop-color="#1e293b"/>
+              <stop offset="50%" stop-color="#334155"/>
+              <stop offset="100%" stop-color="#1e293b"/>
+            </linearGradient>
+            <radialGradient id="portalOpenGrad" cx="50%" cy="50%" r="50%">
+              <stop offset="0%" stop-color="#fef08a" stop-opacity="0.95"/>
+              <stop offset="55%" stop-color="#38bdf8" stop-opacity="0.45"/>
+              <stop offset="100%" stop-color="#0f172a" stop-opacity="0"/>
+            </radialGradient>
+          </defs>
+
+          <!-- Estrelas / Arquitetura de fundo -->
+          <g opacity="0.35">
+            <circle cx="70" cy="34" r="1.6" fill="#38bdf8"/>
+            <circle cx="215" cy="22" r="1.4" fill="#facc15"/>
+            <circle cx="380" cy="30" r="1.8" fill="#a78bfa"/>
+            <circle cx="560" cy="24" r="1.5" fill="#38bdf8"/>
+            <circle cx="745" cy="32" r="1.7" fill="#34d399"/>
+            <circle cx="860" cy="26" r="1.5" fill="#facc15"/>
+          </g>
+
+          <!-- Trilha de pedra e energia -->
+          <rect x="35" y="162" width="850" height="22" rx="11" fill="url(#pathGrad)" stroke="#475569" stroke-width="1.5"/>
+          <line id="energy-path-line" x1="55" y1="173" x2="110" y2="173" stroke="#facc15" stroke-width="3.5" stroke-linecap="round" opacity="0.85"/>
+
+          <!-- Camada dos 5 Portões -->
+          <g id="svg-gates-layer"></g>
+
+          <!-- Guerreiro com apenas Escudo na passagem -->
+          <g id="passage-warrior" transform="translate(80, 170)" style="transition: transform 0.65s cubic-bezier(0.22, 1, 0.36, 1);">
+            <ellipse cx="0" cy="4" rx="14" ry="4" fill="rgba(0,0,0,0.45)"/>
+            <rect x="-7" y="-12" width="5" height="12" rx="2" fill="#475569"/>
+            <rect x="2" y="-12" width="5" height="12" rx="2" fill="#334155"/>
+            <rect x="-9" y="-29" width="18" height="18" rx="6" fill="#1e293b" stroke="#94a3b8" stroke-width="1.6"/>
+            <path d="M -6 -25 L 5 -14" stroke="#38bdf8" stroke-width="2.2" stroke-linecap="round"/>
+            <rect x="4" y="-23" width="8" height="4.5" rx="2" fill="#64748b"/>
+            <circle cx="0" cy="-38" r="9.5" fill="#e2e8f0" stroke="#64748b" stroke-width="1.5"/>
+            <path d="M -5 -47 Q 0 -52 6 -47 Z" fill="#facc15"/>
+            <rect x="1" y="-40.5" width="8" height="4.6" rx="2" fill="#0f172a"/>
+            <circle cx="6.2" cy="-38.2" r="1.4" fill="#38bdf8"/>
+            <!-- Escudo protagonista -->
+            <g transform="translate(14, -21)">
+              <path d="M -5.5 -11.5 L 5.5 -9.5 L 6 2.5 Q 2 11 -5.5 12 Z" fill="#0284c7" stroke="#facc15" stroke-width="2.1" stroke-linejoin="round"/>
+              <circle cx="0.5" cy="0" r="3" fill="#facc15"/>
+            </g>
+          </g>
+        </svg>
+
+        <!-- Cartões clicáveis dos 5 portões -->
+        <div id="gates-strip" class="gates-strip"></div>
+      </div>
+
+      <!-- Painel do Instrutor do Reino -->
+      <div id="instructor-card" class="instructor-card">
+        <div class="instructor-avatar" aria-hidden="true">
+          <svg width="40" height="40" viewBox="0 0 48 48" fill="none">
+            <circle cx="24" cy="24" r="21" fill="#0f172a" stroke="#38bdf8" stroke-width="1.5" stroke-dasharray="4 3"/>
+            <polygon points="24,6 38,24 24,42 10,24" fill="rgba(250,204,21,0.16)" stroke="#facc15" stroke-width="2"/>
+            <circle cx="24" cy="18" r="5" fill="#e2e8f0"/>
+            <path d="M15 34 C15 27, 33 27, 33 34" fill="#38bdf8" fill-opacity="0.45" stroke="#38bdf8" stroke-width="1.8"/>
+            <circle cx="24" cy="12" r="2.2" fill="#facc15"/>
+          </svg>
+        </div>
+        <div class="instructor-body">
+          <div class="instructor-head">
+            <span class="instructor-name">Instrutor do Reino</span>
+            <span id="instructor-badge" class="instructor-badge">Orientação</span>
+          </div>
+          <div id="instructor-text" class="instructor-text"></div>
+        </div>
+      </div>
+
+      <!-- Botão principal da Câmara -->
+      <div class="passage-cta-row">
+        <button id="btn-challenge-gate" class="btn btn-gold" style="min-width:240px; min-height:44px; font-size:0.96rem;">
+          Desafiar Portão I ▶
+        </button>
+        <button id="btn-next-cycle" class="btn btn-primary" style="display:none; min-height:44px; font-size:0.94rem;">
+          Iniciar Ciclo B (Novas Expressões) ▶
+        </button>
+      </div>
+    </section>
+
+    <!-- =================================================================
+         TELA C — TELA DE RESOLUÇÃO EM CASCATA (DESAFIO DO PORTÃO)
+         ================================================================= -->
+    <section id="screen-resolve" class="screen" aria-label="Resolução em Cascata">
+      <div class="card" style="padding:9px 13px;">
+        <div class="res-header">
+          <button id="btn-back-portals" class="btn btn-ghost">← Voltar aos Portais</button>
+          <div class="res-gate-title">
+            <span id="res-gate-name">Portão I — Ordem das Operações</span>
+          </div>
+          <div style="display:flex; align-items:center; gap:7px;">
+            <button id="res-mage-btn" class="btn btn-mage" style="min-height:32px; padding:5px 10px; font-size:0.77rem;">1· Mago 1</button>
+            <div class="res-warrior-mini" title="Escudo de Energia Lógica">
+              <svg id="res-shield-svg" width="24" height="26" viewBox="0 0 28 30" fill="none">
+                <path id="res-shield-body" d="M14 2L24 6V14.5C24 20.8 19.6 25.6 14 28C8.4 25.6 4 20.8 4 14.5V6L14 2Z" fill="#0284c7" stroke="#facc15" stroke-width="2.2"/>
+                <circle cx="14" cy="14.5" r="3.6" fill="#facc15"/>
+                <path id="res-shield-crack" d="M10 8L15 14L12 18L17 24" stroke="#f87171" stroke-width="2.4" stroke-linecap="round" opacity="0"/>
+              </svg>
+              <span id="res-step-counter" style="font-size:0.76rem; font-weight:800; color:var(--text-muted);">Passo 1/4</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Cascata vertical: expressão original fixa no topo + passos abaixo -->
+      <div id="res-cascade" class="cascade-box" aria-live="polite"></div>
+
+      <!-- Pergunta objetiva -->
+      <div id="res-prompt" class="res-prompt">Qual o resultado do bloco destacado?</div>
+
+      <!-- 4 Cards de resposta -->
+      <div id="res-choices" class="choices-grid"></div>
+
+      <!-- Caixa de Chave Forjada (aparece ao finalizar o último passo) -->
+      <div id="key-forged-box" class="key-forged-box">
+        <div style="font-size:1.15rem; font-weight:900; color:var(--gold);">
+          🔑 Chave de Energia Lógica Forjada!
+        </div>
+        <div id="key-forged-sub" style="font-size:0.88rem; color:#e2e8f0;">
+          Expressão resolvida com precisão! Leve a chave até a Câmara para abrir o portão.
+        </div>
+        <button id="btn-take-key" class="btn btn-gold" style="min-height:44px; padding:10px 24px; font-size:0.96rem;">
+          Levar Chave ao Portão ▶
+        </button>
+      </div>
+    </section>
+
+    <!-- =================================================================
+         TELA D — CÂMARA DE EXECUÇÃO ISOLADA (PROCESSO DE CÁLCULO LENTO)
+         ================================================================= -->
+    <section id="screen-exec" class="screen" aria-label="Câmara de Execução Isolada">
+      <div class="card exec-card">
+        <div class="exec-top-bar">
+          <span id="exec-type-badge" class="exec-type-badge">⚡ Câmara de Execução</span>
+          <div style="display:flex; align-items:center; gap:6px;">
+            <span id="exec-phase-pill" class="exec-phase-pill">Fase 1/3</span>
+            <button id="exec-mage-btn" class="btn btn-mage" style="min-height:30px; padding:4px 10px; font-size:0.76rem;">1· Mago 1</button>
+          </div>
+        </div>
+
+        <div id="exec-stage" class="exec-stage" aria-live="polite"></div>
+
+        <div id="exec-narration" class="exec-narration"></div>
+
+        <div class="exec-progress-track" aria-hidden="true">
+          <div id="exec-progress-fill" class="exec-progress-fill"></div>
+        </div>
+
+        <div class="exec-controls">
+          <div class="exec-controls-left">
+            <button id="exec-pause-btn" class="btn">⏸ Pausar</button>
+            <button id="exec-speed-btn" class="btn">⚡ Normal</button>
+          </div>
+          <button id="exec-return-btn" class="btn btn-primary">Voltar à Expressão ▶</button>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <!-- OVERLAY DE GAME OVER LOCAL (RETROCESSO) -->
+  <div id="retro-overlay" class="retro-overlay" role="dialog" aria-modal="true" aria-labelledby="retro-title">
+    <div class="retro-modal">
+      <svg width="56" height="58" viewBox="0 0 48 52" fill="none">
+        <path d="M24 3L42 10V25C42 36 34.4 44.5 24 49C13.6 44.5 6 36 6 25V10L24 3Z" fill="rgba(248,113,113,0.22)" stroke="#f87171" stroke-width="3"/>
+        <path d="M18 14L27 24L21 31L30 42" stroke="#fca5a5" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+      <div id="retro-title" class="retro-title">Escudo Rompido — Retrocesso!</div>
+      <div id="retro-msg" class="retro-msg"></div>
+      <div style="font-size:0.8rem; color:#cbd5e1;">
+        Suas chaves já conquistadas permanecem salvas. O <strong>Instrutor do Reino</strong> preparou uma orientação na Câmara dos Portais.
+      </div>
+      <button id="btn-retro-return" class="btn btn-primary" style="width:100%; min-height:42px;">
+        Recuar à Câmara dos Portais
+      </button>
+    </div>
+  </div>
+
+  <script>
+    /* =====================================================================
+       MOTOR DE ÁUDIO SINTETIZADO (Web Audio API — 100% nativo)
+       ===================================================================== */
+    const SoundFX = (() => {
+      let ctx = null;
+      let enabled = true;
+
+      function ensure() {
+        if (!enabled) return null;
+        try {
+          if (!ctx) {
+            const AC = window.AudioContext || window.webkitAudioContext;
+            if (AC) ctx = new AC();
+          }
+          if (ctx && ctx.state === 'suspended') ctx.resume();
+          return ctx;
+        } catch (e) {
+          return null;
+        }
+      }
+
+      function tone(freq, dur, type = 'sine', vol = 0.07, delay = 0) {
+        const c = ensure();
+        if (!c) return;
+        const t = c.currentTime + delay;
+        const osc = c.createOscillator();
+        const gain = c.createGain();
+        osc.type = type;
+        osc.frequency.setValueAtTime(freq, t);
+        gain.gain.setValueAtTime(0.0001, t);
+        gain.gain.exponentialRampToValueAtTime(vol, t + 0.014);
+        gain.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+        osc.connect(gain);
+        gain.connect(c.destination);
+        osc.start(t);
+        osc.stop(t + dur + 0.02);
+      }
+
+      return {
+        toggle() {
+          enabled = !enabled;
+          return enabled;
+        },
+        step() { tone(523.25, 0.11, 'triangle', 0.07); },
+        ok() {
+          tone(523.25, 0.1, 'triangle', 0.07, 0);
+          tone(659.25, 0.14, 'triangle', 0.08, 0.08);
+        },
+        key() {
+          tone(523.25, 0.11, 'triangle', 0.08, 0);
+          tone(659.25, 0.11, 'triangle', 0.08, 0.09);
+          tone(783.99, 0.13, 'triangle', 0.09, 0.18);
+          tone(1046.5, 0.24, 'triangle', 0.09, 0.27);
+        },
+        crack() {
+          tone(220, 0.14, 'sawtooth', 0.06, 0);
+          tone(155, 0.24, 'sawtooth', 0.065, 0.11);
+        }
+      };
+    })();
+
+    /* =====================================================================
+       FORMATADOR DE EXPRESSÕES MATEMÁTICAS
+       Marcadores suportados nas strings:
+         - [[...]]  -> bloco destacado em cápsula dourada pulsante
+         - <<...>>  -> bloco recém-resolvido em verde suave
+         - {{m1}}   -> Mago 1 inline ("1 ·") que aparece quando mageVisible = true
+       ===================================================================== */
+    function escapeHtml(s) {
+      return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    }
+
+    function styleMathFragment(raw) {
+      let out = '';
+      for (let i = 0; i < raw.length; i++) {
+        const ch = raw[i];
+        if (ch === '(' || ch === ')') {
+          out += `<span class="d-paren">${ch}</span>`;
+        } else if (ch === '[' || ch === ']') {
+          out += `<span class="d-brack">${ch}</span>`;
+        } else if (ch === '{' || ch === '}') {
+          out += `<span class="d-brace">${ch}</span>`;
+        } else if (ch === '+') {
+          out += `<span class="m-pos">+</span>`;
+        } else if (ch === '−') {
+          out += `<span class="m-neg">−</span>`;
+        } else if (ch === '·' || ch === '÷') {
+          out += `<span class="m-op">${ch}</span>`;
+        } else {
+          out += escapeHtml(ch);
+        }
+      }
+      return out;
+    }
+
+    function formatMathHtml(template) {
+      // Quebra por marcadores [[...]], <<...>> e {{m1}}
+      const regex = /(\[\[[^\]]+\]\]|<<[^>]+>>|\{\{m1\}\})/g;
+      const parts = template.split(regex);
+      let html = '';
+
+      for (const part of parts) {
+        if (!part) continue;
+        if (part === '{{m1}}') {
+          html += `<span class="mage-one">1 ·</span>`;
+        } else if (part.startsWith('[[') && part.endsWith(']]')) {
+          const inner = part.slice(2, -2);
+          html += `<span class="focus-block">${formatMathHtml(inner)}</span>`;
+        } else if (part.startsWith('<<') && part.endsWith('>>')) {
+          const inner = part.slice(2, -2);
+          html += `<span class="resolved-block">${formatMathHtml(inner)}</span>`;
+        } else {
+          html += styleMathFragment(part);
+        }
+      }
+      return `<span class="math-expr">${html}</span>`;
+    }
+
+    /* =====================================================================
+       DADOS DA TELA A — 4 DEMONSTRAÇÕES EM CASCATA
+       ===================================================================== */
+    const DEMOS = [
+      {
+        title: '1. Ordem das Operações',
+        magoDefault: false,
+        lines: [
+          {
+            expr: '6 + [[2 · (−4)]]',
+            note: 'Multiplicação e divisão têm prioridade sobre soma e subtração. Resolvemos primeiro <strong>2 · (−4)</strong>.',
+            exec: {
+              kind: 'multdiv',
+              title: 'Multiplicação · Prioridade',
+              expr: '2 · (−4)',
+              opRole: 'Multiplicador (+2)',
+              valRole: 'Passo-base (−4)',
+              opText: '+2',
+              valText: '−4',
+              inverts: false,
+              calcLine: '2 passos de Antimatéria (−4) → −8',
+              result: '−8',
+              note1: 'Separamos o Multiplicador (+2) do passo-base de Antimatéria (−4).',
+              note2: 'Multiplicador positivo mantém o sentido: 2 vezes (−4) acumulam −8 em Antimatéria.',
+              note3: 'Resultado forjado: −8! Retornando para substituir o bloco na expressão.'
+            }
+          },
+          {
+            expr: '[[6 + <<(−8)>>]]',
+            note: 'Dois passos de Antimatéria (−4) resultam em <strong>−8</strong>. Agora combinamos Matéria (+6) com Antimatéria (−8).',
+            exec: {
+              kind: 'sumsub',
+              title: 'Fusão Matéria & Antimatéria',
+              expr: '6 + (−8)',
+              posTotal: 6,
+              negTotal: 8,
+              result: '−2',
+              note1: 'Separamos Matéria (+6) em azul e Antimatéria (−8) em laranja.',
+              note2: '6 unidades de Matéria anulam 6 de Antimatéria em flash dourado; sobram 2 de Antimatéria.',
+              note3: 'Saldo final da fusão: −2!'
+            }
+          },
+          {
+            expr: '<<−2>>',
+            note: 'Resultado final: <strong>−2</strong> (Antimatéria). A expressão se afunila linha a linha!',
+            final: true
+          }
+        ]
+      },
+      {
+        title: '2. Armadilha das Potências: (−2)² vs −2²',
+        magoDefault: true,
+        lines: [
+          {
+            expr: '[[(−2)²]] − {{m1}}2²',
+            note: 'Com parênteses, o expoente 2 atinge o sinal: <strong>(−2) · (−2) = +4</strong> (Matéria).',
+            exec: {
+              kind: 'pow-paren',
+              title: 'Potência com Parênteses',
+              expr: '(−2)²',
+              factors: ['(−2)', '(−2)'],
+              hasInversion: true,
+              calcText: 'Inversor com Antimatéria → Matéria (+4)',
+              result: '+4',
+              note1: 'Base inteira (−2) protegida pelos parênteses: o sinal entra na potência.',
+              note2: 'Expandindo em fatores: (−2) · (−2). O escudo gira 180° e transforma em Matéria!',
+              note3: 'Resultado forjado: +4 (Matéria)!'
+            }
+          },
+          {
+            expr: '<<(+4)>> − [[{{m1}}2²]]',
+            note: 'Sem parênteses, o Mago 1 revela <strong>−1 · 2²</strong>: a potência calcula só <strong>2² = +4</strong> e o sinal de fora inverte depois!',
+            exec: {
+              kind: 'pow-bare',
+              title: 'Potência com Inversor Isolado',
+              expr: '−{{m1}}2²',
+              powerPart: '2²',
+              factors: ['2', '2'],
+              innerVal: '4',
+              result: '−4',
+              note1: 'Sem parênteses, o sinal − (ou −1 · do Mago 1) fica aguardando fora da potência.',
+              note2: 'Calculamos apenas 2 · 2 = 4; só então o inversor externo gira o escudo para Antimatéria!',
+              note3: 'Resultado forjado: −4 (Antimatéria)!'
+            }
+          },
+          {
+            expr: '[[(+4) − (+4)]]',
+            note: 'Temos Matéria (+4) combinada com seu oposto Antimatéria (−4).',
+            exec: {
+              kind: 'sumsub',
+              title: 'Aniquilação Completa',
+              expr: '(+4) − (+4)',
+              posTotal: 4,
+              negTotal: 4,
+              result: '0',
+              note1: 'Matéria (+4) em azul encontra Antimatéria (−4) em laranja.',
+              note2: 'As 4 unidades opostas têm mesma intensidade e se anulam completamente em flash dourado!',
+              note3: 'Saldo final: 0 (Origem)!'
+            }
+          },
+          {
+            expr: '<<0>>',
+            note: 'Resultado final: <strong>0</strong>! Parênteses mudam completamente o alcance da potência.',
+            final: true
+          }
+        ]
+      },
+      {
+        title: '3. Força Distributiva',
+        magoDefault: false,
+        lines: [
+          {
+            expr: '[[−2 · (3 − 5)]]',
+            note: 'O fator externo <strong>−2</strong> distribui sua multiplicação e inversão sobre cada termo dentro dos parênteses.',
+            exec: {
+              kind: 'dist',
+              title: 'Força Distributiva',
+              expr: '−2 · (3 − 5)',
+              mult: '−2',
+              t1: '+3',
+              t2: '−5',
+              p1Expr: '(−2)·(+3)',
+              p1Val: '−6',
+              p2Expr: '(−2)·(−5)',
+              p2Val: '+10',
+              result: '−6 + 10',
+              note1: 'O multiplicador externo −2 se prepara para alcançar os dois termos internos: +3 e −5.',
+              note2: '1º arco: (−2)·(+3) = −6. 2º arco: (−2)·(−5) = +10 (inversão de Antimatéria para Matéria!).',
+              note3: 'Forma expandida forjada: −6 + 10!'
+            }
+          },
+          {
+            expr: '[[<<−6>> + <<10>>]]',
+            note: 'Agora somamos Antimatéria (−6) com Matéria (+10).',
+            exec: {
+              kind: 'sumsub',
+              title: 'Fusão Matéria & Antimatéria',
+              expr: '−6 + 10',
+              posTotal: 10,
+              negTotal: 6,
+              result: '+4',
+              note1: 'Antimatéria (−6) em laranja encontra Matéria (+10) em azul.',
+              note2: '6 unidades opostas se anulam no centro; restam 4 unidades de Matéria.',
+              note3: 'Saldo final: +4 (Matéria)!'
+            }
+          },
+          {
+            expr: '<<+4>>',
+            note: 'Resultado final: <strong>+4</strong> (Matéria). A distributiva prepara o caminho para a álgebra!',
+            final: true
+          }
+        ]
+      },
+      {
+        title: '4. Camadas ( ), [ ] e { }',
+        magoDefault: true,
+        lines: [
+          {
+            expr: '−{{m1}}{ 2 − [ [[5 + (−3)]] ] }',
+            note: 'Sempre resolvemos da camada mais interna para a externa: primeiro o interior dos <strong>colchetes [ ]</strong>.',
+            exec: {
+              kind: 'sumsub',
+              title: 'Camada Interna [ ]',
+              expr: '5 + (−3)',
+              posTotal: 5,
+              negTotal: 3,
+              result: '+2',
+              note1: 'Dentro dos colchetes, separamos Matéria (+5) e Antimatéria (−3).',
+              note2: '3 unidades se anulam no centro, deixando saldo de +2 em Matéria.',
+              note3: 'Os colchetes colapsam em +2!'
+            }
+          },
+          {
+            expr: '−{{m1}}{ [[2 − [ <<+2>> ]]] }',
+            note: 'Os colchetes colapsam em <strong>+2</strong>. Agora resolvemos o interior das <strong>chaves { }</strong>: <strong>2 − 2</strong>.',
+            exec: {
+              kind: 'sumsub',
+              title: 'Interior das Chaves { }',
+              expr: '2 − (+2)',
+              posTotal: 2,
+              negTotal: 2,
+              result: '0',
+              note1: 'Dentro das chaves, Matéria (+2) encontra seu oposto Antimatéria (−2).',
+              note2: 'As 2 unidades opostas se anulam totalmente em flash dourado.',
+              note3: 'O interior das chaves colapsa em 0!'
+            }
+          },
+          {
+            expr: '[[−{{m1}}{ <<0>> }]]',
+            note: 'O oposto de zero continua sendo zero.',
+            exec: {
+              kind: 'multdiv',
+              title: 'Inversão sobre Zero',
+              expr: '−{{m1}}{ 0 }',
+              opRole: 'Inversor (−1)',
+              valRole: 'Origem (0)',
+              opText: '−1',
+              valText: '0',
+              inverts: false,
+              calcLine: 'O oposto da origem permanece na origem: 0',
+              result: '0',
+              note1: 'O inversor externo (−1) atua sobre a origem (0).',
+              note2: 'Zero não tem lado positivo nem negativo: permanece exatamente 0.',
+              note3: 'Resultado final forjado: 0!'
+            }
+          },
+          {
+            expr: '<<0>>',
+            note: 'Resultado final: <strong>0</strong>! Você está pronto para entrar na Câmara dos Portais.',
+            final: true
+          }
+        ]
+      }
+    ];
+
+    /* =====================================================================
+       DADOS DOS 5 PORTÕES — CICLO A E CICLO B (100% VERIFICADOS)
+       ===================================================================== */
+    const CYCLES = {
+      A: [
+        {
+          id: 0,
+          roman: 'I',
+          short: 'Ordem',
+          title: 'Portão I — Ordem das Operações',
+          brief: 'Resolva multiplicações antes de somas e lembre-se de que um sinal negativo antes dos parênteses atua como inversor.',
+          original: '5 + 3 · (−4) − {{m1}}(−2)',
+          steps: [
+            {
+              activeLine: '5 + [[3 · (−4)]] − {{m1}}(−2)',
+              afterLine: '5 + <<(−12)>> − {{m1}}(−2)',
+              prompt: 'Pela ordem das operações, qual o resultado de 3 · (−4)?',
+              correct: '−12',
+              options: ['−12', '+12', '−7', '−1'],
+              hint: 'Na ordem das operações, a multiplicação vem antes da soma: 3 passos de Antimatéria (−4) resultam em −12, não +12.',
+              exec: {
+                kind: 'multdiv',
+                title: 'Multiplicação · Prioridade',
+                expr: '3 · (−4)',
+                opRole: 'Multiplicador (+3)',
+                valRole: 'Passo-base (−4)',
+                opText: '+3',
+                valText: '−4',
+                inverts: false,
+                calcLine: '3 × (−4) = −12 (Antimatéria)',
+                result: '−12',
+                note1: 'Multiplicador positivo (+3) comanda 3 repetições de Antimatéria (−4).',
+                note2: 'Sem inversor negativo, o sentido permanece Antimatéria: 3 × 4 = 12 → −12.',
+                note3: 'Bloco 3 · (−4) forjado em −12!'
+              }
+            },
+            {
+              activeLine: '[[5 + (−12)]] − {{m1}}(−2)',
+              afterLine: '<<−7>> − {{m1}}(−2)',
+              prompt: 'Combine Matéria (+5) com Antimatéria (−12):',
+              correct: '−7',
+              options: ['−7', '+7', '−17', '+17'],
+              hint: 'Ao somar sinais diferentes (+5 e −12), subtraímos os módulos (12 − 5 = 7) e mantemos o sinal de maior intensidade (Antimatéria: −7).',
+              exec: {
+                kind: 'sumsub',
+                title: 'Fusão Matéria & Antimatéria',
+                expr: '5 + (−12)',
+                posTotal: 5,
+                negTotal: 12,
+                result: '−7',
+                note1: 'Matéria (+5) em azul se aproxima de Antimatéria (−12) em laranja.',
+                note2: '5 unidades opostas se anulam; restam 7 unidades de Antimatéria.',
+                note3: 'Saldo forjado: −7!'
+              }
+            },
+            {
+              activeLine: '−7 [[− {{m1}}(−2)]]',
+              afterLine: '−7 <<+ 2>>',
+              prompt: 'Aplique o inversor externo sobre Antimatéria (−2):',
+              correct: '+2',
+              options: ['+2', '−2', '0', '+4'],
+              hint: 'Ative o Mago 1: −(−2) equivale a −1 · (−2). O inversor externo transforma Antimatéria (−2) em Matéria (+2).',
+              exec: {
+                kind: 'multdiv',
+                title: 'Inversão de Sinal · Mago 1',
+                expr: '−{{m1}}(−2)',
+                opRole: 'Inversor (−1)',
+                valRole: 'Direção (−2)',
+                opText: '−1',
+                valText: '−2',
+                inverts: true,
+                calcLine: 'Escudo gira 180°: Antimatéria (−2) → Matéria (+2)',
+                result: '+2',
+                note1: 'O sinal externo − (Mago 1: −1 ·) age como inversor sobre Antimatéria (−2).',
+                note2: 'Pulso de Energia lógica no escudo! Giro de 180° converte (−2) em Matéria (+2).',
+                note3: 'Bloco −(−2) forjado em +2!'
+              }
+            },
+            {
+              activeLine: '[[−7 + 2]]',
+              afterLine: '<<−5>>',
+              prompt: 'Último passo! Qual o valor de −7 + 2?',
+              correct: '−5',
+              options: ['−5', '+5', '−9', '+9'],
+              hint: 'Partindo de Antimatéria (−7) e adicionando Matéria (+2), avançamos 2 unidades em direção ao zero e chegamos em −5.',
+              exec: {
+                kind: 'sumsub',
+                title: 'Fusão Final',
+                expr: '−7 + 2',
+                posTotal: 2,
+                negTotal: 7,
+                result: '−5',
+                note1: 'Antimatéria (−7) encontra Matéria (+2).',
+                note2: '2 unidades opostas se anulam; permanecem 5 unidades de Antimatéria.',
+                note3: 'Valor final forjado: −5!'
+              }
+            }
+          ],
+          finalValue: '−5'
+        },
+        {
+          id: 1,
+          roman: 'II',
+          short: 'Potências',
+          title: 'Portão II — Potências e Sinais',
+          brief: 'Observe com atenção onde estão os parênteses: (−a)² inclui o sinal na potência; −a² deixa o sinal fora como inversor.',
+          original: '−{{m1}}2² + (−3)² + (−1)³',
+          steps: [
+            {
+              activeLine: '[[−{{m1}}2²]] + (−3)² + (−1)³',
+              afterLine: '<<−4>> + (−3)² + (−1)³',
+              prompt: 'Atenção à ausência de parênteses! Quanto vale −2²?',
+              correct: '−4',
+              options: ['−4', '+4', '−2', '+2'],
+              hint: 'Sem parênteses, o expoente 2 atua apenas sobre o 2. O Mago 1 mostra −1 · 2² = −1 · 4 = −4.',
+              exec: {
+                kind: 'pow-bare',
+                title: 'Potência com Inversor Isolado',
+                expr: '−{{m1}}2²',
+                powerPart: '2²',
+                factors: ['2', '2'],
+                innerVal: '4',
+                result: '−4',
+                note1: 'Sem parênteses, o sinal − (ou −1 ·) fica aguardando do lado de fora.',
+                note2: 'Expandimos apenas 2 · 2 = 4; em seguida o inversor gira o escudo para −4.',
+                note3: 'Resultado forjado: −4 (Antimatéria)!'
+              }
+            },
+            {
+              activeLine: '−4 + [[(−3)²]] + (−1)³',
+              afterLine: '−4 + <<9>> + (−1)³',
+              prompt: 'Agora com parênteses! Quanto vale (−3)²?',
+              correct: '+9',
+              options: ['+9', '−9', '−6', '+6'],
+              hint: 'Com parênteses, a base inteira é −3: (−3) · (−3). Dois sinais de Antimatéria se invertem e geram Matéria (+9), não −6 nem −9.',
+              exec: {
+                kind: 'pow-paren',
+                title: 'Potência com Parênteses',
+                expr: '(−3)²',
+                factors: ['(−3)', '(−3)'],
+                hasInversion: true,
+                calcText: '(−3) · (−3) = +9 (Matéria)',
+                result: '+9',
+                note1: 'Parênteses protegem a base inteira (−3) sob o expoente par 2.',
+                note2: 'Expandindo: (−3) · (−3). O escudo gira 180° e transforma em Matéria (+9)!',
+                note3: 'Resultado forjado: +9!'
+              }
+            },
+            {
+              activeLine: '−4 + 9 + [[(−1)³]]',
+              afterLine: '−4 + 9 + <<(−1)>>',
+              prompt: 'Expoente ímpar sobre Antimatéria: quanto vale (−1)³?',
+              correct: '−1',
+              options: ['−1', '+1', '−3', '+3'],
+              hint: 'Em (−1)³ = (−1)·(−1)·(−1), três fatores de −1 mantêm a Antimatéria (−1). Cuidado para não multiplicar a base pelo expoente!',
+              exec: {
+                kind: 'pow-paren',
+                title: 'Potência de Expoente Ímpar',
+                expr: '(−1)³',
+                factors: ['(−1)', '(−1)', '(−1)'],
+                hasInversion: false,
+                calcText: '(+1) · (−1) = −1 (Antimatéria)',
+                result: '−1',
+                note1: 'Base inteira (−1) repetida 3 vezes (expoente ímpar).',
+                note2: 'Dois (−1) geram +1; o terceiro (−1) devolve o sinal para Antimatéria (−1)!',
+                note3: 'Resultado forjado: −1!'
+              }
+            },
+            {
+              activeLine: '[[−4 + 9 − 1]]',
+              afterLine: '<<+4>>',
+              prompt: 'Finalize a combinação de Matéria e Antimatéria:',
+              correct: '+4',
+              options: ['+4', '−4', '+6', '−6'],
+              hint: 'Junte as Antimatérias (−4 com −1 = −5) e combine com a Matéria (+9): +9 − 5 = +4.',
+              exec: {
+                kind: 'sumsub',
+                title: 'Fusão Matéria & Antimatéria',
+                expr: '−4 + 9 − 1',
+                posTotal: 9,
+                negTotal: 5,
+                result: '+4',
+                note1: 'Agrupamos Matéria (+9) em azul e Antimatéria (−4 e −1 = −5) em laranja.',
+                note2: '5 unidades opostas se anulam; sobram 4 unidades de Matéria.',
+                note3: 'Valor final forjado: +4!'
+              }
+            }
+          ],
+          finalValue: '+4'
+        },
+        {
+          id: 2,
+          roman: 'III',
+          short: 'Distributiva',
+          title: 'Portão III — Força Distributiva',
+          brief: 'Quando um fator negativo multiplica parênteses, ele inverte o sinal de CADA termo interno. Use o Mago 1 quando o sinal estiver sozinho!',
+          original: '−3 · (2 − 5) − {{m1}}(4 − 1)',
+          steps: [
+            {
+              activeLine: '[[−3 · (2 − 5)]] − {{m1}}(4 − 1)',
+              afterLine: '<<−6 + 15>> − {{m1}}(4 − 1)',
+              prompt: 'Aplique a distributiva de −3 sobre (2 − 5):',
+              correct: '−6 + 15',
+              options: ['−6 + 15', '−6 − 15', '+6 − 15', '+6 + 15'],
+              hint: 'Distribua −3 para os dois termos: −3 · (+2) = −6 e −3 · (−5) = +15. O sinal negativo inverte o −5 para +15!',
+              exec: {
+                kind: 'dist',
+                title: 'Força Distributiva',
+                expr: '−3 · (2 − 5)',
+                mult: '−3',
+                t1: '+2',
+                t2: '−5',
+                p1Expr: '(−3)·(+2)',
+                p1Val: '−6',
+                p2Expr: '(−3)·(−5)',
+                p2Val: '+15',
+                result: '−6 + 15',
+                note1: 'O multiplicador externo −3 mira os dois termos dentro dos parênteses: +2 e −5.',
+                note2: '1º arco: (−3)·(+2) = −6. 2º arco: (−3)·(−5) = +15 (inversão para Matéria).',
+                note3: 'Expressão expandida forjada: −6 + 15!'
+              }
+            },
+            {
+              activeLine: '−6 + 15 [[− {{m1}}(4 − 1)]]',
+              afterLine: '−6 + 15 <<− 4 + 1>>',
+              prompt: 'Distribua o inversor externo −(4 − 1) (dica: ative o Mago 1):',
+              correct: '−4 + 1',
+              options: ['−4 + 1', '−4 − 1', '+4 − 1', '+4 + 1'],
+              hint: 'Com o Mago 1, −(4 − 1) é −1 · (4 − 1). Distribuindo −1: −1·(+4) = −4 e −1·(−1) = +1.',
+              exec: {
+                kind: 'dist',
+                title: 'Distributiva do Mago 1 (−1)',
+                expr: '−{{m1}}(4 − 1)',
+                mult: '−1',
+                t1: '+4',
+                t2: '−1',
+                p1Expr: '(−1)·(+4)',
+                p1Val: '−4',
+                p2Expr: '(−1)·(−1)',
+                p2Val: '+1',
+                result: '−4 + 1',
+                note1: 'O Mago 1 revela −1 · (4 − 1): o inversor −1 alcança cada termo interno.',
+                note2: '1º arco: (−1)·(+4) = −4. 2º arco: (−1)·(−1) = +1.',
+                note3: 'Forma expandida forjada: −4 + 1!'
+              }
+            },
+            {
+              activeLine: '[[−6 + 15 − 4 + 1]]',
+              afterLine: '<<+6>>',
+              prompt: 'Some os termos finais de Matéria e Antimatéria:',
+              correct: '+6',
+              options: ['+6', '−6', '+4', '+14'],
+              hint: 'Some Matéria (+15 + 1 = +16) e Antimatéria (−6 − 4 = −10). Por fim, +16 − 10 = +6.',
+              exec: {
+                kind: 'sumsub',
+                title: 'Fusão Final',
+                expr: '−6 + 15 − 4 + 1',
+                posTotal: 16,
+                negTotal: 10,
+                result: '+6',
+                note1: 'Agrupamos toda a Matéria (+15 + 1 = +16) e toda a Antimatéria (−6 − 4 = −10).',
+                note2: '10 unidades opostas se anulam no centro; sobram 6 unidades de Matéria.',
+                note3: 'Valor final forjado: +6!'
+              }
+            }
+          ],
+          finalValue: '+6'
+        },
+        {
+          id: 3,
+          roman: 'IV',
+          short: 'Camadas',
+          title: 'Portão IV — Camadas ( ) [ ] { }',
+          brief: 'Avance de dentro para fora: resolva primeiro o que está nos colchetes [ ], depois nas chaves { }, respeitando multiplicações internas.',
+          original: '10 − {{m1}}{ 4 + [ 2 · (−3) − {{m1}}(−5) ] }',
+          steps: [
+            {
+              activeLine: '10 − {{m1}}{ 4 + [ [[2 · (−3)]] − {{m1}}(−5) ] }',
+              afterLine: '10 − {{m1}}{ 4 + [ <<−6>> − {{m1}}(−5) ] }',
+              prompt: 'Dentro dos colchetes, comece pela multiplicação 2 · (−3):',
+              correct: '−6',
+              options: ['−6', '+6', '−1', '−5'],
+              hint: 'Dentro dos colchetes, a multiplicação tem prioridade: 2 · (−3) = −6.',
+              exec: {
+                kind: 'multdiv',
+                title: 'Multiplicação nos Colchetes',
+                expr: '2 · (−3)',
+                opRole: 'Multiplicador (+2)',
+                valRole: 'Passo-base (−3)',
+                opText: '+2',
+                valText: '−3',
+                inverts: false,
+                calcLine: '2 × (−3) = −6 (Antimatéria)',
+                result: '−6',
+                note1: 'Dentro dos colchetes, isolamos a multiplicação 2 · (−3).',
+                note2: 'Multiplicador positivo mantém Antimatéria: 2 vezes (−3) = −6.',
+                note3: 'Resultado forjado: −6!'
+              }
+            },
+            {
+              activeLine: '10 − {{m1}}{ 4 + [[ [ −6 − {{m1}}(−5) ] ]] }',
+              afterLine: '10 − {{m1}}{ 4 + <<(−1)>> }',
+              prompt: 'Resolva o interior dos colchetes [ −6 − (−5) ]:',
+              correct: '−1',
+              options: ['−1', '−11', '+1', '+11'],
+              hint: 'Primeiro inverta −(−5) em +5. Depois combine −6 + 5 = −1.',
+              exec: {
+                kind: 'sumsub',
+                title: 'Fechando os Colchetes [ ]',
+                expr: '−6 − (−5)  →  −6 + 5',
+                posTotal: 5,
+                negTotal: 6,
+                result: '−1',
+                note1: 'O inversor −(−5) vira Matéria (+5), que encontra Antimatéria (−6).',
+                note2: '5 unidades opostas se anulam no centro; resta 1 unidade de Antimatéria.',
+                note3: 'Os colchetes colapsam em −1!'
+              }
+            },
+            {
+              activeLine: '10 − {{m1}}[[{ 4 + (−1) }]]',
+              afterLine: '10 − <<(+3)>>',
+              prompt: 'Agora resolva o interior das chaves { 4 + (−1) }:',
+              correct: '+3',
+              options: ['+3', '−3', '+5', '−5'],
+              hint: 'Dentro das chaves, 4 + (−1) equivale a 4 − 1 = +3.',
+              exec: {
+                kind: 'sumsub',
+                title: 'Fechando as Chaves { }',
+                expr: '4 + (−1)',
+                posTotal: 4,
+                negTotal: 1,
+                result: '+3',
+                note1: 'Dentro das chaves, Matéria (+4) encontra Antimatéria (−1).',
+                note2: '1 unidade se anula; permanecem 3 unidades de Matéria.',
+                note3: 'As chaves colapsam em +3!'
+              }
+            },
+            {
+              activeLine: '[[10 − (+3)]]',
+              afterLine: '<<+7>>',
+              prompt: 'Último passo! Resolva 10 − (+3):',
+              correct: '+7',
+              options: ['+7', '+13', '−7', '−13'],
+              hint: 'O inversor externo transforma +3 em −3: 10 − 3 = +7.',
+              exec: {
+                kind: 'sumsub',
+                title: 'Fusão Final',
+                expr: '10 − (+3)  →  10 − 3',
+                posTotal: 10,
+                negTotal: 3,
+                result: '+7',
+                note1: 'O inversor externo transforma (+3) em Antimatéria (−3) diante de Matéria (+10).',
+                note2: '3 unidades se anulam no centro; restam 7 unidades de Matéria.',
+                note3: 'Valor final forjado: +7!'
+              }
+            }
+          ],
+          finalValue: '+7'
+        },
+        {
+          id: 4,
+          roman: 'V',
+          short: 'Núcleo',
+          title: 'Portão V — A Expressão Clássica (Núcleo)',
+          brief: 'O desafio final reúne todas as leis: camadas ( ) [ ] { }, potências com sinal e inversão final nas chaves!',
+          original: '−{{m1}}{ (−2)² − [ −2 · (1 − 4) + (−3)² ] }',
+          steps: [
+            {
+              activeLine: '−{{m1}}{ (−2)² − [ −2 · [[(1 − 4)]] + (−3)² ] }',
+              afterLine: '−{{m1}}{ (−2)² − [ −2 · <<(−3)>> + (−3)² ] }',
+              prompt: 'Camada mais interna: resolva os parênteses (1 − 4):',
+              correct: '−3',
+              options: ['−3', '+3', '−5', '+5'],
+              hint: 'Em (1 − 4), tiramos 4 de 1, cruzando o zero para Antimatéria (−3).',
+              exec: {
+                kind: 'sumsub',
+                title: 'Parênteses Internos ( )',
+                expr: '1 − 4',
+                posTotal: 1,
+                negTotal: 4,
+                result: '−3',
+                note1: 'Matéria (+1) encontra Antimatéria (−4) dentro dos parênteses.',
+                note2: '1 unidade oposta se anula; sobram 3 unidades de Antimatéria.',
+                note3: 'Os parênteses colapsam em −3!'
+              }
+            },
+            {
+              activeLine: '−{{m1}}{ (−2)² − [ −2 · (−3) + [[(−3)²]] ] }',
+              afterLine: '−{{m1}}{ (−2)² − [ −2 · (−3) + <<9>> ] }',
+              prompt: 'Dentro dos colchetes, resolva a potência (−3)²:',
+              correct: '+9',
+              options: ['+9', '−9', '−6', '+6'],
+              hint: 'A base está entre parênteses: (−3)² = (−3) · (−3) = +9 (Matéria).',
+              exec: {
+                kind: 'pow-paren',
+                title: 'Potência com Parênteses',
+                expr: '(−3)²',
+                factors: ['(−3)', '(−3)'],
+                hasInversion: true,
+                calcText: '(−3) · (−3) = +9 (Matéria)',
+                result: '+9',
+                note1: 'Base inteira (−3) protegida pelos parênteses.',
+                note2: 'Expandimos (−3) · (−3): o escudo gira 180° e converte em Matéria (+9)!',
+                note3: 'Potência forjada em +9!'
+              }
+            },
+            {
+              activeLine: '−{{m1}}{ (−2)² − [ [[−2 · (−3)]] + 9 ] }',
+              afterLine: '−{{m1}}{ (−2)² − [ <<6>> + 9 ] }',
+              prompt: 'Ainda nos colchetes, resolva −2 · (−3):',
+              correct: '+6',
+              options: ['+6', '−6', '−5', '+5'],
+              hint: 'Multiplicador negativo (−2) inverte Antimatéria (−3) em Matéria: (−2)·(−3) = +6.',
+              exec: {
+                kind: 'multdiv',
+                title: 'Multiplicação com Inversor',
+                expr: '−2 · (−3)',
+                opRole: 'Inversor (−2)',
+                valRole: 'Passo-base (−3)',
+                opText: '−2',
+                valText: '−3',
+                inverts: true,
+                calcLine: 'Escudo gira 180°: 2 × 3 = +6 (Matéria)',
+                result: '+6',
+                note1: 'Multiplicador negativo (−2) atua como inversor sobre Antimatéria (−3).',
+                note2: 'Pulso no escudo gira 180° para Matéria: 2 × 3 = +6!',
+                note3: 'Produto forjado em +6!'
+              }
+            },
+            {
+              activeLine: '−{{m1}}{ (−2)² − [[ [ 6 + 9 ] ]] }',
+              afterLine: '−{{m1}}{ (−2)² − <<15>> }',
+              prompt: 'Feche os colchetes resolvendo [ 6 + 9 ]:',
+              correct: '+15',
+              options: ['+15', '−15', '+3', '−3'],
+              hint: 'Duas parcelas de Matéria se somam diretamente: 6 + 9 = +15.',
+              exec: {
+                kind: 'sumsub',
+                title: 'Acúmulo de Matéria [ ]',
+                expr: '6 + 9',
+                posTotal: 15,
+                negTotal: 0,
+                result: '+15',
+                note1: 'Duas parcelas de Matéria (+6 e +9) no mesmo sentido azul.',
+                note2: 'Sem Antimatéria para anular, as intensidades se somam: 6 + 9 = +15.',
+                note3: 'Os colchetes colapsam em +15!'
+              }
+            },
+            {
+              activeLine: '−{{m1}}{ [[(−2)²]] − 15 }',
+              afterLine: '−{{m1}}{ <<4>> − 15 }',
+              prompt: 'Dentro das chaves, calcule a potência (−2)²:',
+              correct: '+4',
+              options: ['+4', '−4', '+2', '−2'],
+              hint: 'Com parênteses, (−2)² = (−2)·(−2) = +4.',
+              exec: {
+                kind: 'pow-paren',
+                title: 'Potência com Parênteses',
+                expr: '(−2)²',
+                factors: ['(−2)', '(−2)'],
+                hasInversion: true,
+                calcText: '(−2) · (−2) = +4 (Matéria)',
+                result: '+4',
+                note1: 'Base (−2) protegida pelos parênteses com expoente 2.',
+                note2: 'Expandindo (−2) · (−2): o escudo gira 180° e gera Matéria (+4)!',
+                note3: 'Potência forjada em +4!'
+              }
+            },
+            {
+              activeLine: '[[−{{m1}}{ 4 − 15 }]]',
+              afterLine: '<<+11>>',
+              prompt: 'Passo final do Núcleo! Resolva 4 − 15 e aplique o inversor externo:',
+              correct: '+11',
+              options: ['+11', '−11', '+19', '−19'],
+              hint: 'Dentro das chaves, 4 − 15 = −11. O Mago 1 revela −1 · (−11): o inversor transforma −11 em +11!',
+              exec: {
+                kind: 'multdiv',
+                title: 'Inversão Final das Chaves',
+                expr: '−{{m1}}{ 4 − 15 }',
+                opRole: 'Inversor (−1)',
+                valRole: 'Chaves (4−15 = −11)',
+                opText: '−1',
+                valText: '−11',
+                inverts: true,
+                calcLine: 'Dentro das chaves: −11 → Escudo gira 180° → +11',
+                result: '+11',
+                note1: 'Dentro das chaves, 4 − 15 = −11 (Antimatéria). O Mago 1 revela o inversor −1.',
+                note2: 'Pulso de Energia lógica no escudo! Giro de 180° converte (−11) em Matéria (+11)!',
+                note3: 'Núcleo decifrado: +11!'
+              }
+            }
+          ],
+          finalValue: '+11'
+        }
+      ],
+
+      B: [
+        {
+          id: 0,
+          roman: 'I',
+          short: 'Ordem',
+          title: 'Portão I — Ordem das Operações (Ciclo B)',
+          brief: 'Divisões e multiplicações têm prioridade máxima antes de subtrair ou inverter sinais.',
+          original: '12 ÷ (−3) − 2 · (−5)',
+          steps: [
+            {
+              activeLine: '[[12 ÷ (−3)]] − 2 · (−5)',
+              afterLine: '<<−4>> − 2 · (−5)',
+              prompt: 'Comece pela divisão 12 ÷ (−3):',
+              correct: '−4',
+              options: ['−4', '+4', '−9', '−36'],
+              hint: 'Divisor negativo (−3) atua como inversor sobre Matéria (+12): 12 ÷ (−3) = −4.',
+              exec: {
+                kind: 'multdiv',
+                title: 'Divisão com Divisor Inversor',
+                expr: '12 ÷ (−3)',
+                opRole: 'Divisor Inversor (−3)',
+                valRole: 'Dividendo (+12)',
+                opText: '÷ (−3)',
+                valText: '+12',
+                inverts: true,
+                calcLine: '12 ÷ 3 = 4 · Escudo gira 180° → −4',
+                result: '−4',
+                note1: 'Dividimos +12 em 3 partes de 4 e separamos o inversor negativo do divisor.',
+                note2: 'Pulso no escudo! O divisor negativo inverte Matéria (+4) em Antimatéria (−4).',
+                note3: 'Quociente forjado: −4!'
+              }
+            },
+            {
+              activeLine: '−4 − [[2 · (−5)]]',
+              afterLine: '−4 − <<(−10)>>',
+              prompt: 'Agora calcule a multiplicação 2 · (−5):',
+              correct: '−10',
+              options: ['−10', '+10', '−7', '−3'],
+              hint: '2 passos de Antimatéria (−5) resultam em −10 (o sinal de menos anterior permanece aguardando).',
+              exec: {
+                kind: 'multdiv',
+                title: 'Multiplicação · Prioridade',
+                expr: '2 · (−5)',
+                opRole: 'Multiplicador (+2)',
+                valRole: 'Passo-base (−5)',
+                opText: '+2',
+                valText: '−5',
+                inverts: false,
+                calcLine: '2 × (−5) = −10 (Antimatéria)',
+                result: '−10',
+                note1: 'Multiplicador positivo (+2) repete o passo-base de Antimatéria (−5).',
+                note2: 'Sem inversão: 2 vezes (−5) resultam em −10.',
+                note3: 'Produto forjado: −10!'
+              }
+            },
+            {
+              activeLine: '−4 [[− {{m1}}(−10)]]',
+              afterLine: '−4 <<+ 10>>',
+              prompt: 'Aplique o inversor externo sobre (−10):',
+              correct: '+10',
+              options: ['+10', '−10', '−14', '+14'],
+              hint: 'Com o Mago 1, −(−10) é −1 · (−10) = +10 (Matéria).',
+              exec: {
+                kind: 'multdiv',
+                title: 'Inversão de Sinal · Mago 1',
+                expr: '−{{m1}}(−10)',
+                opRole: 'Inversor (−1)',
+                valRole: 'Direção (−10)',
+                opText: '−1',
+                valText: '−10',
+                inverts: true,
+                calcLine: 'Escudo gira 180°: (−10) → +10 (Matéria)',
+                result: '+10',
+                note1: 'O Mago 1 mostra −1 · (−10): inversor externo diante de Antimatéria.',
+                note2: 'Escudo gira 180° e transforma Antimatéria (−10) em Matéria (+10)!',
+                note3: 'Resultado forjado: +10!'
+              }
+            },
+            {
+              activeLine: '[[−4 + 10]]',
+              afterLine: '<<+6>>',
+              prompt: 'Finalize calculando −4 + 10:',
+              correct: '+6',
+              options: ['+6', '−6', '+14', '−14'],
+              hint: 'Combinando Antimatéria (−4) com Matéria (+10), sobram +6 de Matéria.',
+              exec: {
+                kind: 'sumsub',
+                title: 'Fusão Final',
+                expr: '−4 + 10',
+                posTotal: 10,
+                negTotal: 4,
+                result: '+6',
+                note1: 'Antimatéria (−4) em laranja encontra Matéria (+10) em azul.',
+                note2: '4 unidades opostas se anulam no centro; sobram 6 de Matéria.',
+                note3: 'Valor final forjado: +6!'
+              }
+            }
+          ],
+          finalValue: '+6'
+        },
+        {
+          id: 1,
+          roman: 'II',
+          short: 'Potências',
+          title: 'Portão II — Potências e Sinais (Ciclo B)',
+          brief: 'Compare expoente ímpar com parênteses, potência sem parênteses e expoente par com parênteses.',
+          original: '(−2)³ − {{m1}}3² − (−2)²',
+          steps: [
+            {
+              activeLine: '[[(−2)³]] − {{m1}}3² − (−2)²',
+              afterLine: '<<−8>> − {{m1}}3² − (−2)²',
+              prompt: 'Calcule (−2)³ (expoente ímpar sobre Antimatéria):',
+              correct: '−8',
+              options: ['−8', '+8', '−6', '+6'],
+              hint: '(−2)³ = (−2)·(−2)·(−2) = −8. Cuidado para não fazer 2 × 3 = 6!',
+              exec: {
+                kind: 'pow-paren',
+                title: 'Potência de Expoente Ímpar',
+                expr: '(−2)³',
+                factors: ['(−2)', '(−2)', '(−2)'],
+                hasInversion: false,
+                calcText: '(+4) · (−2) = −8 (Antimatéria)',
+                result: '−8',
+                note1: 'Base inteira (−2) protegida pelos parênteses repetida 3 vezes.',
+                note2: 'Os dois primeiros fatores geram +4; o terceiro multiplica por (−2) → −8.',
+                note3: 'Potência forjada em −8!'
+              }
+            },
+            {
+              activeLine: '−8 [[− {{m1}}3²]] − (−2)²',
+              afterLine: '−8 <<− 9>> − (−2)²',
+              prompt: 'Sem parênteses: quanto vale −3²?',
+              correct: '−9',
+              options: ['−9', '+9', '−6', '+6'],
+              hint: 'O Mago 1 mostra −1 · 3² = −1 · 9 = −9. O sinal não está elevado ao quadrado.',
+              exec: {
+                kind: 'pow-bare',
+                title: 'Potência com Inversor Isolado',
+                expr: '−{{m1}}3²',
+                powerPart: '3²',
+                factors: ['3', '3'],
+                innerVal: '9',
+                result: '−9',
+                note1: 'Sem parênteses, o sinal − (ou −1 ·) aguarda do lado de fora.',
+                note2: 'Calculamos 3 · 3 = 9; depois o inversor externo gira o escudo para −9.',
+                note3: 'Resultado forjado: −9!'
+              }
+            },
+            {
+              activeLine: '−8 − 9 − [[(−2)²]]',
+              afterLine: '−8 − 9 − <<(+4)>>',
+              prompt: 'Calcule a potência com parênteses (−2)²:',
+              correct: '+4',
+              options: ['+4', '−4', '+2', '−2'],
+              hint: 'Com parênteses, (−2)² = (−2)·(−2) = +4. O sinal de menos que está antes fica fora esperando.',
+              exec: {
+                kind: 'pow-paren',
+                title: 'Potência com Parênteses',
+                expr: '(−2)²',
+                factors: ['(−2)', '(−2)'],
+                hasInversion: true,
+                calcText: '(−2) · (−2) = +4 (Matéria)',
+                result: '+4',
+                note1: 'Base (−2) protegida pelos parênteses sob expoente par 2.',
+                note2: 'Expandindo (−2) · (−2): o escudo gira 180° e gera Matéria (+4)!',
+                note3: 'Potência forjada em +4!'
+              }
+            },
+            {
+              activeLine: '[[−8 − 9 − (+4)]]',
+              afterLine: '<<−21>>',
+              prompt: 'Combine todas as parcelas de Antimatéria:',
+              correct: '−21',
+              options: ['−21', '−13', '+21', '−5'],
+              hint: 'Todas as três parcelas são Antimatéria (−8, −9 e −4). Somando suas intensidades: 8 + 9 + 4 = 21 → −21.',
+              exec: {
+                kind: 'sumsub',
+                title: 'Acúmulo de Antimatéria',
+                expr: '−8 − 9 − 4',
+                posTotal: 0,
+                negTotal: 21,
+                result: '−21',
+                note1: 'Todas as parcelas (−8, −9 e −4) pertencem à Antimatéria (laranja).',
+                note2: 'Sem Matéria para anular, somamos todas as intensidades: 8 + 9 + 4 = 21 → −21.',
+                note3: 'Valor final forjado: −21!'
+              }
+            }
+          ],
+          finalValue: '−21'
+        },
+        {
+          id: 2,
+          roman: 'III',
+          short: 'Distributiva',
+          title: 'Portão III — Força Distributiva (Ciclo B)',
+          brief: 'Aplique a distributiva nos dois blocos, cuidando dos sinais ao multiplicar cada termo.',
+          original: '−2 · (−4 + 3) + 4 · (1 − 3)',
+          steps: [
+            {
+              activeLine: '[[−2 · (−4 + 3)]] + 4 · (1 − 3)',
+              afterLine: '<<8 − 6>> + 4 · (1 − 3)',
+              prompt: 'Distribua −2 sobre (−4 + 3):',
+              correct: '+8 − 6',
+              options: ['+8 − 6', '−8 − 6', '+8 + 6', '−8 + 6'],
+              hint: '−2 · (−4) = +8 (inversor com Antimatéria vira Matéria) e −2 · (+3) = −6.',
+              exec: {
+                kind: 'dist',
+                title: 'Força Distributiva',
+                expr: '−2 · (−4 + 3)',
+                mult: '−2',
+                t1: '−4',
+                t2: '+3',
+                p1Expr: '(−2)·(−4)',
+                p1Val: '+8',
+                p2Expr: '(−2)·(+3)',
+                p2Val: '−6',
+                result: '+8 − 6',
+                note1: 'O multiplicador externo −2 distribui sua ação sobre −4 e +3.',
+                note2: '1º arco: (−2)·(−4) = +8. 2º arco: (−2)·(+3) = −6.',
+                note3: 'Forma expandida forjada: +8 − 6!'
+              }
+            },
+            {
+              activeLine: '8 − 6 [[+ 4 · (1 − 3)]]',
+              afterLine: '8 − 6 <<+ 4 − 12>>',
+              prompt: 'Distribua +4 sobre (1 − 3):',
+              correct: '+4 − 12',
+              options: ['+4 − 12', '+4 + 12', '−4 − 12', '−4 + 12'],
+              hint: '+4 mantém os sinais internos: +4 · (+1) = +4 e +4 · (−3) = −12.',
+              exec: {
+                kind: 'dist',
+                title: 'Força Distributiva Direta',
+                expr: '+4 · (1 − 3)',
+                mult: '+4',
+                t1: '+1',
+                t2: '−3',
+                p1Expr: '(+4)·(+1)',
+                p1Val: '+4',
+                p2Expr: '(+4)·(−3)',
+                p2Val: '−12',
+                result: '+4 − 12',
+                note1: 'O multiplicador positivo +4 mantém o sentido de cada termo interno.',
+                note2: '1º arco: (+4)·(+1) = +4. 2º arco: (+4)·(−3) = −12.',
+                note3: 'Forma expandida forjada: +4 − 12!'
+              }
+            },
+            {
+              activeLine: '[[8 − 6 + 4 − 12]]',
+              afterLine: '<<−6>>',
+              prompt: 'Finalize somando Matéria e Antimatéria:',
+              correct: '−6',
+              options: ['−6', '+6', '−10', '+2'],
+              hint: 'Junte Matéria (8 + 4 = +12) e Antimatéria (−6 − 12 = −18). Resultado: +12 − 18 = −6.',
+              exec: {
+                kind: 'sumsub',
+                title: 'Fusão Final',
+                expr: '8 − 6 + 4 − 12',
+                posTotal: 12,
+                negTotal: 18,
+                result: '−6',
+                note1: 'Agrupamos Matéria (+8 + 4 = +12) e Antimatéria (−6 − 12 = −18).',
+                note2: '12 unidades opostas se anulam no centro; restam 6 de Antimatéria.',
+                note3: 'Valor final forjado: −6!'
+              }
+            }
+          ],
+          finalValue: '−6'
+        },
+        {
+          id: 3,
+          roman: 'IV',
+          short: 'Camadas',
+          title: 'Portão IV — Camadas ( ) [ ] { } (Ciclo B)',
+          brief: 'Resolva de dentro para fora: divisão nos colchetes, fechamento das chaves e inversão externa.',
+          original: '−{{m1}}{ 3 − [ 6 ÷ (−2) + 5 ] } + 4',
+          steps: [
+            {
+              activeLine: '−{{m1}}{ 3 − [ [[6 ÷ (−2)]] + 5 ] } + 4',
+              afterLine: '−{{m1}}{ 3 − [ <<−3>> + 5 ] } + 4',
+              prompt: 'Dentro dos colchetes, resolva 6 ÷ (−2):',
+              correct: '−3',
+              options: ['−3', '+3', '−4', '−12'],
+              hint: 'Divisão de Matéria (+6) por divisor inversor (−2) resulta em Antimatéria (−3).',
+              exec: {
+                kind: 'multdiv',
+                title: 'Divisão nos Colchetes',
+                expr: '6 ÷ (−2)',
+                opRole: 'Divisor Inversor (−2)',
+                valRole: 'Dividendo (+6)',
+                opText: '÷ (−2)',
+                valText: '+6',
+                inverts: true,
+                calcLine: '6 ÷ 2 = 3 · Escudo gira 180° → −3',
+                result: '−3',
+                note1: 'Dividimos +6 em 2 partes iguais de 3; divisor negativo aciona o inversor.',
+                note2: 'Escudo gira 180° e transforma em Antimatéria (−3)!',
+                note3: 'Quociente forjado: −3!'
+              }
+            },
+            {
+              activeLine: '−{{m1}}{ 3 − [[ [ −3 + 5 ] ]] } + 4',
+              afterLine: '−{{m1}}{ 3 − <<(+2)>> } + 4',
+              prompt: 'Resolva o interior dos colchetes [ −3 + 5 ]:',
+              correct: '+2',
+              options: ['+2', '−2', '+8', '−8'],
+              hint: 'Combinando Antimatéria (−3) com Matéria (+5), chegamos em +2.',
+              exec: {
+                kind: 'sumsub',
+                title: 'Fechando os Colchetes [ ]',
+                expr: '−3 + 5',
+                posTotal: 5,
+                negTotal: 3,
+                result: '+2',
+                note1: 'Dentro dos colchetes, Antimatéria (−3) encontra Matéria (+5).',
+                note2: '3 unidades se anulam no centro; restam 2 de Matéria.',
+                note3: 'Os colchetes colapsam em +2!'
+              }
+            },
+            {
+              activeLine: '[[−{{m1}}{ 3 − (+2) }]] + 4',
+              afterLine: '<<−1>> + 4',
+              prompt: 'Resolva as chaves e aplique o inversor externo −{ 3 − 2 }:',
+              correct: '−1',
+              options: ['−1', '+1', '−5', '+5'],
+              hint: 'Dentro das chaves, 3 − 2 = +1. O sinal externo (Mago 1: −1 · (+1)) inverte para −1.',
+              exec: {
+                kind: 'multdiv',
+                title: 'Inversão das Chaves { }',
+                expr: '−{{m1}}{ 3 − 2 }',
+                opRole: 'Inversor (−1)',
+                valRole: 'Chaves (+1)',
+                opText: '−1',
+                valText: '+1',
+                inverts: true,
+                calcLine: '3 − 2 = +1 · Escudo gira 180° → −1',
+                result: '−1',
+                note1: 'Dentro das chaves, 3 − 2 = +1. O Mago 1 revela o inversor externo −1.',
+                note2: 'Escudo gira 180° e converte Matéria (+1) em Antimatéria (−1)!',
+                note3: 'As chaves colapsam em −1!'
+              }
+            },
+            {
+              activeLine: '[[−1 + 4]]',
+              afterLine: '<<+3>>',
+              prompt: 'Passo final! Calcule −1 + 4:',
+              correct: '+3',
+              options: ['+3', '−3', '+5', '−5'],
+              hint: 'Combinando Antimatéria (−1) com Matéria (+4), obtemos +3.',
+              exec: {
+                kind: 'sumsub',
+                title: 'Fusão Final',
+                expr: '−1 + 4',
+                posTotal: 4,
+                negTotal: 1,
+                result: '+3',
+                note1: 'Antimatéria (−1) encontra Matéria (+4).',
+                note2: '1 unidade oposta se anula; permanecem 3 de Matéria.',
+                note3: 'Valor final forjado: +3!'
+              }
+            }
+          ],
+          finalValue: '+3'
+        },
+        {
+          id: 4,
+          roman: 'V',
+          short: 'Núcleo',
+          title: 'Portão V — A Expressão Clássica (Ciclo B)',
+          brief: 'Desmonte camada por camada e não caia na armadilha final de −2² sem parênteses!',
+          original: '−{{m1}}2² + { 5 − [ −3 · (2 − 5) − 4 ] }',
+          steps: [
+            {
+              activeLine: '−{{m1}}2² + { 5 − [ −3 · [[(2 − 5)]] − 4 ] }',
+              afterLine: '−{{m1}}2² + { 5 − [ −3 · <<(−3)>> − 4 ] }',
+              prompt: 'Comece pelos parênteses mais internos (2 − 5):',
+              correct: '−3',
+              options: ['−3', '+3', '−7', '+7'],
+              hint: 'Em 2 − 5, a Antimatéria (−5) supera a Matéria (+2) por 3 unidades: −3.',
+              exec: {
+                kind: 'sumsub',
+                title: 'Parênteses Internos ( )',
+                expr: '2 − 5',
+                posTotal: 2,
+                negTotal: 5,
+                result: '−3',
+                note1: 'Matéria (+2) encontra Antimatéria (−5) dentro dos parênteses.',
+                note2: '2 unidades opostas se anulam; sobram 3 de Antimatéria.',
+                note3: 'Os parênteses colapsam em −3!'
+              }
+            },
+            {
+              activeLine: '−{{m1}}2² + { 5 − [ [[−3 · (−3)]] − 4 ] }',
+              afterLine: '−{{m1}}2² + { 5 − [ <<9>> − 4 ] }',
+              prompt: 'Nos colchetes, calcule −3 · (−3):',
+              correct: '+9',
+              options: ['+9', '−9', '−6', '+6'],
+              hint: 'Multiplicador negativo (−3) inverte Antimatéria (−3) em Matéria: +9.',
+              exec: {
+                kind: 'multdiv',
+                title: 'Multiplicação com Inversor',
+                expr: '−3 · (−3)',
+                opRole: 'Inversor (−3)',
+                valRole: 'Passo-base (−3)',
+                opText: '−3',
+                valText: '−3',
+                inverts: true,
+                calcLine: 'Escudo gira 180°: 3 × 3 = +9 (Matéria)',
+                result: '+9',
+                note1: 'Multiplicador negativo (−3) atua como inversor sobre Antimatéria (−3).',
+                note2: 'Escudo gira 180° para Matéria: 3 × 3 = +9!',
+                note3: 'Produto forjado em +9!'
+              }
+            },
+            {
+              activeLine: '−{{m1}}2² + { 5 − [[ [ 9 − 4 ] ]] }',
+              afterLine: '−{{m1}}2² + { 5 − <<5>> }',
+              prompt: 'Feche os colchetes calculando [ 9 − 4 ]:',
+              correct: '+5',
+              options: ['+5', '−5', '+13', '−13'],
+              hint: '9 − 4 resulta em +5 (Matéria).',
+              exec: {
+                kind: 'sumsub',
+                title: 'Fechando os Colchetes [ ]',
+                expr: '9 − 4',
+                posTotal: 9,
+                negTotal: 4,
+                result: '+5',
+                note1: 'Matéria (+9) encontra Antimatéria (−4) nos colchetes.',
+                note2: '4 unidades opostas se anulam; sobram 5 de Matéria.',
+                note3: 'Os colchetes colapsam em +5!'
+              }
+            },
+            {
+              activeLine: '−{{m1}}2² + [[{ 5 − 5 }]]',
+              afterLine: '−{{m1}}2² + <<0>>',
+              prompt: 'Resolva o interior das chaves { 5 − 5 }:',
+              correct: '0',
+              options: ['0', '+10', '−10', '+1'],
+              hint: 'Matéria (+5) e Antimatéria (−5) se anulam perfeitamente: resultado 0.',
+              exec: {
+                kind: 'sumsub',
+                title: 'Aniquilação nas Chaves { }',
+                expr: '5 − 5',
+                posTotal: 5,
+                negTotal: 5,
+                result: '0',
+                note1: 'Matéria (+5) e Antimatéria (−5) têm exatamente a mesma intensidade.',
+                note2: 'Todas as 5 unidades se anulam em flash dourado!',
+                note3: 'As chaves colapsam em 0!'
+              }
+            },
+            {
+              activeLine: '[[−{{m1}}2²]] + 0',
+              afterLine: '<<−4>>',
+              prompt: 'Último passo! Sem parênteses, quanto vale −2²?',
+              correct: '−4',
+              options: ['−4', '+4', '−2', '+2'],
+              hint: 'A armadilha clássica: −2² sem parênteses significa −1 · 2² = −4 (Antimatéria).',
+              exec: {
+                kind: 'pow-bare',
+                title: 'Potência com Inversor Isolado',
+                expr: '−{{m1}}2²',
+                powerPart: '2²',
+                factors: ['2', '2'],
+                innerVal: '4',
+                result: '−4',
+                note1: 'Sem parênteses, o sinal − (ou −1 ·) aguarda fora da potência.',
+                note2: 'Calculamos 2 · 2 = 4 e o inversor externo gira o escudo para −4!',
+                note3: 'Núcleo decifrado: −4!'
+              }
+            }
+          ],
+          finalValue: '−4'
+        }
+      ]
+    };
+
+    /* =====================================================================
+       ESTADO GLOBAL DO JOGO
+       ===================================================================== */
+    const state = {
+      screen: 'demo',         // 'demo' | 'portals' | 'resolve' | 'exec'
+      mageVisible: false,
+      execSlow: false,        // false = Normal (~4.2s), true = Lento (~6.5s)
+      cycle: 'A',             // 'A' | 'B'
+      unlocked: {
+        A: [false, false, false, false, false],
+        B: [false, false, false, false, false]
+      },
+      // Demo
+      demoIdx: 0,
+      demoLineIdx: 0,
+      demoFreshLine: false,
+      // Portais / Instrutor
+      lastAlert: null,        // { gateTitle, wrongChoice, hint } | null
+      // Resolução atual
+      activeGateIdx: 0,
+      resStepIdx: 0,
+      resHistory: [],         // linhas já concluídas abaixo da original
+      resLocked: false,
+      resCompleted: false,
+      resFreshLine: null      // linha recém-substituída com <<...>> brilhando por ~1.5s
+    };
+
+    /* =====================================================================
+       UTILITÁRIOS DE UI E NAVEGAÇÃO ENTRE AS 4 TELAS
+       ===================================================================== */
+    function showScreen(name) {
+      if (state.screen === 'exec' && name !== 'exec') {
+        ExecEngine.cancel();
+      }
+      state.screen = name;
+      ['demo', 'portals', 'resolve', 'exec'].forEach((id) => {
+        document.getElementById('screen-' + id).classList.toggle('active', id === name);
+      });
+      if (name === 'demo') renderDemo();
+      if (name === 'portals') renderPortals();
+      if (name === 'resolve') renderResolve();
+    }
+
+    function syncMageUI() {
+      document.getElementById('demo-mage-btn').classList.toggle('active', state.mageVisible);
+      document.getElementById('res-mage-btn').classList.toggle('active', state.mageVisible);
+      document.getElementById('exec-mage-btn').classList.toggle('active', state.mageVisible);
+      document.getElementById('demo-cascade').classList.toggle('mage-active', state.mageVisible);
+      document.getElementById('res-cascade').classList.toggle('mage-active', state.mageVisible);
+      document.getElementById('exec-stage').classList.toggle('mage-active', state.mageVisible);
+    }
+
+    document.getElementById('demo-mage-btn').addEventListener('click', () => {
+      state.mageVisible = !state.mageVisible;
+      syncMageUI();
+    });
+
+    document.getElementById('res-mage-btn').addEventListener('click', () => {
+      state.mageVisible = !state.mageVisible;
+      syncMageUI();
+    });
+
+    document.getElementById('exec-mage-btn').addEventListener('click', () => {
+      state.mageVisible = !state.mageVisible;
+      syncMageUI();
+    });
+
+    document.getElementById('btn-sound').addEventListener('click', (e) => {
+      const on = SoundFX.toggle();
+      e.currentTarget.innerHTML = on
+        ? '🔊 <span class="lbl-hide-sm">Som</span>'
+        : '🔇 <span class="lbl-hide-sm">Mudo</span>';
+    });
+
+    /* =====================================================================
+       TELA D — MOTOR DA CÂMARA DE EXECUÇÃO ISOLADA (3 FASES LENTAS + PAUSA)
+       ===================================================================== */
+    const ExecEngine = (() => {
+      const badgeEl = document.getElementById('exec-type-badge');
+      const phasePillEl = document.getElementById('exec-phase-pill');
+      const stageEl = document.getElementById('exec-stage');
+      const narrationEl = document.getElementById('exec-narration');
+      const progressFill = document.getElementById('exec-progress-fill');
+      const pauseBtn = document.getElementById('exec-pause-btn');
+      const speedBtn = document.getElementById('exec-speed-btn');
+      const returnBtn = document.getElementById('exec-return-btn');
+
+      let active = false;
+      let paused = false;
+      let elapsed = 0;
+      let lastTs = 0;
+      let rafId = null;
+      let currentPhase = 0;
+      let currentMeta = null;
+      let onFinishCb = null;
+      let phase2SubTriggered = false;
+
+      function totalDurationMs() {
+        return state.execSlow ? 6500 : 4200;
+      }
+
+      function resultToneClass(valStr) {
+        if (!valStr) return '';
+        if (valStr.trim() === '0') return '';
+        if (valStr.trim().startsWith('+')) return 'is-pos';
+        if (valStr.trim().startsWith('−') || valStr.trim().startsWith('-')) return 'is-neg';
+        return 'is-pos';
+      }
+
+      function miniShieldSvg(id) {
+        return `
+          <svg id="${id}" class="exec-shield-spin-svg" width="26" height="28" viewBox="0 0 28 30" fill="none">
+            <path d="M14 2L24 6V14.5C24 20.8 19.6 25.6 14 28C8.4 25.6 4 20.8 4 14.5V6L14 2Z" fill="#0284c7" stroke="#facc15" stroke-width="2.2"/>
+            <circle cx="14" cy="14.5" r="3.6" fill="#facc15"/>
+          </svg>
+        `;
+      }
+
+      function buildStageHtml(m) {
+        const resCls = resultToneClass(m.result);
+        const resBlock = `
+          <div id="ex-p3" class="exec-phase-block">
+            <div class="exec-result-capsule ${resCls}">
+              <span>=</span>
+              ${formatMathHtml(m.result)}
+            </div>
+          </div>
+        `;
+
+        if (m.kind === 'pow-paren') {
+          const factorsHtml = m.factors.map((f, idx) =>
+            `${idx > 0 ? '<span class="m-op">·</span>' : ''}<span class="exec-factor-chip" data-fidx="${idx}">${formatMathHtml(f)}</span>`
+          ).join('');
+
+          return `
+            <div id="ex-p1" class="exec-phase-block">
+              <div class="exec-sub-label">Base inteira protegida pelos parênteses</div>
+              <div class="exec-hero-math">${formatMathHtml(m.expr)}</div>
+            </div>
+            <div id="ex-p2" class="exec-phase-block">
+              <div class="exec-factors-row">${factorsHtml}</div>
+              <div class="exec-shield-spin-wrap">
+                ${miniShieldSvg('ex-shield-icon')}
+                <span>${m.calcText}</span>
+              </div>
+            </div>
+            ${resBlock}
+          `;
+        }
+
+        if (m.kind === 'pow-bare') {
+          const factorsHtml = m.factors.map((f, idx) =>
+            `${idx > 0 ? '<span class="m-op">·</span>' : ''}<span class="exec-factor-chip" data-fidx="${idx}">${formatMathHtml(f)}</span>`
+          ).join('');
+
+          return `
+            <div id="ex-p1" class="exec-phase-block">
+              <div class="exec-role-row">
+                <div class="exec-role-box is-wait">
+                  <span class="exec-role-tag">Inversor em espera</span>
+                  <span class="exec-role-val">${formatMathHtml('−{{m1}}')}</span>
+                </div>
+                <div class="exec-role-box is-pos">
+                  <span class="exec-role-tag">Potência isolada</span>
+                  <span class="exec-role-val">${formatMathHtml(m.powerPart)}</span>
+                </div>
+              </div>
+            </div>
+            <div id="ex-p2" class="exec-phase-block">
+              <div class="exec-factors-row">
+                <span class="m-neg" style="font-size:1.3rem;">−</span>
+                <span>(</span>${factorsHtml}<span>)</span>
+                <span class="m-op">=</span>
+                <span>${formatMathHtml('−(' + m.innerVal + ')')}</span>
+              </div>
+              <div class="exec-shield-spin-wrap">
+                ${miniShieldSvg('ex-shield-icon')}
+                <span>Inversor externo gira o escudo → Antimatéria!</span>
+              </div>
+            </div>
+            ${resBlock}
+          `;
+        }
+
+        if (m.kind === 'dist') {
+          return `
+            <div id="ex-p1" class="exec-phase-block">
+              <div class="exec-hero-math">${formatMathHtml(m.expr)}</div>
+            </div>
+            <div id="ex-p2" class="exec-phase-block">
+              <svg class="dist-svg" viewBox="0 0 420 112" xmlns="http://www.w3.org/2000/svg">
+                <!-- Arcos animados -->
+                <path id="dist-arc-1" class="dist-arc" d="M 88 52 Q 152 8 214 52" stroke="#38bdf8"/>
+                <path id="dist-arc-2" class="dist-arc" d="M 88 52 Q 204 -8 326 52" stroke="#facc15"/>
+                <!-- Caixas dos termos -->
+                <rect x="34" y="54" width="106" height="36" rx="9" fill="#0f172a" stroke="#c084fc" stroke-width="2"/>
+                <text x="87" y="78" text-anchor="middle" font-size="18" font-weight="900" fill="#e9d5ff">${m.mult}</text>
+
+                <text x="156" y="78" text-anchor="middle" font-size="18" font-weight="900" fill="#94a3b8">· (</text>
+
+                <rect x="174" y="54" width="80" height="36" rx="9" fill="#0f172a" stroke="#38bdf8" stroke-width="1.8"/>
+                <text x="214" y="78" text-anchor="middle" font-size="18" font-weight="900" fill="#f8fafc">${m.t1}</text>
+
+                <rect x="286" y="54" width="80" height="36" rx="9" fill="#0f172a" stroke="#fb923c" stroke-width="1.8"/>
+                <text x="326" y="78" text-anchor="middle" font-size="18" font-weight="900" fill="#f8fafc">${m.t2}</text>
+
+                <text x="380" y="78" text-anchor="middle" font-size="18" font-weight="900" fill="#94a3b8">)</text>
+              </svg>
+              <div class="exec-factors-row" style="font-size:clamp(0.92rem, 2vw, 1.15rem);">
+                <span class="exec-factor-chip" data-fidx="0">${formatMathHtml(m.p1Expr + ' = ' + m.p1Val)}</span>
+                <span class="exec-factor-chip" data-fidx="1">${formatMathHtml(m.p2Expr + ' = ' + m.p2Val)}</span>
+              </div>
+            </div>
+            ${resBlock}
+          `;
+        }
+
+        if (m.kind === 'multdiv') {
+          return `
+            <div id="ex-p1" class="exec-phase-block">
+              <div class="exec-role-row">
+                <div class="exec-role-box ${m.inverts ? 'is-wait' : 'is-pos'}">
+                  <span class="exec-role-tag">${m.opRole}</span>
+                  <span class="exec-role-val">${formatMathHtml(m.opText)}</span>
+                </div>
+                <div class="exec-role-box">
+                  <span class="exec-role-tag">${m.valRole}</span>
+                  <span class="exec-role-val">${formatMathHtml(m.valText)}</span>
+                </div>
+              </div>
+            </div>
+            <div id="ex-p2" class="exec-phase-block">
+              <div class="exec-shield-spin-wrap">
+                ${miniShieldSvg('ex-shield-icon')}
+                <span>${m.calcLine}</span>
+              </div>
+            </div>
+            ${resBlock}
+          `;
+        }
+
+        // 'sumsub' — Fusão Matéria (+) e Antimatéria (−)
+        const maxRef = Math.max(1, m.posTotal, m.negTotal);
+        const posW = m.posTotal > 0 ? Math.max(24, Math.round((m.posTotal / maxRef) * 44)) : 0;
+        const negW = m.negTotal > 0 ? Math.max(24, Math.round((m.negTotal / maxRef) * 44)) : 0;
+        const annul = Math.min(m.posTotal, m.negTotal);
+        const clashText = annul > 0
+          ? `⚡ ${annul} Matéria + ${annul} Antimatéria se anulam!`
+          : (m.posTotal > 0 ? '⚡ Acúmulo de Matéria (+)' : '⚡ Acúmulo de Antimatéria (−)');
+
+        return `
+          <div id="ex-p1" class="exec-phase-block">
+            <div class="exec-role-row">
+              ${m.posTotal > 0 ? `
+                <div class="exec-role-box is-pos">
+                  <span class="exec-role-tag">Matéria (+)</span>
+                  <span class="exec-role-val m-pos">+${m.posTotal}</span>
+                </div>` : ''}
+              ${m.negTotal > 0 ? `
+                <div class="exec-role-box is-neg">
+                  <span class="exec-role-tag">Antimatéria (−)</span>
+                  <span class="exec-role-val m-neg">−${m.negTotal}</span>
+                </div>` : ''}
+            </div>
+          </div>
+          <div id="ex-p2" class="exec-phase-block">
+            <div class="fusion-wrap">
+              <div class="fusion-bars">
+                ${posW > 0 ? `<div id="fusion-pos-bar" class="fusion-bar pos" style="width:${posW}%;">+${m.posTotal}</div>` : ''}
+                ${negW > 0 ? `<div id="fusion-neg-bar" class="fusion-bar neg" style="width:${negW}%;">−${m.negTotal}</div>` : ''}
+              </div>
+              <div id="fusion-clash" class="fusion-clash-badge">${clashText}</div>
+            </div>
+          </div>
+          ${resBlock}
+        `;
+      }
+
+      function applyPhase(p) {
+        if (p === currentPhase || !currentMeta) return;
+        currentPhase = p;
+        phasePillEl.textContent = `Fase ${p}/3`;
+
+        if (p === 1) {
+          const p1 = document.getElementById('ex-p1');
+          if (p1) p1.classList.add('visible');
+          narrationEl.innerHTML = currentMeta.note1;
+          SoundFX.step();
+        } else if (p === 2) {
+          const p2 = document.getElementById('ex-p2');
+          if (p2) p2.classList.add('visible');
+          narrationEl.innerHTML = currentMeta.note2;
+          SoundFX.step();
+
+          // Dispara animações iniciais da Fase 2
+          const firstChip = stageEl.querySelector('[data-fidx="0"]');
+          if (firstChip) firstChip.classList.add('show');
+          const arc1 = document.getElementById('dist-arc-1');
+          if (arc1) requestAnimationFrame(() => arc1.classList.add('draw'));
+          const clash = document.getElementById('fusion-clash');
+          if (clash) setTimeout(() => clash.classList.add('show'), 280);
+        } else if (p === 3) {
+          const p3 = document.getElementById('ex-p3');
+          if (p3) p3.classList.add('visible');
+          narrationEl.innerHTML = currentMeta.note3;
+          SoundFX.ok();
+        }
+      }
+
+      function triggerPhase2SecondBeat() {
+        if (phase2SubTriggered || !currentMeta) return;
+        phase2SubTriggered = true;
+
+        stageEl.querySelectorAll('.exec-factor-chip').forEach((c) => c.classList.add('show'));
+        const arc2 = document.getElementById('dist-arc-2');
+        if (arc2) arc2.classList.add('draw');
+
+        const shield = document.getElementById('ex-shield-icon');
+        if (shield && (currentMeta.inverts || currentMeta.hasInversion || currentMeta.kind === 'pow-bare')) {
+          shield.classList.add('flipped');
+        }
+      }
+
+      function tick(ts) {
+        if (!active) return;
+        if (!lastTs) lastTs = ts;
+        const dt = ts - lastTs;
+        lastTs = ts;
+
+        if (!paused) {
+          elapsed += dt;
+          const total = totalDurationMs();
+          const ratio = Math.min(1, elapsed / total);
+          progressFill.style.width = `${(ratio * 100).toFixed(1)}%`;
+
+          if (ratio >= 0.02 && currentPhase < 1) applyPhase(1);
+          if (ratio >= 0.28 && currentPhase < 2) applyPhase(2);
+          if (ratio >= 0.50 && currentPhase === 2) triggerPhase2SecondBeat();
+          if (ratio >= 0.74 && currentPhase < 3) applyPhase(3);
+
+          if (ratio >= 1) {
+            finish();
+            return;
+          }
+        }
+        rafId = requestAnimationFrame(tick);
+      }
+
+      function finish() {
+        if (!active) return;
+        active = false;
+        if (rafId) cancelAnimationFrame(rafId);
+        rafId = null;
+        const cb = onFinishCb;
+        onFinishCb = null;
+        if (cb) cb();
+      }
+
+      function cancel() {
+        active = false;
+        if (rafId) cancelAnimationFrame(rafId);
+        rafId = null;
+        onFinishCb = null;
+      }
+
+      function play(meta, onDone) {
+        cancel();
+        currentMeta = meta;
+        onFinishCb = onDone;
+        active = true;
+        paused = false;
+        elapsed = 0;
+        lastTs = 0;
+        currentPhase = 0;
+        phase2SubTriggered = false;
+
+        badgeEl.textContent = `⚡ ${meta.title || 'Câmara de Execução'}`;
+        phasePillEl.textContent = 'Fase 1/3';
+        progressFill.style.width = '0%';
+        pauseBtn.textContent = '⏸ Pausar';
+        speedBtn.textContent = state.execSlow ? '🐢 Lento' : '⚡ Normal';
+
+        stageEl.innerHTML = buildStageHtml(meta);
+        stageEl.classList.toggle('mage-active', state.mageVisible);
+        syncMageUI();
+
+        showScreen('exec');
+        applyPhase(1);
+        rafId = requestAnimationFrame(tick);
+      }
+
+      pauseBtn.addEventListener('click', () => {
+        if (!active) return;
+        paused = !paused;
+        pauseBtn.textContent = paused ? '▶ Retomar' : '⏸ Pausar';
+      });
+
+      speedBtn.addEventListener('click', () => {
+        const prevTotal = totalDurationMs();
+        const ratio = Math.min(1, elapsed / prevTotal);
+        state.execSlow = !state.execSlow;
+        elapsed = ratio * totalDurationMs();
+        speedBtn.textContent = state.execSlow ? '🐢 Lento' : '⚡ Normal';
+      });
+
+      returnBtn.addEventListener('click', () => finish());
+
+      return { play, cancel };
+    })();
+
+    /* =====================================================================
+       TELA A — LÓGICA DA DEMONSTRAÇÃO GUIADA
+       ===================================================================== */
+    const demoCounterEl = document.getElementById('demo-counter');
+    const demoTitleEl = document.getElementById('demo-title');
+    const demoCascadeEl = document.getElementById('demo-cascade');
+    const demoNoteEl = document.getElementById('demo-note');
+    const demoNextBtn = document.getElementById('demo-next-btn');
+
+    function renderDemo() {
+      const d = DEMOS[state.demoIdx];
+      demoCounterEl.textContent = `Demo ${state.demoIdx + 1}/${DEMOS.length}`;
+      demoTitleEl.textContent = d.title;
+
+      demoCascadeEl.innerHTML = '';
+      demoCascadeEl.classList.toggle('mage-active', state.mageVisible);
+
+      for (let i = 0; i <= state.demoLineIdx; i++) {
+        const ln = d.lines[i];
+        const isLatest = i === state.demoLineIdx;
+        const row = document.createElement('div');
+        row.className = 'cascade-row' +
+          (i === 0 ? ' is-origin' : '') +
+          (isLatest && !ln.final ? ' is-active' : '') +
+          (ln.final ? ' is-final' : '') +
+          (isLatest && state.demoFreshLine ? ' is-fresh' : '');
+
+        const tag = i === 0 ? 'Original' : (ln.final ? 'Final' : '=');
+        let htmlExpr = formatMathHtml(ln.expr);
+        if (isLatest && state.demoFreshLine) {
+          htmlExpr = htmlExpr.replace(/class="resolved-block"/g, 'class="newly-forged"');
+        }
+        row.innerHTML = `<span class="row-tag">${tag}</span>${htmlExpr}`;
+        demoCascadeEl.appendChild(row);
+      }
+
+      state.demoFreshLine = false;
+      demoCascadeEl.scrollTop = demoCascadeEl.scrollHeight;
+      demoNoteEl.innerHTML = d.lines[state.demoLineIdx].note;
+
+      const isVeryEnd = state.demoIdx === DEMOS.length - 1 && state.demoLineIdx === d.lines.length - 1;
+      demoNextBtn.classList.toggle('is-enter', isVeryEnd);
+      demoNextBtn.textContent = isVeryEnd ? 'Entrar na Câmara dos Portais ▶' : 'Próximo ▶';
+      syncMageUI();
+    }
+
+    demoNextBtn.addEventListener('click', () => {
+      const d = DEMOS[state.demoIdx];
+      if (state.demoLineIdx < d.lines.length - 1) {
+        const currentLine = d.lines[state.demoLineIdx];
+        if (currentLine.exec) {
+          ExecEngine.play(currentLine.exec, () => {
+            state.demoLineIdx++;
+            state.demoFreshLine = true;
+            showScreen('demo');
+          });
+        } else {
+          state.demoLineIdx++;
+          state.demoFreshLine = true;
+          SoundFX.step();
+          renderDemo();
+        }
+      } else if (state.demoIdx < DEMOS.length - 1) {
+        state.demoIdx++;
+        state.demoLineIdx = 0;
+        state.demoFreshLine = false;
+        state.mageVisible = DEMOS[state.demoIdx].magoDefault;
+        SoundFX.ok();
+        renderDemo();
+      } else {
+        SoundFX.key();
+        state.lastAlert = null;
+        showScreen('portals');
+      }
+    });
+
+    document.getElementById('demo-skip-btn').addEventListener('click', () => {
+      state.lastAlert = null;
+      showScreen('portals');
+    });
+
+    /* =====================================================================
+       TELA B — CÂMARA DOS PORTAIS (PASSAGEM + 5 PORTÕES + INSTRUTOR)
+       ===================================================================== */
+    const hudKeysEl = document.getElementById('hud-keys');
+    const svgGatesLayer = document.getElementById('svg-gates-layer');
+    const energyPathLine = document.getElementById('energy-path-line');
+    const passageWarrior = document.getElementById('passage-warrior');
+    const gatesStripEl = document.getElementById('gates-strip');
+    const instructorCard = document.getElementById('instructor-card');
+    const instructorBadge = document.getElementById('instructor-badge');
+    const instructorText = document.getElementById('instructor-text');
+    const btnChallengeGate = document.getElementById('btn-challenge-gate');
+    const btnNextCycle = document.getElementById('btn-next-cycle');
+
+    function currentGates() {
+      return CYCLES[state.cycle];
+    }
+
+    function currentUnlocked() {
+      return state.unlocked[state.cycle];
+    }
+
+    function getNextFrontierIdx() {
+      const arr = currentUnlocked();
+      const idx = arr.findIndex((u) => !u);
+      return idx === -1 ? arr.length : idx;
+    }
+
+    function renderPortals() {
+      const gates = currentGates();
+      const unlocked = currentUnlocked();
+      const keysCount = unlocked.filter(Boolean).length;
+      const frontier = getNextFrontierIdx();
+      const allOpen = keysCount === gates.length;
+
+      hudKeysEl.textContent = `🔑 Chaves: ${keysCount}/${gates.length}`;
+      document.getElementById('cycle-a-btn').classList.toggle('active', state.cycle === 'A');
+      document.getElementById('cycle-b-btn').classList.toggle('active', state.cycle === 'B');
+
+      // Desenha os 5 portões no SVG da passagem
+      const gateXs = [170, 325, 480, 635, 795];
+      svgGatesLayer.innerHTML = '';
+      gatesStripEl.innerHTML = '';
+
+      gates.forEach((g, idx) => {
+        const isOpen = unlocked[idx];
+        const isActive = !allOpen && idx === frontier;
+        const isLocked = !isOpen && !isActive;
+        const gx = gateXs[idx];
+
+        const ns = 'http://www.w3.org/2000/svg';
+        const grp = document.createElementNS(ns, 'g');
+        grp.setAttribute('transform', `translate(${gx}, 162)`);
+        grp.setAttribute('class', 'gate-svg-group ' + (isOpen ? 'is-open' : (isActive ? 'is-active' : 'is-locked')));
+
+        const archStroke = isOpen ? '#4ade80' : (isActive ? '#facc15' : '#475569');
+        const archFill = isOpen ? 'url(#portalOpenGrad)' : (isActive ? 'rgba(250,204,21,0.12)' : 'rgba(15,23,42,0.92)');
+
+        grp.innerHTML = `
+          <path class="gate-arch" d="M -32 0 L -32 -78 C -32 -110, 32 -110, 32 -78 L 32 0 Z"
+                fill="${archFill}" stroke="${archStroke}" stroke-width="${isActive ? 3.2 : 2.2}"/>
+          <path d="M -22 0 L -22 -72 C -22 -96, 22 -96, 22 -72 L 22 0"
+                fill="none" stroke="${archStroke}" stroke-width="1.2" opacity="0.55"/>
+          <text x="0" y="-110" text-anchor="middle" font-size="13" font-weight="900" fill="${isActive ? '#facc15' : (isOpen ? '#86efac' : '#94a3b8')}">
+            PORTÃO ${g.roman}
+          </text>
+          <text x="0" y="-44" text-anchor="middle" font-size="22">
+            ${isOpen ? '🔑' : (isActive ? '⚡' : '🔒')}
+          </text>
+          <text x="0" y="-14" text-anchor="middle" font-size="10.5" font-weight="800" fill="${isOpen ? '#bbf7d0' : '#cbd5e1'}">
+            ${g.short}
+          </text>
+        `;
+
+        if (!isLocked) {
+          grp.addEventListener('click', () => startGateChallenge(idx));
+        }
+        svgGatesLayer.appendChild(grp);
+
+        // Botão correspondente na barra inferior da passagem
+        const chip = document.createElement('button');
+        chip.className = 'gate-chip ' + (isOpen ? 'is-open' : (isActive ? 'is-active' : 'is-locked'));
+        chip.disabled = isLocked;
+        chip.innerHTML = `
+          <span>${isOpen ? '🔑' : (isActive ? '⚡' : '🔒')}</span>
+          <strong>Portão ${g.roman}</strong>
+          <span class="gate-sub">${g.short}</span>
+        `;
+        if (!isLocked) {
+          chip.addEventListener('click', () => startGateChallenge(idx));
+        }
+        gatesStripEl.appendChild(chip);
+      });
+
+      // Posiciona o Guerreiro diante do portão ativo (ou além do Portão V se concluiu)
+      const warriorX = allOpen ? 865 : (gateXs[frontier] - 64);
+      passageWarrior.setAttribute('transform', `translate(${warriorX}, 170)`);
+      energyPathLine.setAttribute('x2', String(Math.max(90, warriorX)));
+
+      // Atualiza Painel do Instrutor do Reino
+      instructorCard.classList.remove('is-alert', 'is-victory');
+
+      if (allOpen) {
+        instructorCard.classList.add('is-victory');
+        instructorBadge.textContent = 'Portal do Núcleo Aberto!';
+        instructorText.innerHTML = `Excelente domínio da Energia Lógica! Você conquistou as <strong>5 Chaves do Ciclo ${state.cycle}</strong> e abriu toda a passagem. Você pode praticar qualquer portão novamente ou avançar para o <strong>Ciclo ${state.cycle === 'A' ? 'B' : 'A'}</strong>.`;
+        btnChallengeGate.style.display = 'none';
+        btnNextCycle.style.display = 'inline-flex';
+        btnNextCycle.textContent = state.cycle === 'A'
+          ? 'Iniciar Ciclo B (Novas Expressões) ▶'
+          : 'Voltar ao Ciclo A ▶';
+      } else if (state.lastAlert) {
+        instructorCard.classList.add('is-alert');
+        instructorBadge.textContent = 'Dica após Retrocesso';
+        instructorText.innerHTML = `<strong>${state.lastAlert.gateTitle}:</strong> você escolheu <strong>${state.lastAlert.wrongChoice}</strong>. ${state.lastAlert.hint}`;
+        btnChallengeGate.style.display = 'inline-flex';
+        btnChallengeGate.textContent = `Tentar Novamente — Portão ${gates[frontier].roman} ▶`;
+        btnNextCycle.style.display = 'none';
+      } else {
+        const g = gates[frontier];
+        instructorBadge.textContent = `Estratégia · Portão ${g.roman}`;
+        instructorText.innerHTML = `<strong>${g.title}:</strong> ${g.brief}`;
+        btnChallengeGate.style.display = 'inline-flex';
+        btnChallengeGate.textContent = `Desafiar Portão ${g.roman} ▶`;
+        btnNextCycle.style.display = 'none';
+      }
+    }
+
+    btnChallengeGate.addEventListener('click', () => {
+      const frontier = getNextFrontierIdx();
+      if (frontier < currentGates().length) {
+        startGateChallenge(frontier);
+      }
+    });
+
+    btnNextCycle.addEventListener('click', () => {
+      state.cycle = state.cycle === 'A' ? 'B' : 'A';
+      state.lastAlert = null;
+      renderPortals();
+    });
+
+    document.getElementById('cycle-a-btn').addEventListener('click', () => {
+      state.cycle = 'A';
+      state.lastAlert = null;
+      renderPortals();
+    });
+
+    document.getElementById('cycle-b-btn').addEventListener('click', () => {
+      state.cycle = 'B';
+      state.lastAlert = null;
+      renderPortals();
+    });
+
+    document.getElementById('btn-review-demo').addEventListener('click', () => {
+      state.demoIdx = 0;
+      state.demoLineIdx = 0;
+      state.mageVisible = DEMOS[0].magoDefault;
+      showScreen('demo');
+    });
+
+    document.getElementById('btn-reset-cycle').addEventListener('click', () => {
+      state.unlocked[state.cycle] = [false, false, false, false, false];
+      state.lastAlert = null;
+      renderPortals();
+    });
+
+    /* =====================================================================
+       TELA C — RESOLUÇÃO EM CASCATA + GAME OVER LOCAL (RETROCESSO)
+       ===================================================================== */
+    const resGateNameEl = document.getElementById('res-gate-name');
+    const resStepCounterEl = document.getElementById('res-step-counter');
+    const resCascadeEl = document.getElementById('res-cascade');
+    const resPromptEl = document.getElementById('res-prompt');
+    const resChoicesEl = document.getElementById('res-choices');
+    const keyForgedBox = document.getElementById('key-forged-box');
+    const resShieldSvg = document.getElementById('res-shield-svg');
+    const resShieldBody = document.getElementById('res-shield-body');
+    const resShieldCrack = document.getElementById('res-shield-crack');
+    const retroOverlay = document.getElementById('retro-overlay');
+    const retroMsg = document.getElementById('retro-msg');
+
+    function shuffle(arr) {
+      const copy = [...arr];
+      for (let i = copy.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [copy[i], copy[j]] = [copy[j], copy[i]];
+      }
+      return copy;
+    }
+
+    function startGateChallenge(gateIdx) {
+      state.activeGateIdx = gateIdx;
+      state.resStepIdx = 0;
+      state.resHistory = [];
+      state.resLocked = false;
+      state.resCompleted = false;
+      state.resFreshLine = null;
+      resShieldBody.setAttribute('fill', '#0284c7');
+      resShieldCrack.setAttribute('opacity', '0');
+      showScreen('resolve');
+    }
+
+    function renderResolve() {
+      const gate = currentGates()[state.activeGateIdx];
+      resGateNameEl.textContent = gate.title;
+      resStepCounterEl.textContent = state.resCompleted
+        ? 'Concluído!'
+        : `Passo ${state.resStepIdx + 1}/${gate.steps.length}`;
+
+      resCascadeEl.innerHTML = '';
+      resCascadeEl.classList.toggle('mage-active', state.mageVisible);
+
+      // Linha 0 (Expressão Original sempre visível no topo)
+      const originRow = document.createElement('div');
+      originRow.className = 'cascade-row is-origin';
+      const showOriginAsActive = !state.resCompleted && state.resStepIdx === 0 && !state.resFreshLine;
+      originRow.innerHTML = `<span class="row-tag">Original</span>${formatMathHtml(showOriginAsActive ? gate.steps[0].activeLine : gate.original)}`;
+      resCascadeEl.appendChild(originRow);
+
+      // Linhas intermediárias já concluídas
+      state.resHistory.forEach((lineTpl) => {
+        const r = document.createElement('div');
+        r.className = 'cascade-row';
+        r.innerHTML = `<span class="row-tag">=</span>${formatMathHtml(lineTpl)}`;
+        resCascadeEl.appendChild(r);
+      });
+
+      // Modo transição (~1.5s): exibe a nova linha com brilho esmeralda/dourado no trecho recém-substituído
+      if (state.resFreshLine) {
+        const freshRow = document.createElement('div');
+        freshRow.className = 'cascade-row is-fresh' + (state.resCompleted ? ' is-final' : '');
+        const tag = state.resCompleted ? 'Final' : '=';
+        const htmlExpr = formatMathHtml(state.resFreshLine).replace(/class="resolved-block"/g, 'class="newly-forged"');
+        freshRow.innerHTML = `<span class="row-tag">${tag}</span>${htmlExpr}`;
+        resCascadeEl.appendChild(freshRow);
+      } else {
+        // Linha ativa atual (quando stepIdx > 0 e ainda não concluiu)
+        if (!state.resCompleted && state.resStepIdx > 0) {
+          const activeRow = document.createElement('div');
+          activeRow.className = 'cascade-row is-active';
+          activeRow.innerHTML = `<span class="row-tag">=</span>${formatMathHtml(gate.steps[state.resStepIdx].activeLine)}`;
+          resCascadeEl.appendChild(activeRow);
+        }
+
+        // Linha final se concluído
+        if (state.resCompleted) {
+          const finalRow = document.createElement('div');
+          finalRow.className = 'cascade-row is-final';
+          finalRow.innerHTML = `<span class="row-tag">Final</span>${formatMathHtml(`<<${gate.finalValue}>>`)}`;
+          resCascadeEl.appendChild(finalRow);
+        }
+      }
+
+      resCascadeEl.scrollTop = resCascadeEl.scrollHeight;
+
+      if (state.resCompleted && !state.resFreshLine) {
+        resPromptEl.style.display = 'none';
+        resChoicesEl.style.display = 'none';
+        keyForgedBox.classList.add('show');
+      } else if (state.resFreshLine) {
+        resPromptEl.style.display = 'block';
+        resPromptEl.textContent = 'Resultado substituído na expressão! Preparando o próximo bloco...';
+        resChoicesEl.style.display = 'grid';
+        resChoicesEl.querySelectorAll('.choice-card').forEach((b) => { b.disabled = true; });
+        keyForgedBox.classList.remove('show');
+      } else {
+        resPromptEl.style.display = 'block';
+        resChoicesEl.style.display = 'grid';
+        keyForgedBox.classList.remove('show');
+
+        const step = gate.steps[state.resStepIdx];
+        resPromptEl.textContent = step.prompt;
+        resChoicesEl.innerHTML = '';
+
+        const opts = shuffle(step.options);
+        opts.forEach((opt) => {
+          const btn = document.createElement('button');
+          btn.className = 'choice-card';
+          btn.disabled = state.resLocked;
+          btn.innerHTML = formatMathHtml(opt);
+          btn.addEventListener('click', () => handleChoice(opt, btn));
+          resChoicesEl.appendChild(btn);
+        });
+      }
+
+      syncMageUI();
+    }
+
+    function pulseWarriorShield() {
+      resShieldSvg.classList.remove('shield-pulse');
+      void resShieldSvg.offsetWidth;
+      resShieldSvg.classList.add('shield-pulse');
+    }
+
+    function crackWarriorShield() {
+      resShieldBody.setAttribute('fill', '#dc2626');
+      resShieldCrack.setAttribute('opacity', '1');
+      resShieldSvg.classList.remove('shield-crack');
+      void resShieldSvg.offsetWidth;
+      resShieldSvg.classList.add('shield-crack');
+    }
+
+    function handleChoice(chosen, btnEl) {
+      if (state.resLocked || state.resCompleted) return;
+      const gate = currentGates()[state.activeGateIdx];
+      const step = gate.steps[state.resStepIdx];
+      state.resLocked = true;
+
+      // Desabilita todos os botões imediatamente
+      resChoicesEl.querySelectorAll('.choice-card').forEach((b) => { b.disabled = true; });
+
+      if (chosen === step.correct) {
+        btnEl.classList.add('is-correct');
+        pulseWarriorShield();
+        SoundFX.ok();
+
+        // Guarda a linha anterior sem os colchetes de destaque
+        if (state.resStepIdx > 0) {
+          state.resHistory.push(step.activeLine.replace(/\[\[|\]\]/g, ''));
+        }
+
+        const isLast = state.resStepIdx === gate.steps.length - 1;
+        const substitutedLine = step.afterLine || `<<${gate.finalValue}>>`;
+
+        // Pulsa brevemente e entra na Câmara de Execução Isolada (Tela D)
+        setTimeout(() => {
+          ExecEngine.play(step.exec, () => {
+            if (isLast) {
+              state.resCompleted = true;
+              SoundFX.key();
+            } else {
+              state.resStepIdx++;
+            }
+            // Retorna à Tela C exibindo a nova linha com brilho esmeralda/dourado por ~1.5s
+            state.resFreshLine = substitutedLine;
+            state.resLocked = true;
+            showScreen('resolve');
+
+            setTimeout(() => {
+              if (state.screen !== 'resolve') return;
+              state.resFreshLine = null;
+              state.resLocked = false;
+              renderResolve();
+            }, 1450);
+          });
+        }, 340);
+      } else {
+        // GAME OVER LOCAL — RETROCESSO
+        btnEl.classList.add('is-wrong');
+        crackWarriorShield();
+        SoundFX.crack();
+
+        state.lastAlert = {
+          gateTitle: gate.title,
+          wrongChoice: chosen,
+          hint: step.hint
+        };
+
+        retroMsg.innerHTML = `O valor <strong>${chosen}</strong> desestabilizou o selo neste passo. Você recuará à Câmara dos Portais para revisar a estratégia.`;
+        setTimeout(() => {
+          retroOverlay.classList.add('show');
+        }, 380);
+      }
+    }
+
+    document.getElementById('btn-retro-return').addEventListener('click', () => {
+      retroOverlay.classList.remove('show');
+      showScreen('portals');
+    });
+
+    document.getElementById('btn-back-portals').addEventListener('click', () => {
+      // Permite alternar telas a qualquer momento sem perder chaves já conquistadas
+      showScreen('portals');
+    });
+
+    document.getElementById('btn-take-key').addEventListener('click', () => {
+      state.unlocked[state.cycle][state.activeGateIdx] = true;
+      state.lastAlert = null;
+      SoundFX.key();
+      showScreen('portals');
+    });
+
+    /* =====================================================================
+       INICIALIZAÇÃO (COMEÇA NA TELA A — DEMONSTRAÇÃO GUIADA)
+       ===================================================================== */
+    state.mageVisible = DEMOS[0].magoDefault;
+    renderDemo();
+  </script>
+<div id="autoriaTxt" onclick="this.classList.remove('on')" style="position:fixed;top:44px;right:8px;z-index:2147483000;max-width:260px;padding:8px 10px;border-radius:8px;background:#222;color:#fff;font:12px/1.35 sans-serif;display:none">© Ygor B. F. Ferreira · A Saga dos Reinos Matemáticos · Matematkês · uso livre em sala</div><style>#autoriaTxt.on{display:block!important}</style>
+</body>
+</html>

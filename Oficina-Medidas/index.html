@@ -1,0 +1,3202 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>Oficina de Medidas: 1D, 2D, 3D · Área e Perímetro (6º Ano)</title>
+  <style>
+    /* =========================================================================
+       DESIGN TOKENS — OFICINA TÁTIL EM MDF CLARO E PEÇAS DE MADEIRA/ACRÍLICO
+       ========================================================================= */
+    :root {
+      --bg-desk: #e5dccb;
+      --bg-desk-2: #d6c8b2;
+      --mdf-light: #f4efe6;
+      --mdf-warm: #ebe3d5;
+      --panel-bg: rgba(255, 253, 249, 0.96);
+      --panel-border: rgba(140, 118, 88, 0.28);
+      --text-main: #1e293b;
+      --text-muted: #475569;
+      --text-soft: #64748b;
+
+      /* Cores dos 3 Elementos Unitários */
+      --u1-main: #d97706;       /* 1D: Bastão 1 u (âmbar/dourado forte) */
+      --u1-dark: #92400e;
+      --u1-soft: #fef3c7;
+
+      --u2-main: #0f766e;       /* 2D: Lajota 1 u² (azul-petróleo) */
+      --u2-light: #14b8a6;
+      --u2-soft: #ccfbf1;
+
+      --u3-main: #ea580c;       /* 3D: Cubo 1 u³ (terracota/madeira quente) */
+      --u3-dark: #c2410c;
+      --u3-top: #fdba74;
+      --u3-soft: #ffedd5;
+
+      --emerald: #059669;
+      --emerald-soft: #d1fae5;
+      --danger: #dc2626;
+      --danger-soft: #fee2e2;
+
+      --radius-lg: 16px;
+      --radius-md: 12px;
+      --shadow-board: 0 14px 34px rgba(62, 46, 26, 0.16), 0 3px 8px rgba(62, 46, 26, 0.10);
+      --shadow-panel: 0 10px 26px rgba(45, 35, 22, 0.10);
+    }
+
+    * {
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    html, body {
+      margin: 0;
+      padding: 0;
+      width: 100%;
+      height: 100dvh;
+      overflow: hidden;
+      font-family: 'Segoe UI', system-ui, -apple-system, BlinkMacSystemFont, Roboto, Helvetica, Arial, sans-serif;
+      background: radial-gradient(circle at 25% 18%, var(--bg-desk) 0%, var(--bg-desk-2) 100%);
+      color: var(--text-main);
+      user-select: none;
+      -webkit-user-select: none;
+    }
+
+    /* =========================================================================
+       LAYOUT PRINCIPAL RESPONSIVO (100dvh, SEM SCROLL GLOBAL)
+       ========================================================================= */
+    .app-shell {
+      display: flex;
+      flex-direction: column;
+      width: 100%;
+      height: 100dvh;
+      padding: 0.45rem;
+      gap: 0.45rem;
+      position: relative;
+    }
+
+    /* Cabeçalho Compacto */
+    .app-header {
+      flex: 0 0 auto;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.45rem;
+      background: var(--panel-bg);
+      border: 1px solid var(--panel-border);
+      border-radius: 14px;
+      padding: 0.4rem 0.65rem;
+      box-shadow: 0 4px 14px rgba(45, 35, 22, 0.07);
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      min-width: 0;
+    }
+
+    .brand-icon {
+      width: 32px;
+      height: 32px;
+      border-radius: 9px;
+      background: linear-gradient(135deg, var(--u2-main) 0%, #115e59 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #ffffff;
+      flex-shrink: 0;
+      box-shadow: 0 3px 8px rgba(15, 118, 110, 0.25);
+    }
+
+    .brand-text {
+      min-width: 0;
+    }
+
+    .brand-title {
+      margin: 0;
+      font-size: 0.88rem;
+      font-weight: 800;
+      letter-spacing: -0.015em;
+      color: var(--text-main);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .brand-sub {
+      display: none;
+      margin: 0;
+      font-size: 0.72rem;
+      color: var(--text-soft);
+    }
+
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 0.45rem;
+      width: 100%;
+      justify-content: space-between;
+    }
+
+    /* Abas das 3 Fases */
+    .phase-tabs {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      background: #efe9de;
+      border: 1px solid #dfd5c3;
+      border-radius: 11px;
+      padding: 3px;
+      gap: 3px;
+      flex: 1 1 auto;
+    }
+
+    .phase-tab {
+      border: none;
+      background: transparent;
+      color: #57534e;
+      font-family: inherit;
+      font-size: 0.72rem;
+      font-weight: 700;
+      padding: 0.38rem 0.4rem;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.16s ease;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      text-align: center;
+    }
+
+    .phase-tab:hover:not(.active-p1):not(.active-p2):not(.active-p3) {
+      background: rgba(255, 255, 255, 0.72);
+      color: var(--text-main);
+    }
+
+    .phase-tab.active-p1 {
+      background: linear-gradient(135deg, #ea580c 0%, #c2410c 100%);
+      color: #ffffff;
+      box-shadow: 0 3px 8px rgba(234, 88, 12, 0.28);
+    }
+
+    .phase-tab.active-p2 {
+      background: linear-gradient(135deg, #d97706 0%, #b45309 100%);
+      color: #ffffff;
+      box-shadow: 0 3px 8px rgba(217, 119, 6, 0.28);
+    }
+
+    .phase-tab.active-p3 {
+      background: linear-gradient(135deg, #0f766e 0%, #115e59 100%);
+      color: #ffffff;
+      box-shadow: 0 3px 8px rgba(15, 118, 110, 0.28);
+    }
+
+    .btn-challenges-header {
+      flex: 0 0 auto;
+      border: 1.5px solid #d97706;
+      background: #fffbeb;
+      color: #92400e;
+      border-radius: 10px;
+      padding: 0.38rem 0.62rem;
+      font-family: inherit;
+      font-size: 0.74rem;
+      font-weight: 800;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.32rem;
+      transition: all 0.15s ease;
+      white-space: nowrap;
+    }
+
+    .btn-challenges-header:hover {
+      background: #fef3c7;
+    }
+
+    .btn-challenges-header.open {
+      background: #d97706;
+      color: #ffffff;
+      box-shadow: 0 3px 10px rgba(217, 119, 6, 0.28);
+    }
+
+    .btn-challenges-header.all-done {
+      border-color: var(--emerald);
+      background: var(--emerald-soft);
+      color: #065f46;
+    }
+
+    /* Área de Trabalho: Canvas + Painel */
+    .workspace {
+      flex: 1 1 auto;
+      min-height: 0;
+      min-width: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 0.45rem;
+      position: relative;
+    }
+
+    /* Container do Canvas (Bancada MDF) */
+    .stage-wrap {
+      flex: 1 1 55%;
+      min-height: 220px;
+      min-width: 0;
+      position: relative;
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+      background: var(--mdf-light);
+      border: 2px solid #d4c3a8;
+      box-shadow: var(--shadow-board);
+    }
+
+    #workshopCanvas {
+      display: block;
+      width: 100%;
+      height: 100%;
+      touch-action: none;
+      cursor: default;
+    }
+
+    /* Toast Discreto de Missão Concluída / Aviso */
+    .stage-toast {
+      position: absolute;
+      top: 12px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(6, 95, 70, 0.96);
+      color: #ffffff;
+      font-size: 0.8rem;
+      font-weight: 700;
+      padding: 0.5rem 1rem;
+      border-radius: 999px;
+      box-shadow: 0 8px 22px rgba(6, 95, 70, 0.30);
+      display: flex;
+      align-items: center;
+      gap: 0.45rem;
+      pointer-events: none;
+      z-index: 25;
+      max-width: 92%;
+      text-align: center;
+      transition: opacity 0.25s ease, transform 0.25s ease;
+    }
+
+    .stage-toast.warning {
+      background: rgba(185, 28, 28, 0.95);
+      box-shadow: 0 8px 22px rgba(185, 28, 28, 0.30);
+    }
+
+    .stage-toast.hidden {
+      opacity: 0;
+      transform: translate(-50%, -12px);
+    }
+
+    /* Painel Lateral / Inferior de Controles */
+    .control-panel {
+      flex: 0 1 45%;
+      min-height: 0;
+      background: var(--panel-bg);
+      border: 1px solid var(--panel-border);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-panel);
+      padding: 0.65rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.52rem;
+      overflow-y: auto;
+    }
+
+    .control-panel::-webkit-scrollbar { width: 6px; }
+    .control-panel::-webkit-scrollbar-track { background: transparent; }
+    .control-panel::-webkit-scrollbar-thumb { background: rgba(140, 118, 88, 0.32); border-radius: 999px; }
+
+    /* Card Colapsável de Desafios (5 Missões) */
+    .challenges-drawer {
+      position: absolute;
+      top: 56px;
+      right: 10px;
+      width: min(390px, calc(100% - 20px));
+      max-height: calc(100dvh - 76px);
+      overflow-y: auto;
+      background: #fffdf9;
+      border: 1.5px solid #d97706;
+      border-radius: 16px;
+      box-shadow: 0 18px 42px rgba(45, 35, 22, 0.26);
+      padding: 0.8rem;
+      z-index: 40;
+      display: flex;
+      flex-direction: column;
+      gap: 0.55rem;
+      animation: drawerIn 0.18s ease-out;
+    }
+
+    @keyframes drawerIn {
+      from { opacity: 0; transform: translateY(-8px) scale(0.98); }
+      to { opacity: 1; transform: translateY(0) scale(1); }
+    }
+
+    .drawer-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid #ece3d4;
+      padding-bottom: 0.45rem;
+    }
+
+    .drawer-title {
+      font-size: 0.88rem;
+      font-weight: 800;
+      color: #92400e;
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+
+    .btn-close-drawer {
+      border: 1px solid #d6cbb8;
+      background: #f8f4ec;
+      color: #475569;
+      width: 28px;
+      height: 28px;
+      border-radius: 8px;
+      font-weight: 800;
+      font-size: 1rem;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .btn-close-drawer:hover { background: #ede4d4; color: #0f172a; }
+
+    .mission-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.55rem;
+      padding: 0.52rem 0.62rem;
+      border-radius: 11px;
+      border: 1px solid #e7decb;
+      background: #faf6ee;
+      transition: all 0.18s ease;
+    }
+
+    .mission-item.done {
+      background: #ecfdf5;
+      border-color: #6ee7b7;
+    }
+
+    .mission-info {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      min-width: 0;
+    }
+
+    .mission-tag {
+      font-size: 0.64rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: #b45309;
+    }
+
+    .mission-item.done .mission-tag {
+      color: #047857;
+    }
+
+    .mission-text {
+      font-size: 0.77rem;
+      font-weight: 600;
+      color: #1e293b;
+      line-height: 1.3;
+    }
+
+    .mission-right {
+      display: flex;
+      align-items: center;
+      gap: 0.35rem;
+      flex-shrink: 0;
+    }
+
+    .mission-check {
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.75rem;
+      font-weight: 800;
+      background: #e2e8f0;
+      color: #64748b;
+    }
+
+    .mission-item.done .mission-check {
+      background: #059669;
+      color: #ffffff;
+    }
+
+    .btn-go {
+      border: 1px solid #cbd5e1;
+      background: #ffffff;
+      color: #0f172a;
+      border-radius: 8px;
+      padding: 0.3rem 0.55rem;
+      font-family: inherit;
+      font-size: 0.72rem;
+      font-weight: 800;
+      cursor: pointer;
+    }
+
+    .btn-go:hover {
+      background: #f1f5f9;
+      border-color: #94a3b8;
+    }
+
+    /* Breakpoint PC / Projetor / Paisagem Larga */
+    @media (min-width: 900px), (orientation: landscape) and (min-width: 760px) {
+      .app-shell {
+        padding: 0.7rem 0.9rem;
+        gap: 0.65rem;
+      }
+
+      .app-header {
+        flex-wrap: nowrap;
+        padding: 0.5rem 0.95rem;
+      }
+
+      .brand-title { font-size: 1.04rem; }
+      .brand-sub { display: block; }
+
+      .header-actions {
+        width: auto;
+        justify-content: flex-end;
+      }
+
+      .phase-tabs {
+        display: flex;
+        flex: 0 0 auto;
+      }
+
+      .phase-tab {
+        font-size: 0.82rem;
+        padding: 0.45rem 0.85rem;
+      }
+
+      .btn-challenges-header {
+        font-size: 0.82rem;
+        padding: 0.45rem 0.78rem;
+      }
+
+      .workspace {
+        flex-direction: row;
+        gap: 0.85rem;
+        align-items: stretch;
+      }
+
+      .stage-wrap {
+        flex: 1 1 auto;
+      }
+
+      .control-panel {
+        flex: 0 0 350px;
+        width: 350px;
+        max-height: 100%;
+        padding: 0.95rem;
+        gap: 0.72rem;
+      }
+    }
+
+    @media (min-width: 1280px) {
+      .control-panel {
+        flex: 0 0 375px;
+        width: 375px;
+      }
+    }
+
+    /* =========================================================================
+       COMPONENTES DO PAINEL
+       ========================================================================= */
+    .phase-pane {
+      display: flex;
+      flex-direction: column;
+      gap: 0.58rem;
+    }
+
+    .section-label {
+      font-size: 0.67rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--text-soft);
+      margin-bottom: 0.24rem;
+    }
+
+    /* Sub-abas 1D / 2D / 3D ou Retângulos / Livre */
+    .sub-tabs {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 4px;
+      background: #f1ece2;
+      border: 1px solid #dfd5c3;
+      border-radius: 11px;
+      padding: 3px;
+    }
+
+    .sub-tabs.cols-2 {
+      grid-template-columns: repeat(2, 1fr);
+    }
+
+    .sub-tab {
+      border: none;
+      background: transparent;
+      color: #57534e;
+      font-family: inherit;
+      font-size: 0.73rem;
+      font-weight: 700;
+      padding: 0.44rem 0.3rem;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.15s ease;
+      text-align: center;
+    }
+
+    .sub-tab:hover:not(.active-u1):not(.active-u2):not(.active-u3) {
+      background: rgba(255, 255, 255, 0.75);
+      color: var(--text-main);
+    }
+
+    .sub-tab.active-u1 {
+      background: var(--u1-main);
+      color: #ffffff;
+      box-shadow: 0 2px 8px rgba(217, 119, 6, 0.25);
+    }
+
+    .sub-tab.active-u2 {
+      background: var(--u2-main);
+      color: #ffffff;
+      box-shadow: 0 2px 8px rgba(15, 118, 110, 0.25);
+    }
+
+    .sub-tab.active-u3 {
+      background: var(--u3-main);
+      color: #ffffff;
+      box-shadow: 0 2px 8px rgba(234, 88, 12, 0.25);
+    }
+
+    /* Controle de Dimensão (- [slider] +) */
+    .dim-control {
+      background: #faf7f0;
+      border: 1px solid #e4dac8;
+      border-radius: 12px;
+      padding: 0.5rem 0.65rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.32rem;
+    }
+
+    .dim-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.78rem;
+      font-weight: 700;
+      color: var(--text-main);
+    }
+
+    .dim-val {
+      font-weight: 800;
+      padding: 0.1rem 0.46rem;
+      border-radius: 999px;
+      font-size: 0.76rem;
+    }
+
+    .dim-val.u1 { background: var(--u1-soft); color: var(--u1-dark); }
+    .dim-val.u2 { background: var(--u2-soft); color: var(--u2-main); }
+    .dim-val.u3 { background: var(--u3-soft); color: var(--u3-dark); }
+
+    .dim-row {
+      display: flex;
+      align-items: center;
+      gap: 0.45rem;
+    }
+
+    .btn-step {
+      width: 30px;
+      height: 30px;
+      border-radius: 8px;
+      border: 1px solid #cbd5e1;
+      background: #ffffff;
+      color: var(--text-main);
+      font-size: 1rem;
+      font-weight: 800;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      transition: all 0.12s ease;
+    }
+
+    .btn-step:hover:not(:disabled) { background: #f1f5f9; border-color: #94a3b8; }
+    .btn-step:active:not(:disabled) { transform: scale(0.94); }
+    .btn-step:disabled { opacity: 0.38; cursor: not-allowed; }
+
+    input[type="range"] {
+      flex: 1 1 auto;
+      width: 100%;
+      height: 6px;
+      cursor: pointer;
+      accent-color: var(--u2-main);
+    }
+
+    input[type="range"].accent-u1 { accent-color: var(--u1-main); }
+    input[type="range"].accent-u3 { accent-color: var(--u3-main); }
+
+    /* Chips de Seleção (Perímetros, Áreas, Divisores) */
+    .chip-grid {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.35rem;
+    }
+
+    .chip-btn {
+      flex: 1 1 auto;
+      min-width: 56px;
+      border: 1px solid #d5cbb8;
+      background: #ffffff;
+      color: #334155;
+      border-radius: 9px;
+      padding: 0.42rem 0.48rem;
+      font-family: inherit;
+      font-size: 0.78rem;
+      font-weight: 800;
+      cursor: pointer;
+      transition: all 0.14s ease;
+      text-align: center;
+    }
+
+    .chip-btn:hover { background: #f8f4ec; border-color: #b4a287; }
+
+    .chip-btn.active-u1 {
+      background: var(--u1-main);
+      border-color: var(--u1-main);
+      color: #ffffff;
+      box-shadow: 0 2px 8px rgba(217, 119, 6, 0.24);
+    }
+
+    .chip-btn.active-u2 {
+      background: var(--u2-main);
+      border-color: var(--u2-main);
+      color: #ffffff;
+      box-shadow: 0 2px 8px rgba(15, 118, 110, 0.24);
+    }
+
+    /* Botões de Ação */
+    .btn {
+      border: 1px solid transparent;
+      border-radius: var(--radius-md);
+      font-family: inherit;
+      font-size: 0.81rem;
+      font-weight: 700;
+      padding: 0.56rem 0.74rem;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.4rem;
+      transition: transform 0.1s ease, filter 0.15s ease, background 0.15s ease;
+      line-height: 1.15;
+    }
+
+    .btn:active { transform: scale(0.97); }
+    .btn:disabled { opacity: 0.45; cursor: not-allowed; }
+
+    .btn-u1 {
+      background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+      color: #ffffff;
+      box-shadow: 0 4px 12px rgba(217, 119, 6, 0.26);
+    }
+    .btn-u1:hover:not(:disabled) { filter: brightness(1.06); }
+
+    .btn-u2 {
+      background: linear-gradient(135deg, #14b8a6 0%, #0f766e 100%);
+      color: #ffffff;
+      box-shadow: 0 4px 12px rgba(15, 118, 110, 0.26);
+    }
+    .btn-u2:hover:not(:disabled) { filter: brightness(1.06); }
+
+    .btn-u3 {
+      background: linear-gradient(135deg, #f97316 0%, #ea580c 100%);
+      color: #ffffff;
+      box-shadow: 0 4px 12px rgba(234, 88, 12, 0.26);
+    }
+    .btn-u3:hover:not(:disabled) { filter: brightness(1.06); }
+
+    .btn-secondary {
+      background: #f8fafc;
+      color: var(--text-main);
+      border-color: #cbd5e1;
+    }
+    .btn-secondary:hover:not(:disabled) { background: #f1f5f9; border-color: #94a3b8; }
+
+    .btn-row {
+      display: flex;
+      gap: 0.42rem;
+      align-items: stretch;
+    }
+
+    /* Interruptor (Toggle) */
+    .toggle-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.5rem;
+      padding: 0.48rem 0.68rem;
+      border-radius: 11px;
+      background: #faf7f0;
+      border: 1px solid #e4dac8;
+      cursor: pointer;
+      transition: all 0.15s ease;
+      font-size: 0.8rem;
+      font-weight: 700;
+      color: var(--text-main);
+    }
+
+    .toggle-row:hover { background: #f3ede1; }
+
+    .toggle-row.is-on-u1 { background: #fffbeb; border-color: #fcd34d; color: #92400e; }
+    .toggle-row.is-on-u2 { background: #f0fdfa; border-color: #5eead4; color: #115e59; }
+    .toggle-row.is-on-u3 { background: #fff7ed; border-color: #fdba74; color: #9a3412; }
+
+    .switch-track {
+      width: 38px;
+      height: 20px;
+      border-radius: 999px;
+      background: #cbd5e1;
+      position: relative;
+      flex-shrink: 0;
+      transition: background 0.18s ease;
+    }
+
+    .toggle-row.is-on-u1 .switch-track { background: var(--u1-main); }
+    .toggle-row.is-on-u2 .switch-track { background: var(--u2-main); }
+    .toggle-row.is-on-u3 .switch-track { background: var(--u3-main); }
+
+    .switch-thumb {
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
+      background: #ffffff;
+      position: absolute;
+      top: 3px;
+      left: 3px;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.25);
+      transition: transform 0.18s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
+    .toggle-row.is-on-u1 .switch-thumb,
+    .toggle-row.is-on-u2 .switch-thumb,
+    .toggle-row.is-on-u3 .switch-thumb {
+      transform: translateX(18px);
+    }
+
+    /* Cartão de Medidas / Fórmula */
+    .measure-card {
+      border-radius: var(--radius-md);
+      padding: 0.62rem 0.76rem;
+      border: 1.5px solid #cbd5e1;
+      background: #f8fafc;
+      text-align: center;
+      transition: all 0.18s ease;
+    }
+
+    .measure-card.tone-u1 { background: #fffbeb; border-color: #fcd34d; }
+    .measure-card.tone-u2 { background: #f0fdfa; border-color: #5eead4; }
+    .measure-card.tone-u3 { background: #fff7ed; border-color: #fdba74; }
+
+    .measure-label {
+      font-size: 0.68rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--text-soft);
+    }
+
+    .measure-big {
+      font-size: 1.15rem;
+      font-weight: 800;
+      color: var(--text-main);
+      margin-top: 2px;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .measure-sub {
+      font-size: 0.76rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      margin-top: 2px;
+    }
+
+    .dual-metrics {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.45rem;
+    }
+
+    /* Barra Visual de Formas Descobertas (Fase 2) */
+    .discovered-box {
+      background: #faf7f0;
+      border: 1px solid #e4dac8;
+      border-radius: 12px;
+      padding: 0.55rem 0.65rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.35rem;
+    }
+
+    .discovered-list {
+      display: flex;
+      flex-direction: column;
+      gap: 0.28rem;
+      max-height: 155px;
+      overflow-y: auto;
+    }
+
+    .disc-row {
+      display: flex;
+      align-items: center;
+      gap: 0.45rem;
+      font-size: 0.74rem;
+      font-weight: 700;
+      cursor: pointer;
+      padding: 0.18rem 0.32rem;
+      border-radius: 7px;
+      transition: background 0.12s ease;
+    }
+
+    .disc-row:hover { background: #efe9dc; }
+    .disc-row.active { background: #fef3c7; }
+
+    .disc-dim {
+      width: 44px;
+      flex-shrink: 0;
+      color: #334155;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .disc-bar-track {
+      flex: 1 1 auto;
+      height: 11px;
+      background: #e5dfd1;
+      border-radius: 999px;
+      overflow: hidden;
+    }
+
+    .disc-bar-fill {
+      height: 100%;
+      border-radius: 999px;
+      background: linear-gradient(90deg, #14b8a6, #0f766e);
+      transition: width 0.25s ease;
+    }
+
+    .disc-row.is-max .disc-bar-fill {
+      background: linear-gradient(90deg, #f59e0b, #d97706);
+    }
+
+    .disc-area {
+      width: 58px;
+      text-align: right;
+      flex-shrink: 0;
+      color: #0f766e;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .disc-row.is-max .disc-area {
+      color: #b45309;
+    }
+
+    /* Aviso de Montagem Livre (Fase 3) */
+    .status-pill {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.4rem;
+      padding: 0.44rem 0.64rem;
+      border-radius: 10px;
+      font-size: 0.76rem;
+      font-weight: 700;
+      background: #f0fdfa;
+      border: 1px solid #99f6e4;
+      color: #115e59;
+    }
+
+    .status-pill.warn {
+      background: #fef2f2;
+      border-color: #fca5a5;
+      color: #991b1b;
+    }
+
+    .hint-box {
+      font-size: 0.72rem;
+      color: var(--text-soft);
+      background: #faf7f0;
+      border: 1px dashed #d5c8b2;
+      border-radius: 10px;
+      padding: 0.46rem 0.62rem;
+      line-height: 1.38;
+    }
+
+    .hidden { display: none !important; }
+
+    @media (max-width: 899px) and (orientation: portrait) {
+      .desktop-only { display: none !important; }
+      .btn { padding: 0.48rem 0.6rem; font-size: 0.76rem; }
+    }
+  </style>
+</head>
+<body>
+  <div class="app-shell">
+    <!-- CABEÇALHO COMPACTO -->
+    <header class="app-header">
+      <div class="brand">
+        <div class="brand-icon" aria-hidden="true">
+          <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/>
+            <polyline points="3.27 6.96 12 12.01 20.73 6.96"/>
+            <line x1="12" y1="22.08" x2="12" y2="12"/>
+          </svg>
+        </div>
+        <div class="brand-text">
+          <h1 class="brand-title">Oficina de Medidas: 1D, 2D, 3D · Área e Perímetro</h1>
+          <p class="brand-sub">6º Ano · Segmento (1 u), Lajota (1 u²) e Cubo (1 u³)</p>
+        </div>
+      </div>
+
+      <div class="header-actions">
+        <nav class="phase-tabs" role="tablist" aria-label="Fases da Oficina">
+          <button id="tabP1" type="button" role="tab" aria-selected="true" class="phase-tab active-p1">
+            Fase 1 · 1D/2D/3D
+          </button>
+          <button id="tabP2" type="button" role="tab" aria-selected="false" class="phase-tab">
+            Fase 2 · Perímetro Fixo
+          </button>
+          <button id="tabP3" type="button" role="tab" aria-selected="false" class="phase-tab">
+            Fase 3 · Área Fixa
+          </button>
+        </nav>
+
+        <button id="btnChallenges" type="button" class="btn-challenges-header" aria-expanded="false">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+            <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+          </svg>
+          <span id="labelChallenges">Desafios (0/5)</span>
+        </button>
+      </div>
+    </header>
+
+    <!-- PAINEL COLAPSÁVEL DE DESAFIOS (5 MISSÕES) -->
+    <section id="challengesDrawer" class="challenges-drawer hidden" aria-label="Painel de Desafios">
+      <div class="drawer-head">
+        <div class="drawer-title">
+          <span>&#9733; Missões da Oficina</span>
+          <span id="drawerProgress" style="font-size:0.74rem; color:#64748b;">(0/5)</span>
+        </div>
+        <button id="btnCloseDrawer" type="button" class="btn-close-drawer" aria-label="Fechar desafios">&times;</button>
+      </div>
+      <div id="missionsList" style="display:flex; flex-direction:column; gap:0.42rem;"></div>
+    </section>
+
+    <!-- ÁREA DE TRABALHO: BANCADA CANVAS + PAINEL -->
+    <div class="workspace">
+      <main class="stage-wrap" id="stageWrap">
+        <canvas id="workshopCanvas" aria-label="Bancada Interativa da Oficina de Medidas"></canvas>
+        <div id="stageToast" class="stage-toast hidden" role="status" aria-live="polite">
+          <span id="stageToastIcon">&#10004;</span>
+          <span id="stageToastText">Missão concluída!</span>
+        </div>
+      </main>
+
+      <aside class="control-panel">
+        <!-- ===================== FASE 1: OS ELEMENTOS DE MEDIDA ===================== -->
+        <div id="paneP1" class="phase-pane">
+          <div>
+            <div class="section-label">Dimensão do Elemento Unitário</div>
+            <div class="sub-tabs" id="p1SubTabs">
+              <button type="button" class="sub-tab active-u1" data-dim="1">1D · 1 u</button>
+              <button type="button" class="sub-tab" data-dim="2">2D · 1 u²</button>
+              <button type="button" class="sub-tab" data-dim="3">3D · 1 u³</button>
+            </div>
+          </div>
+
+          <!-- Cartão de Medidas e Fórmula (oculto no Modo Visual Puro) -->
+          <div id="p1MeasureCard" class="measure-card tone-u1 hidden">
+            <div id="p1MeasureLabel" class="measure-label">Comprimento (1D)</div>
+            <div id="p1MeasureBig" class="measure-big">6 bastões = 6 u</div>
+            <div id="p1MeasureSub" class="measure-sub">Contando segmentos unitários de 1 u</div>
+          </div>
+
+          <!-- Controles 1D -->
+          <div id="p1Controls1D" class="phase-pane">
+            <div class="dim-control">
+              <div class="dim-header">
+                <span>Comprimento (bastões 1 u)</span>
+                <span id="valP1Len" class="dim-val u1">6 u</span>
+              </div>
+              <div class="dim-row">
+                <button type="button" class="btn-step" data-act="p1-len-dec" aria-label="Diminuir comprimento">&minus;</button>
+                <input id="sliderP1Len" type="range" class="accent-u1" min="1" max="12" step="1" value="6" />
+                <button type="button" class="btn-step" data-act="p1-len-inc" aria-label="Aumentar comprimento">+</button>
+              </div>
+            </div>
+            <button id="btnCount1D" type="button" class="btn btn-u1">
+              <span>&#9654; Contar 1 por 1</span>
+            </button>
+          </div>
+
+          <!-- Controles 2D -->
+          <div id="p1Controls2D" class="phase-pane hidden">
+            <div class="dim-control">
+              <div class="dim-header">
+                <span>Largura (colunas)</span>
+                <span id="valP1W" class="dim-val u2">6</span>
+              </div>
+              <div class="dim-row">
+                <button type="button" class="btn-step" data-act="p1-w-dec" aria-label="Diminuir largura">&minus;</button>
+                <input id="sliderP1W" type="range" min="1" max="10" step="1" value="6" />
+                <button type="button" class="btn-step" data-act="p1-w-inc" aria-label="Aumentar largura">+</button>
+              </div>
+            </div>
+            <div class="dim-control">
+              <div class="dim-header">
+                <span>Altura (fileiras)</span>
+                <span id="valP1H" class="dim-val u2">4</span>
+              </div>
+              <div class="dim-row">
+                <button type="button" class="btn-step" data-act="p1-h-dec" aria-label="Diminuir altura">&minus;</button>
+                <input id="sliderP1H" type="range" min="1" max="8" step="1" value="4" />
+                <button type="button" class="btn-step" data-act="p1-h-inc" aria-label="Aumentar altura">+</button>
+              </div>
+            </div>
+            <button id="btnFillRows2D" type="button" class="btn btn-u2">
+              <span>&#9654; Preencher Fileiras</span>
+            </button>
+          </div>
+
+          <!-- Controles 3D -->
+          <div id="p1Controls3D" class="phase-pane hidden">
+            <div class="dim-control">
+              <div class="dim-header">
+                <span>Comprimento (C)</span>
+                <span id="valP1C" class="dim-val u3">4</span>
+              </div>
+              <div class="dim-row">
+                <button type="button" class="btn-step" data-act="p1-c-dec" aria-label="Diminuir C">&minus;</button>
+                <input id="sliderP1C" type="range" class="accent-u3" min="1" max="6" step="1" value="4" />
+                <button type="button" class="btn-step" data-act="p1-c-inc" aria-label="Aumentar C">+</button>
+              </div>
+            </div>
+            <div class="dim-control">
+              <div class="dim-header">
+                <span>Largura (L)</span>
+                <span id="valP1L" class="dim-val u3">3</span>
+              </div>
+              <div class="dim-row">
+                <button type="button" class="btn-step" data-act="p1-l-dec" aria-label="Diminuir L">&minus;</button>
+                <input id="sliderP1L" type="range" class="accent-u3" min="1" max="6" step="1" value="3" />
+                <button type="button" class="btn-step" data-act="p1-l-inc" aria-label="Aumentar L">+</button>
+              </div>
+            </div>
+            <div class="dim-control">
+              <div class="dim-header">
+                <span>Altura / Andares (H)</span>
+                <span id="valP1Z" class="dim-val u3">2</span>
+              </div>
+              <div class="dim-row">
+                <button type="button" class="btn-step" data-act="p1-z-dec" aria-label="Diminuir H">&minus;</button>
+                <input id="sliderP1Z" type="range" class="accent-u3" min="1" max="5" step="1" value="2" />
+                <button type="button" class="btn-step" data-act="p1-z-inc" aria-label="Aumentar H">+</button>
+              </div>
+            </div>
+
+            <div id="togSplitLayers" class="toggle-row" role="switch" aria-checked="false" tabindex="0">
+              <span>Separar Andares</span>
+              <div class="switch-track"><div class="switch-thumb"></div></div>
+            </div>
+
+            <button id="btnResetCam3D" type="button" class="btn btn-secondary">
+              Resetar Câmera 3D
+            </button>
+          </div>
+
+          <!-- Camada Progressiva da Fase 1 -->
+          <div id="togP1Measures" class="toggle-row" role="switch" aria-checked="false" tabindex="0">
+            <span>Mostrar Medidas e Fórmula</span>
+            <div class="switch-track"><div class="switch-thumb"></div></div>
+          </div>
+
+          <div id="p1Hint" class="hint-box desktop-only">
+            <strong>1D (Comprimento):</strong> arraste a alça dourada na ponta direita da barra ou clique em <em>Contar 1 por 1</em>.
+          </div>
+        </div>
+
+        <!-- ===================== FASE 2: MESMO PERÍMETRO, ÁREAS DIFERENTES ===================== -->
+        <div id="paneP2" class="phase-pane hidden">
+          <div>
+            <div class="section-label">Perímetro Fixo (Cerca de bastões 1 u)</div>
+            <div class="chip-grid" id="p2PerimChips">
+              <button type="button" class="chip-btn" data-p="12">12 u</button>
+              <button type="button" class="chip-btn" data-p="16">16 u</button>
+              <button type="button" class="chip-btn active-u1" data-p="20">20 u</button>
+              <button type="button" class="chip-btn" data-p="24">24 u</button>
+            </div>
+          </div>
+
+          <!-- Cartão de Medidas (oculto no Modo Visual Puro) -->
+          <div id="p2MeasureBox" class="dual-metrics hidden">
+            <div class="measure-card tone-u1">
+              <div class="measure-label">Perímetro (Fixo)</div>
+              <div id="p2PerimVal" class="measure-big">20 u</div>
+            </div>
+            <div class="measure-card tone-u2">
+              <div class="measure-label">Área (Variável)</div>
+              <div id="p2AreaVal" class="measure-big">21 u²</div>
+            </div>
+          </div>
+
+          <!-- Controle de Deformação -->
+          <div class="dim-control">
+            <div class="dim-header">
+              <span>Deformar Retângulo (Largura)</span>
+              <span id="valP2Dims" class="dim-val u1">7 × 3</span>
+            </div>
+            <div class="dim-row">
+              <button type="button" class="btn-step" data-act="p2-w-dec" aria-label="Diminuir largura">&minus;</button>
+              <input id="sliderP2W" type="range" class="accent-u1" min="1" max="9" step="1" value="7" />
+              <button type="button" class="btn-step" data-act="p2-w-inc" aria-label="Aumentar largura">+</button>
+            </div>
+          </div>
+
+          <div class="btn-row">
+            <button id="btnWalkP2" type="button" class="btn btn-u1" style="flex:1;">
+              <span>&#9654; Percorrer Cerca (1 u)</span>
+            </button>
+          </div>
+
+          <div id="togP2Measures" class="toggle-row" role="switch" aria-checked="false" tabindex="0">
+            <span>Mostrar Medidas</span>
+            <div class="switch-track"><div class="switch-thumb"></div></div>
+          </div>
+
+          <!-- Barra Visual: Formas Descobertas -->
+          <div class="discovered-box">
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+              <span class="section-label" style="margin:0;">Formas Descobertas (P = <span id="discPerimTitle">20</span> u)</span>
+              <span id="discCount" style="font-size:0.7rem; font-weight:800; color:#b45309;">1 testada</span>
+            </div>
+            <div id="discoveredList" class="discovered-list"></div>
+          </div>
+
+          <div class="hint-box desktop-only">
+            <strong>Teste na bancada:</strong> arraste a alça dourada na lateral direita do retângulo. O contorno continua com o mesmo número de bastões <strong>1 u</strong>, mas a área interna muda!
+          </div>
+        </div>
+
+        <!-- ===================== FASE 3: MESMA ÁREA, PERÍMETROS DIFERENTES ===================== -->
+        <div id="paneP3" class="phase-pane hidden">
+          <div>
+            <div class="section-label">Estoque Fixo de Lajotas (1 u²)</div>
+            <div class="chip-grid" id="p3AreaChips">
+              <button type="button" class="chip-btn active-u2" data-a="12">12 u²</button>
+              <button type="button" class="chip-btn" data-a="16">16 u²</button>
+              <button type="button" class="chip-btn" data-a="24">24 u²</button>
+            </div>
+          </div>
+
+          <!-- Alternador: Retângulos vs Montagem Livre -->
+          <div class="sub-tabs cols-2" id="p3ModeTabs">
+            <button type="button" class="sub-tab active-u2" data-mode="rect">Retângulos</button>
+            <button type="button" class="sub-tab" data-mode="free">Montagem Livre</button>
+          </div>
+
+          <!-- Cartão de Medidas (oculto no Modo Visual Puro) -->
+          <div id="p3MeasureBox" class="dual-metrics hidden">
+            <div class="measure-card tone-u2">
+              <div class="measure-label">Área (Lajotas)</div>
+              <div id="p3AreaVal" class="measure-big">12 u²</div>
+            </div>
+            <div class="measure-card tone-u1">
+              <div class="measure-label">Perímetro (Cerca)</div>
+              <div id="p3PerimVal" class="measure-big">14 u</div>
+            </div>
+          </div>
+
+          <!-- Sub-painel Retângulos (Divisores) -->
+          <div id="p3RectControls">
+            <div class="section-label">Pares de Divisores (Largura × Altura)</div>
+            <div class="chip-grid" id="p3DivisorChips"></div>
+          </div>
+
+          <!-- Sub-painel Montagem Livre -->
+          <div id="p3FreeControls" class="hidden" style="display:flex; flex-direction:column; gap:0.45rem;">
+            <div id="p3FreeStatus" class="status-pill">
+              <span id="p3FreeCountText">Lajotas: 12 / 12</span>
+              <span id="p3FreeConnText">Figura conectada</span>
+            </div>
+            <div class="btn-row">
+              <button id="btnP3Clear" type="button" class="btn btn-secondary" style="flex:1;">
+                Limpar
+              </button>
+              <button id="btnP3FillRect" type="button" class="btn btn-u2" style="flex:1.25;">
+                Preencher Retângulo
+              </button>
+            </div>
+          </div>
+
+          <button id="btnWalkP3" type="button" class="btn btn-u1">
+            <span>&#9654; Percorrer Cerca (1 u)</span>
+          </button>
+
+          <div id="togP3Measures" class="toggle-row" role="switch" aria-checked="false" tabindex="0">
+            <span>Mostrar Medidas</span>
+            <div class="switch-track"><div class="switch-thumb"></div></div>
+          </div>
+
+          <div id="p3Hint" class="hint-box desktop-only">
+            <strong>Mesma área, cercas diferentes:</strong> compare um retângulo bem comprido (como 1×12) com um mais compacto (3×4) ou monte formas em L e escada na <em>Montagem Livre</em>!
+          </div>
+        </div>
+      </aside>
+    </div>
+  </div>
+
+  <script>
+    /**
+     * =========================================================================
+     * OFICINA DE MEDIDAS: 1D, 2D, 3D · ÁREA E PERÍMETRO (6º ANO)
+     * =========================================================================
+     * - Zero dependências externas; Canvas 2D nítido em Retina/HiDPI.
+     * - Pointer Events unificados (mouse, touchpad e touch) com touch-action: none.
+     * - 3 Fases completas + Painel Colapsável de 5 Missões verificadas em tempo real.
+     */
+    (function () {
+      'use strict';
+
+      // =======================================================================
+      // REFERÊNCIAS DE DOM
+      // =======================================================================
+      const stageWrap = document.getElementById('stageWrap');
+      const canvas = document.getElementById('workshopCanvas');
+      const ctx = canvas.getContext('2d');
+
+      const tabP1 = document.getElementById('tabP1');
+      const tabP2 = document.getElementById('tabP2');
+      const tabP3 = document.getElementById('tabP3');
+      const paneP1 = document.getElementById('paneP1');
+      const paneP2 = document.getElementById('paneP2');
+      const paneP3 = document.getElementById('paneP3');
+
+      const btnChallenges = document.getElementById('btnChallenges');
+      const labelChallenges = document.getElementById('labelChallenges');
+      const challengesDrawer = document.getElementById('challengesDrawer');
+      const btnCloseDrawer = document.getElementById('btnCloseDrawer');
+      const drawerProgress = document.getElementById('drawerProgress');
+      const missionsList = document.getElementById('missionsList');
+
+      const stageToast = document.getElementById('stageToast');
+      const stageToastIcon = document.getElementById('stageToastIcon');
+      const stageToastText = document.getElementById('stageToastText');
+
+      // Fase 1
+      const p1SubTabs = document.getElementById('p1SubTabs');
+      const p1MeasureCard = document.getElementById('p1MeasureCard');
+      const p1MeasureLabel = document.getElementById('p1MeasureLabel');
+      const p1MeasureBig = document.getElementById('p1MeasureBig');
+      const p1MeasureSub = document.getElementById('p1MeasureSub');
+      const p1Controls1D = document.getElementById('p1Controls1D');
+      const p1Controls2D = document.getElementById('p1Controls2D');
+      const p1Controls3D = document.getElementById('p1Controls3D');
+      const valP1Len = document.getElementById('valP1Len');
+      const sliderP1Len = document.getElementById('sliderP1Len');
+      const btnCount1D = document.getElementById('btnCount1D');
+      const valP1W = document.getElementById('valP1W');
+      const sliderP1W = document.getElementById('sliderP1W');
+      const valP1H = document.getElementById('valP1H');
+      const sliderP1H = document.getElementById('sliderP1H');
+      const btnFillRows2D = document.getElementById('btnFillRows2D');
+      const valP1C = document.getElementById('valP1C');
+      const sliderP1C = document.getElementById('sliderP1C');
+      const valP1L = document.getElementById('valP1L');
+      const sliderP1L = document.getElementById('sliderP1L');
+      const valP1Z = document.getElementById('valP1Z');
+      const sliderP1Z = document.getElementById('sliderP1Z');
+      const togSplitLayers = document.getElementById('togSplitLayers');
+      const btnResetCam3D = document.getElementById('btnResetCam3D');
+      const togP1Measures = document.getElementById('togP1Measures');
+      const p1Hint = document.getElementById('p1Hint');
+
+      // Fase 2
+      const p2PerimChips = document.getElementById('p2PerimChips');
+      const p2MeasureBox = document.getElementById('p2MeasureBox');
+      const p2PerimVal = document.getElementById('p2PerimVal');
+      const p2AreaVal = document.getElementById('p2AreaVal');
+      const valP2Dims = document.getElementById('valP2Dims');
+      const sliderP2W = document.getElementById('sliderP2W');
+      const btnWalkP2 = document.getElementById('btnWalkP2');
+      const togP2Measures = document.getElementById('togP2Measures');
+      const discPerimTitle = document.getElementById('discPerimTitle');
+      const discCount = document.getElementById('discCount');
+      const discoveredList = document.getElementById('discoveredList');
+
+      // Fase 3
+      const p3AreaChips = document.getElementById('p3AreaChips');
+      const p3ModeTabs = document.getElementById('p3ModeTabs');
+      const p3MeasureBox = document.getElementById('p3MeasureBox');
+      const p3AreaVal = document.getElementById('p3AreaVal');
+      const p3PerimVal = document.getElementById('p3PerimVal');
+      const p3RectControls = document.getElementById('p3RectControls');
+      const p3DivisorChips = document.getElementById('p3DivisorChips');
+      const p3FreeControls = document.getElementById('p3FreeControls');
+      const p3FreeStatus = document.getElementById('p3FreeStatus');
+      const p3FreeCountText = document.getElementById('p3FreeCountText');
+      const p3FreeConnText = document.getElementById('p3FreeConnText');
+      const btnP3Clear = document.getElementById('btnP3Clear');
+      const btnP3FillRect = document.getElementById('btnP3FillRect');
+      const btnWalkP3 = document.getElementById('btnWalkP3');
+      const togP3Measures = document.getElementById('togP3Measures');
+      const p3Hint = document.getElementById('p3Hint');
+
+      // =======================================================================
+      // TEXTURA DE MADEIRA MDF EM CANVAS OFFSCREEN (PERFORMANCE + NITIDEZ)
+      // =======================================================================
+      let mdfPattern = null;
+      function createMdfPattern() {
+        const off = document.createElement('canvas');
+        off.width = 120;
+        off.height = 120;
+        const octx = off.getContext('2d');
+        octx.fillStyle = '#f4efe6';
+        octx.fillRect(0, 0, 120, 120);
+
+        // Veios sutis de MDF claro
+        octx.strokeStyle = 'rgba(186, 165, 134, 0.16)';
+        octx.lineWidth = 1;
+        for (let y = 6; y < 120; y += 14) {
+          octx.beginPath();
+          octx.moveTo(0, y);
+          octx.bezierCurveTo(40, y + 2, 80, y - 2, 120, y + 1);
+          octx.stroke();
+        }
+
+        // Pontilhado microscópico natural
+        octx.fillStyle = 'rgba(166, 142, 108, 0.14)';
+        for (let i = 0; i < 40; i++) {
+          const x = (i * 37 + 11) % 120;
+          const y = (i * 53 + 19) % 120;
+          octx.fillRect(x, y, 1.4, 1.4);
+        }
+        mdfPattern = ctx.createPattern(off, 'repeat');
+      }
+
+      // =======================================================================
+      // 5 MISSÕES DO PAINEL COLAPSÁVEL DE DESAFIOS
+      // =======================================================================
+      const MISSIONS = [
+        {
+          id: 1,
+          tag: '3D · Volume',
+          text: 'Monte um bloco de volume exatamente igual a 18 u³ (na Fase 1 · 3D).',
+          check: () => state.phase === 1 && state.p1.dim === 3 && (state.p1.c * state.p1.l * state.p1.h === 18),
+          go: () => {
+            state.phase = 1;
+            state.p1.dim = 3;
+            stopAnimations();
+            syncUI();
+          }
+        },
+        {
+          id: 2,
+          tag: 'Perímetro Fixo',
+          text: 'Com perímetro 16 u (Fase 2), construa a maior área possível (4×4 = 16 u²).',
+          check: () => state.phase === 2 && state.p2.perim === 16 && state.p2.w === 4 && (state.p2.perim / 2 - state.p2.w === 4),
+          go: () => {
+            state.phase = 2;
+            setP2Perim(16);
+            state.p2.w = 2; // Deixa para o aluno deformar até 4×4
+            recordP2Discovery();
+            stopAnimations();
+            syncUI();
+          }
+        },
+        {
+          id: 3,
+          tag: 'Perímetro Fixo',
+          text: 'Com perímetro 20 u (Fase 2), monte um retângulo com área menor que 12 u² (1×9 ou 9×1).',
+          check: () => {
+            if (state.phase !== 2 || state.p2.perim !== 20) return false;
+            const h = state.p2.perim / 2 - state.p2.w;
+            return state.p2.w * h < 12;
+          },
+          go: () => {
+            state.phase = 2;
+            setP2Perim(20);
+            state.p2.w = 5; // Começa no quadrado para o aluno esticar
+            recordP2Discovery();
+            stopAnimations();
+            syncUI();
+          }
+        },
+        {
+          id: 4,
+          tag: 'Área Fixa',
+          text: 'Com área 12 u² (Fase 3), consiga o menor perímetro possível (14 u).',
+          check: () => {
+            if (state.phase !== 3 || state.p3.targetArea !== 12) return false;
+            const m = getP3Metrics();
+            return m.area === 12 && m.connected && m.perim === 14;
+          },
+          go: () => {
+            state.phase = 3;
+            setP3Area(12);
+            state.p3.mode = 'rect';
+            state.p3.rectW = 1; // Começa no 1×12 (perímetro 26)
+            stopAnimations();
+            syncUI();
+          }
+        },
+        {
+          id: 5,
+          tag: 'Área Fixa',
+          text: 'Com área 12 u² (Fase 3), consiga um perímetro de pelo menos 26 u.',
+          check: () => {
+            if (state.phase !== 3 || state.p3.targetArea !== 12) return false;
+            const m = getP3Metrics();
+            return m.area === 12 && m.connected && m.perim >= 26;
+          },
+          go: () => {
+            state.phase = 3;
+            setP3Area(12);
+            state.p3.mode = 'rect';
+            state.p3.rectW = 4; // Começa no 4×3 (perímetro 14)
+            stopAnimations();
+            syncUI();
+          }
+        }
+      ];
+
+      // =======================================================================
+      // ESTADO GLOBAL
+      // =======================================================================
+      const FREE_COLS = 14;
+      const FREE_ROWS = 9;
+
+      const state = {
+        phase: 1, // 1, 2 ou 3
+        w: 640,
+        h: 480,
+        dpr: 1,
+
+        // Fase 1: 1D / 2D / 3D
+        p1: {
+          dim: 1,            // 1, 2 ou 3
+          len1D: 6,          // 1..12
+          w2D: 6,            // 1..10
+          h2D: 4,            // 1..8
+          c: 4,              // 1..6 (3D comprimento)
+          l: 3,              // 1..6 (3D largura)
+          h: 2,              // 1..5 (3D altura / andares)
+          splitLayers: false,
+          splitAnim: 0,      // 0..1 interpolado
+          yaw: -0.62,
+          pitch: 0.48,
+          showMeasures: false // Modo Visual Puro por padrão
+        },
+
+        // Fase 2: Perímetro Fixo
+        p2: {
+          perim: 20,         // 12, 16, 20, 24
+          w: 7,              // 1..(perim/2 - 1)
+          showMeasures: false,
+          discovered: {
+            12: new Set([4]),
+            16: new Set([5]),
+            20: new Set([7]),
+            24: new Set([8])
+          }
+        },
+
+        // Fase 3: Área Fixa
+        p3: {
+          targetArea: 12,    // 12, 16, 24
+          mode: 'rect',      // 'rect' | 'free'
+          rectW: 4,          // divisor de targetArea
+          freeCells: new Set(), // chaves "col,row"
+          showMeasures: false
+        },
+
+        // Animações ativas (Contar 1D, Preencher Fileiras 2D, Percorrer Cerca P2/P3)
+        anim: null,
+
+        // Desafios
+        drawerOpen: false,
+        solvedMissions: new Set(),
+        toastTimer: null,
+
+        // Interação no Canvas (Pointer Events)
+        drag: null,
+        // Geometria cacheada do frame atual para hit-testing preciso
+        hit: {
+          handle1D: null,
+          bar1D: null,
+          handle2D: null,
+          grid2D: null,
+          handleP2: null,
+          gridP2: null,
+          gridP3Free: null
+        }
+      };
+
+      // Inicializa a grade livre da Fase 3 com um retângulo padrão (4×3 = 12)
+      function fillFreeWithRect(area) {
+        state.p3.freeCells.clear();
+        const divs = getDivisors(area);
+        // Escolhe o divisor mais próximo da raiz (mais compacto)
+        let bestW = divs[0];
+        let bestDiff = Infinity;
+        for (const d of divs) {
+          const diff = Math.abs(d - area / d);
+          if (diff < bestDiff) { bestDiff = diff; bestW = d; }
+        }
+        const h = area / bestW;
+        const startC = Math.floor((FREE_COLS - bestW) / 2);
+        const startR = Math.floor((FREE_ROWS - h) / 2);
+        for (let c = 0; c < bestW; c++) {
+          for (let r = 0; r < h; r++) {
+            state.p3.freeCells.add(`${startC + c},${startR + r}`);
+          }
+        }
+      }
+
+      function getDivisors(n) {
+        const res = [];
+        for (let i = 1; i <= n; i++) {
+          if (n % i === 0) res.push(i);
+        }
+        return res;
+      }
+
+      // =======================================================================
+      // CÁLCULOS DA FASE 3 (ÁREA, PERÍMETRO DE BORDAS EXTERNAS E CONECTIVIDADE)
+      // =======================================================================
+      function getP3CellsArray() {
+        if (state.p3.mode === 'rect') {
+          const w = state.p3.rectW;
+          const h = state.p3.targetArea / w;
+          const arr = [];
+          for (let c = 0; c < w; c++) {
+            for (let r = 0; r < h; r++) arr.push({ c, r });
+          }
+          return arr;
+        }
+        const arr = [];
+        for (const key of state.p3.freeCells) {
+          const [c, r] = key.split(',').map(Number);
+          arr.push({ c, r });
+        }
+        return arr;
+      }
+
+      function getP3Metrics() {
+        if (state.p3.mode === 'rect') {
+          const w = state.p3.rectW;
+          const h = state.p3.targetArea / w;
+          const edges = buildRectEdges(0, 0, w, h);
+          return {
+            area: state.p3.targetArea,
+            perim: 2 * (w + h),
+            connected: true,
+            edges
+          };
+        }
+
+        const cells = state.p3.freeCells;
+        const area = cells.size;
+        if (area === 0) {
+          return { area: 0, perim: 0, connected: true, edges: [] };
+        }
+
+        // 1. Verifica conectividade ortogonal via BFS
+        const firstKey = cells.values().next().value;
+        const visited = new Set([firstKey]);
+        const queue = [firstKey];
+        const dirs = [[1, 0], [-1, 0], [0, 1], [0, -1]];
+        while (queue.length > 0) {
+          const cur = queue.shift();
+          const [c, r] = cur.split(',').map(Number);
+          for (const [dc, dr] of dirs) {
+            const nk = `${c + dc},${r + dr}`;
+            if (cells.has(nk) && !visited.has(nk)) {
+              visited.add(nk);
+              queue.push(nk);
+            }
+          }
+        }
+        const connected = visited.size === area;
+
+        // 2. Coleta todas as arestas externas dirigidas no sentido horário
+        //    para permitir animação contínua de "Percorrer Cerca (1 u)"
+        const rawEdges = [];
+        for (const key of cells) {
+          const [c, r] = key.split(',').map(Number);
+          if (!cells.has(`${c},${r - 1}`)) rawEdges.push({ x1: c, y1: r, x2: c + 1, y2: r });         // Topo
+          if (!cells.has(`${c + 1},${r}`)) rawEdges.push({ x1: c + 1, y1: r, x2: c + 1, y2: r + 1 }); // Direita
+          if (!cells.has(`${c},${r + 1}`)) rawEdges.push({ x1: c + 1, y1: r + 1, x2: c, y2: r + 1 }); // Base
+          if (!cells.has(`${c - 1},${r}`)) rawEdges.push({ x1: c, y1: r + 1, x2: c, y2: r });         // Esquerda
+        }
+
+        // Ordena as arestas encadeando por vértices para um passeio fluido
+        const edges = chainDirectedEdges(rawEdges);
+        return { area, perim: edges.length, connected, edges };
+      }
+
+      function buildRectEdges(c0, r0, w, h) {
+        const edges = [];
+        for (let i = 0; i < w; i++) edges.push({ x1: c0 + i, y1: r0, x2: c0 + i + 1, y2: r0 });
+        for (let j = 0; j < h; j++) edges.push({ x1: c0 + w, y1: r0 + j, x2: c0 + w, y2: r0 + j + 1 });
+        for (let i = w; i > 0; i--) edges.push({ x1: c0 + i, y1: r0 + h, x2: c0 + i - 1, y2: r0 + h });
+        for (let j = h; j > 0; j--) edges.push({ x1: c0, y1: r0 + j, x2: c0, y2: r0 + j - 1 });
+        return edges;
+      }
+
+      function chainDirectedEdges(rawEdges) {
+        if (rawEdges.length === 0) return [];
+        const byStart = new Map();
+        rawEdges.forEach((e, idx) => {
+          const k = `${e.x1},${e.y1}`;
+          if (!byStart.has(k)) byStart.set(k, []);
+          byStart.get(k).push(idx);
+        });
+
+        const used = new Uint8Array(rawEdges.length);
+        const ordered = [];
+
+        for (let i = 0; i < rawEdges.length; i++) {
+          if (used[i]) continue;
+          let curIdx = i;
+          while (curIdx !== -1 && !used[curIdx]) {
+            used[curIdx] = 1;
+            const e = rawEdges[curIdx];
+            ordered.push(e);
+            const nextList = byStart.get(`${e.x2},${e.y2}`) || [];
+            curIdx = -1;
+            for (const cand of nextList) {
+              if (!used[cand]) { curIdx = cand; break; }
+            }
+          }
+        }
+        return ordered;
+      }
+
+      // =======================================================================
+      // VERIFICAÇÃO DE MISSÕES & TOAST
+      // =======================================================================
+      function showToast(msg, isWarning = false, ms = 3200) {
+        stageToastText.textContent = msg;
+        stageToastIcon.innerHTML = isWarning ? '&#9888;' : '&#10004;';
+        stageToast.classList.toggle('warning', isWarning);
+        stageToast.classList.remove('hidden');
+
+        if (state.toastTimer) clearTimeout(state.toastTimer);
+        state.toastTimer = setTimeout(() => {
+          stageToast.classList.add('hidden');
+        }, ms);
+      }
+
+      function checkMissions() {
+        let newlySolved = null;
+        for (const m of MISSIONS) {
+          if (!state.solvedMissions.has(m.id) && m.check()) {
+            state.solvedMissions.add(m.id);
+            newlySolved = m;
+          }
+        }
+        if (newlySolved) {
+          showToast(`Missão ${newlySolved.id} concluída! (${newlySolved.tag})`, false, 3600);
+          renderMissionsDrawer();
+        }
+        const total = state.solvedMissions.size;
+        labelChallenges.textContent = `Desafios (${total}/5)`;
+        drawerProgress.textContent = `(${total}/5)`;
+        btnChallenges.classList.toggle('all-done', total === MISSIONS.length);
+      }
+
+      function renderMissionsDrawer() {
+        missionsList.innerHTML = '';
+        for (const m of MISSIONS) {
+          const done = state.solvedMissions.has(m.id);
+          const item = document.createElement('div');
+          item.className = `mission-item${done ? ' done' : ''}`;
+          item.innerHTML = `
+            <div class="mission-info">
+              <span class="mission-tag">${m.id}. ${m.tag}</span>
+              <span class="mission-text">${m.text}</span>
+            </div>
+            <div class="mission-right">
+              <span class="mission-check" title="${done ? 'Concluída' : 'Pendente'}">${done ? '&#10004;' : '&bull;'}</span>
+              <button type="button" class="btn-go">Ir</button>
+            </div>
+          `;
+          item.querySelector('.btn-go').addEventListener('click', () => {
+            m.go();
+            toggleDrawer(false);
+          });
+          missionsList.appendChild(item);
+        }
+      }
+
+      function toggleDrawer(forceState) {
+        state.drawerOpen = typeof forceState === 'boolean' ? forceState : !state.drawerOpen;
+        challengesDrawer.classList.toggle('hidden', !state.drawerOpen);
+        btnChallenges.classList.toggle('open', state.drawerOpen);
+        btnChallenges.setAttribute('aria-expanded', String(state.drawerOpen));
+        if (state.drawerOpen) renderMissionsDrawer();
+      }
+
+      // =======================================================================
+      // AUXILIARES DE ESTADO
+      // =======================================================================
+      function stopAnimations() {
+        state.anim = null;
+      }
+
+      function setP2Perim(p) {
+        state.p2.perim = p;
+        const maxW = p / 2 - 1;
+        state.p2.w = Math.max(1, Math.min(maxW, state.p2.w));
+        if (!state.p2.discovered[p]) state.p2.discovered[p] = new Set();
+        state.p2.discovered[p].add(state.p2.w);
+      }
+
+      function recordP2Discovery() {
+        const p = state.p2.perim;
+        if (!state.p2.discovered[p]) state.p2.discovered[p] = new Set();
+        state.p2.discovered[p].add(state.p2.w);
+      }
+
+      function setP3Area(area) {
+        state.p3.targetArea = area;
+        const divs = getDivisors(area);
+        if (!divs.includes(state.p3.rectW)) {
+          // Escolhe um divisor intermediário
+          state.p3.rectW = divs[Math.floor(divs.length / 2)];
+        }
+        fillFreeWithRect(area);
+      }
+
+      // =======================================================================
+      // REDIMENSIONAMENTO RETINA / HiDPI
+      // =======================================================================
+      function resizeCanvas() {
+        const rect = stageWrap.getBoundingClientRect();
+        const w = Math.max(240, Math.floor(rect.width));
+        const h = Math.max(220, Math.floor(rect.height));
+        const dpr = Math.min(window.devicePixelRatio || 1, 2.5);
+
+        state.w = w;
+        state.h = h;
+        state.dpr = dpr;
+
+        canvas.width = Math.round(w * dpr);
+        canvas.height = Math.round(h * dpr);
+        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      }
+
+      // =======================================================================
+      // PRIMITIVAS DE DESENHO TÁTIL (1 u, 1 u², 1 u³, CARTÃO DE REFERÊNCIA)
+      // =======================================================================
+      function drawBenchBackground() {
+        const { w, h } = state;
+        if (mdfPattern) {
+          ctx.fillStyle = mdfPattern;
+          ctx.fillRect(0, 0, w, h);
+        } else {
+          ctx.fillStyle = '#f4efe6';
+          ctx.fillRect(0, 0, w, h);
+        }
+
+        // Vinheta muito suave de borda da mesa MDF
+        const grad = ctx.createRadialGradient(w * 0.45, h * 0.35, Math.min(w, h) * 0.15, w * 0.5, h * 0.5, Math.max(w, h) * 0.78);
+        grad.addColorStop(0, 'rgba(255, 255, 255, 0.25)');
+        grad.addColorStop(1, 'rgba(182, 158, 124, 0.16)');
+        ctx.fillStyle = grad;
+        ctx.fillRect(0, 0, w, h);
+      }
+
+      // Desenha um bastão/segmento unitário "1 u" em âmbar/dourado forte com pinos nas pontas
+      function drawUnitRod(x1, y1, x2, y2, opts = {}) {
+        const thickness = opts.thickness || 10;
+        const glow = opts.glow || false;
+        const dimmed = opts.dimmed || false;
+        const label = opts.label || null;
+
+        ctx.save();
+        ctx.globalAlpha = dimmed ? 0.25 : 1;
+        ctx.lineCap = 'round';
+
+        // Sombra tátil
+        ctx.strokeStyle = 'rgba(78, 52, 18, 0.22)';
+        ctx.lineWidth = thickness + 2;
+        ctx.beginPath();
+        ctx.moveTo(x1 + 1.5, y1 + 2.5);
+        ctx.lineTo(x2 + 1.5, y2 + 2.5);
+        ctx.stroke();
+
+        // Halo de destaque durante animação de contagem/cerca
+        if (glow) {
+          ctx.strokeStyle = 'rgba(251, 191, 36, 0.58)';
+          ctx.lineWidth = thickness + 10;
+          ctx.beginPath();
+          ctx.moveTo(x1, y1);
+          ctx.lineTo(x2, y2);
+          ctx.stroke();
+        }
+
+        // Corpo do bastão 1 u (#d97706)
+        ctx.strokeStyle = glow ? '#f59e0b' : '#d97706';
+        ctx.lineWidth = thickness;
+        ctx.beginPath();
+        ctx.moveTo(x1, y1);
+        ctx.lineTo(x2, y2);
+        ctx.stroke();
+
+        // Filete de brilho superior
+        ctx.strokeStyle = glow ? '#fef9c3' : '#fde68a';
+        ctx.lineWidth = Math.max(2, thickness * 0.28);
+        ctx.beginPath();
+        ctx.moveTo(x1, y1 - (y1 === y2 ? thickness * 0.18 : 0));
+        ctx.lineTo(x2, y2 - (y1 === y2 ? thickness * 0.18 : 0));
+        ctx.stroke();
+
+        // Extremidades marcadas (pinos/emendas)
+        const pinR = Math.max(3.2, thickness * 0.42);
+        for (const [px, py] of [[x1, y1], [x2, y2]]) {
+          ctx.beginPath();
+          ctx.arc(px, py, pinR, 0, Math.PI * 2);
+          ctx.fillStyle = '#fffbeb';
+          ctx.fill();
+          ctx.strokeStyle = '#92400e';
+          ctx.lineWidth = 1.8;
+          ctx.stroke();
+        }
+
+        if (label) {
+          const mx = (x1 + x2) / 2;
+          const my = (y1 + y2) / 2;
+          ctx.font = '800 12px "Segoe UI", system-ui, sans-serif';
+          ctx.fillStyle = '#78350f';
+          ctx.textAlign = 'center';
+          ctx.textBaseline = 'middle';
+          ctx.fillText(label, mx, my - thickness - 6);
+        }
+
+        ctx.restore();
+      }
+
+      // Desenha uma lajota quadrada unitária "1 u²" em azul-petróleo com borda chanfrada tátil
+      function drawUnitTile(x, y, size, opts = {}) {
+        const glow = opts.glow || false;
+        const alpha = opts.alpha !== undefined ? opts.alpha : 1;
+        const pad = Math.max(1.2, size * 0.045);
+        const rx = x + pad;
+        const ry = y + pad;
+        const rw = Math.max(2, size - pad * 2);
+        const bevel = Math.max(2.5, rw * 0.11);
+
+        ctx.save();
+        ctx.globalAlpha = alpha;
+
+        // Sombra suave sob a peça
+        ctx.fillStyle = 'rgba(15, 45, 42, 0.16)';
+        ctx.fillRect(rx + 1.5, ry + 2, rw, rw);
+
+        // Corpo principal (#0f766e / #14b8a6)
+        ctx.fillStyle = glow ? '#2dd4bf' : '#14b8a6';
+        ctx.fillRect(rx, ry, rw, rw);
+
+        // Chanfro claro (topo e esquerda)
+        ctx.fillStyle = glow ? 'rgba(255, 255, 255, 0.55)' : 'rgba(204, 251, 241, 0.48)';
+        ctx.beginPath();
+        ctx.moveTo(rx, ry);
+        ctx.lineTo(rx + rw, ry);
+        ctx.lineTo(rx + rw - bevel, ry + bevel);
+        ctx.lineTo(rx + bevel, ry + bevel);
+        ctx.lineTo(rx + bevel, ry + rw - bevel);
+        ctx.lineTo(rx, ry + rw);
+        ctx.closePath();
+        ctx.fill();
+
+        // Chanfro escuro (base e direita)
+        ctx.fillStyle = 'rgba(15, 118, 110, 0.62)';
+        ctx.beginPath();
+        ctx.moveTo(rx + rw, ry);
+        ctx.lineTo(rx + rw, ry + rw);
+        ctx.lineTo(rx, ry + rw);
+        ctx.lineTo(rx + bevel, ry + rw - bevel);
+        ctx.lineTo(rx + rw - bevel, ry + rw - bevel);
+        ctx.lineTo(rx + rw - bevel, ry + bevel);
+        ctx.closePath();
+        ctx.fill();
+
+        // Borda nítida da lajota
+        ctx.strokeStyle = '#0f766e';
+        ctx.lineWidth = 1.25;
+        ctx.strokeRect(rx, ry, rw, rw);
+
+        if (opts.text) {
+          ctx.fillStyle = '#ffffff';
+          ctx.font = `800 ${Math.max(10, Math.min(14, rw * 0.34))}px "Segoe UI", system-ui, sans-serif`;
+          ctx.textAlign = 'center';
+          ctx.textBaseline = 'middle';
+          ctx.fillText(opts.text, rx + rw / 2, ry + rw / 2 + 0.5);
+        }
+
+        ctx.restore();
+      }
+
+      // Desenha um cubo isométrico mini de referência "1 u³" em terracota/madeira quente
+      function drawMiniIsoCube(cx, cy, r) {
+        const dx = r * Math.cos(Math.PI / 6);
+        const dy = r * Math.sin(Math.PI / 6);
+
+        ctx.save();
+        ctx.lineJoin = 'round';
+        ctx.lineWidth = 1.3;
+        ctx.strokeStyle = '#7c2d12';
+
+        // Face superior (#fdba74)
+        ctx.beginPath();
+        ctx.moveTo(cx, cy - r);
+        ctx.lineTo(cx + dx, cy - dy);
+        ctx.lineTo(cx, cy);
+        ctx.lineTo(cx - dx, cy - dy);
+        ctx.closePath();
+        ctx.fillStyle = '#fdba74';
+        ctx.fill();
+        ctx.stroke();
+
+        // Face esquerda (#ea580c)
+        ctx.beginPath();
+        ctx.moveTo(cx - dx, cy - dy);
+        ctx.lineTo(cx, cy);
+        ctx.lineTo(cx, cy + r);
+        ctx.lineTo(cx - dx, cy + dy);
+        ctx.closePath();
+        ctx.fillStyle = '#ea580c';
+        ctx.fill();
+        ctx.stroke();
+
+        // Face direita (#c2410c)
+        ctx.beginPath();
+        ctx.moveTo(cx + dx, cy - dy);
+        ctx.lineTo(cx, cy);
+        ctx.lineTo(cx, cy + r);
+        ctx.lineTo(cx + dx, cy + dy);
+        ctx.closePath();
+        ctx.fillStyle = '#c2410c';
+        ctx.fill();
+        ctx.stroke();
+
+        ctx.restore();
+      }
+
+      // Cartão do Elemento Unitário no canto superior esquerdo do canvas
+      function drawUnitReferenceCard(types) {
+        // types: array contendo '1D', '2D' ou '3D'
+        const isSmall = state.w < 460;
+        const padX = isSmall ? 10 : 14;
+        const padY = isSmall ? 8 : 10;
+        const itemH = isSmall ? 30 : 34;
+        const cardW = isSmall ? (types.length > 1 ? 156 : 146) : (types.length > 1 ? 190 : 176);
+        const cardH = 22 + types.length * itemH + padY;
+        const x = 12;
+        const y = 12;
+
+        ctx.save();
+        // Sombra do cartão
+        ctx.shadowColor = 'rgba(45, 35, 22, 0.14)';
+        ctx.shadowBlur = 12;
+        ctx.shadowOffsetY = 3;
+        ctx.fillStyle = 'rgba(255, 253, 249, 0.94)';
+        ctx.strokeStyle = 'rgba(140, 118, 88, 0.38)';
+        ctx.lineWidth = 1.4;
+        ctx.beginPath();
+        if (ctx.roundRect) ctx.roundRect(x, y, cardW, cardH, 12);
+        else ctx.rect(x, y, cardW, cardH);
+        ctx.fill();
+        ctx.shadowColor = 'transparent';
+        ctx.stroke();
+
+        // Título do cartão
+        ctx.fillStyle = '#64748b';
+        ctx.font = `800 ${isSmall ? 9.5 : 10}px "Segoe UI", system-ui, sans-serif`;
+        ctx.textAlign = 'left';
+        ctx.textBaseline = 'top';
+        ctx.fillText(types.length > 1 ? 'ELEMENTOS UNITÁRIOS' : 'ELEMENTO UNITÁRIO', x + padX, y + 7);
+
+        let curY = y + 23;
+        for (const t of types) {
+          const iconCenterX = x + padX + 16;
+          const iconCenterY = curY + itemH * 0.45;
+          const textX = x + padX + 40;
+
+          if (t === '1D') {
+            drawUnitRod(iconCenterX - 13, iconCenterY, iconCenterX + 13, iconCenterY, { thickness: 6 });
+            ctx.fillStyle = '#92400e';
+            ctx.font = `800 ${isSmall ? 11.5 : 12.5}px "Segoe UI", system-ui, sans-serif`;
+            ctx.textAlign = 'left';
+            ctx.textBaseline = 'middle';
+            ctx.fillText('1 u  (bastão)', textX, iconCenterY);
+          } else if (t === '2D') {
+            drawUnitTile(iconCenterX - 11, iconCenterY - 11, 22);
+            ctx.fillStyle = '#0f766e';
+            ctx.font = `800 ${isSmall ? 11.5 : 12.5}px "Segoe UI", system-ui, sans-serif`;
+            ctx.textAlign = 'left';
+            ctx.textBaseline = 'middle';
+            ctx.fillText('1 u² (lajota 1×1)', textX, iconCenterY);
+          } else if (t === '3D') {
+            drawMiniIsoCube(iconCenterX, iconCenterY + 1, 12);
+            ctx.fillStyle = '#c2410c';
+            ctx.font = `800 ${isSmall ? 11.5 : 12.5}px "Segoe UI", system-ui, sans-serif`;
+            ctx.textAlign = 'left';
+            ctx.textBaseline = 'middle';
+            ctx.fillText('1 u³ (cubo 1×1×1)', textX, iconCenterY);
+          }
+          curY += itemH;
+        }
+        ctx.restore();
+      }
+
+      // Alça interativa de arraste no canvas
+      function drawDragHandle(x, y, color = '#d97706', label = '↔') {
+        ctx.save();
+        ctx.beginPath();
+        ctx.arc(x, y, 16, 0, Math.PI * 2);
+        ctx.fillStyle = `${color}28`;
+        ctx.fill();
+
+        ctx.beginPath();
+        ctx.arc(x, y, 11.5, 0, Math.PI * 2);
+        ctx.fillStyle = color;
+        ctx.fill();
+        ctx.strokeStyle = '#ffffff';
+        ctx.lineWidth = 2.4;
+        ctx.stroke();
+
+        ctx.fillStyle = '#ffffff';
+        ctx.font = '800 12px "Segoe UI", system-ui, sans-serif';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText(label, x, y + 0.5);
+        ctx.restore();
+      }
+
+      function drawCanvasBadge(x, y, text, borderColor, bgColor = 'rgba(255, 253, 249, 0.96)', textColor = '#0f172a') {
+        ctx.save();
+        ctx.font = '800 13px "Segoe UI", system-ui, sans-serif';
+        const tw = ctx.measureText(text).width;
+        const bw = tw + 20;
+        const bh = 26;
+        ctx.fillStyle = bgColor;
+        ctx.strokeStyle = borderColor;
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        if (ctx.roundRect) ctx.roundRect(x - bw / 2, y - bh / 2, bw, bh, 13);
+        else ctx.rect(x - bw / 2, y - bh / 2, bw, bh);
+        ctx.fill();
+        ctx.stroke();
+
+        ctx.fillStyle = textColor;
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText(text, x, y + 0.5);
+        ctx.restore();
+      }
+
+      // =======================================================================
+      // RENDERIZAÇÃO — FASE 1: 1D (COMPRIMENTO), 2D (ÁREA) E 3D (VOLUME)
+      // =======================================================================
+      function renderPhase1_1D(now) {
+        drawUnitReferenceCard(['1D']);
+
+        const maxUnits = 12;
+        const padSide = Math.max(36, state.w * 0.08);
+        const availW = state.w - padSide * 2;
+        const unitPx = Math.max(22, Math.min(58, availW / maxUnits));
+        const totalTrackW = unitPx * maxUnits;
+        const startX = (state.w - totalTrackW) / 2;
+        const barY = state.h * 0.57;
+        const refY = Math.max(96, barY - Math.min(115, state.h * 0.24));
+
+        // 1. Elemento padrão "1 u" isolado acima para comparação visual direta
+        const refX = startX;
+        ctx.save();
+        ctx.fillStyle = '#78350f';
+        ctx.font = '700 12.5px "Segoe UI", system-ui, sans-serif';
+        ctx.textAlign = 'left';
+        ctx.textBaseline = 'bottom';
+        ctx.fillText('Padrão de comparação (1 u):', refX, refY - 14);
+        ctx.restore();
+        drawUnitRod(refX, refY, refX + unitPx, refY, { thickness: 11, label: '1 u' });
+
+        // 2. Trilho/régua de encaixe (12 slots na bancada)
+        ctx.save();
+        ctx.strokeStyle = 'rgba(140, 118, 88, 0.35)';
+        ctx.lineWidth = 2;
+        ctx.setLineDash([4, 4]);
+        ctx.beginPath();
+        ctx.moveTo(startX, barY);
+        ctx.lineTo(startX + totalTrackW, barY);
+        ctx.stroke();
+        ctx.setLineDash([]);
+
+        for (let i = 0; i <= maxUnits; i++) {
+          const tx = startX + i * unitPx;
+          ctx.beginPath();
+          ctx.moveTo(tx, barY - 11);
+          ctx.lineTo(tx, barY + 11);
+          ctx.strokeStyle = i <= state.p1.len1D ? 'rgba(146, 64, 14, 0.45)' : 'rgba(140, 118, 88, 0.28)';
+          ctx.lineWidth = 1.5;
+          ctx.stroke();
+
+          if (state.p1.showMeasures && i > 0) {
+            ctx.fillStyle = i <= state.p1.len1D ? '#92400e' : '#94a3b8';
+            ctx.font = '700 11px "Segoe UI", system-ui, sans-serif';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'top';
+            ctx.fillText(String(i), tx, barY + 16);
+          }
+        }
+        ctx.restore();
+
+        // 3. Progresso da animação "Contar 1 por 1"
+        let activeCount = -1;
+        if (state.anim && state.anim.type === 'count1D') {
+          const elapsed = (now - state.anim.start) / 360;
+          activeCount = Math.floor(elapsed);
+          if (activeCount >= state.p1.len1D) {
+            state.anim = null;
+            activeCount = -1;
+          }
+        }
+
+        // 4. Bastões unitários enfileirados
+        for (let i = 0; i < state.p1.len1D; i++) {
+          const x1 = startX + i * unitPx;
+          const x2 = x1 + unitPx;
+          const isAnim = activeCount >= 0;
+          const isLit = isAnim && i === activeCount;
+          const isDimmed = isAnim && i > activeCount;
+
+          drawUnitRod(x1, barY, x2, barY, {
+            thickness: 12,
+            glow: isLit,
+            dimmed: isDimmed,
+            label: isLit ? `${i + 1} u` : null
+          });
+        }
+
+        // 5. Alça arrastável na ponta direita da barra
+        const endX = startX + state.p1.len1D * unitPx;
+        drawDragHandle(endX, barY, '#d97706', '↔');
+
+        // Cache de hit-test
+        state.hit.handle1D = { x: endX, y: barY, r: 28 };
+        state.hit.bar1D = { startX, unitPx, barY };
+
+        // 6. Badge de medida se "Mostrar Medidas e Fórmula" estiver ativo
+        if (state.p1.showMeasures) {
+          drawCanvasBadge(
+            startX + (state.p1.len1D * unitPx) / 2,
+            barY + 46,
+            `${state.p1.len1D} bastões = ${state.p1.len1D} u`,
+            '#d97706',
+            '#fffbeb',
+            '#92400e'
+          );
+        }
+      }
+
+      function renderPhase1_2D(now) {
+        drawUnitReferenceCard(['2D']);
+
+        const maxCols = 10;
+        const maxRows = 8;
+        const topSafe = state.w < 460 ? 74 : 68;
+        const padX = 28;
+        const padB = 34;
+
+        const cell = Math.floor(Math.min(
+          (state.w - padX * 2) / maxCols,
+          (state.h - topSafe - padB) / maxRows
+        ));
+        const gridW = cell * maxCols;
+        const gridH = cell * maxRows;
+        const ox = Math.floor((state.w - gridW) / 2);
+        const oy = Math.floor(topSafe + (state.h - topSafe - padB - gridH) / 2);
+
+        // Malha fina sobre MDF
+        drawFineGrid(ox, oy, maxCols, maxRows, cell);
+
+        // Animação "Preencher Fileiras"
+        let revealedRows = state.p1.h2D;
+        let highlightRow = -1;
+        if (state.anim && state.anim.type === 'fillRows2D') {
+          const step = Math.floor((now - state.anim.start) / 420);
+          if (step >= state.p1.h2D) {
+            state.anim = null;
+          } else {
+            revealedRows = step + 1;
+            highlightRow = step;
+          }
+        }
+
+        // Lajotas 1 u² pavimentando o retângulo
+        for (let r = 0; r < state.p1.h2D; r++) {
+          if (r >= revealedRows) continue;
+          const isLit = r === highlightRow;
+          for (let c = 0; c < state.p1.w2D; c++) {
+            drawUnitTile(ox + c * cell, oy + r * cell, cell, { glow: isLit });
+          }
+        }
+
+        // Contorno fino em âmbar ao redor do retângulo
+        const rw = state.p1.w2D * cell;
+        const rh = state.p1.h2D * cell;
+        ctx.save();
+        ctx.strokeStyle = '#d97706';
+        ctx.lineWidth = 3;
+        ctx.strokeRect(ox, oy, rw, rh);
+        ctx.restore();
+
+        // Alça arrastável no canto inferior direito
+        const hx = ox + rw;
+        const hy = oy + rh;
+        drawDragHandle(hx, hy, '#0f766e', '⤢');
+
+        state.hit.handle2D = { x: hx, y: hy, r: 28 };
+        state.hit.grid2D = { ox, oy, cell };
+
+        // Medidas e cotas laterais se ativado
+        if (state.p1.showMeasures) {
+          drawCanvasBadge(ox + rw / 2, oy - 15, `${state.p1.w2D} u`, '#d97706', '#fffbeb', '#92400e');
+          drawCanvasBadge(ox - 20, oy + rh / 2, `${state.p1.h2D} u`, '#d97706', '#fffbeb', '#92400e');
+          drawCanvasBadge(
+            ox + rw / 2,
+            oy + rh / 2,
+            `${state.p1.w2D} × ${state.p1.h2D} = ${state.p1.w2D * state.p1.h2D} u²`,
+            '#0f766e',
+            'rgba(255, 253, 249, 0.94)',
+            '#0f766e'
+          );
+        }
+      }
+
+      // Projeção 3D limpa em Canvas 2D com Painter's Algorithm e face culling exato
+      function renderPhase1_3D(dt) {
+        const targetSplit = state.p1.splitLayers ? 1 : 0;
+        state.p1.splitAnim += (targetSplit - state.p1.splitAnim) * Math.min(1, dt * 8);
+        if (Math.abs(targetSplit - state.p1.splitAnim) < 0.005) state.p1.splitAnim = targetSplit;
+
+        const { c: C, l: L, h: H, yaw, pitch, splitAnim } = state.p1;
+        const layerGap = splitAnim * 0.78;
+
+        const cosY = Math.cos(yaw), sinY = Math.sin(yaw);
+        const cosP = Math.cos(pitch), sinP = Math.sin(pitch);
+
+        // Escala automática confortável para o bloco caber sempre bem na bancada
+        const totalSpanY = H + (H - 1) * layerGap;
+        const maxExtent = Math.max(C, L, totalSpanY, 4.2);
+        const scale = Math.min(state.w, state.h) / (maxExtent * 2.15);
+        const cx = state.w * 0.52;
+        const cy = state.h * 0.54;
+
+        // Transforma ponto (x, y, z) do mundo para coordenadas da câmera (xCam, yCam, zCam)
+        function toCam(x, y, z) {
+          const x1 = x * cosY - z * sinY;
+          const z1 = x * sinY + z * cosY;
+          const y2 = y * cosP - z1 * sinP;
+          const z2 = y * sinP + z1 * cosP;
+          return { x: x1, y: y2, z: z2 };
+        }
+
+        function project(x, y, z) {
+          const p = toCam(x, y, z);
+          // Perspectiva muito suave (quase isométrica para leitura didática limpa)
+          const camDist = 26;
+          const k = camDist / (camDist - p.z);
+          return {
+            sx: cx + p.x * scale * k,
+            sy: cy - p.y * scale * k,
+            depth: p.z
+          };
+        }
+
+        // Centro geométrico do bloco
+        const offX = C / 2;
+        const offZ = L / 2;
+        const offY = totalSpanY / 2;
+
+        // Sombra suave da base sobre a bancada MDF
+        const baseY = -offY - 0.12;
+        const s0 = project(-offX - 0.15, baseY, -offZ - 0.15);
+        const s1 = project(offX + 0.15, baseY, -offZ - 0.15);
+        const s2 = project(offX + 0.15, baseY, offZ + 0.15);
+        const s3 = project(-offX - 0.15, baseY, offZ + 0.15);
+        ctx.save();
+        ctx.fillStyle = 'rgba(78, 52, 26, 0.13)';
+        ctx.beginPath();
+        ctx.moveTo(s0.sx, s0.sy);
+        ctx.lineTo(s1.sx, s1.sy);
+        ctx.lineTo(s2.sx, s2.sy);
+        ctx.lineTo(s3.sx, s3.sy);
+        ctx.closePath();
+        ctx.fill();
+        ctx.restore();
+
+        // Monta lista de cubinhos e ordena por profundidade (mais distante -> mais próximo)
+        const cubes = [];
+        for (let iy = 0; iy < H; iy++) {
+          const wy = iy * (1 + layerGap) + 0.5 - offY;
+          for (let ix = 0; ix < C; ix++) {
+            const wx = ix + 0.5 - offX;
+            for (let iz = 0; iz < L; iz++) {
+              const wz = iz + 0.5 - offZ;
+              const camCenter = toCam(wx, wy, wz);
+              cubes.push({ wx, wy, wz, depth: camCenter.z, iy });
+            }
+          }
+        }
+        cubes.sort((a, b) => a.depth - b.depth);
+
+        // Definição das 6 faces de um cubo unitário (normal + 4 vértices locais + cor)
+        const FACES = [
+          { n: [0, 1, 0],  v: [[-0.5,0.5,-0.5], [0.5,0.5,-0.5], [0.5,0.5,0.5], [-0.5,0.5,0.5]],   col: '#fdba74' }, // Topo (+Y)
+          { n: [0, -1, 0], v: [[-0.5,-0.5,-0.5], [-0.5,-0.5,0.5], [0.5,-0.5,0.5], [0.5,-0.5,-0.5]], col: '#9a3412' }, // Base (-Y)
+          { n: [1, 0, 0],  v: [[0.5,-0.5,-0.5], [0.5,-0.5,0.5], [0.5,0.5,0.5], [0.5,0.5,-0.5]],   col: '#ea580c' }, // +X
+          { n: [-1, 0, 0], v: [[-0.5,-0.5,-0.5], [-0.5,0.5,-0.5], [-0.5,0.5,0.5], [-0.5,-0.5,0.5]], col: '#f97316' }, // -X
+          { n: [0, 0, 1],  v: [[-0.5,-0.5,0.5], [0.5,-0.5,0.5], [0.5,0.5,0.5], [-0.5,0.5,0.5]],   col: '#c2410c' }, // +Z
+          { n: [0, 0, -1], v: [[-0.5,-0.5,-0.5], [-0.5,0.5,-0.5], [0.5,0.5,-0.5], [0.5,-0.5,-0.5]], col: '#dd4f09' }  // -Z
+        ];
+
+        // Calcula visibilidade das 6 faces uma única vez para o ângulo atual da câmera
+        const visibleFaces = FACES.filter(f => {
+          const rn = toCam(f.n[0], f.n[1], f.n[2]);
+          return rn.z > 0.001; // Face voltada para a câmera (+Z)
+        });
+
+        ctx.save();
+        ctx.lineJoin = 'round';
+        ctx.lineWidth = Math.max(1, scale * 0.025);
+        ctx.strokeStyle = '#7c2d12';
+
+        const inset = 0.985; // Pequena folga para destacar a individualidade de cada cubinho 1 u³
+        for (let i = 0; i < cubes.length; i++) {
+          const cb = cubes[i];
+          for (let fIdx = 0; fIdx < visibleFaces.length; fIdx++) {
+            const f = visibleFaces[fIdx];
+            ctx.beginPath();
+            for (let k = 0; k < 4; k++) {
+              const p = project(
+                cb.wx + f.v[k][0] * inset,
+                cb.wy + f.v[k][1] * inset,
+                cb.wz + f.v[k][2] * inset
+              );
+              if (k === 0) ctx.moveTo(p.sx, p.sy);
+              else ctx.lineTo(p.sx, p.sy);
+            }
+            ctx.closePath();
+            ctx.fillStyle = f.col;
+            ctx.fill();
+            ctx.stroke();
+          }
+        }
+        ctx.restore();
+
+        // Cartão do Elemento Unitário 1 u³ no canto superior esquerdo
+        drawUnitReferenceCard(['3D']);
+
+        // Dica de rotação no canto inferior direito
+        drawCanvasBadge(
+          state.w - 94,
+          state.h - 22,
+          'Arraste para girar 3D',
+          '#ea580c',
+          'rgba(255, 247, 237, 0.94)',
+          '#9a3412'
+        );
+
+        // Etiqueta de andares quando "Separar Andares" e "Mostrar Medidas" estão ligados
+        if (state.p1.showMeasures) {
+          const vol = C * L * H;
+          const labelText = state.p1.splitLayers
+            ? `${H} andares × (${C} × ${L}) = ${vol} u³`
+            : `${C} × ${L} × ${H} = ${vol} u³`;
+          drawCanvasBadge(state.w * 0.52, state.h - 24, labelText, '#ea580c', '#fff7ed', '#9a3412');
+        }
+      }
+
+      // =======================================================================
+      // RENDERIZAÇÃO — FASE 2: MESMO PERÍMETRO, ÁREAS DIFERENTES
+      // =======================================================================
+      function drawFineGrid(ox, oy, cols, rows, cell) {
+        ctx.save();
+        ctx.fillStyle = 'rgba(255, 255, 255, 0.42)';
+        ctx.fillRect(ox, oy, cols * cell, rows * cell);
+
+        ctx.strokeStyle = 'rgba(120, 102, 78, 0.24)';
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        for (let c = 0; c <= cols; c++) {
+          const x = ox + c * cell;
+          ctx.moveTo(x, oy);
+          ctx.lineTo(x, oy + rows * cell);
+        }
+        for (let r = 0; r <= rows; r++) {
+          const y = oy + r * cell;
+          ctx.moveTo(ox, y);
+          ctx.lineTo(ox + cols * cell, y);
+        }
+        ctx.stroke();
+
+        ctx.strokeStyle = 'rgba(120, 102, 78, 0.44)';
+        ctx.lineWidth = 1.6;
+        ctx.strokeRect(ox, oy, cols * cell, rows * cell);
+        ctx.restore();
+      }
+
+      function renderPhase2(now) {
+        drawUnitReferenceCard(['1D', '2D']);
+
+        const P = state.p2.perim;
+        const halfP = P / 2;
+        const wU = state.p2.w;
+        const hU = halfP - wU;
+
+        const maxGrid = halfP - 1; // Ex: para P=20 -> 9×9, P=24 -> 11×11
+        const topSafe = state.w < 460 ? 96 : 24;
+        const leftSafe = state.w < 460 ? 22 : 210;
+        const rightSafe = 28;
+        const bottomSafe = 38;
+
+        const availW = state.w - leftSafe - rightSafe;
+        const availH = state.h - topSafe - bottomSafe;
+        const cell = Math.max(16, Math.floor(Math.min(availW / maxGrid, availH / maxGrid)));
+
+        const gridW = cell * maxGrid;
+        const gridH = cell * maxGrid;
+        const ox = Math.floor(leftSafe + (availW - gridW) / 2);
+        const oy = Math.floor(topSafe + (availH - gridH) / 2);
+
+        drawFineGrid(ox, oy, maxGrid, maxGrid, cell);
+
+        // Lajotas 1 u² no interior
+        for (let r = 0; r < hU; r++) {
+          for (let c = 0; c < wU; c++) {
+            drawUnitTile(ox + c * cell, oy + r * cell, cell);
+          }
+        }
+
+        // Bastões unitários 1 u no contorno (com animação "Percorrer Cerca")
+        const edges = buildRectEdges(0, 0, wU, hU);
+        let walkIdx = -1;
+        if (state.anim && state.anim.type === 'walkP2') {
+          walkIdx = Math.floor((now - state.anim.start) / 210);
+          if (walkIdx >= edges.length) {
+            state.anim = null;
+            walkIdx = -1;
+          }
+        }
+
+        const rodThick = Math.max(5.5, Math.min(9, cell * 0.22));
+        for (let i = 0; i < edges.length; i++) {
+          const e = edges[i];
+          const isLit = walkIdx >= 0 && i === walkIdx;
+          const isDone = walkIdx >= 0 && i < walkIdx;
+          drawUnitRod(
+            ox + e.x1 * cell, oy + e.y1 * cell,
+            ox + e.x2 * cell, oy + e.y2 * cell,
+            { thickness: isLit ? rodThick + 2.5 : rodThick, glow: isLit || isDone }
+          );
+        }
+
+        // Contador luminoso acompanhando a cerca durante a animação
+        if (walkIdx >= 0 && walkIdx < edges.length) {
+          const e = edges[walkIdx];
+          const mx = ox + ((e.x1 + e.x2) / 2) * cell;
+          const my = oy + ((e.y1 + e.y2) / 2) * cell;
+          drawCanvasBadge(mx, my - 20, `${walkIdx + 1} u`, '#d97706', '#fffbeb', '#92400e');
+        }
+
+        // Alça de deformação na lateral direita do retângulo
+        const hx = ox + wU * cell;
+        const hy = oy + (hU * cell) / 2;
+        drawDragHandle(hx, hy, '#d97706', '↔');
+
+        state.hit.handleP2 = { x: hx, y: hy, r: 28 };
+        state.hit.gridP2 = { ox, oy, cell, maxW: halfP - 1 };
+
+        if (state.p2.showMeasures) {
+          drawCanvasBadge(ox + (wU * cell) / 2, oy - 16, `${wU} u`, '#d97706', '#fffbeb', '#92400e');
+          drawCanvasBadge(ox - 20, oy + (hU * cell) / 2, `${hU} u`, '#d97706', '#fffbeb', '#92400e');
+          drawCanvasBadge(
+            ox + (wU * cell) / 2,
+            oy + (hU * cell) / 2,
+            `${wU * hU} u²`,
+            '#0f766e',
+            'rgba(255, 253, 249, 0.94)',
+            '#0f766e'
+          );
+        }
+      }
+
+      // =======================================================================
+      // RENDERIZAÇÃO — FASE 3: MESMA ÁREA, PERÍMETROS DIFERENTES
+      // =======================================================================
+      function renderPhase3(now) {
+        drawUnitReferenceCard(['1D', '2D']);
+
+        const isFree = state.p3.mode === 'free';
+        const metrics = getP3Metrics();
+
+        const topSafe = state.w < 460 ? 96 : 24;
+        const leftSafe = state.w < 460 ? 18 : 210;
+        const rightSafe = 22;
+        const bottomSafe = 36;
+        const availW = state.w - leftSafe - rightSafe;
+        const availH = state.h - topSafe - bottomSafe;
+
+        let cols, rows, cell, ox, oy;
+
+        if (isFree) {
+          cols = FREE_COLS;
+          rows = FREE_ROWS;
+          cell = Math.max(18, Math.floor(Math.min(availW / cols, availH / rows)));
+          ox = Math.floor(leftSafe + (availW - cols * cell) / 2);
+          oy = Math.floor(topSafe + (availH - rows * cell) / 2);
+          state.hit.gridP3Free = { ox, oy, cols, rows, cell };
+
+          drawFineGrid(ox, oy, cols, rows, cell);
+
+          // Desenha lajotas colocadas
+          for (const key of state.p3.freeCells) {
+            const [c, r] = key.split(',').map(Number);
+            drawUnitTile(ox + c * cell, oy + r * cell, cell);
+          }
+
+          // Mensagem sutil se estiver vazio
+          if (state.p3.freeCells.size === 0) {
+            ctx.save();
+            ctx.fillStyle = '#64748b';
+            ctx.font = '700 13.5px "Segoe UI", system-ui, sans-serif';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText(`Toque nas células para colocar até ${state.p3.targetArea} lajotas 1 u²`, ox + (cols * cell) / 2, oy + (rows * cell) / 2);
+            ctx.restore();
+          }
+        } else {
+          const wU = state.p3.rectW;
+          const hU = state.p3.targetArea / wU;
+          cols = Math.max(wU, 6);
+          rows = Math.max(hU, 4);
+          cell = Math.max(16, Math.floor(Math.min(availW / Math.max(wU, 8), availH / Math.max(hU, 6))));
+          // Centraliza exatamente o retângulo na área disponível
+          ox = Math.floor(leftSafe + (availW - wU * cell) / 2);
+          oy = Math.floor(topSafe + (availH - hU * cell) / 2);
+          state.hit.gridP3Free = null;
+
+          // Grade de apoio apenas ao redor do retângulo
+          drawFineGrid(ox, oy, wU, hU, cell);
+          for (let r = 0; r < hU; r++) {
+            for (let c = 0; c < wU; c++) {
+              drawUnitTile(ox + c * cell, oy + r * cell, cell);
+            }
+          }
+        }
+
+        // Desenha bastões 1 u ao redor de todas as bordas externas
+        const edges = metrics.edges;
+        let walkIdx = -1;
+        if (state.anim && state.anim.type === 'walkP3') {
+          walkIdx = Math.floor((now - state.anim.start) / 195);
+          if (walkIdx >= edges.length) {
+            state.anim = null;
+            walkIdx = -1;
+          }
+        }
+
+        const rodThick = Math.max(5, Math.min(8.5, cell * 0.22));
+        for (let i = 0; i < edges.length; i++) {
+          const e = edges[i];
+          const isLit = walkIdx >= 0 && i === walkIdx;
+          const isDone = walkIdx >= 0 && i < walkIdx;
+          drawUnitRod(
+            ox + e.x1 * cell, oy + e.y1 * cell,
+            ox + e.x2 * cell, oy + e.y2 * cell,
+            { thickness: isLit ? rodThick + 2.5 : rodThick, glow: isLit || isDone }
+          );
+        }
+
+        if (walkIdx >= 0 && walkIdx < edges.length) {
+          const e = edges[walkIdx];
+          const mx = ox + ((e.x1 + e.x2) / 2) * cell;
+          const my = oy + ((e.y1 + e.y2) / 2) * cell;
+          drawCanvasBadge(mx, my - 20, `${walkIdx + 1} u`, '#d97706', '#fffbeb', '#92400e');
+        }
+
+        // Rótulos de medida se ativo
+        if (state.p3.showMeasures && metrics.area > 0) {
+          if (!isFree) {
+            const wU = state.p3.rectW;
+            const hU = state.p3.targetArea / wU;
+            drawCanvasBadge(ox + (wU * cell) / 2, oy - 16, `${wU} u`, '#d97706', '#fffbeb', '#92400e');
+            drawCanvasBadge(ox - 20, oy + (hU * cell) / 2, `${hU} u`, '#d97706', '#fffbeb', '#92400e');
+          }
+          drawCanvasBadge(
+            leftSafe + availW / 2,
+            state.h - 18,
+            `Área = ${metrics.area} u²  ·  Perímetro = ${metrics.perim} u`,
+            '#0f766e',
+            'rgba(255, 253, 249, 0.96)',
+            '#0f172a'
+          );
+        }
+      }
+
+      // =======================================================================
+      // LOOP DE RENDERIZAÇÃO (60FPS)
+      // =======================================================================
+      let lastFrame = performance.now();
+      function frame(now) {
+        const dt = Math.min(0.05, (now - lastFrame) / 1000);
+        lastFrame = now;
+
+        drawBenchBackground();
+
+        if (state.phase === 1) {
+          if (state.p1.dim === 1) renderPhase1_1D(now);
+          else if (state.p1.dim === 2) renderPhase1_2D(now);
+          else renderPhase1_3D(dt);
+        } else if (state.phase === 2) {
+          renderPhase2(now);
+        } else {
+          renderPhase3(now);
+        }
+
+        requestAnimationFrame(frame);
+      }
+
+      // =======================================================================
+      // SINCRONIZAÇÃO DA UI (PAINEL + MISSÕES)
+      // =======================================================================
+      function setToggleVisual(node, isOn, cls) {
+        node.classList.remove('is-on-u1', 'is-on-u2', 'is-on-u3');
+        if (isOn) node.classList.add(cls);
+        node.setAttribute('aria-checked', String(isOn));
+      }
+
+      function syncUI() {
+        const p = state.phase;
+
+        tabP1.className = 'phase-tab' + (p === 1 ? ' active-p1' : '');
+        tabP1.setAttribute('aria-selected', String(p === 1));
+        tabP2.className = 'phase-tab' + (p === 2 ? ' active-p2' : '');
+        tabP2.setAttribute('aria-selected', String(p === 2));
+        tabP3.className = 'phase-tab' + (p === 3 ? ' active-p3' : '');
+        tabP3.setAttribute('aria-selected', String(p === 3));
+
+        paneP1.classList.toggle('hidden', p !== 1);
+        paneP2.classList.toggle('hidden', p !== 2);
+        paneP3.classList.toggle('hidden', p !== 3);
+
+        // --- FASE 1 ---
+        if (p === 1) {
+          const d = state.p1.dim;
+          p1SubTabs.querySelectorAll('.sub-tab').forEach(btn => {
+            const bd = Number(btn.dataset.dim);
+            btn.className = 'sub-tab' + (bd === d ? ` active-u${bd}` : '');
+          });
+
+          p1Controls1D.classList.toggle('hidden', d !== 1);
+          p1Controls2D.classList.toggle('hidden', d !== 2);
+          p1Controls3D.classList.toggle('hidden', d !== 3);
+
+          valP1Len.textContent = `${state.p1.len1D} u`;
+          sliderP1Len.value = String(state.p1.len1D);
+
+          valP1W.textContent = String(state.p1.w2D);
+          sliderP1W.value = String(state.p1.w2D);
+          valP1H.textContent = String(state.p1.h2D);
+          sliderP1H.value = String(state.p1.h2D);
+
+          valP1C.textContent = String(state.p1.c);
+          sliderP1C.value = String(state.p1.c);
+          valP1L.textContent = String(state.p1.l);
+          sliderP1L.value = String(state.p1.l);
+          valP1Z.textContent = String(state.p1.h);
+          sliderP1Z.value = String(state.p1.h);
+
+          setToggleVisual(togSplitLayers, state.p1.splitLayers, 'is-on-u3');
+          setToggleVisual(togP1Measures, state.p1.showMeasures, `is-on-u${d}`);
+
+          p1MeasureCard.classList.toggle('hidden', !state.p1.showMeasures);
+          p1MeasureCard.className = `measure-card tone-u${d}${state.p1.showMeasures ? '' : ' hidden'}`;
+
+          if (d === 1) {
+            p1MeasureLabel.textContent = 'Comprimento (1D)';
+            p1MeasureBig.textContent = `${state.p1.len1D} ${state.p1.len1D === 1 ? 'bastão' : 'bastões'} = ${state.p1.len1D} u`;
+            p1MeasureSub.textContent = 'Medimos comprimento contando segmentos de 1 u.';
+            p1Hint.innerHTML = '<strong>1D (Comprimento):</strong> arraste a alça dourada na ponta direita da barra ou clique em <em>Contar 1 por 1</em>.';
+          } else if (d === 2) {
+            const area = state.p1.w2D * state.p1.h2D;
+            p1MeasureLabel.textContent = 'Área (2D)';
+            p1MeasureBig.textContent = `${state.p1.h2D} × ${state.p1.w2D} = ${area} u²`;
+            p1MeasureSub.textContent = `${state.p1.h2D} fileiras de ${state.p1.w2D} lajotas unitárias (1 u²).`;
+            p1Hint.innerHTML = '<strong>2D (Área):</strong> arraste a alça verde no canto do retângulo ou acione <em>Preencher Fileiras</em>.';
+          } else {
+            const perFloor = state.p1.c * state.p1.l;
+            const vol = perFloor * state.p1.h;
+            p1MeasureLabel.textContent = 'Volume (3D)';
+            p1MeasureBig.textContent = `${state.p1.c} × ${state.p1.l} × ${state.p1.h} = ${vol} u³`;
+            p1MeasureSub.textContent = `${state.p1.h} ${state.p1.h === 1 ? 'andar' : 'andares'} com ${perFloor} cubinhos (1 u³) em cada.`;
+            p1Hint.innerHTML = '<strong>3D (Volume):</strong> arraste no canvas para girar o bloco e ligue <em>Separar Andares</em> para enxergar as camadas.';
+          }
+        }
+
+        // --- FASE 2 ---
+        if (p === 2) {
+          const P = state.p2.perim;
+          const halfP = P / 2;
+          const wU = state.p2.w;
+          const hU = halfP - wU;
+
+          p2PerimChips.querySelectorAll('.chip-btn').forEach(btn => {
+            btn.classList.toggle('active-u1', Number(btn.dataset.p) === P);
+          });
+
+          sliderP2W.min = '1';
+          sliderP2W.max = String(halfP - 1);
+          sliderP2W.value = String(wU);
+          valP2Dims.textContent = `${wU} × ${hU}`;
+
+          setToggleVisual(togP2Measures, state.p2.showMeasures, 'is-on-u1');
+          p2MeasureBox.classList.toggle('hidden', !state.p2.showMeasures);
+          p2PerimVal.textContent = `${P} u`;
+          p2AreaVal.textContent = `${wU * hU} u²`;
+
+          // Renderiza lista "Formas Descobertas"
+          discPerimTitle.textContent = String(P);
+          const set = state.p2.discovered[P] || new Set([wU]);
+          const widths = Array.from(set).sort((a, b) => a - b);
+          discCount.textContent = `${widths.length} ${widths.length === 1 ? 'testada' : 'testadas'}`;
+
+          const maxPossibleArea = Math.floor(halfP / 2) * Math.ceil(halfP / 2);
+          discoveredList.innerHTML = '';
+          for (const dw of widths) {
+            const dh = halfP - dw;
+            const area = dw * dh;
+            const isMax = area === maxPossibleArea;
+            const pct = Math.round((area / maxPossibleArea) * 100);
+            const row = document.createElement('div');
+            row.className = `disc-row${dw === wU ? ' active' : ''}${isMax ? ' is-max' : ''}`;
+            row.innerHTML = `
+              <span class="disc-dim">${dw}×${dh}</span>
+              <div class="disc-bar-track"><div class="disc-bar-fill" style="width:${pct}%"></div></div>
+              <span class="disc-area">${area} u²${isMax ? ' ★' : ''}</span>
+            `;
+            row.addEventListener('click', () => {
+              state.p2.w = dw;
+              stopAnimations();
+              syncUI();
+            });
+            discoveredList.appendChild(row);
+          }
+        }
+
+        // --- FASE 3 ---
+        if (p === 3) {
+          const A = state.p3.targetArea;
+          const isFree = state.p3.mode === 'free';
+          const m = getP3Metrics();
+
+          p3AreaChips.querySelectorAll('.chip-btn').forEach(btn => {
+            btn.classList.toggle('active-u2', Number(btn.dataset.a) === A);
+          });
+
+          p3ModeTabs.querySelectorAll('.sub-tab').forEach(btn => {
+            btn.className = 'sub-tab' + (btn.dataset.mode === state.p3.mode ? ' active-u2' : '');
+          });
+
+          p3RectControls.classList.toggle('hidden', isFree);
+          p3FreeControls.classList.toggle('hidden', !isFree);
+
+          if (!isFree) {
+            const divs = getDivisors(A);
+            p3DivisorChips.innerHTML = '';
+            for (const dw of divs) {
+              const dh = A / dw;
+              const b = document.createElement('button');
+              b.type = 'button';
+              b.className = 'chip-btn' + (dw === state.p3.rectW ? ' active-u2' : '');
+              b.textContent = `${dw}×${dh}`;
+              b.addEventListener('click', () => {
+                state.p3.rectW = dw;
+                stopAnimations();
+                syncUI();
+              });
+              p3DivisorChips.appendChild(b);
+            }
+            p3Hint.innerHTML = '<strong>Modo Retângulos:</strong> compare como as mesmas lajotas exigem cercas bem diferentes conforme o formato fica comprido ou compacto.';
+          } else {
+            p3FreeCountText.textContent = `Lajotas: ${m.area} / ${A}`;
+            if (m.area === 0) {
+              p3FreeConnText.textContent = 'Toque na grade';
+              p3FreeStatus.classList.remove('warn');
+            } else if (!m.connected) {
+              p3FreeConnText.textContent = 'Peças soltas!';
+              p3FreeStatus.classList.add('warn');
+            } else if (m.area < A) {
+              p3FreeConnText.textContent = `Faltam ${A - m.area}`;
+              p3FreeStatus.classList.remove('warn');
+            } else {
+              p3FreeConnText.textContent = 'Estoque completo ✔';
+              p3FreeStatus.classList.remove('warn');
+            }
+            p3Hint.innerHTML = '<strong>Montagem Livre:</strong> clique ou arraste na grade para montar formas em L, T ou escada usando o estoque fixo de lajotas <strong>1 u²</strong>.';
+          }
+
+          setToggleVisual(togP3Measures, state.p3.showMeasures, 'is-on-u2');
+          p3MeasureBox.classList.toggle('hidden', !state.p3.showMeasures);
+          p3AreaVal.textContent = `${m.area} u²`;
+          p3PerimVal.textContent = `${m.perim} u`;
+        }
+
+        // Verifica missões em tempo real
+        checkMissions();
+      }
+
+      // =======================================================================
+      // INTERAÇÕES UNIFICADAS NO CANVAS (POINTER EVENTS)
+      // =======================================================================
+      function getCanvasPoint(e) {
+        const rect = canvas.getBoundingClientRect();
+        return { x: e.clientX - rect.left, y: e.clientY - rect.top };
+      }
+
+      function toggleFreeCellAt(pt, paintAction) {
+        const g = state.hit.gridP3Free;
+        if (!g) return null;
+        const c = Math.floor((pt.x - g.ox) / g.cell);
+        const r = Math.floor((pt.y - g.oy) / g.cell);
+        if (c < 0 || c >= g.cols || r < 0 || r >= g.rows) return null;
+
+        const key = `${c},${r}`;
+        const has = state.p3.freeCells.has(key);
+        const action = paintAction || (has ? 'remove' : 'add');
+
+        if (action === 'add' && !has) {
+          if (state.p3.freeCells.size >= state.p3.targetArea) {
+            if (!paintAction) {
+              showToast(`Estoque máximo de ${state.p3.targetArea} lajotas atingido! Remova uma para mover.`, true, 2200);
+            }
+            return action;
+          }
+          state.p3.freeCells.add(key);
+          stopAnimations();
+          syncUI();
+        } else if (action === 'remove' && has) {
+          state.p3.freeCells.delete(key);
+          stopAnimations();
+          syncUI();
+        }
+        return action;
+      }
+
+      canvas.addEventListener('pointerdown', (e) => {
+        if (state.drag) return;
+        const pt = getCanvasPoint(e);
+
+        if (state.phase === 1) {
+          if (state.p1.dim === 1 && state.hit.handle1D) {
+            const h = state.hit.handle1D;
+            if (Math.hypot(pt.x - h.x, pt.y - h.y) <= h.r + 6) {
+              state.drag = { type: 'p1-1d', pointerId: e.pointerId };
+              canvas.setPointerCapture(e.pointerId);
+              stopAnimations();
+              return;
+            }
+          } else if (state.p1.dim === 2 && state.hit.handle2D) {
+            const h = state.hit.handle2D;
+            if (Math.hypot(pt.x - h.x, pt.y - h.y) <= h.r + 6) {
+              state.drag = { type: 'p1-2d', pointerId: e.pointerId };
+              canvas.setPointerCapture(e.pointerId);
+              stopAnimations();
+              return;
+            }
+          } else if (state.p1.dim === 3) {
+            state.drag = { type: 'p1-3d', pointerId: e.pointerId, lastX: pt.x, lastY: pt.y };
+            canvas.setPointerCapture(e.pointerId);
+            return;
+          }
+        } else if (state.phase === 2 && state.hit.handleP2) {
+          const h = state.hit.handleP2;
+          if (Math.hypot(pt.x - h.x, pt.y - h.y) <= h.r + 8) {
+            state.drag = { type: 'p2-deform', pointerId: e.pointerId };
+            canvas.setPointerCapture(e.pointerId);
+            stopAnimations();
+            return;
+          }
+        } else if (state.phase === 3 && state.p3.mode === 'free') {
+          const act = toggleFreeCellAt(pt, null);
+          if (act) {
+            state.drag = { type: 'p3-paint', action: act, pointerId: e.pointerId };
+            canvas.setPointerCapture(e.pointerId);
+          }
+        }
+      });
+
+      canvas.addEventListener('pointermove', (e) => {
+        const pt = getCanvasPoint(e);
+
+        if (!state.drag) {
+          // Cursor contextual em desktop
+          let cur = 'default';
+          if (state.phase === 1 && state.p1.dim === 1 && state.hit.handle1D &&
+              Math.hypot(pt.x - state.hit.handle1D.x, pt.y - state.hit.handle1D.y) <= 28) cur = 'ew-resize';
+          else if (state.phase === 1 && state.p1.dim === 2 && state.hit.handle2D &&
+              Math.hypot(pt.x - state.hit.handle2D.x, pt.y - state.hit.handle2D.y) <= 28) cur = 'nwse-resize';
+          else if (state.phase === 1 && state.p1.dim === 3) cur = 'grab';
+          else if (state.phase === 2 && state.hit.handleP2 &&
+              Math.hypot(pt.x - state.hit.handleP2.x, pt.y - state.hit.handleP2.y) <= 28) cur = 'ew-resize';
+          else if (state.phase === 3 && state.p3.mode === 'free' && state.hit.gridP3Free) {
+            const g = state.hit.gridP3Free;
+            if (pt.x >= g.ox && pt.x <= g.ox + g.cols * g.cell && pt.y >= g.oy && pt.y <= g.oy + g.rows * g.cell) {
+              cur = 'pointer';
+            }
+          }
+          canvas.style.cursor = cur;
+          return;
+        }
+
+        if (e.pointerId !== state.drag.pointerId) return;
+
+        if (state.drag.type === 'p1-1d' && state.hit.bar1D) {
+          const { startX, unitPx } = state.hit.bar1D;
+          const nextLen = Math.max(1, Math.min(12, Math.round((pt.x - startX) / unitPx)));
+          if (nextLen !== state.p1.len1D) {
+            state.p1.len1D = nextLen;
+            syncUI();
+          }
+        } else if (state.drag.type === 'p1-2d' && state.hit.grid2D) {
+          const { ox, oy, cell } = state.hit.grid2D;
+          const nw = Math.max(1, Math.min(10, Math.round((pt.x - ox) / cell)));
+          const nh = Math.max(1, Math.min(8, Math.round((pt.y - oy) / cell)));
+          if (nw !== state.p1.w2D || nh !== state.p1.h2D) {
+            state.p1.w2D = nw;
+            state.p1.h2D = nh;
+            syncUI();
+          }
+        } else if (state.drag.type === 'p1-3d') {
+          const dx = pt.x - state.drag.lastX;
+          const dy = pt.y - state.drag.lastY;
+          state.drag.lastX = pt.x;
+          state.drag.lastY = pt.y;
+          state.p1.yaw += dx * 0.009;
+          state.p1.pitch = Math.max(-1.15, Math.min(1.25, state.p1.pitch + dy * 0.008));
+        } else if (state.drag.type === 'p2-deform' && state.hit.gridP2) {
+          const { ox, cell, maxW } = state.hit.gridP2;
+          const nw = Math.max(1, Math.min(maxW, Math.round((pt.x - ox) / cell)));
+          if (nw !== state.p2.w) {
+            state.p2.w = nw;
+            recordP2Discovery();
+            syncUI();
+          }
+        } else if (state.drag.type === 'p3-paint') {
+          toggleFreeCellAt(pt, state.drag.action);
+        }
+      });
+
+      function endDrag(e) {
+        if (!state.drag || e.pointerId !== state.drag.pointerId) return;
+        state.drag = null;
+      }
+
+      canvas.addEventListener('pointerup', endDrag);
+      canvas.addEventListener('pointercancel', endDrag);
+
+      // =======================================================================
+      // EVENTOS DE BOTÕES, SLIDERS E ABAS
+      // =======================================================================
+      function switchPhase(next) {
+        if (state.phase === next) return;
+        state.phase = next;
+        stopAnimations();
+        syncUI();
+      }
+
+      tabP1.addEventListener('click', () => switchPhase(1));
+      tabP2.addEventListener('click', () => switchPhase(2));
+      tabP3.addEventListener('click', () => switchPhase(3));
+
+      btnChallenges.addEventListener('click', () => toggleDrawer());
+      btnCloseDrawer.addEventListener('click', () => toggleDrawer(false));
+
+      // Sub-abas Fase 1
+      p1SubTabs.addEventListener('click', (e) => {
+        const btn = e.target.closest('.sub-tab');
+        if (!btn) return;
+        state.p1.dim = Number(btn.dataset.dim);
+        stopAnimations();
+        syncUI();
+      });
+
+      // Sliders Fase 1
+      sliderP1Len.addEventListener('input', () => { state.p1.len1D = Number(sliderP1Len.value); stopAnimations(); syncUI(); });
+      sliderP1W.addEventListener('input', () => { state.p1.w2D = Number(sliderP1W.value); stopAnimations(); syncUI(); });
+      sliderP1H.addEventListener('input', () => { state.p1.h2D = Number(sliderP1H.value); stopAnimations(); syncUI(); });
+      sliderP1C.addEventListener('input', () => { state.p1.c = Number(sliderP1C.value); syncUI(); });
+      sliderP1L.addEventListener('input', () => { state.p1.l = Number(sliderP1L.value); syncUI(); });
+      sliderP1Z.addEventListener('input', () => { state.p1.h = Number(sliderP1Z.value); syncUI(); });
+
+      // Botões - / + unificados
+      document.addEventListener('click', (e) => {
+        const btn = e.target.closest('.btn-step');
+        if (!btn) return;
+        const act = btn.dataset.act;
+        if (act === 'p1-len-dec') state.p1.len1D = Math.max(1, state.p1.len1D - 1);
+        else if (act === 'p1-len-inc') state.p1.len1D = Math.min(12, state.p1.len1D + 1);
+        else if (act === 'p1-w-dec') state.p1.w2D = Math.max(1, state.p1.w2D - 1);
+        else if (act === 'p1-w-inc') state.p1.w2D = Math.min(10, state.p1.w2D + 1);
+        else if (act === 'p1-h-dec') state.p1.h2D = Math.max(1, state.p1.h2D - 1);
+        else if (act === 'p1-h-inc') state.p1.h2D = Math.min(8, state.p1.h2D + 1);
+        else if (act === 'p1-c-dec') state.p1.c = Math.max(1, state.p1.c - 1);
+        else if (act === 'p1-c-inc') state.p1.c = Math.min(6, state.p1.c + 1);
+        else if (act === 'p1-l-dec') state.p1.l = Math.max(1, state.p1.l - 1);
+        else if (act === 'p1-l-inc') state.p1.l = Math.min(6, state.p1.l + 1);
+        else if (act === 'p1-z-dec') state.p1.h = Math.max(1, state.p1.h - 1);
+        else if (act === 'p1-z-inc') state.p1.h = Math.min(5, state.p1.h + 1);
+        else if (act === 'p2-w-dec') {
+          state.p2.w = Math.max(1, state.p2.w - 1);
+          recordP2Discovery();
+        } else if (act === 'p2-w-inc') {
+          state.p2.w = Math.min(state.p2.perim / 2 - 1, state.p2.w + 1);
+          recordP2Discovery();
+        }
+        stopAnimations();
+        syncUI();
+      });
+
+      // Animações Fase 1
+      btnCount1D.addEventListener('click', () => {
+        state.anim = { type: 'count1D', start: performance.now() };
+      });
+      btnFillRows2D.addEventListener('click', () => {
+        state.anim = { type: 'fillRows2D', start: performance.now() };
+      });
+      btnResetCam3D.addEventListener('click', () => {
+        state.p1.yaw = -0.62;
+        state.p1.pitch = 0.48;
+      });
+
+      // Fase 2
+      p2PerimChips.addEventListener('click', (e) => {
+        const btn = e.target.closest('.chip-btn');
+        if (!btn) return;
+        setP2Perim(Number(btn.dataset.p));
+        stopAnimations();
+        syncUI();
+      });
+
+      sliderP2W.addEventListener('input', () => {
+        state.p2.w = Number(sliderP2W.value);
+        recordP2Discovery();
+        stopAnimations();
+        syncUI();
+      });
+
+      btnWalkP2.addEventListener('click', () => {
+        state.anim = { type: 'walkP2', start: performance.now() };
+      });
+
+      // Fase 3
+      p3AreaChips.addEventListener('click', (e) => {
+        const btn = e.target.closest('.chip-btn');
+        if (!btn) return;
+        setP3Area(Number(btn.dataset.a));
+        stopAnimations();
+        syncUI();
+      });
+
+      p3ModeTabs.addEventListener('click', (e) => {
+        const btn = e.target.closest('.sub-tab');
+        if (!btn) return;
+        state.p3.mode = btn.dataset.mode;
+        stopAnimations();
+        syncUI();
+      });
+
+      btnP3Clear.addEventListener('click', () => {
+        state.p3.freeCells.clear();
+        stopAnimations();
+        syncUI();
+      });
+
+      btnP3FillRect.addEventListener('click', () => {
+        fillFreeWithRect(state.p3.targetArea);
+        stopAnimations();
+        syncUI();
+      });
+
+      btnWalkP3.addEventListener('click', () => {
+        const m = getP3Metrics();
+        if (m.edges.length === 0) {
+          showToast('Coloque pelo menos uma lajota para percorrer a cerca!', true, 2000);
+          return;
+        }
+        state.anim = { type: 'walkP3', start: performance.now() };
+      });
+
+      // Toggles acessíveis (clique + teclado)
+      function bindToggle(node, fn) {
+        node.addEventListener('click', () => { fn(); syncUI(); });
+        node.addEventListener('keydown', (e) => {
+          if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); fn(); syncUI(); }
+        });
+      }
+
+      bindToggle(togSplitLayers, () => { state.p1.splitLayers = !state.p1.splitLayers; });
+      bindToggle(togP1Measures, () => { state.p1.showMeasures = !state.p1.showMeasures; });
+      bindToggle(togP2Measures, () => { state.p2.showMeasures = !state.p2.showMeasures; });
+      bindToggle(togP3Measures, () => { state.p3.showMeasures = !state.p3.showMeasures; });
+
+      // =======================================================================
+      // INICIALIZAÇÃO
+      // =======================================================================
+      if (typeof ResizeObserver !== 'undefined') {
+        new ResizeObserver(resizeCanvas).observe(stageWrap);
+      }
+      window.addEventListener('resize', resizeCanvas);
+
+      window.onload = function () {
+        createMdfPattern();
+        fillFreeWithRect(state.p3.targetArea);
+        resizeCanvas();
+        renderMissionsDrawer();
+        syncUI();
+        requestAnimationFrame(frame);
+      };
+    })();
+  </script>
+<style>#autoriaBtn{position:fixed;left:6px;bottom:6px;z-index:2147483000;width:22px;height:22px;border-radius:50%;border:1px solid rgba(128,128,128,.5);background:rgba(255,255,255,.75);color:#333;font:12px/20px sans-serif;text-align:center;padding:0;cursor:pointer;opacity:.5}#autoriaBtn:hover,#autoriaBtn:focus{opacity:1}#autoriaTxt{position:fixed;left:6px;bottom:34px;z-index:2147483000;max-width:260px;padding:8px 10px;border-radius:8px;background:#222;color:#fff;font:12px/1.35 sans-serif;display:none}#autoriaTxt.on{display:block}</style><button id="autoriaBtn" type="button" aria-label="Autoria" onclick="document.getElementById('autoriaTxt').classList.toggle('on')">©</button><div id="autoriaTxt" onclick="this.classList.remove('on')">© Ygor B. F. Ferreira · A Saga dos Reinos Matemáticos · Matematkês · uso livre em sala</div>
+</body>
+</html>

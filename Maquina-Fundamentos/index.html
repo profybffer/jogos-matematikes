@@ -1,0 +1,3241 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>Máquina de Fundamentos — Matematikês v1.0</title>
+  <style>
+    /* =========================================================
+       TOKENS VISUAIS — LABORATÓRIO PEDAGÓGICO (ALTO CONTRASTE)
+       ========================================================= */
+    :root {
+      --bg-page: #f8fafc;
+      --bg-card: #ffffff;
+      --bg-subtle: #f1f5f9;
+      --border-slate: #cbd5e1;
+      --border-light: #e2e8f0;
+      --text-primary: #0f172a;
+      --text-secondary: #475569;
+      --text-muted: #64748b;
+
+      --blue-main: #2563eb;
+      --blue-hover: #1d4ed8;
+      --blue-soft: #eff6ff;
+      --blue-border: #93c5fd;
+
+      --green-main: #10b981;
+      --green-dark: #047857;
+      --green-soft: #ecfdf5;
+      --green-border: #6ee7b7;
+
+      --red-main: #ef4444;
+      --red-soft: #fef2f2;
+
+      --amber-main: #f59e0b;
+      --amber-soft: #fffbeb;
+
+      --radius-sm: 8px;
+      --radius-md: 12px;
+      --radius-lg: 16px;
+      --shadow-sm: 0 1px 3px rgba(15, 23, 42, 0.08);
+      --shadow-lg: 0 12px 32px rgba(15, 23, 42, 0.18);
+    }
+
+    * {
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+      user-select: none;
+    }
+
+    html, body {
+      margin: 0;
+      padding: 0;
+      width: 100%;
+      height: 100dvh;
+      overflow: hidden;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background-color: var(--bg-page);
+      color: var(--text-primary);
+    }
+
+    /* =========================================================
+       LAYOUT PRINCIPAL — 100dvh SEM SCROLL (PC E CELULAR)
+       ========================================================= */
+    .app-shell {
+      display: flex;
+      flex-direction: column;
+      width: 100%;
+      height: 100dvh;
+      overflow: hidden;
+    }
+
+    /* BARRA SUPERIOR COMPACTA */
+    .topbar {
+      flex-shrink: 0;
+      background-color: var(--bg-card);
+      border-bottom: 2px solid var(--border-light);
+      padding: 8px 12px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      z-index: 20;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      min-width: 0;
+    }
+
+    .brand-badge {
+      width: 32px;
+      height: 32px;
+      border-radius: var(--radius-sm);
+      background-color: var(--blue-main);
+      color: #ffffff;
+      display: grid;
+      place-items: center;
+      font-weight: 900;
+      font-size: 0.9rem;
+      flex-shrink: 0;
+    }
+
+    .brand-title {
+      margin: 0;
+      font-size: 0.98rem;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .mode-tabs {
+      display: flex;
+      gap: 4px;
+      background-color: var(--bg-subtle);
+      padding: 4px;
+      border-radius: 10px;
+      border: 1px solid var(--border-light);
+    }
+
+    .mode-tab {
+      border: none;
+      background: transparent;
+      color: var(--text-secondary);
+      font-size: 0.85rem;
+      font-weight: 700;
+      padding: 7px 12px;
+      border-radius: 7px;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: background-color 0.15s, color 0.15s;
+    }
+
+    .mode-tab:hover {
+      color: var(--text-primary);
+      background-color: rgba(255, 255, 255, 0.75);
+    }
+
+    .mode-tab.active {
+      background-color: var(--blue-main);
+      color: #ffffff;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .top-actions {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      flex-shrink: 0;
+    }
+
+    .top-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 5px;
+      height: 36px;
+      padding: 0 10px;
+      border-radius: var(--radius-sm);
+      border: 1.5px solid var(--border-slate);
+      background-color: var(--bg-card);
+      color: var(--text-primary);
+      font-size: 0.82rem;
+      font-weight: 700;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: all 0.15s;
+    }
+
+    .top-btn:hover {
+      border-color: var(--blue-main);
+      color: var(--blue-main);
+      background-color: var(--blue-soft);
+    }
+
+    .top-btn:active {
+      transform: scale(0.96);
+    }
+
+    .top-btn.btn-panel-open {
+      background-color: var(--blue-main);
+      border-color: var(--blue-main);
+      color: #ffffff;
+    }
+
+    .top-btn.audio-muted {
+      background-color: var(--bg-subtle);
+      color: var(--text-muted);
+      border-color: var(--border-light);
+    }
+
+    /* =========================================================
+       PALCO CENTRAL FLUIDO (flex: 1; min-height: 0)
+       ========================================================= */
+    .stage-wrapper {
+      flex: 1;
+      min-height: 0;
+      display: flex;
+      flex-direction: column;
+      padding: 10px 14px;
+      gap: 8px;
+      overflow: hidden;
+      max-width: 1180px;
+      width: 100%;
+      margin: 0 auto;
+    }
+
+    /* Faixa rápida contextual (ex.: degraus no Modo 2 ou Quadrado/Trapézio) */
+    .quick-strip {
+      flex-shrink: 0;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      min-height: 0;
+    }
+
+    .quick-strip:empty {
+      display: none;
+    }
+
+    .pill-btn {
+      border: 1.5px solid var(--border-slate);
+      background-color: var(--bg-card);
+      color: var(--text-secondary);
+      font-size: 0.8rem;
+      font-weight: 700;
+      padding: 5px 10px;
+      border-radius: 999px;
+      cursor: pointer;
+      transition: all 0.15s;
+      white-space: nowrap;
+    }
+
+    .pill-btn:hover {
+      border-color: var(--blue-main);
+      color: var(--blue-main);
+    }
+
+    .pill-btn.active {
+      background-color: var(--blue-main);
+      border-color: var(--blue-main);
+      color: #ffffff;
+    }
+
+    .pill-btn.pill-accent {
+      border-color: var(--amber-main);
+      background-color: var(--amber-soft);
+      color: #92400e;
+    }
+
+    .pill-btn.pill-accent.active {
+      background-color: var(--amber-main);
+      color: #ffffff;
+    }
+
+    /* Cartão do Palco SVG */
+    .stage-box {
+      flex: 1;
+      min-height: 0;
+      width: 100%;
+      background-color: var(--bg-card);
+      border: 2px solid var(--border-slate);
+      border-radius: var(--radius-lg);
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      transition: border-color 0.25s, background-color 0.25s;
+    }
+
+    .stage-box.stage-done {
+      border-color: var(--green-main);
+      background-color: #f0fdf4;
+    }
+
+    .stage-svg {
+      width: 100%;
+      height: 100%;
+      max-width: 100%;
+      max-height: 100%;
+      display: block;
+      touch-action: manipulation;
+    }
+
+    /* Estado de Zero (área pontilhada limpa) */
+    .zero-overlay {
+      width: min(86%, 440px);
+      padding: 24px 18px;
+      border: 3px dashed var(--border-slate);
+      border-radius: var(--radius-lg);
+      background-color: var(--bg-page);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      gap: 14px;
+    }
+
+    .stage-box.stage-done .zero-overlay {
+      border-color: var(--green-main);
+      background-color: #ffffff;
+    }
+
+    .zero-title {
+      font-size: 1.15rem;
+      font-weight: 800;
+      color: var(--text-primary);
+      margin: 0;
+    }
+
+    .zero-desc {
+      font-size: 0.9rem;
+      color: var(--text-secondary);
+      margin: 0;
+    }
+
+    .big-action-btn {
+      border: none;
+      border-radius: var(--radius-md);
+      background-color: var(--blue-main);
+      color: #ffffff;
+      font-size: 1.05rem;
+      font-weight: 800;
+      padding: 13px 26px;
+      cursor: pointer;
+      box-shadow: var(--shadow-sm);
+      transition: transform 0.12s, background-color 0.15s;
+    }
+
+    .big-action-btn:hover {
+      background-color: var(--blue-hover);
+    }
+
+    .big-action-btn:active {
+      transform: scale(0.96);
+    }
+
+    .big-action-btn.confirmed {
+      background-color: var(--green-main);
+    }
+
+    /* Botão flutuante discreto de "Confirmar 0" no Modo 2 (Círculo) */
+    .stage-zero-float {
+      position: absolute;
+      bottom: 14px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 5;
+    }
+
+    /* =========================================================
+       ESTILOS SVG INTERATIVOS (CÓPIAS E VÉRTICES)
+       ========================================================= */
+    .copy-item {
+      cursor: pointer;
+    }
+
+    .copy-shape {
+      fill: var(--blue-soft);
+      stroke: var(--blue-main);
+      stroke-width: 4.5;
+      transition: fill 0.18s, stroke 0.18s;
+    }
+
+    .copy-item:hover .copy-shape {
+      fill: #dbeafe;
+    }
+
+    .copy-item.counted .copy-shape {
+      fill: var(--green-soft);
+      stroke: var(--green-main);
+      stroke-width: 5;
+    }
+
+    .copy-num {
+      font-size: 34px;
+      font-weight: 900;
+      fill: var(--green-dark);
+      text-anchor: middle;
+      dominant-baseline: central;
+      pointer-events: none;
+    }
+
+    .poly-body {
+      fill: #ffffff;
+      stroke: #334155;
+      stroke-width: 5;
+      stroke-linejoin: round;
+      stroke-linecap: round;
+      transition: fill 0.25s, stroke 0.25s;
+    }
+
+    .poly-body.done {
+      fill: var(--green-soft);
+      stroke: var(--green-dark);
+    }
+
+    .vertex-group {
+      cursor: pointer;
+    }
+
+    .vertex-hit {
+      fill: transparent;
+    }
+
+    .vertex-glow {
+      fill: var(--green-main);
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.2s;
+    }
+
+    .vertex-group.counted .vertex-glow {
+      opacity: 0.22;
+    }
+
+    .vertex-dot {
+      fill: #ffffff;
+      stroke: var(--blue-main);
+      stroke-width: 4.5;
+      transition: fill 0.16s, stroke 0.16s;
+    }
+
+    .vertex-dot.is-point {
+      fill: var(--blue-main);
+      stroke: var(--blue-hover);
+      stroke-width: 3;
+    }
+
+    .vertex-group:hover .vertex-dot {
+      fill: var(--blue-soft);
+    }
+
+    .vertex-group:hover .vertex-dot.is-point {
+      fill: var(--blue-hover);
+    }
+
+    .vertex-group.counted .vertex-dot,
+    .vertex-group.counted .vertex-dot.is-point {
+      fill: var(--green-main);
+      stroke: var(--green-dark);
+      stroke-width: 4;
+    }
+
+    .vertex-num {
+      font-weight: 900;
+      fill: #ffffff;
+      text-anchor: middle;
+      dominant-baseline: central;
+      pointer-events: none;
+    }
+
+    .fusion-fig-frame {
+      fill: #f8fafc;
+      stroke: var(--border-light);
+      stroke-width: 2.5;
+      transition: fill 0.2s, stroke 0.2s;
+    }
+
+    .fusion-fig-frame.done {
+      fill: #f0fdf4;
+      stroke: var(--green-main);
+      stroke-width: 3;
+    }
+
+    .fusion-fig-label {
+      font-size: 15px;
+      font-weight: 800;
+      fill: var(--text-muted);
+      text-anchor: middle;
+      pointer-events: none;
+    }
+
+    .fusion-fig-label.done {
+      fill: var(--green-dark);
+    }
+
+    /* =========================================================
+       RODAPÉ COMPACTO (CONTADOR, INSTRUÇÃO/SOMA E BARRA NUMÉRICA)
+       ========================================================= */
+    .footer-dock {
+      flex-shrink: 0;
+      background-color: var(--bg-card);
+      border-top: 2px solid var(--border-light);
+      padding: 8px 14px 10px;
+      box-shadow: 0 -2px 10px rgba(15, 23, 42, 0.04);
+    }
+
+    .footer-inner {
+      max-width: 1180px;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .status-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+    }
+
+    .counter-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background-color: var(--bg-subtle);
+      border: 2px solid var(--border-slate);
+      border-radius: var(--radius-md);
+      padding: 4px 14px;
+      flex-shrink: 0;
+      transition: background-color 0.2s, border-color 0.2s;
+    }
+
+    .counter-pill.done {
+      background-color: var(--green-soft);
+      border-color: var(--green-main);
+    }
+
+    .counter-caption {
+      font-size: 0.72rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--text-muted);
+    }
+
+    .counter-pill.done .counter-caption {
+      color: var(--green-dark);
+    }
+
+    .counter-number {
+      font-size: 1.9rem;
+      font-weight: 900;
+      line-height: 1;
+      color: var(--blue-main);
+      min-width: 34px;
+      text-align: center;
+      font-variant-numeric: tabular-nums;
+      display: inline-block;
+    }
+
+    .counter-pill.done .counter-number {
+      color: var(--green-dark);
+    }
+
+    .counter-pop {
+      animation: popScale 0.22s ease;
+    }
+
+    @keyframes popScale {
+      0% { transform: scale(1); }
+      45% { transform: scale(1.26); }
+      100% { transform: scale(1); }
+    }
+
+    .status-center {
+      flex: 1;
+      min-width: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      gap: 2px;
+    }
+
+    .status-instruction {
+      font-size: 0.92rem;
+      font-weight: 700;
+      color: var(--text-secondary);
+      margin: 0;
+      line-height: 1.25;
+    }
+
+    .status-instruction.success {
+      color: var(--green-dark);
+    }
+
+    .next-btn {
+      flex-shrink: 0;
+      border: none;
+      border-radius: var(--radius-sm);
+      background-color: var(--blue-main);
+      color: #ffffff;
+      font-size: 0.88rem;
+      font-weight: 800;
+      padding: 10px 16px;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: all 0.15s;
+    }
+
+    .next-btn:hover {
+      background-color: var(--blue-hover);
+    }
+
+    .next-btn.ready {
+      background-color: var(--green-main);
+      box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.25);
+    }
+
+    .next-btn.ready:hover {
+      background-color: var(--green-dark);
+    }
+
+    /* Barra Numérica Compacta (Modos 1 e 2) */
+    .num-bar {
+      display: grid;
+      gap: 6px;
+      width: 100%;
+    }
+
+    .num-bar.cols-10 {
+      grid-template-columns: repeat(10, 1fr);
+    }
+
+    .num-bar.cols-7 {
+      grid-template-columns: repeat(7, 1fr);
+      max-width: 560px;
+      margin: 0 auto;
+    }
+
+    .num-key {
+      height: 44px;
+      border-radius: var(--radius-sm);
+      border: 2px solid var(--border-slate);
+      background-color: var(--bg-card);
+      color: var(--text-primary);
+      font-size: 1.2rem;
+      font-weight: 900;
+      cursor: pointer;
+      display: grid;
+      place-items: center;
+      transition: all 0.12s;
+    }
+
+    .num-key:hover {
+      border-color: var(--blue-main);
+      background-color: var(--blue-soft);
+      color: var(--blue-main);
+    }
+
+    .num-key:active {
+      transform: scale(0.94);
+    }
+
+    .num-key.key-correct {
+      background-color: var(--green-main);
+      border-color: var(--green-dark);
+      color: #ffffff;
+    }
+
+    .num-key.key-wrong {
+      background-color: var(--red-soft);
+      border-color: var(--red-main);
+      color: var(--red-main);
+      animation: shake 0.28s ease;
+    }
+
+    @keyframes shake {
+      0%, 100% { transform: translateX(0); }
+      25% { transform: translateX(-4px); }
+      75% { transform: translateX(4px); }
+    }
+
+    /* Equação Visual em Blocos (Modo 3) */
+    .sum-bar {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+    }
+
+    .sum-block {
+      min-width: 44px;
+      height: 40px;
+      padding: 0 10px;
+      border-radius: var(--radius-sm);
+      border: 2px solid var(--border-slate);
+      background-color: var(--bg-subtle);
+      color: var(--blue-main);
+      font-size: 1.25rem;
+      font-weight: 900;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s;
+    }
+
+    .sum-block.block-done {
+      background-color: var(--green-main);
+      border-color: var(--green-dark);
+      color: #ffffff;
+    }
+
+    .sum-op {
+      font-size: 1.2rem;
+      font-weight: 900;
+      color: var(--text-muted);
+    }
+
+    .sum-total {
+      min-width: 52px;
+      height: 42px;
+      padding: 0 12px;
+      border-radius: var(--radius-sm);
+      border: 2.5px solid var(--blue-main);
+      background-color: var(--blue-soft);
+      color: var(--blue-main);
+      font-size: 1.35rem;
+      font-weight: 900;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s;
+    }
+
+    .sum-total.done {
+      background-color: var(--green-dark);
+      border-color: var(--green-dark);
+      color: #ffffff;
+    }
+
+    /* =========================================================
+       MODO 4 — DESAFIO QUIZ (SEM SCROLL, ERRO SEM PUNIÇÃO)
+       ========================================================= */
+    .quiz-shell {
+      width: 100%;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      padding: 10px 14px;
+      gap: 8px;
+      overflow: hidden;
+    }
+
+    .quiz-top {
+      flex-shrink: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .quiz-stars {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+
+    .quiz-star {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      border: 2px solid var(--border-slate);
+      background-color: var(--bg-subtle);
+      color: var(--text-muted);
+      font-size: 0.95rem;
+      display: grid;
+      place-items: center;
+      transition: all 0.2s ease;
+    }
+
+    .quiz-star.current {
+      border-color: var(--blue-main);
+      background-color: var(--blue-soft);
+      color: var(--blue-main);
+      transform: scale(1.1);
+    }
+
+    .quiz-star.earned {
+      border-color: var(--amber-main);
+      background-color: var(--amber-soft);
+      color: #d97706;
+    }
+
+    .quiz-prompt-row {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      width: 100%;
+      flex-wrap: wrap;
+    }
+
+    .quiz-prompt {
+      margin: 0;
+      font-size: 1.25rem;
+      font-weight: 900;
+      color: var(--text-primary);
+      text-align: center;
+      line-height: 1.2;
+    }
+
+    .quiz-listen-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      border: 2px solid var(--blue-main);
+      background-color: var(--blue-soft);
+      color: var(--blue-main);
+      font-size: 0.92rem;
+      font-weight: 800;
+      padding: 7px 14px;
+      border-radius: 999px;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: all 0.15s;
+    }
+
+    .quiz-listen-btn:hover {
+      background-color: var(--blue-main);
+      color: #ffffff;
+    }
+
+    .quiz-listen-btn:active {
+      transform: scale(0.95);
+    }
+
+    .quiz-arena {
+      flex: 1;
+      min-height: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      overflow: hidden;
+    }
+
+    .quiz-stimulus {
+      flex: 1;
+      min-height: 0;
+      width: 100%;
+      background-color: var(--bg-page);
+      border: 2px solid var(--border-light);
+      border-radius: var(--radius-md);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .quiz-options {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+      width: 100%;
+    }
+
+    .quiz-options.svg-options {
+      flex: 1;
+      min-height: 0;
+    }
+
+    .quiz-options.num-options {
+      flex-shrink: 0;
+      max-width: 620px;
+      margin: 0 auto;
+    }
+
+    .quiz-card {
+      border: 2.5px solid var(--border-slate);
+      background-color: var(--bg-card);
+      border-radius: var(--radius-md);
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 8px;
+      min-height: 0;
+      overflow: hidden;
+      transition: transform 0.14s, border-color 0.2s, background-color 0.2s, opacity 0.2s;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .quiz-card:hover:not(.dimmed):not(.correct) {
+      border-color: var(--blue-main);
+      background-color: var(--blue-soft);
+      transform: translateY(-2px);
+    }
+
+    .quiz-card:active:not(.dimmed) {
+      transform: scale(0.97);
+    }
+
+    .quiz-card.num-card {
+      height: 66px;
+      font-size: 2rem;
+      font-weight: 900;
+      color: var(--text-primary);
+    }
+
+    .quiz-card.correct {
+      border-color: var(--green-dark);
+      background-color: var(--green-soft);
+      color: var(--green-dark);
+      box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.22);
+    }
+
+    .quiz-card.dimmed {
+      opacity: 0.42;
+      background-color: var(--bg-subtle);
+      border-color: var(--border-light);
+      cursor: default;
+    }
+
+    .quiz-card.wrong-shake {
+      border-color: var(--amber-main);
+      background-color: var(--amber-soft);
+      animation: gentleShake 0.34s ease;
+    }
+
+    @keyframes gentleShake {
+      0%, 100% { transform: translateX(0); }
+      25% { transform: translateX(-5px); }
+      65% { transform: translateX(5px); }
+    }
+
+    /* Destaque pulsante de dica visual (erro sem punição) */
+    .quiz-hint-pulse .vertex-dot,
+    .quiz-hint-pulse .copy-shape {
+      animation: hintPulse 0.85s ease-in-out infinite;
+    }
+
+    @keyframes hintPulse {
+      0%, 100% {
+        stroke: var(--amber-main);
+        stroke-width: 6;
+      }
+      50% {
+        stroke: var(--blue-main);
+        stroke-width: 8.5;
+      }
+    }
+
+    .quiz-celebration {
+      width: 100%;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 20px;
+      gap: 14px;
+      background: radial-gradient(circle at center, #ecfdf5 0%, #ffffff 72%);
+    }
+
+    .celebration-stars {
+      font-size: 2.2rem;
+      letter-spacing: 6px;
+      line-height: 1.2;
+      color: #f59e0b;
+    }
+
+    .celebration-title {
+      margin: 0;
+      font-size: 1.65rem;
+      font-weight: 900;
+      color: var(--green-dark);
+    }
+
+    .celebration-sub {
+      margin: 0;
+      font-size: 1.05rem;
+      font-weight: 700;
+      color: var(--text-secondary);
+      max-width: 460px;
+    }
+
+    /* =========================================================
+       PAINEL DO PROFESSOR (GAVETA RECOLHÍVEL)
+       ========================================================= */
+    .drawer-backdrop {
+      position: fixed;
+      inset: 0;
+      background-color: rgba(15, 23, 42, 0.38);
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.2s ease;
+      z-index: 40;
+    }
+
+    .drawer-backdrop.open {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .teacher-drawer {
+      position: fixed;
+      top: 0;
+      right: 0;
+      bottom: 0;
+      width: min(360px, 92vw);
+      background-color: var(--bg-card);
+      box-shadow: var(--shadow-lg);
+      transform: translateX(100%);
+      transition: transform 0.24s ease;
+      z-index: 50;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    .teacher-drawer.open {
+      transform: translateX(0);
+    }
+
+    .drawer-header {
+      padding: 14px 16px;
+      border-bottom: 1.5px solid var(--border-light);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-shrink: 0;
+    }
+
+    .drawer-header h2 {
+      margin: 0;
+      font-size: 1rem;
+      font-weight: 800;
+      color: var(--text-primary);
+    }
+
+    .drawer-close {
+      width: 34px;
+      height: 34px;
+      border-radius: var(--radius-sm);
+      border: 1.5px solid var(--border-slate);
+      background-color: var(--bg-subtle);
+      color: var(--text-primary);
+      font-size: 1rem;
+      font-weight: 800;
+      cursor: pointer;
+      display: grid;
+      place-items: center;
+    }
+
+    .drawer-close:hover {
+      background-color: var(--border-light);
+    }
+
+    .drawer-body {
+      flex: 1;
+      overflow-y: auto;
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+    }
+
+    .drawer-section {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .drawer-label {
+      font-size: 0.78rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      color: var(--text-muted);
+    }
+
+    .drawer-grid {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+
+    .d-btn {
+      border: 1.5px solid var(--border-slate);
+      background-color: var(--bg-card);
+      color: var(--text-primary);
+      font-size: 0.85rem;
+      font-weight: 700;
+      padding: 8px 12px;
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      transition: all 0.14s;
+    }
+
+    .d-btn:hover {
+      border-color: var(--blue-main);
+      color: var(--blue-main);
+      background-color: var(--blue-soft);
+    }
+
+    .d-btn.active {
+      background-color: var(--blue-main);
+      border-color: var(--blue-main);
+      color: #ffffff;
+    }
+
+    .d-toggle {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 0.9rem;
+      font-weight: 700;
+      color: var(--text-primary);
+      padding: 10px 12px;
+      border-radius: var(--radius-sm);
+      background-color: var(--bg-subtle);
+      cursor: pointer;
+    }
+
+    .d-toggle input {
+      width: 18px;
+      height: 18px;
+      accent-color: var(--blue-main);
+    }
+
+    .drawer-footer {
+      padding: 14px 16px;
+      border-top: 1.5px solid var(--border-light);
+      flex-shrink: 0;
+    }
+
+    .btn-random-full {
+      width: 100%;
+      border: none;
+      border-radius: var(--radius-md);
+      background-color: var(--blue-main);
+      color: #ffffff;
+      font-size: 0.95rem;
+      font-weight: 800;
+      padding: 12px 16px;
+      cursor: pointer;
+      transition: background-color 0.15s;
+    }
+
+    .btn-random-full:hover {
+      background-color: var(--blue-hover);
+    }
+
+    /* =========================================================
+       RESPONSIVIDADE — CELULAR E TELAS ESTREITAS
+       ========================================================= */
+    @media (max-width: 720px) {
+      .topbar {
+        flex-wrap: wrap;
+        padding: 6px 8px;
+        gap: 6px;
+      }
+
+      .brand-title {
+        font-size: 0.88rem;
+      }
+
+      .mode-tabs {
+        order: 3;
+        width: 100%;
+        justify-content: space-between;
+      }
+
+      .mode-tab {
+        flex: 1;
+        padding: 6px 4px;
+        font-size: 0.76rem;
+        text-align: center;
+      }
+
+      .top-btn {
+        height: 32px;
+        padding: 0 8px;
+        font-size: 0.76rem;
+      }
+
+      .stage-wrapper {
+        padding: 6px 8px;
+        gap: 6px;
+      }
+
+      .footer-dock {
+        padding: 6px 8px 8px;
+      }
+
+      .counter-pill {
+        padding: 4px 10px;
+      }
+
+      .counter-number {
+        font-size: 1.45rem;
+        min-width: 26px;
+      }
+
+      .status-instruction {
+        font-size: 0.8rem;
+      }
+
+      .next-btn {
+        padding: 8px 12px;
+        font-size: 0.8rem;
+      }
+
+      .num-bar.cols-10 {
+        grid-template-columns: repeat(5, 1fr);
+      }
+
+      .num-key {
+        height: 38px;
+        font-size: 1.05rem;
+      }
+
+      .sum-block {
+        min-width: 36px;
+        height: 34px;
+        font-size: 1.05rem;
+      }
+
+      .sum-total {
+        min-width: 44px;
+        height: 36px;
+        font-size: 1.15rem;
+      }
+
+      .quiz-shell {
+        padding: 8px 8px;
+        gap: 6px;
+      }
+
+      .quiz-star {
+        width: 24px;
+        height: 24px;
+        font-size: 0.82rem;
+      }
+
+      .quiz-prompt {
+        font-size: 1.02rem;
+      }
+
+      .quiz-listen-btn {
+        font-size: 0.82rem;
+        padding: 5px 11px;
+      }
+
+      .quiz-options.svg-options {
+        grid-template-columns: 1fr;
+        grid-template-rows: repeat(3, 1fr);
+        gap: 7px;
+      }
+
+      .quiz-card.num-card {
+        height: 54px;
+        font-size: 1.65rem;
+      }
+
+      .celebration-title {
+        font-size: 1.35rem;
+      }
+
+      .celebration-sub {
+        font-size: 0.92rem;
+      }
+    }
+
+    @media (max-width: 420px) {
+      .hide-xs {
+        display: none;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="app-shell">
+
+    <!-- =========================================================
+         BARRA SUPERIOR COMPACTA
+         ========================================================= -->
+    <header class="topbar">
+      <div class="brand">
+        <div class="brand-badge" aria-hidden="true">MF</div>
+        <h1 class="brand-title">Máquina de Fundamentos</h1>
+      </div>
+
+      <nav class="mode-tabs" role="tablist" aria-label="Modos da Máquina">
+        <button class="mode-tab active" data-mode="1" role="tab" aria-selected="true">1. Cópias</button>
+        <button class="mode-tab" data-mode="2" role="tab" aria-selected="false">2. Vértices</button>
+        <button class="mode-tab" data-mode="3" role="tab" aria-selected="false">3. Fusão</button>
+        <button class="mode-tab" data-mode="4" role="tab" aria-selected="false">4. Desafio</button>
+      </nav>
+
+      <div class="top-actions">
+        <button id="audioBtn" class="top-btn" type="button" title="Alternar modo de áudio">
+          <span id="audioIcon" aria-hidden="true">🔊</span>
+          <span id="audioLabel">Voz + Som</span>
+        </button>
+        <button id="resetBtn" class="top-btn" type="button" title="Reiniciar desafio atual">
+          <span aria-hidden="true">↺</span>
+          <span class="hide-xs">Reiniciar</span>
+        </button>
+        <button id="panelToggleBtn" class="top-btn" type="button" aria-expanded="false" aria-controls="teacherDrawer">
+          <span aria-hidden="true">⚙️</span>
+          <span>Professor</span>
+        </button>
+      </div>
+    </header>
+
+    <!-- =========================================================
+         ÁREA CENTRAL (PALCO SVG FLUIDO)
+         ========================================================= -->
+    <main class="stage-wrapper">
+      <div id="quickStrip" class="quick-strip"></div>
+      <section id="stageBox" class="stage-box" aria-label="Palco Interativo"></section>
+    </main>
+
+    <!-- =========================================================
+         RODAPÉ COMPACTO (CONTADOR, EQUAÇÃO E BARRA NUMÉRICA)
+         ========================================================= -->
+    <footer class="footer-dock">
+      <div class="footer-inner">
+        <div class="status-row">
+          <div id="counterPill" class="counter-pill" aria-live="polite">
+            <span id="counterCaption" class="counter-caption">Contagem</span>
+            <span id="counterNumber" class="counter-number">0</span>
+          </div>
+
+          <div class="status-center">
+            <p id="statusInstruction" class="status-instruction">Toque nas figuras para contar.</p>
+          </div>
+
+          <button id="nextBtn" class="next-btn" type="button">Próximo →</button>
+        </div>
+
+        <div id="footerInteractive"></div>
+      </div>
+    </footer>
+
+  </div>
+
+  <!-- =========================================================
+       PAINEL DO PROFESSOR (GAVETA RECOLHÍVEL)
+       ========================================================= -->
+  <div id="drawerBackdrop" class="drawer-backdrop"></div>
+  <aside id="teacherDrawer" class="teacher-drawer" aria-label="Painel do Professor" aria-hidden="true">
+    <div class="drawer-header">
+      <h2>Painel do Professor</h2>
+      <button id="drawerCloseBtn" class="drawer-close" type="button" aria-label="Fechar painel">✕</button>
+    </div>
+    <div id="drawerBody" class="drawer-body"></div>
+    <div class="drawer-footer">
+      <p style="margin:0 0 8px;font-size:.72rem;opacity:.7;text-align:center;line-height:1.35">© Ygor B. F. Ferreira · A Saga dos Reinos Matemáticos · Matematkês · uso livre em sala</p>
+      <button id="drawerRandomBtn" class="btn-random-full" type="button">🎲 Sortear Desafio</button>
+    </div>
+  </aside>
+
+  <script>
+    /* =========================================================
+       MOTOR DE ÁUDIO: VOZ FALADA (pt-BR) + WEB AUDIO API
+       ========================================================= */
+    const AudioSystem = (() => {
+      // Modos: 'voice' (Voz + Som) | 'sfx' (Só Som) | 'mute' (Mudo)
+      let mode = 'voice';
+      let audioCtx = null;
+      let ptBrVoice = null;
+
+      // Dicionário por extenso de 0 a 24 para pronúncia limpa e natural
+      const NUMBER_WORDS = [
+        'zero', 'um', 'dois', 'três', 'quatro', 'cinco',
+        'seis', 'sete', 'oito', 'nove', 'dez',
+        'onze', 'doze', 'treze', 'catorze', 'quinze',
+        'dezesseis', 'dezessete', 'dezoito', 'dezenove', 'vinte',
+        'vinte e um', 'vinte e dois', 'vinte e três', 'vinte e quatro'
+      ];
+
+      // Notas musicais ascendentes (C4 até E7) para contagem até 24
+      const NOTES = [
+        261.63, 293.66, 329.63, 349.23, 392.00, 440.00,
+        493.88, 523.25, 587.33, 659.25, 698.46, 783.99,
+        880.00, 987.77, 1046.50, 1174.66, 1318.51, 1396.91,
+        1567.98, 1760.00, 1975.53, 2093.00, 2349.32, 2637.02
+      ];
+
+      function pickPtBrVoice() {
+        try {
+          if (!('speechSynthesis' in window)) return;
+          const voices = window.speechSynthesis.getVoices();
+          if (!voices || !voices.length) return;
+          ptBrVoice =
+            voices.find(v => v.lang && v.lang.toLowerCase() === 'pt-br') ||
+            voices.find(v => v.lang && v.lang.toLowerCase().startsWith('pt')) ||
+            null;
+        } catch (err) {
+          ptBrVoice = null;
+        }
+      }
+
+      if ('speechSynthesis' in window) {
+        pickPtBrVoice();
+        window.speechSynthesis.onvoiceschanged = pickPtBrVoice;
+      }
+
+      function ensureCtx() {
+        try {
+          if (!audioCtx) {
+            const Ctx = window.AudioContext || window.webkitAudioContext;
+            if (Ctx) audioCtx = new Ctx();
+          }
+          if (audioCtx && audioCtx.state === 'suspended') {
+            audioCtx.resume();
+          }
+        } catch (err) {
+          // Ignora restrições pontuais do navegador
+        }
+      }
+
+      function playTone(freq, duration = 0.14, type = 'triangle', volume = 0.16, delay = 0) {
+        if (mode === 'mute') return;
+        ensureCtx();
+        if (!audioCtx) return;
+
+        try {
+          const now = audioCtx.currentTime + delay;
+          const osc = audioCtx.createOscillator();
+          const gain = audioCtx.createGain();
+          osc.type = type;
+          osc.frequency.setValueAtTime(freq, now);
+
+          gain.gain.setValueAtTime(0.001, now);
+          gain.gain.linearRampToValueAtTime(volume, now + 0.012);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + duration);
+
+          osc.connect(gain);
+          gain.connect(audioCtx.destination);
+          osc.start(now);
+          osc.stop(now + duration + 0.02);
+        } catch (err) {
+          // Silencioso
+        }
+      }
+
+      function speakNumber(n) {
+        if (mode !== 'voice') return;
+        if (!('speechSynthesis' in window)) return;
+        try {
+          window.speechSynthesis.cancel();
+          const text = NUMBER_WORDS[n] !== undefined ? NUMBER_WORDS[n] : String(n);
+          const utter = new SpeechSynthesisUtterance(text);
+          utter.lang = 'pt-BR';
+          utter.rate = 1.05;
+          utter.pitch = 1.05;
+          if (ptBrVoice) utter.voice = ptBrVoice;
+          window.speechSynthesis.speak(utter);
+        } catch (err) {
+          // Silencioso caso síntese não esteja disponível
+        }
+      }
+
+      function speakText(text) {
+        if (mode !== 'voice') return;
+        if (!('speechSynthesis' in window)) return;
+        try {
+          window.speechSynthesis.cancel();
+          const utter = new SpeechSynthesisUtterance(text);
+          utter.lang = 'pt-BR';
+          utter.rate = 1.02;
+          utter.pitch = 1.04;
+          if (ptBrVoice) utter.voice = ptBrVoice;
+          window.speechSynthesis.speak(utter);
+        } catch (err) {
+          // Silencioso caso síntese não esteja disponível
+        }
+      }
+
+      return {
+        getMode: () => mode,
+        cycleMode: () => {
+          if (mode === 'voice') mode = 'sfx';
+          else if (mode === 'sfx') mode = 'mute';
+          else mode = 'voice';
+
+          if (mode !== 'voice' && 'speechSynthesis' in window) {
+            try { window.speechSynthesis.cancel(); } catch (e) {}
+          }
+          return mode;
+        },
+        stopSpeech: () => {
+          if ('speechSynthesis' in window) {
+            try { window.speechSynthesis.cancel(); } catch (e) {}
+          }
+        },
+        speakText,
+        playCount: (num) => {
+          const idx = Math.max(0, Math.min(num - 1, NOTES.length - 1));
+          playTone(num === 0 ? 261.63 : NOTES[idx], 0.15, 'triangle', 0.15);
+          speakNumber(num);
+        },
+        playSuccess: () => {
+          playTone(523.25, 0.16, 'sine', 0.14, 0.00);
+          playTone(659.25, 0.16, 'sine', 0.14, 0.08);
+          playTone(783.99, 0.26, 'sine', 0.16, 0.16);
+        },
+        playCelebration: () => {
+          playTone(523.25, 0.14, 'triangle', 0.15, 0.00);
+          playTone(659.25, 0.14, 'triangle', 0.15, 0.10);
+          playTone(783.99, 0.14, 'triangle', 0.15, 0.20);
+          playTone(1046.50, 0.34, 'triangle', 0.18, 0.30);
+        },
+        playHint: () => {
+          playTone(329.63, 0.13, 'sine', 0.11, 0.00);
+          playTone(293.66, 0.18, 'sine', 0.10, 0.10);
+        },
+        playError: () => {
+          playTone(185.0, 0.18, 'sine', 0.15, 0);
+        }
+      };
+    })();
+
+    /* =========================================================
+       ESTADO GLOBAL DA APLICAÇÃO
+       ========================================================= */
+    const state = {
+      mode: 1, // 1 = Cópias, 2 = Vértices, 3 = Fusão, 4 = Desafio Quiz
+      drawerOpen: false,
+      isPortrait: false,
+      lastCounterVal: null,
+
+      // Modo 1: Extração por Cópias (0 a 9)
+      m1: {
+        target: 5,
+        layout: 'subitizing', // 'subitizing' | 'scattered'
+        shape: 'square',      // 'square' | 'triangle' | 'circle'
+        requireValidation: true,
+        countedIds: [],
+        zeroConfirmed: false,
+        validatedNumber: null,
+        wrongKey: null,
+        scatteredSeeds: []    // Coordenadas normalizadas [0..1, 0..1] para adaptar PC/Celular
+      },
+
+      // Modo 2: Extração por Vértices — Escada Dimensional (0 a 6)
+      m2: {
+        step: 3,              // 0..6 (até o Hexágono)
+        quadType: 'square',   // 'square' | 'trapezoid'
+        requireValidation: true,
+        countedVertices: [],
+        zeroConfirmed: false,
+        validatedNumber: null,
+        wrongKey: null
+      },
+
+      // Modo 3: Fusão — Pré-Múltiplos (2..4 figuras × 3..6 vértices)
+      m3: {
+        copies: 2,            // 2, 3, 4
+        sides: 3,             // 3, 4, 5, 6
+        countedMap: {},       // "figIdx-vIdx" => contagem global
+        totalCounted: 0
+      },
+
+      // Modo 4: Desafio Quiz (Rodadas curtas com dica visual sem punição)
+      m4: {
+        roundSize: 6,         // 5, 6 ou 8 perguntas
+        topic: 'mixed',       // 'mixed' | 'copies' | 'vertices' | 'fusion'
+        questions: [],
+        currentIndex: 0,
+        completed: [],
+        answeredCorrectly: false,
+        wrongOptionIds: [],
+        shakingOptionId: null,
+        hintActive: false,
+        hintMessage: '',
+        helperCounted: {},    // Auxílio de toque para contar peças/vértices no estímulo
+        helperTotal: 0,
+        finished: false,
+        firstTryCount: 0
+      }
+    };
+
+    /* =========================================================
+       REFERÊNCIAS DO DOM
+       ========================================================= */
+    const quickStripEl = document.getElementById('quickStrip');
+    const stageBoxEl = document.getElementById('stageBox');
+    const counterPillEl = document.getElementById('counterPill');
+    const counterCaptionEl = document.getElementById('counterCaption');
+    const counterNumberEl = document.getElementById('counterNumber');
+    const statusInstructionEl = document.getElementById('statusInstruction');
+    const footerInteractiveEl = document.getElementById('footerInteractive');
+    const nextBtn = document.getElementById('nextBtn');
+    const resetBtn = document.getElementById('resetBtn');
+    const audioBtn = document.getElementById('audioBtn');
+    const audioIconEl = document.getElementById('audioIcon');
+    const audioLabelEl = document.getElementById('audioLabel');
+    const panelToggleBtn = document.getElementById('panelToggleBtn');
+    const teacherDrawerEl = document.getElementById('teacherDrawer');
+    const drawerBackdropEl = document.getElementById('drawerBackdrop');
+    const drawerCloseBtn = document.getElementById('drawerCloseBtn');
+    const drawerBodyEl = document.getElementById('drawerBody');
+    const drawerRandomBtn = document.getElementById('drawerRandomBtn');
+
+    /* =========================================================
+       GEOMETRIA E PADRÕES ADAPTATIVOS (LANDSCAPE / PORTRAIT)
+       ========================================================= */
+    const STEP_INFO = {
+      0: { short: '0 · Círculo', name: 'Círculo' },
+      1: { short: '1 · Ponto', name: 'Ponto' },
+      2: { short: '2 · Segmento', name: 'Segmento de Reta' },
+      3: { short: '3 · Triângulo', name: 'Triângulo' },
+      4: { short: '4 · Quadrilátero', name: 'Quadrilátero' },
+      5: { short: '5 · Pentágono', name: 'Pentágono' },
+      6: { short: '6 · Hexágono', name: 'Hexágono' }
+    };
+
+    const POLY_PLURAL = {
+      3: 'triângulos',
+      4: 'quadrados',
+      5: 'pentágonos',
+      6: 'hexágonos'
+    };
+
+    // Padrões de subitização em coordenadas normalizadas [nx, ny] (0..1)
+    const SUBITIZING_LANDSCAPE = {
+      0: [],
+      1: [[0.50, 0.50]],
+      2: [[0.34, 0.50], [0.66, 0.50]],
+      3: [[0.26, 0.50], [0.50, 0.50], [0.74, 0.50]],
+      4: [[0.35, 0.30], [0.65, 0.30], [0.35, 0.70], [0.65, 0.70]],
+      5: [[0.28, 0.25], [0.72, 0.25], [0.50, 0.50], [0.28, 0.75], [0.72, 0.75]],
+      6: [[0.26, 0.30], [0.50, 0.30], [0.74, 0.30], [0.26, 0.70], [0.50, 0.70], [0.74, 0.70]],
+      7: [[0.26, 0.22], [0.50, 0.22], [0.74, 0.22], [0.26, 0.52], [0.50, 0.52], [0.74, 0.52], [0.50, 0.82]],
+      8: [[0.20, 0.30], [0.40, 0.30], [0.60, 0.30], [0.80, 0.30], [0.20, 0.70], [0.40, 0.70], [0.60, 0.70], [0.80, 0.70]],
+      9: [[0.26, 0.20], [0.50, 0.20], [0.74, 0.20], [0.26, 0.50], [0.50, 0.50], [0.74, 0.50], [0.26, 0.80], [0.50, 0.80], [0.74, 0.80]]
+    };
+
+    const SUBITIZING_PORTRAIT = {
+      0: [],
+      1: [[0.50, 0.50]],
+      2: [[0.50, 0.34], [0.50, 0.66]],
+      3: [[0.50, 0.24], [0.50, 0.50], [0.50, 0.76]],
+      4: [[0.31, 0.33], [0.69, 0.33], [0.31, 0.67], [0.69, 0.67]],
+      5: [[0.28, 0.26], [0.72, 0.26], [0.50, 0.50], [0.28, 0.74], [0.72, 0.74]],
+      6: [[0.31, 0.24], [0.69, 0.24], [0.31, 0.50], [0.69, 0.50], [0.31, 0.76], [0.69, 0.76]],
+      7: [[0.30, 0.20], [0.70, 0.20], [0.30, 0.43], [0.70, 0.43], [0.30, 0.66], [0.70, 0.66], [0.50, 0.86]],
+      8: [[0.30, 0.18], [0.70, 0.18], [0.30, 0.39], [0.70, 0.39], [0.30, 0.61], [0.70, 0.61], [0.30, 0.82], [0.70, 0.82]],
+      9: [[0.22, 0.24], [0.50, 0.24], [0.78, 0.24], [0.22, 0.50], [0.50, 0.50], [0.78, 0.50], [0.22, 0.76], [0.50, 0.76], [0.78, 0.76]]
+    };
+
+    // Gera coordenadas espalhadas sem sobreposição no viewBox atual
+    function generateScatteredPositions(count, vw, vh) {
+      const pts = [];
+      const minDist = Math.min(vw, vh) * (count >= 7 ? 0.23 : 0.27);
+      const padX = vw * 0.14;
+      const padY = vh * 0.16;
+
+      for (let i = 0; i < count; i++) {
+        let placed = false;
+        for (let attempt = 0; attempt < 260; attempt++) {
+          const x = padX + Math.random() * (vw - padX * 2);
+          const y = padY + Math.random() * (vh - padY * 2);
+          if (pts.every(p => Math.hypot(p[0] - x, p[1] - y) >= minDist)) {
+            pts.push([x / vw, y / vh]);
+            placed = true;
+            break;
+          }
+        }
+        if (!placed) {
+          const base = (state.isPortrait ? SUBITIZING_PORTRAIT : SUBITIZING_LANDSCAPE)[count][i];
+          pts.push([
+            Math.max(0.14, Math.min(0.86, base[0] + (Math.random() - 0.5) * 0.08)),
+            Math.max(0.16, Math.min(0.84, base[1] + (Math.random() - 0.5) * 0.08))
+          ]);
+        }
+      }
+      return pts;
+    }
+
+    // Geometria da Escada Dimensional (0 a 6)
+    function getStepGeometry(step, cx, cy, r, quadType = 'square') {
+      if (step === 0) return { type: 'circle', points: [] };
+      if (step === 1) return { type: 'point', points: [[cx, cy]] };
+      if (step === 2) return { type: 'segment', points: [[cx - r * 1.05, cy], [cx + r * 1.05, cy]] };
+
+      if (step === 4) {
+        if (quadType === 'square') {
+          const d = r * 0.76;
+          return {
+            type: 'polygon',
+            points: [
+              [cx - d, cy - d],
+              [cx + d, cy - d],
+              [cx + d, cy + d],
+              [cx - d, cy + d]
+            ]
+          };
+        }
+        // Trapézio isósceles claro e simétrico
+        return {
+          type: 'polygon',
+          points: [
+            [cx - r * 0.54, cy - r * 0.66],
+            [cx + r * 0.54, cy - r * 0.66],
+            [cx + r * 1.04, cy + r * 0.66],
+            [cx - r * 1.04, cy + r * 0.66]
+          ]
+        };
+      }
+
+      // Polígonos regulares: 3 (Triângulo), 5 (Pentágono), 6 (Hexágono)
+      const points = [];
+      const startAngle = -Math.PI / 2;
+      for (let i = 0; i < step; i++) {
+        const angle = startAngle + (i * 2 * Math.PI) / step;
+        points.push([
+          Number((cx + r * Math.cos(angle)).toFixed(1)),
+          Number((cy + r * Math.sin(angle)).toFixed(1))
+        ]);
+      }
+      return { type: 'polygon', points };
+    }
+
+    // Mira discreta em cruz para destacar o Ponto (degrau 1) sem usar contorno circular
+    function buildPointCrosshairSvg(cx, cy, inner = 26, outer = 44) {
+      return `
+        <g stroke="#94a3b8" stroke-width="2.5" stroke-linecap="round" opacity="0.65">
+          <line x1="${cx}" y1="${cy - outer}" x2="${cx}" y2="${cy - inner}" />
+          <line x1="${cx}" y1="${cy + inner}" x2="${cx}" y2="${cy + outer}" />
+          <line x1="${cx - outer}" y1="${cy}" x2="${cx - inner}" y2="${cy}" />
+          <line x1="${cx + inner}" y1="${cy}" x2="${cx + outer}" y2="${cy}" />
+        </g>
+      `;
+    }
+
+    function updateOrientation() {
+      const w = stageBoxEl.clientWidth || window.innerWidth;
+      const h = stageBoxEl.clientHeight || window.innerHeight;
+      const nextPortrait = w < h * 0.92;
+      if (nextPortrait !== state.isPortrait) {
+        state.isPortrait = nextPortrait;
+        if (state.mode === 1 && state.m1.layout === 'scattered') {
+          const vw = state.isPortrait ? 460 : 800;
+          const vh = state.isPortrait ? 540 : 380;
+          state.m1.scatteredSeeds = generateScatteredPositions(state.m1.target, vw, vh);
+        }
+        render();
+      }
+    }
+
+    function animateCounter(displayValue) {
+      counterNumberEl.textContent = displayValue;
+      if (state.lastCounterVal !== displayValue) {
+        state.lastCounterVal = displayValue;
+        counterNumberEl.classList.remove('counter-pop');
+        void counterNumberEl.offsetWidth;
+        counterNumberEl.classList.add('counter-pop');
+      }
+    }
+
+    /* =========================================================
+       MODO 1: EXTRAÇÃO POR CÓPIAS (0 A 9)
+       ========================================================= */
+    function initMode1(target) {
+      state.m1.target = target;
+      state.m1.countedIds = [];
+      state.m1.zeroConfirmed = false;
+      state.m1.validatedNumber = null;
+      state.m1.wrongKey = null;
+
+      const vw = state.isPortrait ? 460 : 800;
+      const vh = state.isPortrait ? 540 : 380;
+      state.m1.scatteredSeeds = generateScatteredPositions(target, vw, vh);
+      render();
+    }
+
+    function isMode1Counted() {
+      return state.m1.target === 0
+        ? state.m1.zeroConfirmed
+        : state.m1.countedIds.length === state.m1.target;
+    }
+
+    function isMode1Complete() {
+      if (!isMode1Counted()) return false;
+      if (state.m1.requireValidation) {
+        return state.m1.validatedNumber === state.m1.target;
+      }
+      return true;
+    }
+
+    function onMode1CopyTap(idx) {
+      if (state.m1.countedIds.includes(idx)) return;
+      state.m1.countedIds.push(idx);
+      const count = state.m1.countedIds.length;
+      AudioSystem.playCount(count);
+
+      if (count === state.m1.target && !state.m1.requireValidation) {
+        state.m1.validatedNumber = state.m1.target;
+        setTimeout(() => AudioSystem.playSuccess(), 180);
+      }
+      render();
+    }
+
+    function onMode1ZeroConfirm() {
+      state.m1.zeroConfirmed = true;
+      AudioSystem.playCount(0);
+      if (!state.m1.requireValidation) {
+        state.m1.validatedNumber = 0;
+        setTimeout(() => AudioSystem.playSuccess(), 200);
+      }
+      render();
+    }
+
+    function onMode1NumKey(num) {
+      // Se o alvo for 0 e o aluno clicar direto no 0 na barra, já confirma e valida
+      if (state.m1.target === 0 && num === 0) {
+        state.m1.zeroConfirmed = true;
+        state.m1.validatedNumber = 0;
+        state.m1.wrongKey = null;
+        AudioSystem.playCount(0);
+        setTimeout(() => AudioSystem.playSuccess(), 200);
+        render();
+        return;
+      }
+
+      if (!isMode1Counted()) {
+        AudioSystem.playError();
+        state.m1.wrongKey = num;
+        render();
+        setTimeout(() => { state.m1.wrongKey = null; render(); }, 380);
+        return;
+      }
+
+      if (num === state.m1.target) {
+        state.m1.validatedNumber = num;
+        state.m1.wrongKey = null;
+        AudioSystem.playSuccess();
+        render();
+      } else {
+        AudioSystem.playError();
+        state.m1.wrongKey = num;
+        render();
+        setTimeout(() => { state.m1.wrongKey = null; render(); }, 420);
+      }
+    }
+
+    function renderMode1() {
+      const { target, layout, shape, requireValidation, countedIds, zeroConfirmed, validatedNumber, wrongKey } = state.m1;
+      const counted = isMode1Counted();
+      const complete = isMode1Complete();
+
+      // Sem faixa rápida no Modo 1 (palco máximo)
+      quickStripEl.innerHTML = '';
+
+      // Palco
+      stageBoxEl.classList.toggle('stage-done', complete);
+
+      if (target === 0) {
+        stageBoxEl.innerHTML = `
+          <div class="zero-overlay">
+            <p class="zero-title">Nenhuma peça na mesa</p>
+            <p class="zero-desc">
+              ${complete
+                ? 'Muito bem! Você extraiu o número 0.'
+                : zeroConfirmed
+                  ? 'Agora toque no número 0 na barra abaixo.'
+                  : 'Confirme abaixo ou toque no 0 na barra numérica.'}
+            </p>
+            <button id="m1ZeroBtn" class="big-action-btn ${zeroConfirmed ? 'confirmed' : ''}" type="button">
+              ${zeroConfirmed ? '✓ Confirmado: 0' : 'Confirmar 0'}
+            </button>
+          </div>
+        `;
+        document.getElementById('m1ZeroBtn').addEventListener('click', onMode1ZeroConfirm);
+      } else {
+        const vw = state.isPortrait ? 460 : 800;
+        const vh = state.isPortrait ? 540 : 380;
+        const seeds = layout === 'subitizing'
+          ? (state.isPortrait ? SUBITIZING_PORTRAIT[target] : SUBITIZING_LANDSCAPE[target])
+          : state.m1.scatteredSeeds;
+
+        const baseRadius = state.isPortrait
+          ? (target >= 7 ? 42 : 48)
+          : (target >= 7 ? 40 : 48);
+
+        let itemsSvg = '';
+        seeds.forEach(([nx, ny], idx) => {
+          const x = Number((nx * vw).toFixed(1));
+          const y = Number((ny * vh).toFixed(1));
+          const order = countedIds.indexOf(idx);
+          const isHit = order !== -1;
+
+          let shapeEl = '';
+          if (shape === 'square') {
+            shapeEl = `<rect class="copy-shape" x="${x - baseRadius}" y="${y - baseRadius}" width="${baseRadius * 2}" height="${baseRadius * 2}" rx="12" />`;
+          } else if (shape === 'circle') {
+            shapeEl = `<circle class="copy-shape" cx="${x}" cy="${y}" r="${baseRadius}" />`;
+          } else {
+            const h = baseRadius * 1.85;
+            const topY = y - h * 0.56;
+            const botY = y + h * 0.44;
+            const halfW = baseRadius * 1.12;
+            shapeEl = `<polygon class="copy-shape" points="${x},${topY.toFixed(1)} ${(x + halfW).toFixed(1)},${botY.toFixed(1)} ${(x - halfW).toFixed(1)},${botY.toFixed(1)}" stroke-linejoin="round" />`;
+          }
+
+          const textY = shape === 'triangle' ? y + 10 : y;
+          itemsSvg += `
+            <g class="copy-item ${isHit ? 'counted' : ''}" data-copy-idx="${idx}" role="button" tabindex="0" aria-label="Peça ${idx + 1}">
+              ${shapeEl}
+              ${isHit ? `<text class="copy-num" x="${x}" y="${textY}">${order + 1}</text>` : ''}
+            </g>
+          `;
+        });
+
+        stageBoxEl.innerHTML = `
+          <svg class="stage-svg" viewBox="0 0 ${vw} ${vh}" preserveAspectRatio="xMidYMid meet" aria-label="Área de contagem de cópias">
+            ${itemsSvg}
+          </svg>
+        `;
+
+        stageBoxEl.querySelectorAll('.copy-item').forEach(el => {
+          el.addEventListener('click', () => onMode1CopyTap(Number(el.dataset.copyIdx)));
+        });
+      }
+
+      // Rodapé: Contador e Instrução
+      counterCaptionEl.textContent = 'Cópias';
+      animateCounter(target === 0 ? (zeroConfirmed ? '0' : '—') : String(countedIds.length));
+      counterPillEl.classList.toggle('done', complete);
+      nextBtn.classList.toggle('ready', complete);
+
+      if (complete) {
+        statusInstructionEl.textContent = `Número extraído: ${target}!`;
+        statusInstructionEl.className = 'status-instruction success';
+      } else if (counted && requireValidation) {
+        statusInstructionEl.textContent = 'Agora escolha o número na barra abaixo:';
+        statusInstructionEl.className = 'status-instruction';
+      } else if (target === 0) {
+        statusInstructionEl.textContent = 'Mesa vazia: confirme o zero.';
+        statusInstructionEl.className = 'status-instruction';
+      } else {
+        statusInstructionEl.textContent = 'Toque em cada figura para contar.';
+        statusInstructionEl.className = 'status-instruction';
+      }
+
+      // Barra Numérica 0–9
+      let keysHtml = '';
+      for (let n = 0; n <= 9; n++) {
+        let cls = 'num-key';
+        if (validatedNumber === n) cls += ' key-correct';
+        else if (wrongKey === n) cls += ' key-wrong';
+        keysHtml += `<button class="${cls}" data-num-key="${n}" type="button">${n}</button>`;
+      }
+
+      footerInteractiveEl.innerHTML = `<div class="num-bar cols-10" role="group" aria-label="Barra numérica de 0 a 9">${keysHtml}</div>`;
+      footerInteractiveEl.querySelectorAll('.num-key').forEach(btn => {
+        btn.addEventListener('click', () => onMode1NumKey(Number(btn.dataset.numKey)));
+      });
+    }
+
+    /* =========================================================
+       MODO 2: EXTRAÇÃO POR VÉRTICES (ESCADA DIMENSIONAL 0 A 6)
+       ========================================================= */
+    function initMode2(step) {
+      state.m2.step = step;
+      state.m2.countedVertices = [];
+      state.m2.zeroConfirmed = false;
+      state.m2.validatedNumber = null;
+      state.m2.wrongKey = null;
+      render();
+    }
+
+    function isMode2Counted() {
+      return state.m2.step === 0
+        ? state.m2.zeroConfirmed
+        : state.m2.countedVertices.length === state.m2.step;
+    }
+
+    function isMode2Complete() {
+      if (!isMode2Counted()) return false;
+      if (state.m2.requireValidation) {
+        return state.m2.validatedNumber === state.m2.step;
+      }
+      return true;
+    }
+
+    function onMode2VertexTap(vIdx) {
+      if (state.m2.countedVertices.includes(vIdx)) return;
+      state.m2.countedVertices.push(vIdx);
+      const count = state.m2.countedVertices.length;
+      AudioSystem.playCount(count);
+
+      if (count === state.m2.step && !state.m2.requireValidation) {
+        state.m2.validatedNumber = state.m2.step;
+        setTimeout(() => AudioSystem.playSuccess(), 180);
+      }
+      render();
+    }
+
+    function onMode2ZeroConfirm() {
+      state.m2.zeroConfirmed = true;
+      AudioSystem.playCount(0);
+      if (!state.m2.requireValidation) {
+        state.m2.validatedNumber = 0;
+        setTimeout(() => AudioSystem.playSuccess(), 200);
+      }
+      render();
+    }
+
+    function onMode2NumKey(num) {
+      if (state.m2.step === 0 && num === 0) {
+        state.m2.zeroConfirmed = true;
+        state.m2.validatedNumber = 0;
+        state.m2.wrongKey = null;
+        AudioSystem.playCount(0);
+        setTimeout(() => AudioSystem.playSuccess(), 200);
+        render();
+        return;
+      }
+
+      if (!isMode2Counted()) {
+        AudioSystem.playError();
+        state.m2.wrongKey = num;
+        render();
+        setTimeout(() => { state.m2.wrongKey = null; render(); }, 380);
+        return;
+      }
+
+      if (num === state.m2.step) {
+        state.m2.validatedNumber = num;
+        state.m2.wrongKey = null;
+        AudioSystem.playSuccess();
+        render();
+      } else {
+        AudioSystem.playError();
+        state.m2.wrongKey = num;
+        render();
+        setTimeout(() => { state.m2.wrongKey = null; render(); }, 420);
+      }
+    }
+
+    function renderMode2() {
+      const { step, quadType, requireValidation, countedVertices, zeroConfirmed, validatedNumber, wrongKey } = state.m2;
+      const counted = isMode2Counted();
+      const complete = isMode2Complete();
+
+      // Faixa rápida: seletor 0..6 + alternador Quadrado/Trapézio no degrau 4
+      let stripHtml = '';
+      for (let s = 0; s <= 6; s++) {
+        stripHtml += `<button class="pill-btn ${step === s ? 'active' : ''}" data-m2-step="${s}" type="button">${STEP_INFO[s].short}</button>`;
+      }
+      if (step === 4) {
+        stripHtml += `
+          <button class="pill-btn pill-accent ${quadType === 'square' ? 'active' : ''}" data-m2-quad="square" type="button">Quadrado</button>
+          <button class="pill-btn pill-accent ${quadType === 'trapezoid' ? 'active' : ''}" data-m2-quad="trapezoid" type="button">Trapézio</button>
+        `;
+      }
+      quickStripEl.innerHTML = stripHtml;
+
+      quickStripEl.querySelectorAll('[data-m2-step]').forEach(btn => {
+        btn.addEventListener('click', () => initMode2(Number(btn.dataset.m2Step)));
+      });
+      quickStripEl.querySelectorAll('[data-m2-quad]').forEach(btn => {
+        btn.addEventListener('click', () => {
+          state.m2.quadType = btn.dataset.m2Quad;
+          initMode2(4);
+        });
+      });
+
+      // Palco SVG
+      stageBoxEl.classList.toggle('stage-done', complete);
+      const cx = 220, cy = 175, r = 118;
+      const geom = getStepGeometry(step, cx, cy, r, quadType);
+
+      let bodySvg = '';
+      if (geom.type === 'circle') {
+        bodySvg = `<circle class="poly-body ${complete ? 'done' : ''}" cx="${cx}" cy="${cy}" r="108" />`;
+      } else if (geom.type === 'point') {
+        bodySvg = buildPointCrosshairSvg(cx, cy, 30, 52);
+      } else if (geom.type === 'segment') {
+        const [[x1, y1], [x2, y2]] = geom.points;
+        bodySvg = `<line class="poly-body ${complete ? 'done' : ''}" x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" style="stroke-width: 8;" />`;
+      } else {
+        const pts = geom.points.map(p => p.join(',')).join(' ');
+        bodySvg = `<polygon class="poly-body ${complete ? 'done' : ''}" points="${pts}" />`;
+      }
+
+      let verticesSvg = '';
+      geom.points.forEach(([px, py], idx) => {
+        const order = countedVertices.indexOf(idx);
+        const isHit = order !== -1;
+        const rDot = step === 1 ? (isHit ? 22 : 16) : 23;
+        verticesSvg += `
+          <g class="vertex-group ${isHit ? 'counted' : ''}" data-v-idx="${idx}" role="button" tabindex="0" aria-label="Vértice ${idx + 1}">
+            <circle class="vertex-hit" cx="${px}" cy="${py}" r="42" />
+            <circle class="vertex-glow" cx="${px}" cy="${py}" r="${rDot + 11}" />
+            <circle class="vertex-dot ${step === 1 ? 'is-point' : ''}" cx="${px}" cy="${py}" r="${rDot}" />
+            ${isHit ? `<text class="vertex-num" style="font-size: 21px;" x="${px}" y="${py}">${order + 1}</text>` : ''}
+          </g>
+        `;
+      });
+
+      const zeroFloatBtn = step === 0
+        ? `
+          <div class="stage-zero-float">
+            <button id="m2ZeroBtn" class="big-action-btn ${zeroConfirmed ? 'confirmed' : ''}" type="button">
+              ${zeroConfirmed ? '✓ Confirmado: 0 pontas' : 'Confirmar 0 pontas'}
+            </button>
+          </div>
+        `
+        : '';
+
+      stageBoxEl.innerHTML = `
+        <svg class="stage-svg" viewBox="0 0 440 350" preserveAspectRatio="xMidYMid meet" aria-label="${STEP_INFO[step].name}">
+          ${bodySvg}
+          ${verticesSvg}
+        </svg>
+        ${zeroFloatBtn}
+      `;
+
+      stageBoxEl.querySelectorAll('.vertex-group').forEach(el => {
+        el.addEventListener('click', () => onMode2VertexTap(Number(el.dataset.vIdx)));
+      });
+      const zBtn = document.getElementById('m2ZeroBtn');
+      if (zBtn) zBtn.addEventListener('click', onMode2ZeroConfirm);
+
+      // Rodapé
+      counterCaptionEl.textContent = 'Pontas';
+      animateCounter(step === 0 ? (zeroConfirmed ? '0' : '—') : String(countedVertices.length));
+      counterPillEl.classList.toggle('done', complete);
+      nextBtn.classList.toggle('ready', complete);
+
+      const shapeLabel = step === 4 ? (quadType === 'square' ? 'Quadrado' : 'Trapézio') : STEP_INFO[step].name;
+      if (complete) {
+        statusInstructionEl.textContent = `${shapeLabel}: ${step} ${step === 1 ? 'ponta extraída' : 'pontas extraídas'}!`;
+        statusInstructionEl.className = 'status-instruction success';
+      } else if (counted && requireValidation) {
+        statusInstructionEl.textContent = 'Agora toque no algarismo correspondente abaixo:';
+        statusInstructionEl.className = 'status-instruction';
+      } else if (step === 0) {
+        statusInstructionEl.textContent = 'O círculo não tem pontas. Confirme 0.';
+        statusInstructionEl.className = 'status-instruction';
+      } else {
+        statusInstructionEl.textContent = `Toque em cada ponta do ${shapeLabel.toLowerCase()}.`;
+        statusInstructionEl.className = 'status-instruction';
+      }
+
+      // Barra Numérica 0–6 (exibida quando validação está ativa ou para referência)
+      if (requireValidation) {
+        let keysHtml = '';
+        for (let n = 0; n <= 6; n++) {
+          let cls = 'num-key';
+          if (validatedNumber === n) cls += ' key-correct';
+          else if (wrongKey === n) cls += ' key-wrong';
+          keysHtml += `<button class="${cls}" data-m2-key="${n}" type="button">${n}</button>`;
+        }
+        footerInteractiveEl.innerHTML = `<div class="num-bar cols-7" role="group" aria-label="Barra numérica de 0 a 6">${keysHtml}</div>`;
+        footerInteractiveEl.querySelectorAll('.num-key').forEach(btn => {
+          btn.addEventListener('click', () => onMode2NumKey(Number(btn.dataset.m2Key)));
+        });
+      } else {
+        footerInteractiveEl.innerHTML = '';
+      }
+    }
+
+    /* =========================================================
+       MODO 3: FUSÃO — PRÉ-MÚLTIPLOS (2..4 × 3..6 VÉRTICES)
+       ========================================================= */
+    function initMode3(copies, sides) {
+      state.m3.copies = copies;
+      state.m3.sides = sides;
+      state.m3.countedMap = {};
+      state.m3.totalCounted = 0;
+      render();
+    }
+
+    function getMode3CountsPerFigure() {
+      const counts = [];
+      for (let f = 0; f < state.m3.copies; f++) {
+        let c = 0;
+        for (let v = 0; v < state.m3.sides; v++) {
+          if (state.m3.countedMap[`${f}-${v}`]) c++;
+        }
+        counts.push(c);
+      }
+      return counts;
+    }
+
+    function onMode3VertexTap(figIdx, vIdx) {
+      const key = `${figIdx}-${vIdx}`;
+      if (state.m3.countedMap[key]) return;
+
+      state.m3.totalCounted += 1;
+      state.m3.countedMap[key] = state.m3.totalCounted;
+      AudioSystem.playCount(state.m3.totalCounted);
+
+      const expected = state.m3.copies * state.m3.sides;
+      if (state.m3.totalCounted === expected) {
+        setTimeout(() => AudioSystem.playSuccess(), 220);
+      }
+      render();
+    }
+
+    function renderMode3() {
+      const { copies, sides, countedMap, totalCounted } = state.m3;
+      const expected = copies * sides;
+      const complete = totalCounted === expected;
+      const perFig = getMode3CountsPerFigure();
+
+      // Faixa rápida: Cópias e Formas (permite testar 4×3, 3×4, 2×6 com 1 clique)
+      quickStripEl.innerHTML = `
+        ${[2, 3, 4].map(c => `<button class="pill-btn ${copies === c ? 'active' : ''}" data-m3-c="${c}" type="button">${c} figuras</button>`).join('')}
+        ${[3, 4, 5, 6].map(s => `<button class="pill-btn pill-accent ${sides === s ? 'active' : ''}" data-m3-s="${s}" type="button">${STEP_INFO[s].name} (${s})</button>`).join('')}
+      `;
+
+      quickStripEl.querySelectorAll('[data-m3-c]').forEach(btn => {
+        btn.addEventListener('click', () => initMode3(Number(btn.dataset.m3C), state.m3.sides));
+      });
+      quickStripEl.querySelectorAll('[data-m3-s]').forEach(btn => {
+        btn.addEventListener('click', () => initMode3(state.m3.copies, Number(btn.dataset.m3S)));
+      });
+
+      // Layout dinâmico do SVG (2x2 em celular vertical quando 3 ou 4; linha no desktop)
+      const useGrid2x2 = state.isPortrait && copies >= 3;
+      const useVertical2 = state.isPortrait && copies === 2;
+
+      let cols = copies;
+      let rows = 1;
+      if (useGrid2x2) { cols = 2; rows = 2; }
+      else if (useVertical2) { cols = 1; rows = 2; }
+
+      const cellW = 240;
+      const cellH = 240;
+      const gap = 16;
+      const pad = 16;
+      const vw = pad * 2 + cols * cellW + (cols - 1) * gap;
+      const vh = pad * 2 + rows * cellH + (rows - 1) * gap;
+
+      let figsSvg = '';
+      for (let f = 0; f < copies; f++) {
+        let colIdx = f % cols;
+        let rowIdx = Math.floor(f / cols);
+
+        // Centraliza a 3ª figura na segunda linha em grade 2x2
+        let offsetX = pad + colIdx * (cellW + gap);
+        if (useGrid2x2 && copies === 3 && f === 2) {
+          offsetX = (vw - cellW) / 2;
+        }
+        const offsetY = pad + rowIdx * (cellH + gap);
+
+        const cx = offsetX + cellW / 2;
+        const cy = offsetY + cellH / 2 + 8;
+        const polyR = 72;
+        const geom = getStepGeometry(sides, cx, cy, polyR, 'square');
+        const pts = geom.points.map(p => p.join(',')).join(' ');
+        const figDone = perFig[f] === sides;
+
+        let vSvg = '';
+        geom.points.forEach(([px, py], vIdx) => {
+          const val = countedMap[`${f}-${vIdx}`];
+          const isHit = Boolean(val);
+          vSvg += `
+            <g class="vertex-group ${isHit ? 'counted' : ''}" data-m3-f="${f}" data-m3-v="${vIdx}" role="button" tabindex="0" aria-label="Figura ${f + 1}, ponta ${vIdx + 1}">
+              <circle class="vertex-hit" cx="${px}" cy="${py}" r="32" />
+              <circle class="vertex-glow" cx="${px}" cy="${py}" r="25" />
+              <circle class="vertex-dot" cx="${px}" cy="${py}" r="18" />
+              ${isHit ? `<text class="vertex-num" style="font-size: 16px;" x="${px}" y="${py}">${val}</text>` : ''}
+            </g>
+          `;
+        });
+
+        figsSvg += `
+          <g>
+            <rect class="fusion-fig-frame ${figDone ? 'done' : ''}" x="${offsetX}" y="${offsetY}" width="${cellW}" height="${cellH}" rx="16" />
+            <text class="fusion-fig-label ${figDone ? 'done' : ''}" x="${cx}" y="${offsetY + 24}">Figura ${f + 1} (${perFig[f]}/${sides})</text>
+            <polygon class="poly-body ${figDone ? 'done' : ''}" points="${pts}" />
+            ${vSvg}
+          </g>
+        `;
+      }
+
+      stageBoxEl.classList.toggle('stage-done', complete);
+      stageBoxEl.innerHTML = `
+        <svg class="stage-svg" viewBox="0 0 ${vw} ${vh}" preserveAspectRatio="xMidYMid meet" aria-label="Fusão de cópias e vértices">
+          ${figsSvg}
+        </svg>
+      `;
+
+      stageBoxEl.querySelectorAll('.vertex-group').forEach(el => {
+        el.addEventListener('click', () => {
+          onMode3VertexTap(Number(el.dataset.m3F), Number(el.dataset.m3V));
+        });
+      });
+
+      // Rodapé: Contador, legenda sem sinal de multiplicação e blocos de soma
+      counterCaptionEl.textContent = 'Total';
+      animateCounter(String(totalCounted));
+      counterPillEl.classList.toggle('done', complete);
+      nextBtn.classList.toggle('ready', complete);
+
+      statusInstructionEl.textContent = `${copies} ${POLY_PLURAL[sides]} • ${totalCounted} ${totalCounted === 1 ? 'ponta' : 'pontas'} no total`;
+      statusInstructionEl.className = complete ? 'status-instruction success' : 'status-instruction';
+
+      const blocksHtml = perFig.map((val, idx) => {
+        const doneCls = val === sides ? 'block-done' : '';
+        const plus = idx < perFig.length - 1 ? '<span class="sum-op" aria-hidden="true">+</span>' : '';
+        return `<span class="sum-block ${doneCls}">${val}</span>${plus}`;
+      }).join('');
+
+      footerInteractiveEl.innerHTML = `
+        <div class="sum-bar" aria-live="polite">
+          ${blocksHtml}
+          <span class="sum-op" aria-hidden="true">=</span>
+          <span class="sum-total ${complete ? 'done' : ''}">${totalCounted}</span>
+        </div>
+      `;
+    }
+
+    function advanceMode3() {
+      const combos = [
+        [2, 3], [3, 3], [4, 3],
+        [2, 4], [3, 4], [4, 4],
+        [2, 5], [3, 5], [4, 5],
+        [2, 6], [3, 6], [4, 6]
+      ];
+      const idx = combos.findIndex(([c, s]) => c === state.m3.copies && s === state.m3.sides);
+      const [nc, ns] = combos[(idx + 1) % combos.length];
+      initMode3(nc, ns);
+    }
+
+    /* =========================================================
+       MODO 4: DESAFIO QUIZ (5 FORMATOS VISUAIS + DICA SEM PUNIÇÃO)
+       ========================================================= */
+    function shuffleArray(arr) {
+      const copy = [...arr];
+      for (let i = copy.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [copy[i], copy[j]] = [copy[j], copy[i]];
+      }
+      return copy;
+    }
+
+    function pickDistinctNumbers(target, minVal, maxVal, totalCount = 3) {
+      const set = new Set([target]);
+      let guard = 0;
+      while (set.size < totalCount && guard < 120) {
+        guard++;
+        // Prefere distratores próximos ao alvo para valor pedagógico
+        const delta = (Math.floor(Math.random() * 5) - 2) || (Math.random() < 0.5 ? 1 : -1);
+        const candidate = Math.max(minVal, Math.min(maxVal, target + delta));
+        set.add(candidate);
+      }
+      for (let n = minVal; set.size < totalCount && n <= maxVal; n++) {
+        set.add(n);
+      }
+      return shuffleArray(Array.from(set));
+    }
+
+    function buildQuizQuestion(format) {
+      const shapesPool = ['square', 'triangle', 'circle'];
+      const randShape = () => shapesPool[Math.floor(Math.random() * shapesPool.length)];
+
+      // Formato 1: "Qual figura tem X pontas?" -> 3 cartões com SVGs de polígonos (0 a 6)
+      if (format === 'find_shape_by_vertices') {
+        const target = Math.floor(Math.random() * 7); // 0..6
+        const values = pickDistinctNumbers(target, 0, 6, 3);
+        const prompt = target === 0
+          ? 'Qual figura não tem nenhuma ponta?'
+          : `Qual figura tem ${target} ${target === 1 ? 'ponta' : 'pontas'}?`;
+        return {
+          format,
+          prompt,
+          answer: target,
+          answerSpoken: target === 0 ? 'zero pontas' : `${target} ${target === 1 ? 'ponta' : 'pontas'}`,
+          hintText: 'Tente contar as pontas de cada figura!',
+          options: values.map((val, i) => ({
+            id: `opt-${i}`,
+            value: val,
+            quadType: Math.random() < 0.5 ? 'square' : 'trapezoid'
+          }))
+        };
+      }
+
+      // Formato 2: "Onde há X peças?" -> 3 cartões com quantidades diferentes (1 a 9)
+      if (format === 'find_group_by_copies') {
+        const target = 1 + Math.floor(Math.random() * 9); // 1..9
+        const values = pickDistinctNumbers(target, 1, 9, 3);
+        const shape = randShape();
+        const prompt = `Onde há ${target} ${target === 1 ? 'peça' : 'peças'}?`;
+        return {
+          format,
+          prompt,
+          shape,
+          answer: target,
+          answerSpoken: `${target} ${target === 1 ? 'peça' : 'peças'}`,
+          hintText: 'Conte devagar as peças em cada cartão!',
+          options: values.map((val, i) => ({
+            id: `opt-${i}`,
+            value: val
+          }))
+        };
+      }
+
+      // Formato 3: "Quantas peças há aqui?" -> Palco com peças tocáveis + 3 cartões de números
+      if (format === 'count_copies_to_num') {
+        const target = 1 + Math.floor(Math.random() * 9); // 1..9
+        const values = pickDistinctNumbers(target, 1, 9, 3);
+        const shape = randShape();
+        return {
+          format,
+          prompt: 'Quantas peças há aqui?',
+          shape,
+          count: target,
+          answer: target,
+          answerSpoken: `${target}`,
+          hintText: 'Toque em cada peça para contar junto!',
+          options: values.map((val, i) => ({
+            id: `opt-${i}`,
+            value: val
+          }))
+        };
+      }
+
+      // Formato 4: "Quantas pontas tem esta figura?" -> Palco com 1 figura (0..6, vértices tocáveis) + 3 números
+      if (format === 'count_vertices_to_num') {
+        const target = Math.floor(Math.random() * 7); // 0..6
+        const values = pickDistinctNumbers(target, 0, 6, 3);
+        const prompt = target === 1
+          ? 'Quantos pontos há aqui?'
+          : 'Quantas pontas tem esta figura?';
+        return {
+          format,
+          prompt,
+          step: target,
+          quadType: Math.random() < 0.5 ? 'square' : 'trapezoid',
+          answer: target,
+          answerSpoken: `${target}`,
+          hintText: target === 0
+            ? 'Olhe bem: o círculo é redondo e não tem pontas!'
+            : target === 1
+              ? 'Toque no ponto azul no centro para contar!'
+              : 'Toque nas pontas da figura para contar!',
+          options: values.map((val, i) => ({
+            id: `opt-${i}`,
+            value: val
+          }))
+        };
+      }
+
+      // Formato 5: "Quantas pontas há no total?" -> 2 ou 3 figuras iguais (vértices tocáveis) + 3 números
+      const fusionPool = [
+        [2, 3], [3, 3],
+        [2, 4], [3, 4],
+        [2, 5], [3, 5],
+        [2, 6]
+      ];
+      const [copies, sides] = fusionPool[Math.floor(Math.random() * fusionPool.length)];
+      const total = copies * sides;
+      const values = pickDistinctNumbers(total, Math.max(3, total - 4), total + 4, 3);
+      return {
+        format: 'count_fusion_to_num',
+        prompt: 'Quantas pontas há no total?',
+        copies,
+        sides,
+        answer: total,
+        answerSpoken: `${total}`,
+        hintText: 'Toque em todas as pontas das figuras para somar!',
+        options: values.map((val, i) => ({
+          id: `opt-${i}`,
+          value: val
+        }))
+      };
+    }
+
+    function generateQuizRound(roundSize, topic) {
+      let formats = [];
+      if (topic === 'copies') {
+        formats = ['find_group_by_copies', 'count_copies_to_num'];
+      } else if (topic === 'vertices') {
+        formats = ['find_shape_by_vertices', 'count_vertices_to_num'];
+      } else if (topic === 'fusion') {
+        formats = ['count_fusion_to_num'];
+      } else {
+        formats = [
+          'find_shape_by_vertices',
+          'find_group_by_copies',
+          'count_copies_to_num',
+          'count_vertices_to_num',
+          'count_fusion_to_num'
+        ];
+      }
+
+      const list = [];
+      for (let i = 0; i < roundSize; i++) {
+        const fmt = formats[i % formats.length];
+        list.push(buildQuizQuestion(fmt));
+      }
+      return shuffleArray(list);
+    }
+
+    function initMode4(speakFirst = true) {
+      const { roundSize, topic } = state.m4;
+      state.m4.questions = generateQuizRound(roundSize, topic);
+      state.m4.currentIndex = 0;
+      state.m4.completed = new Array(roundSize).fill(false);
+      state.m4.answeredCorrectly = false;
+      state.m4.wrongOptionIds = [];
+      state.m4.shakingOptionId = null;
+      state.m4.hintActive = false;
+      state.m4.hintMessage = '';
+      state.m4.helperCounted = {};
+      state.m4.helperTotal = 0;
+      state.m4.finished = false;
+      state.m4.firstTryCount = 0;
+      render();
+      if (speakFirst && state.m4.questions[0]) {
+        AudioSystem.speakText(state.m4.questions[0].prompt);
+      }
+    }
+
+    function advanceMode4() {
+      if (state.m4.finished) {
+        initMode4(true);
+        return;
+      }
+
+      if (state.m4.currentIndex + 1 >= state.m4.questions.length) {
+        state.m4.finished = true;
+        AudioSystem.playCelebration();
+        render();
+        setTimeout(() => {
+          AudioSystem.speakText('Parabéns! Você completou o desafio e conquistou todas as estrelas!');
+        }, 380);
+        return;
+      }
+
+      state.m4.currentIndex += 1;
+      state.m4.answeredCorrectly = false;
+      state.m4.wrongOptionIds = [];
+      state.m4.shakingOptionId = null;
+      state.m4.hintActive = false;
+      state.m4.hintMessage = '';
+      state.m4.helperCounted = {};
+      state.m4.helperTotal = 0;
+      render();
+
+      const q = state.m4.questions[state.m4.currentIndex];
+      if (q) AudioSystem.speakText(q.prompt);
+    }
+
+    function onQuizOptionTap(optId) {
+      const q = state.m4.questions[state.m4.currentIndex];
+      if (!q || state.m4.answeredCorrectly) return;
+      if (state.m4.wrongOptionIds.includes(optId)) return;
+
+      const opt = q.options.find(o => o.id === optId);
+      if (!opt) return;
+
+      if (opt.value === q.answer) {
+        if (state.m4.wrongOptionIds.length === 0) {
+          state.m4.firstTryCount += 1;
+        }
+        state.m4.answeredCorrectly = true;
+        state.m4.completed[state.m4.currentIndex] = true;
+        state.m4.hintActive = false;
+        state.m4.hintMessage = '';
+        AudioSystem.playSuccess();
+        setTimeout(() => {
+          AudioSystem.speakText(`Muito bem! ${q.answerSpoken}!`);
+        }, 260);
+        render();
+      } else {
+        // Erro sem punição: treme, esmaece e dispara dica visual + falada
+        state.m4.wrongOptionIds.push(optId);
+        state.m4.shakingOptionId = optId;
+        state.m4.hintActive = true;
+        state.m4.hintMessage = q.hintText;
+        AudioSystem.playHint();
+        AudioSystem.speakText(q.hintText);
+        render();
+        setTimeout(() => {
+          state.m4.shakingOptionId = null;
+          render();
+        }, 380);
+      }
+    }
+
+    function onQuizHelperTap(key) {
+      if (state.m4.helperCounted[key]) return;
+      state.m4.helperTotal += 1;
+      state.m4.helperCounted[key] = state.m4.helperTotal;
+      AudioSystem.playCount(state.m4.helperTotal);
+      render();
+    }
+
+    function buildMiniShapeCardSvg(step, quadType, isCorrect, hintActive) {
+      const cx = 110, cy = 85, r = 56;
+      const geom = getStepGeometry(step, cx, cy, r, quadType);
+      let bodySvg = '';
+      if (geom.type === 'circle') {
+        bodySvg = `<circle class="poly-body ${isCorrect ? 'done' : ''}" cx="${cx}" cy="${cy}" r="52" />`;
+      } else if (geom.type === 'point') {
+        bodySvg = buildPointCrosshairSvg(cx, cy, 20, 34);
+      } else if (geom.type === 'segment') {
+        const [[x1, y1], [x2, y2]] = geom.points;
+        bodySvg = `<line class="poly-body ${isCorrect ? 'done' : ''}" x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" style="stroke-width: 7;" />`;
+      } else {
+        const pts = geom.points.map(p => p.join(',')).join(' ');
+        bodySvg = `<polygon class="poly-body ${isCorrect ? 'done' : ''}" points="${pts}" />`;
+      }
+
+      const dotsSvg = geom.points.map(([px, py]) =>
+        `<circle class="vertex-dot ${step === 1 ? 'is-point' : ''}" cx="${px}" cy="${py}" r="${step === 1 ? 11 : 10}" />`
+      ).join('');
+
+      return `
+        <svg class="stage-svg ${hintActive ? 'quiz-hint-pulse' : ''}" viewBox="0 0 220 170" preserveAspectRatio="xMidYMid meet" aria-hidden="true">
+          ${bodySvg}
+          ${dotsSvg}
+        </svg>
+      `;
+    }
+
+    function buildMiniCopiesCardSvg(count, shape, isCorrect, hintActive) {
+      const vw = 240, vh = 170;
+      const seeds = SUBITIZING_LANDSCAPE[count] || [];
+      const r = count >= 7 ? 15 : 18;
+      let items = '';
+      seeds.forEach(([nx, ny]) => {
+        const x = Number((nx * vw).toFixed(1));
+        const y = Number((ny * vh).toFixed(1));
+        if (shape === 'square') {
+          items += `<rect class="copy-shape" x="${x - r}" y="${y - r}" width="${r * 2}" height="${r * 2}" rx="5" />`;
+        } else if (shape === 'circle') {
+          items += `<circle class="copy-shape" cx="${x}" cy="${y}" r="${r}" />`;
+        } else {
+          const h = r * 1.85;
+          const topY = y - h * 0.56;
+          const botY = y + h * 0.44;
+          const halfW = r * 1.12;
+          items += `<polygon class="copy-shape" points="${x},${topY.toFixed(1)} ${(x + halfW).toFixed(1)},${botY.toFixed(1)} ${(x - halfW).toFixed(1)},${botY.toFixed(1)}" stroke-linejoin="round" />`;
+        }
+      });
+
+      return `
+        <svg class="stage-svg ${hintActive ? 'quiz-hint-pulse' : ''}" viewBox="0 0 ${vw} ${vh}" preserveAspectRatio="xMidYMid meet" aria-hidden="true">
+          <g class="${isCorrect ? 'counted' : ''}">${items}</g>
+        </svg>
+      `;
+    }
+
+    function buildQuizStimulusSvg(q) {
+      const { helperCounted, hintActive, answeredCorrectly } = state.m4;
+      const pulseCls = hintActive ? 'quiz-hint-pulse' : '';
+
+      if (q.format === 'count_copies_to_num') {
+        const vw = state.isPortrait ? 420 : 680;
+        const vh = state.isPortrait ? 300 : 250;
+        const seeds = (state.isPortrait ? SUBITIZING_PORTRAIT[q.count] : SUBITIZING_LANDSCAPE[q.count]) || [];
+        const r = q.count >= 7 ? 28 : 34;
+
+        let itemsSvg = '';
+        seeds.forEach(([nx, ny], idx) => {
+          const x = Number((nx * vw).toFixed(1));
+          const y = Number((ny * vh).toFixed(1));
+          const key = `c-${idx}`;
+          const num = helperCounted[key];
+          const isHit = Boolean(num);
+
+          let shapeEl = '';
+          if (q.shape === 'square') {
+            shapeEl = `<rect class="copy-shape" x="${x - r}" y="${y - r}" width="${r * 2}" height="${r * 2}" rx="9" />`;
+          } else if (q.shape === 'circle') {
+            shapeEl = `<circle class="copy-shape" cx="${x}" cy="${y}" r="${r}" />`;
+          } else {
+            const h = r * 1.85;
+            const topY = y - h * 0.56;
+            const botY = y + h * 0.44;
+            const halfW = r * 1.12;
+            shapeEl = `<polygon class="copy-shape" points="${x},${topY.toFixed(1)} ${(x + halfW).toFixed(1)},${botY.toFixed(1)} ${(x - halfW).toFixed(1)},${botY.toFixed(1)}" stroke-linejoin="round" />`;
+          }
+
+          const textY = q.shape === 'triangle' ? y + 7 : y;
+          itemsSvg += `
+            <g class="copy-item ${isHit ? 'counted' : ''}" data-q-help="${key}" role="button" tabindex="0" aria-label="Peça ${idx + 1}">
+              ${shapeEl}
+              ${isHit ? `<text class="copy-num" style="font-size: 26px;" x="${x}" y="${textY}">${num}</text>` : ''}
+            </g>
+          `;
+        });
+
+        return `
+          <svg class="stage-svg ${pulseCls}" viewBox="0 0 ${vw} ${vh}" preserveAspectRatio="xMidYMid meet">
+            ${itemsSvg}
+          </svg>
+        `;
+      }
+
+      if (q.format === 'count_vertices_to_num') {
+        const cx = 200, cy = 135, r = 90;
+        const geom = getStepGeometry(q.step, cx, cy, r, q.quadType);
+        let bodySvg = '';
+        if (geom.type === 'circle') {
+          bodySvg = `<circle class="poly-body ${answeredCorrectly ? 'done' : ''}" cx="${cx}" cy="${cy}" r="84" />`;
+        } else if (geom.type === 'point') {
+          bodySvg = buildPointCrosshairSvg(cx, cy, 24, 42);
+        } else if (geom.type === 'segment') {
+          const [[x1, y1], [x2, y2]] = geom.points;
+          bodySvg = `<line class="poly-body ${answeredCorrectly ? 'done' : ''}" x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" style="stroke-width: 8;" />`;
+        } else {
+          const pts = geom.points.map(p => p.join(',')).join(' ');
+          bodySvg = `<polygon class="poly-body ${answeredCorrectly ? 'done' : ''}" points="${pts}" />`;
+        }
+
+        const vSvg = geom.points.map(([px, py], idx) => {
+          const key = `v-${idx}`;
+          const num = helperCounted[key];
+          const isHit = Boolean(num);
+          const rDot = q.step === 1 ? (isHit ? 20 : 14) : 19;
+          return `
+            <g class="vertex-group ${isHit ? 'counted' : ''}" data-q-help="${key}" role="button" tabindex="0" aria-label="Ponta ${idx + 1}">
+              <circle class="vertex-hit" cx="${px}" cy="${py}" r="36" />
+              <circle class="vertex-glow" cx="${px}" cy="${py}" r="${rDot + 9}" />
+              <circle class="vertex-dot ${q.step === 1 ? 'is-point' : ''}" cx="${px}" cy="${py}" r="${rDot}" />
+              ${isHit ? `<text class="vertex-num" style="font-size: 18px;" x="${px}" y="${py}">${num}</text>` : ''}
+            </g>
+          `;
+        }).join('');
+
+        return `
+          <svg class="stage-svg ${pulseCls}" viewBox="0 0 400 270" preserveAspectRatio="xMidYMid meet">
+            ${bodySvg}
+            ${vSvg}
+          </svg>
+        `;
+      }
+
+      // Formato 5: count_fusion_to_num (2 ou 3 figuras iguais lado a lado com vértices tocáveis)
+      const cols = q.copies;
+      const cellW = 210, cellH = 200, gap = 14, pad = 14;
+      const vw = pad * 2 + cols * cellW + (cols - 1) * gap;
+      const vh = pad * 2 + cellH;
+
+      let figsSvg = '';
+      for (let f = 0; f < q.copies; f++) {
+        const ox = pad + f * (cellW + gap);
+        const cx = ox + cellW / 2;
+        const cy = pad + cellH / 2;
+        const geom = getStepGeometry(q.sides, cx, cy, 66, 'square');
+        const pts = geom.points.map(p => p.join(',')).join(' ');
+
+        const vSvg = geom.points.map(([px, py], vIdx) => {
+          const key = `f-${f}-${vIdx}`;
+          const num = helperCounted[key];
+          const isHit = Boolean(num);
+          return `
+            <g class="vertex-group ${isHit ? 'counted' : ''}" data-q-help="${key}" role="button" tabindex="0" aria-label="Figura ${f + 1}, ponta ${vIdx + 1}">
+              <circle class="vertex-hit" cx="${px}" cy="${py}" r="30" />
+              <circle class="vertex-glow" cx="${px}" cy="${py}" r="23" />
+              <circle class="vertex-dot" cx="${px}" cy="${py}" r="16" />
+              ${isHit ? `<text class="vertex-num" style="font-size: 15px;" x="${px}" y="${py}">${num}</text>` : ''}
+            </g>
+          `;
+        }).join('');
+
+        figsSvg += `
+          <g>
+            <rect class="fusion-fig-frame ${answeredCorrectly ? 'done' : ''}" x="${ox}" y="${pad}" width="${cellW}" height="${cellH}" rx="14" />
+            <polygon class="poly-body ${answeredCorrectly ? 'done' : ''}" points="${pts}" />
+            ${vSvg}
+          </g>
+        `;
+      }
+
+      return `
+        <svg class="stage-svg ${pulseCls}" viewBox="0 0 ${vw} ${vh}" preserveAspectRatio="xMidYMid meet">
+          ${figsSvg}
+        </svg>
+      `;
+    }
+
+    function renderMode4() {
+      const m4 = state.m4;
+      quickStripEl.innerHTML = '';
+      footerInteractiveEl.innerHTML = '';
+
+      const earnedCount = m4.completed.filter(Boolean).length;
+
+      // Tela Final de Celebração dentro do próprio palco
+      if (m4.finished) {
+        stageBoxEl.classList.add('stage-done');
+        const starsStr = '★'.repeat(m4.questions.length);
+        stageBoxEl.innerHTML = `
+          <div class="quiz-celebration">
+            <div class="celebration-stars" aria-label="${m4.questions.length} estrelas conquistadas">${starsStr}</div>
+            <h2 class="celebration-title">Parabéns! Desafio Concluído!</h2>
+            <p class="celebration-sub">
+              Você conquistou <strong>${m4.questions.length} estrelas</strong>${m4.firstTryCount > 0 ? ` (${m4.firstTryCount} de primeira!)` : ''}.
+              Cada contagem deixou seu raciocínio ainda mais forte!
+            </p>
+            <button id="quizRestartBtn" class="big-action-btn" type="button">Jogar Novo Desafio</button>
+          </div>
+        `;
+        document.getElementById('quizRestartBtn').addEventListener('click', () => initMode4(true));
+
+        counterCaptionEl.textContent = 'Estrelas';
+        animateCounter(`${earnedCount}/${m4.questions.length}`);
+        counterPillEl.classList.add('done');
+        statusInstructionEl.textContent = 'Rodada concluída com sucesso!';
+        statusInstructionEl.className = 'status-instruction success';
+        nextBtn.textContent = 'Novo Desafio →';
+        nextBtn.classList.add('ready');
+        return;
+      }
+
+      const q = m4.questions[m4.currentIndex];
+      if (!q) {
+        initMode4(false);
+        return;
+      }
+
+      stageBoxEl.classList.toggle('stage-done', m4.answeredCorrectly);
+
+      // Estrelas de progresso
+      const starsHtml = m4.questions.map((_, i) => {
+        const earned = m4.completed[i];
+        const current = i === m4.currentIndex && !earned;
+        return `<span class="quiz-star ${earned ? 'earned' : ''} ${current ? 'current' : ''}" aria-label="Pergunta ${i + 1}">${earned ? '★' : i + 1}</span>`;
+      }).join('');
+
+      // Área da pergunta (3 cartões SVG OU estímulo + 3 cartões numéricos)
+      let arenaHtml = '';
+      const isSvgChoice = q.format === 'find_shape_by_vertices' || q.format === 'find_group_by_copies';
+
+      if (isSvgChoice) {
+        const cardsHtml = q.options.map(opt => {
+          const isCorrect = m4.answeredCorrectly && opt.value === q.answer;
+          const isDimmed = m4.wrongOptionIds.includes(opt.id);
+          const isShaking = m4.shakingOptionId === opt.id;
+          const svg = q.format === 'find_shape_by_vertices'
+            ? buildMiniShapeCardSvg(opt.value, opt.quadType, isCorrect, m4.hintActive && !isDimmed)
+            : buildMiniCopiesCardSvg(opt.value, q.shape, isCorrect, m4.hintActive && !isDimmed);
+
+          return `
+            <button class="quiz-card ${isCorrect ? 'correct' : ''} ${isDimmed ? 'dimmed' : ''} ${isShaking ? 'wrong-shake' : ''}"
+                    data-q-opt="${opt.id}" type="button" aria-label="Opção ${opt.value}">
+              ${svg}
+            </button>
+          `;
+        }).join('');
+
+        arenaHtml = `<div class="quiz-options svg-options">${cardsHtml}</div>`;
+      } else {
+        const stimulusHtml = `<div class="quiz-stimulus">${buildQuizStimulusSvg(q)}</div>`;
+        const cardsHtml = q.options.map(opt => {
+          const isCorrect = m4.answeredCorrectly && opt.value === q.answer;
+          const isDimmed = m4.wrongOptionIds.includes(opt.id);
+          const isShaking = m4.shakingOptionId === opt.id;
+          return `
+            <button class="quiz-card num-card ${isCorrect ? 'correct' : ''} ${isDimmed ? 'dimmed' : ''} ${isShaking ? 'wrong-shake' : ''}"
+                    data-q-opt="${opt.id}" type="button">
+              ${opt.value}
+            </button>
+          `;
+        }).join('');
+
+        arenaHtml = `
+          ${stimulusHtml}
+          <div class="quiz-options num-options">${cardsHtml}</div>
+        `;
+      }
+
+      stageBoxEl.innerHTML = `
+        <div class="quiz-shell">
+          <div class="quiz-top">
+            <div class="quiz-stars" aria-label="Progresso da rodada">${starsHtml}</div>
+            <div class="quiz-prompt-row">
+              <h2 class="quiz-prompt">${q.prompt}</h2>
+              <button id="quizListenBtn" class="quiz-listen-btn" type="button">🔊 Ouvir</button>
+            </div>
+          </div>
+          <div class="quiz-arena">
+            ${arenaHtml}
+          </div>
+        </div>
+      `;
+
+      document.getElementById('quizListenBtn').addEventListener('click', () => {
+        AudioSystem.speakText(q.prompt);
+      });
+
+      stageBoxEl.querySelectorAll('[data-q-opt]').forEach(btn => {
+        btn.addEventListener('click', () => onQuizOptionTap(btn.dataset.qOpt));
+      });
+
+      stageBoxEl.querySelectorAll('[data-q-help]').forEach(el => {
+        el.addEventListener('click', () => onQuizHelperTap(el.dataset.qHelp));
+      });
+
+      // Rodapé
+      counterCaptionEl.textContent = 'Estrelas';
+      animateCounter(`${earnedCount}/${m4.questions.length}`);
+      counterPillEl.classList.toggle('done', m4.answeredCorrectly);
+
+      if (m4.answeredCorrectly) {
+        statusInstructionEl.textContent = 'Acertou! Clique em Próxima para continuar.';
+        statusInstructionEl.className = 'status-instruction success';
+      } else if (m4.hintMessage) {
+        statusInstructionEl.textContent = `Dica: ${m4.hintMessage}`;
+        statusInstructionEl.className = 'status-instruction';
+      } else if (!isSvgChoice) {
+        statusInstructionEl.textContent = 'Você pode tocar nas peças ou pontas para ajudar a contar!';
+        statusInstructionEl.className = 'status-instruction';
+      } else {
+        statusInstructionEl.textContent = 'Toque no cartão correto.';
+        statusInstructionEl.className = 'status-instruction';
+      }
+
+      nextBtn.textContent = m4.currentIndex + 1 === m4.questions.length ? 'Concluir →' : 'Próxima →';
+      nextBtn.classList.toggle('ready', m4.answeredCorrectly);
+    }
+
+    /* =========================================================
+       PAINEL DO PROFESSOR (GAVETA RECOLHÍVEL)
+       ========================================================= */
+    function setDrawerOpen(open) {
+      state.drawerOpen = open;
+      teacherDrawerEl.classList.toggle('open', open);
+      drawerBackdropEl.classList.toggle('open', open);
+      teacherDrawerEl.setAttribute('aria-hidden', String(!open));
+      panelToggleBtn.setAttribute('aria-expanded', String(open));
+      panelToggleBtn.classList.toggle('btn-panel-open', open);
+      if (open) renderDrawer();
+    }
+
+    function renderDrawer() {
+      if (state.mode === 1) {
+        const { target, layout, shape, requireValidation } = state.m1;
+        let numsHtml = '';
+        for (let n = 0; n <= 9; n++) {
+          numsHtml += `<button class="d-btn ${target === n ? 'active' : ''}" data-dm1-n="${n}" type="button">${n}</button>`;
+        }
+        drawerBodyEl.innerHTML = `
+          <div class="drawer-section">
+            <span class="drawer-label">Quantidade de Cópias (0–9)</span>
+            <div class="drawer-grid">${numsHtml}</div>
+          </div>
+          <div class="drawer-section">
+            <span class="drawer-label">Organização Espacial</span>
+            <div class="drawer-grid">
+              <button class="d-btn ${layout === 'subitizing' ? 'active' : ''}" data-dm1-l="subitizing" type="button">Padrão (Subitização)</button>
+              <button class="d-btn ${layout === 'scattered' ? 'active' : ''}" data-dm1-l="scattered" type="button">Espalhadas</button>
+            </div>
+          </div>
+          <div class="drawer-section">
+            <span class="drawer-label">Forma Geométrica</span>
+            <div class="drawer-grid">
+              <button class="d-btn ${shape === 'square' ? 'active' : ''}" data-dm1-s="square" type="button">Quadrado</button>
+              <button class="d-btn ${shape === 'triangle' ? 'active' : ''}" data-dm1-s="triangle" type="button">Triângulo</button>
+              <button class="d-btn ${shape === 'circle' ? 'active' : ''}" data-dm1-s="circle" type="button">Círculo</button>
+            </div>
+          </div>
+          <div class="drawer-section">
+            <span class="drawer-label">Validação Numérica</span>
+            <label class="d-toggle">
+              <input id="dm1ValCheck" type="checkbox" ${requireValidation ? 'checked' : ''} />
+              Exigir escolha do número (0–9)
+            </label>
+          </div>
+        `;
+
+        drawerBodyEl.querySelectorAll('[data-dm1-n]').forEach(btn => {
+          btn.addEventListener('click', () => { initMode1(Number(btn.dataset.dm1N)); renderDrawer(); });
+        });
+        drawerBodyEl.querySelectorAll('[data-dm1-l]').forEach(btn => {
+          btn.addEventListener('click', () => { state.m1.layout = btn.dataset.dm1L; initMode1(state.m1.target); renderDrawer(); });
+        });
+        drawerBodyEl.querySelectorAll('[data-dm1-s]').forEach(btn => {
+          btn.addEventListener('click', () => { state.m1.shape = btn.dataset.dm1S; render(); renderDrawer(); });
+        });
+        document.getElementById('dm1ValCheck').addEventListener('change', (e) => {
+          state.m1.requireValidation = e.target.checked;
+          if (!state.m1.requireValidation && isMode1Counted()) {
+            state.m1.validatedNumber = state.m1.target;
+          }
+          render();
+        });
+      } else if (state.mode === 2) {
+        const { step, quadType, requireValidation } = state.m2;
+        let stepsHtml = '';
+        for (let s = 0; s <= 6; s++) {
+          stepsHtml += `<button class="d-btn ${step === s ? 'active' : ''}" data-dm2-s="${s}" type="button">${STEP_INFO[s].short}</button>`;
+        }
+        drawerBodyEl.innerHTML = `
+          <div class="drawer-section">
+            <span class="drawer-label">Escada Dimensional (0 a 6)</span>
+            <div class="drawer-grid">${stepsHtml}</div>
+          </div>
+          <div class="drawer-section">
+            <span class="drawer-label">Variação do Quadrilátero (4 pontas)</span>
+            <div class="drawer-grid">
+              <button class="d-btn ${quadType === 'square' ? 'active' : ''}" data-dm2-q="square" type="button">Quadrado</button>
+              <button class="d-btn ${quadType === 'trapezoid' ? 'active' : ''}" data-dm2-q="trapezoid" type="button">Trapézio</button>
+            </div>
+          </div>
+          <div class="drawer-section">
+            <span class="drawer-label">Validação Numérica</span>
+            <label class="d-toggle">
+              <input id="dm2ValCheck" type="checkbox" ${requireValidation ? 'checked' : ''} />
+              Exigir escolha do número (0–6)
+            </label>
+          </div>
+        `;
+
+        drawerBodyEl.querySelectorAll('[data-dm2-s]').forEach(btn => {
+          btn.addEventListener('click', () => { initMode2(Number(btn.dataset.dm2S)); renderDrawer(); });
+        });
+        drawerBodyEl.querySelectorAll('[data-dm2-q]').forEach(btn => {
+          btn.addEventListener('click', () => { state.m2.quadType = btn.dataset.dm2Q; initMode2(4); renderDrawer(); });
+        });
+        document.getElementById('dm2ValCheck').addEventListener('change', (e) => {
+          state.m2.requireValidation = e.target.checked;
+          if (!state.m2.requireValidation && isMode2Counted()) {
+            state.m2.validatedNumber = state.m2.step;
+          }
+          render();
+        });
+      } else if (state.mode === 3) {
+        const { copies, sides } = state.m3;
+        drawerBodyEl.innerHTML = `
+          <div class="drawer-section">
+            <span class="drawer-label">Quantidade de Figuras</span>
+            <div class="drawer-grid">
+              ${[2, 3, 4].map(c => `<button class="d-btn ${copies === c ? 'active' : ''}" data-dm3-c="${c}" type="button">${c} figuras</button>`).join('')}
+            </div>
+          </div>
+          <div class="drawer-section">
+            <span class="drawer-label">Tipo de Polígono</span>
+            <div class="drawer-grid">
+              ${[3, 4, 5, 6].map(s => `<button class="d-btn ${sides === s ? 'active' : ''}" data-dm3-s="${s}" type="button">${STEP_INFO[s].name} (${s} pontas)</button>`).join('')}
+            </div>
+          </div>
+          <div class="drawer-section">
+            <span class="drawer-label">Atalhos Pedagógicos (Explorar o 12)</span>
+            <div class="drawer-grid">
+              <button class="d-btn" data-dm3-preset="4-3" type="button">4 Triângulos (12)</button>
+              <button class="d-btn" data-dm3-preset="3-4" type="button">3 Quadrados (12)</button>
+              <button class="d-btn" data-dm3-preset="2-6" type="button">2 Hexágonos (12)</button>
+            </div>
+          </div>
+        `;
+
+        drawerBodyEl.querySelectorAll('[data-dm3-c]').forEach(btn => {
+          btn.addEventListener('click', () => { initMode3(Number(btn.dataset.dm3C), state.m3.sides); renderDrawer(); });
+        });
+        drawerBodyEl.querySelectorAll('[data-dm3-s]').forEach(btn => {
+          btn.addEventListener('click', () => { initMode3(state.m3.copies, Number(btn.dataset.dm3S)); renderDrawer(); });
+        });
+        drawerBodyEl.querySelectorAll('[data-dm3-preset]').forEach(btn => {
+          btn.addEventListener('click', () => {
+            const [c, s] = btn.dataset.dm3Preset.split('-').map(Number);
+            initMode3(c, s);
+            renderDrawer();
+          });
+        });
+      } else {
+        const { roundSize, topic } = state.m4;
+        const topics = [
+          { id: 'mixed', label: 'Misto (Todos)' },
+          { id: 'copies', label: 'Só Cópias' },
+          { id: 'vertices', label: 'Só Vértices' },
+          { id: 'fusion', label: 'Só Fusão' }
+        ];
+        drawerBodyEl.innerHTML = `
+          <div class="drawer-section">
+            <span class="drawer-label">Tamanho da Rodada</span>
+            <div class="drawer-grid">
+              ${[5, 6, 8].map(sz => `<button class="d-btn ${roundSize === sz ? 'active' : ''}" data-dm4-sz="${sz}" type="button">${sz} perguntas</button>`).join('')}
+            </div>
+          </div>
+          <div class="drawer-section">
+            <span class="drawer-label">Filtro de Tema</span>
+            <div class="drawer-grid">
+              ${topics.map(t => `<button class="d-btn ${topic === t.id ? 'active' : ''}" data-dm4-tp="${t.id}" type="button">${t.label}</button>`).join('')}
+            </div>
+          </div>
+        `;
+
+        drawerBodyEl.querySelectorAll('[data-dm4-sz]').forEach(btn => {
+          btn.addEventListener('click', () => {
+            state.m4.roundSize = Number(btn.dataset.dm4Sz);
+            initMode4(false);
+            renderDrawer();
+          });
+        });
+        drawerBodyEl.querySelectorAll('[data-dm4-tp]').forEach(btn => {
+          btn.addEventListener('click', () => {
+            state.m4.topic = btn.dataset.dm4Tp;
+            initMode4(false);
+            renderDrawer();
+          });
+        });
+      }
+
+      drawerRandomBtn.textContent = state.mode === 4 ? '🔄 Iniciar Novo Desafio' : '🎲 Sortear Desafio';
+    }
+
+    function randomizeCurrentMode() {
+      if (state.mode === 1) {
+        let next = Math.floor(Math.random() * 10);
+        if (next === state.m1.target) next = (next + 1) % 10;
+        initMode1(next);
+      } else if (state.mode === 2) {
+        let next = Math.floor(Math.random() * 7);
+        if (next === state.m2.step) next = (next + 1) % 7;
+        if (next === 4) state.m2.quadType = Math.random() < 0.5 ? 'square' : 'trapezoid';
+        initMode2(next);
+      } else if (state.mode === 3) {
+        const copiesPool = [2, 3, 4];
+        const sidesPool = [3, 4, 5, 6];
+        let c = copiesPool[Math.floor(Math.random() * copiesPool.length)];
+        let s = sidesPool[Math.floor(Math.random() * sidesPool.length)];
+        if (c === state.m3.copies && s === state.m3.sides) {
+          s = sidesPool[(sidesPool.indexOf(s) + 1) % sidesPool.length];
+        }
+        initMode3(c, s);
+      } else {
+        initMode4(true);
+      }
+      if (state.drawerOpen) renderDrawer();
+    }
+
+    /* =========================================================
+       RENDERIZADOR PRINCIPAL E EVENTOS GLOBAIS
+       ========================================================= */
+    function render() {
+      document.querySelectorAll('.mode-tab').forEach(tab => {
+        const active = Number(tab.dataset.mode) === state.mode;
+        tab.classList.toggle('active', active);
+        tab.setAttribute('aria-selected', String(active));
+      });
+
+      if (state.mode !== 4) {
+        nextBtn.textContent = 'Próximo →';
+      }
+
+      if (state.mode === 1) renderMode1();
+      else if (state.mode === 2) renderMode2();
+      else if (state.mode === 3) renderMode3();
+      else renderMode4();
+    }
+
+    function updateAudioButtonUI() {
+      const m = AudioSystem.getMode();
+      audioBtn.classList.toggle('audio-muted', m === 'mute');
+      if (m === 'voice') {
+        audioIconEl.textContent = '🔊';
+        audioLabelEl.textContent = 'Voz + Som';
+      } else if (m === 'sfx') {
+        audioIconEl.textContent = '🎵';
+        audioLabelEl.textContent = 'Só Som';
+      } else {
+        audioIconEl.textContent = '🔇';
+        audioLabelEl.textContent = 'Mudo';
+      }
+    }
+
+    // Troca de abas
+    document.querySelectorAll('.mode-tab').forEach(tab => {
+      tab.addEventListener('click', () => {
+        const nextMode = Number(tab.dataset.mode);
+        if (nextMode !== state.mode) AudioSystem.stopSpeech();
+        state.mode = nextMode;
+        if (state.drawerOpen) renderDrawer();
+        if (state.mode === 4) {
+          if (!state.m4.questions.length || state.m4.finished) {
+            initMode4(true);
+          } else {
+            render();
+            const q = state.m4.questions[state.m4.currentIndex];
+            if (q) AudioSystem.speakText(q.prompt);
+          }
+        } else {
+          render();
+        }
+      });
+    });
+
+    // Botão de Áudio (Voz + Som -> Só Som -> Mudo)
+    audioBtn.addEventListener('click', () => {
+      AudioSystem.cycleMode();
+      updateAudioButtonUI();
+    });
+
+    // Reiniciar desafio atual
+    resetBtn.addEventListener('click', () => {
+      if (state.mode === 1) initMode1(state.m1.target);
+      else if (state.mode === 2) initMode2(state.m2.step);
+      else if (state.mode === 3) initMode3(state.m3.copies, state.m3.sides);
+      else initMode4(true);
+    });
+
+    // Próximo desafio
+    nextBtn.addEventListener('click', () => {
+      if (state.mode === 1) initMode1((state.m1.target + 1) % 10);
+      else if (state.mode === 2) initMode2((state.m2.step + 1) % 7);
+      else if (state.mode === 3) advanceMode3();
+      else advanceMode4();
+      if (state.drawerOpen) renderDrawer();
+    });
+
+    // Painel do Professor
+    panelToggleBtn.addEventListener('click', () => setDrawerOpen(!state.drawerOpen));
+    drawerCloseBtn.addEventListener('click', () => setDrawerOpen(false));
+    drawerBackdropEl.addEventListener('click', () => setDrawerOpen(false));
+    drawerRandomBtn.addEventListener('click', () => {
+      randomizeCurrentMode();
+      setDrawerOpen(false);
+    });
+
+    // Fechar painel com tecla Escape
+    window.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && state.drawerOpen) setDrawerOpen(false);
+    });
+
+    // Adaptação automática entre PC (horizontal) e Celular (vertical)
+    window.addEventListener('resize', updateOrientation);
+
+    // Inicialização
+    window.onload = function () {
+      updateAudioButtonUI();
+      const w = stageBoxEl.clientWidth || window.innerWidth;
+      const h = stageBoxEl.clientHeight || window.innerHeight;
+      state.isPortrait = w < h * 0.92;
+      initMode1(5);
+    };
+  </script>
+</body>
+</html>

@@ -1,0 +1,3391 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>A Gênese das Dimensões — Módulo 0 (6º Ano)</title>
+  <style>
+    /* =========================================================================
+       DESIGN TOKENS — A SAGA DOS REINOS MATEMÁTICOS (ENERGIA LÓGICA)
+       ========================================================================= */
+    :root {
+      --bg-void: #05070e;
+      --bg-void-2: #0c1324;
+      --panel-bg: rgba(11, 18, 34, 0.94);
+      --panel-surface: rgba(19, 31, 56, 0.84);
+      --panel-border: rgba(56, 189, 248, 0.24);
+      --gold: #fbbf24;
+      --gold-bright: #fde68a;
+      --gold-dim: rgba(251, 191, 36, 0.16);
+      --cyan: #38bdf8;
+      --cyan-bright: #7dd3fc;
+      --cyan-dim: rgba(56, 189, 248, 0.16);
+      --emerald: #34d399;
+      --emerald-dim: rgba(52, 211, 153, 0.18);
+      --coral: #fb7185;
+      --coral-dim: rgba(251, 113, 133, 0.18);
+      --text-main: #f1f5f9;
+      --text-muted: #94a3b8;
+      --radius-lg: 16px;
+      --radius-md: 12px;
+      --shadow-glow: 0 12px 32px rgba(0, 0, 0, 0.48);
+    }
+
+    * {
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    html, body {
+      margin: 0;
+      padding: 0;
+      width: 100%;
+      height: 100dvh;
+      overflow: hidden;
+      font-family: 'Segoe UI', system-ui, -apple-system, BlinkMacSystemFont, Roboto, Helvetica, Arial, sans-serif;
+      background: radial-gradient(circle at 28% 18%, #0f1b33 0%, var(--bg-void-2) 48%, var(--bg-void) 100%);
+      color: var(--text-main);
+      user-select: none;
+      -webkit-user-select: none;
+    }
+
+    /* =========================================================================
+       LAYOUT PRINCIPAL RESPONSIVO (100dvh, SEM ROLAGEM GLOBAL)
+       ========================================================================= */
+    .app-shell {
+      display: flex;
+      flex-direction: column;
+      width: 100%;
+      height: 100dvh;
+      padding: 0.45rem;
+      gap: 0.45rem;
+    }
+
+    /* Cabeçalho Compacto com Abas dos 3 Atos */
+    .top-header {
+      flex: 0 0 auto;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.45rem;
+      background: var(--panel-bg);
+      border: 1px solid var(--panel-border);
+      border-radius: 14px;
+      padding: 0.4rem 0.65rem;
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.35);
+      backdrop-filter: blur(10px);
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 0.55rem;
+      min-width: 0;
+    }
+
+    .brand-crest {
+      width: 32px;
+      height: 32px;
+      border-radius: 10px;
+      background: linear-gradient(135deg, rgba(251, 191, 36, 0.24), rgba(56, 189, 248, 0.16));
+      border: 1px solid rgba(251, 191, 36, 0.58);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      box-shadow: 0 0 14px rgba(251, 191, 36, 0.2);
+    }
+
+    .brand-titles {
+      min-width: 0;
+    }
+
+    .brand-title {
+      margin: 0;
+      font-size: 0.88rem;
+      font-weight: 800;
+      letter-spacing: 0.01em;
+      color: var(--gold-bright);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .brand-sub {
+      display: none;
+      margin: 0;
+      font-size: 0.72rem;
+      color: var(--text-muted);
+      letter-spacing: 0.02em;
+    }
+
+    .act-tabs {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 4px;
+      width: 100%;
+      background: rgba(5, 7, 14, 0.78);
+      border: 1px solid rgba(148, 163, 184, 0.18);
+      border-radius: 11px;
+      padding: 3px;
+    }
+
+    .act-tab {
+      border: 1px solid transparent;
+      background: transparent;
+      color: var(--text-muted);
+      font-family: inherit;
+      font-size: 0.72rem;
+      font-weight: 700;
+      padding: 0.42rem 0.35rem;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.18s ease;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      text-align: center;
+    }
+
+    .act-tab:hover:not(.active) {
+      color: var(--text-main);
+      background: rgba(255, 255, 255, 0.06);
+    }
+
+    .act-tab.active {
+      background: linear-gradient(135deg, rgba(251, 191, 36, 0.25), rgba(56, 189, 248, 0.22));
+      border-color: rgba(251, 191, 36, 0.65);
+      color: var(--gold-bright);
+      box-shadow: 0 0 12px rgba(251, 191, 36, 0.2);
+    }
+
+    /* Área Principal: Palco + Painel */
+    .workspace {
+      flex: 1 1 auto;
+      min-height: 0;
+      min-width: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 0.45rem;
+    }
+
+    .stage-column {
+      flex: 1 1 56%;
+      min-height: 0;
+      min-width: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 0.4rem;
+    }
+
+    /* Barra de Diálogo de Eldran */
+    .eldran-bar {
+      flex: 0 0 auto;
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      padding: 0.46rem 0.72rem;
+      border-radius: 13px;
+      background: linear-gradient(90deg, rgba(16, 26, 48, 0.96) 0%, rgba(11, 18, 34, 0.92) 100%);
+      border: 1px solid rgba(251, 191, 36, 0.38);
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.32);
+      transition: border-color 0.25s ease, background 0.25s ease;
+    }
+
+    .eldran-bar.alert-coral {
+      border-color: rgba(251, 113, 133, 0.85);
+      background: linear-gradient(90deg, rgba(64, 18, 34, 0.96) 0%, rgba(28, 14, 30, 0.94) 100%);
+    }
+
+    .eldran-bar.alert-emerald {
+      border-color: rgba(52, 211, 153, 0.82);
+      background: linear-gradient(90deg, rgba(12, 46, 40, 0.96) 0%, rgba(11, 24, 36, 0.94) 100%);
+    }
+
+    .eldran-badge {
+      width: 34px;
+      height: 34px;
+      border-radius: 50%;
+      background: radial-gradient(circle at 35% 30%, #2a3a5e, #0c1426);
+      border: 1.8px solid var(--gold);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      box-shadow: 0 0 12px rgba(251, 191, 36, 0.3);
+    }
+
+    .eldran-content {
+      min-width: 0;
+      flex: 1 1 auto;
+    }
+
+    .eldran-name {
+      font-size: 0.66rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.09em;
+      color: var(--gold);
+      line-height: 1.1;
+      margin-bottom: 2px;
+    }
+
+    .eldran-speech {
+      margin: 0;
+      font-size: 0.81rem;
+      line-height: 1.32;
+      color: #e2e8f0;
+      font-weight: 500;
+    }
+
+    /* Container do Canvas */
+    .canvas-wrap {
+      flex: 1 1 auto;
+      min-height: 0;
+      min-width: 0;
+      position: relative;
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+      border: 1px solid rgba(56, 189, 248, 0.28);
+      background: var(--bg-void);
+      box-shadow: var(--shadow-glow);
+    }
+
+    #cosmosCanvas {
+      display: block;
+      width: 100%;
+      height: 100%;
+      touch-action: none;
+      cursor: crosshair;
+    }
+
+    /* Chip de dimensão/status flutuante no canto do Canvas */
+    .canvas-hud-pill {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      pointer-events: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.42rem;
+      padding: 0.3rem 0.72rem;
+      border-radius: 999px;
+      background: rgba(5, 7, 14, 0.84);
+      border: 1px solid rgba(56, 189, 248, 0.45);
+      color: #f8fafc;
+      font-size: 0.72rem;
+      font-weight: 800;
+      letter-spacing: 0.04em;
+      backdrop-filter: blur(6px);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.28);
+    }
+
+    .canvas-hud-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--gold);
+      box-shadow: 0 0 8px var(--gold);
+    }
+
+    /* Painel Lateral / Inferior */
+    .control-panel {
+      flex: 0 1 44%;
+      min-height: 0;
+      background: var(--panel-bg);
+      border: 1px solid var(--panel-border);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-glow);
+      padding: 0.62rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.52rem;
+      overflow-y: auto;
+      backdrop-filter: blur(10px);
+    }
+
+    .control-panel::-webkit-scrollbar { width: 6px; }
+    .control-panel::-webkit-scrollbar-track { background: transparent; }
+    .control-panel::-webkit-scrollbar-thumb { background: rgba(148, 163, 184, 0.28); border-radius: 999px; }
+
+    /* Breakpoint PC / Projetor / Paisagem Larga */
+    @media (min-width: 900px), (orientation: landscape) and (min-width: 760px) {
+      .app-shell {
+        padding: 0.7rem 0.9rem;
+        gap: 0.65rem;
+      }
+
+      .top-header {
+        flex-wrap: nowrap;
+        padding: 0.5rem 0.95rem;
+      }
+
+      .brand-title { font-size: 1.04rem; }
+      .brand-sub { display: block; }
+
+      .act-tabs {
+        width: auto;
+        display: flex;
+      }
+
+      .act-tab {
+        font-size: 0.84rem;
+        padding: 0.46rem 0.9rem;
+      }
+
+      .workspace {
+        flex-direction: row;
+        gap: 0.85rem;
+        align-items: stretch;
+      }
+
+      .stage-column { flex: 1 1 auto; }
+      .eldran-speech { font-size: 0.9rem; }
+
+      .control-panel {
+        flex: 0 0 345px;
+        width: 345px;
+        max-height: 100%;
+        padding: 0.92rem;
+        gap: 0.72rem;
+      }
+    }
+
+    @media (min-width: 1280px) {
+      .control-panel {
+        flex: 0 0 365px;
+        width: 365px;
+      }
+    }
+
+    /* =========================================================================
+       COMPONENTES DO PAINEL
+       ========================================================================= */
+    .act-pane {
+      display: flex;
+      flex-direction: column;
+      gap: 0.56rem;
+    }
+
+    .section-label {
+      font-size: 0.67rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--cyan);
+      margin-bottom: 0.26rem;
+    }
+
+    /* Barra de Progresso das 9 Etapas do Ato I */
+    .progress-bar-wrap {
+      display: flex;
+      flex-direction: column;
+      gap: 0.35rem;
+    }
+
+    .progress-track {
+      width: 100%;
+      height: 6px;
+      border-radius: 999px;
+      background: rgba(148, 163, 184, 0.18);
+      overflow: hidden;
+    }
+
+    .progress-fill {
+      height: 100%;
+      width: 0%;
+      border-radius: 999px;
+      background: linear-gradient(90deg, var(--gold), var(--cyan), var(--emerald));
+      transition: width 0.32s cubic-bezier(0.22, 1, 0.36, 1);
+    }
+
+    .step-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 0.28rem;
+    }
+
+    .step-btn {
+      border: 1px solid rgba(148, 163, 184, 0.22);
+      background: rgba(15, 23, 42, 0.76);
+      color: var(--text-muted);
+      border-radius: 8px;
+      padding: 0.36rem 0.2rem;
+      font-family: inherit;
+      font-size: 0.69rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.16s ease;
+      text-align: center;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .step-btn:hover {
+      border-color: rgba(56, 189, 248, 0.52);
+      color: var(--text-main);
+    }
+
+    .step-btn.completed {
+      border-color: rgba(52, 211, 153, 0.42);
+      color: #a7f3d0;
+      background: rgba(16, 48, 42, 0.48);
+    }
+
+    .step-btn.current {
+      border-color: var(--gold);
+      background: linear-gradient(135deg, rgba(251, 191, 36, 0.26), rgba(251, 191, 36, 0.08));
+      color: var(--gold-bright);
+      box-shadow: 0 0 12px rgba(251, 191, 36, 0.22);
+    }
+
+    /* Botões de Ação */
+    .btn {
+      border: 1px solid transparent;
+      border-radius: var(--radius-md);
+      font-family: inherit;
+      font-size: 0.83rem;
+      font-weight: 700;
+      padding: 0.62rem 0.8rem;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.42rem;
+      transition: transform 0.1s ease, filter 0.15s ease, background 0.15s ease, border-color 0.15s ease;
+      line-height: 1.2;
+    }
+
+    .btn:active { transform: scale(0.97); }
+    .btn:disabled { opacity: 0.42; cursor: not-allowed; }
+
+    .btn-gold {
+      background: linear-gradient(135deg, #fbbf24 0%, #d97706 100%);
+      color: #0b1120;
+      border-color: rgba(253, 230, 138, 0.75);
+      box-shadow: 0 4px 16px rgba(251, 191, 36, 0.3);
+    }
+    .btn-gold:hover:not(:disabled) { filter: brightness(1.07); }
+
+    .btn-cyan {
+      background: linear-gradient(135deg, #38bdf8 0%, #0284c7 100%);
+      color: #041322;
+      border-color: rgba(125, 211, 252, 0.72);
+      box-shadow: 0 4px 16px rgba(56, 189, 248, 0.28);
+    }
+    .btn-cyan:hover:not(:disabled) { filter: brightness(1.08); }
+
+    .btn-emerald {
+      background: linear-gradient(135deg, #34d399 0%, #059669 100%);
+      color: #041c16;
+      border-color: rgba(167, 243, 208, 0.72);
+      box-shadow: 0 4px 16px rgba(52, 211, 153, 0.28);
+    }
+    .btn-emerald:hover:not(:disabled) { filter: brightness(1.08); }
+
+    .btn-ghost {
+      background: rgba(20, 32, 58, 0.84);
+      color: var(--text-main);
+      border-color: rgba(148, 163, 184, 0.30);
+    }
+    .btn-ghost:hover:not(:disabled) {
+      background: rgba(30, 48, 84, 0.92);
+      border-color: rgba(56, 189, 248, 0.5);
+    }
+
+    .btn-row {
+      display: flex;
+      gap: 0.42rem;
+      align-items: stretch;
+    }
+
+    /* Seletor de 4 Modos do Ato II */
+    .mode-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.38rem;
+    }
+
+    .mode-btn {
+      border: 1px solid rgba(148, 163, 184, 0.26);
+      background: rgba(15, 23, 42, 0.8);
+      color: #cbd5e1;
+      border-radius: 11px;
+      padding: 0.5rem 0.4rem;
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 2px;
+      transition: all 0.16s ease;
+      font-family: inherit;
+    }
+
+    .mode-btn:hover {
+      border-color: rgba(251, 191, 36, 0.5);
+      color: #ffffff;
+    }
+
+    .mode-btn.active {
+      background: linear-gradient(135deg, rgba(251, 191, 36, 0.24), rgba(56, 189, 248, 0.16));
+      border-color: var(--gold);
+      color: var(--gold-bright);
+      box-shadow: 0 0 14px rgba(251, 191, 36, 0.2);
+    }
+
+    .mode-notation {
+      font-size: 0.98rem;
+      font-weight: 800;
+      letter-spacing: 0.02em;
+    }
+
+    .mode-label {
+      font-size: 0.7rem;
+      font-weight: 600;
+      opacity: 0.9;
+    }
+
+    /* Cartões Informativos */
+    .info-card {
+      border-radius: var(--radius-md);
+      padding: 0.64rem 0.76rem;
+      background: var(--panel-surface);
+      border: 1px solid rgba(56, 189, 248, 0.26);
+      transition: all 0.2s ease;
+    }
+
+    .info-card.tone-gold {
+      background: rgba(45, 36, 16, 0.58);
+      border-color: rgba(251, 191, 36, 0.48);
+    }
+
+    .info-card.tone-emerald {
+      background: rgba(12, 46, 39, 0.64);
+      border-color: rgba(52, 211, 153, 0.54);
+    }
+
+    .info-card.tone-coral {
+      background: rgba(54, 18, 30, 0.64);
+      border-color: rgba(251, 113, 133, 0.56);
+    }
+
+    .info-card.tone-cyan {
+      background: rgba(12, 38, 60, 0.64);
+      border-color: rgba(56, 189, 248, 0.52);
+    }
+
+    .card-title {
+      font-size: 0.91rem;
+      font-weight: 800;
+      color: #ffffff;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.4rem;
+    }
+
+    .card-text {
+      margin: 0.26rem 0 0;
+      font-size: 0.78rem;
+      line-height: 1.38;
+      color: #cbd5e1;
+    }
+
+    .pill-tag {
+      font-size: 0.68rem;
+      font-weight: 800;
+      padding: 0.16rem 0.5rem;
+      border-radius: 999px;
+      letter-spacing: 0.03em;
+      white-space: nowrap;
+    }
+
+    .pill-gold { background: var(--gold-dim); color: var(--gold-bright); border: 1px solid rgba(251, 191, 36, 0.48); }
+    .pill-cyan { background: var(--cyan-dim); color: var(--cyan-bright); border: 1px solid rgba(56, 189, 248, 0.48); }
+    .pill-emerald { background: var(--emerald-dim); color: #6ee7b7; border: 1px solid rgba(52, 211, 153, 0.52); }
+    .pill-coral { background: var(--coral-dim); color: #fda4af; border: 1px solid rgba(251, 113, 133, 0.52); }
+
+    /* Interruptores (Toggles) */
+    .toggle-list {
+      display: flex;
+      flex-direction: column;
+      gap: 0.38rem;
+    }
+
+    .toggle-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.5rem;
+      padding: 0.48rem 0.68rem;
+      border-radius: 11px;
+      background: rgba(15, 23, 42, 0.74);
+      border: 1px solid rgba(148, 163, 184, 0.22);
+      cursor: pointer;
+      transition: all 0.16s ease;
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: #e2e8f0;
+    }
+
+    .toggle-row:hover {
+      border-color: rgba(56, 189, 248, 0.48);
+      background: rgba(20, 34, 62, 0.88);
+    }
+
+    .toggle-row.is-on {
+      background: rgba(14, 42, 66, 0.8);
+      border-color: rgba(56, 189, 248, 0.58);
+      color: #ffffff;
+    }
+
+    .toggle-row.is-on.emerald {
+      background: rgba(12, 46, 38, 0.8);
+      border-color: rgba(52, 211, 153, 0.6);
+    }
+
+    .switch-track {
+      width: 38px;
+      height: 20px;
+      border-radius: 999px;
+      background: rgba(100, 116, 139, 0.55);
+      position: relative;
+      flex-shrink: 0;
+      transition: background 0.18s ease;
+    }
+
+    .toggle-row.is-on .switch-track { background: var(--cyan); }
+    .toggle-row.is-on.emerald .switch-track { background: var(--emerald); }
+
+    .switch-thumb {
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
+      background: #ffffff;
+      position: absolute;
+      top: 3px;
+      left: 3px;
+      box-shadow: 0 1px 4px rgba(0, 0, 0, 0.35);
+      transition: transform 0.18s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
+    .toggle-row.is-on .switch-thumb { transform: translateX(18px); }
+
+    /* Controles 3D (Altitude Z + X/Y do Viajante) */
+    .slider-box {
+      padding: 0.56rem 0.7rem;
+      border-radius: 12px;
+      background: rgba(12, 36, 58, 0.78);
+      border: 1px solid rgba(56, 189, 248, 0.42);
+      display: flex;
+      flex-direction: column;
+      gap: 0.4rem;
+    }
+
+    .slider-item {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .slider-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.74rem;
+      font-weight: 700;
+      color: var(--cyan-bright);
+    }
+
+    .slider-row-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.5rem;
+    }
+
+    input[type="range"] {
+      width: 100%;
+      accent-color: var(--gold);
+      cursor: pointer;
+      height: 6px;
+    }
+
+    /* Desafios de Eldran (Ato III) */
+    .challenge-panel {
+      border-radius: var(--radius-md);
+      background: rgba(12, 22, 42, 0.94);
+      border: 1.5px solid rgba(251, 191, 36, 0.45);
+      padding: 0.62rem 0.75rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.42rem;
+    }
+
+    .challenge-panel.solved {
+      border-color: var(--emerald);
+      background: rgba(10, 42, 35, 0.9);
+    }
+
+    .challenge-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.4rem;
+    }
+
+    .challenge-nav {
+      display: flex;
+      gap: 4px;
+    }
+
+    .btn-mini {
+      width: 26px;
+      height: 26px;
+      border-radius: 7px;
+      border: 1px solid rgba(148, 163, 184, 0.35);
+      background: rgba(15, 23, 42, 0.85);
+      color: #e2e8f0;
+      font-weight: 800;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .btn-mini:hover {
+      border-color: var(--gold);
+      color: var(--gold-bright);
+    }
+
+    .challenge-desc {
+      margin: 0;
+      font-size: 0.8rem;
+      line-height: 1.35;
+      color: #f8fafc;
+      font-weight: 600;
+    }
+
+    .challenge-footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.4rem;
+      font-size: 0.74rem;
+      font-weight: 700;
+    }
+
+    .status-ok { color: var(--emerald); }
+    .status-wait { color: var(--text-muted); }
+
+    .hint-note {
+      font-size: 0.73rem;
+      color: var(--text-muted);
+      background: rgba(15, 23, 42, 0.56);
+      border: 1px dashed rgba(148, 163, 184, 0.25);
+      border-radius: 10px;
+      padding: 0.48rem 0.62rem;
+      line-height: 1.38;
+    }
+
+    .hidden { display: none !important; }
+
+    @media (max-width: 899px) and (orientation: portrait) {
+      .desktop-only { display: none !important; }
+      .eldran-bar { padding: 0.36rem 0.55rem; }
+      .eldran-badge { width: 28px; height: 28px; }
+      .eldran-speech { font-size: 0.75rem; }
+      .btn { padding: 0.52rem 0.65rem; font-size: 0.77rem; }
+    }
+  </style>
+</head>
+<body>
+  <div class="app-shell">
+    <!-- CABEÇALHO COMPACTO -->
+    <header class="top-header">
+      <div class="brand">
+        <div class="brand-crest" aria-hidden="true">
+          <!-- Brasão Geométrico de Eldran -->
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+            <polygon points="12,2 21,7 21,17 12,22 3,17 3,7" stroke="#fbbf24" stroke-width="1.8" fill="rgba(251,191,36,0.14)" />
+            <polygon points="12,5 18,12 12,19 6,12" stroke="#38bdf8" stroke-width="1.4" fill="none" />
+            <circle cx="12" cy="12" r="2.2" fill="#fde68a" />
+          </svg>
+        </div>
+        <div class="brand-titles">
+          <h1 class="brand-title">A Gênese das Dimensões — Módulo 0</h1>
+          <p class="brand-sub">A Saga dos Reinos Matemáticos · 6º Ano · Guia: Eldran</p>
+        </div>
+      </div>
+
+      <nav class="act-tabs" role="tablist" aria-label="Atos da Jornada">
+        <button id="tabAct1" type="button" role="tab" aria-selected="true" class="act-tab active">
+          Ato I · Dimensões
+        </button>
+        <button id="tabAct2" type="button" role="tab" aria-selected="false" class="act-tab">
+          Ato II · Retas
+        </button>
+        <button id="tabAct3" type="button" role="tab" aria-selected="false" class="act-tab">
+          Ato III · Caminhos
+        </button>
+      </nav>
+    <button id="autoriaBtn" type="button" aria-label="Autoria" onclick="document.getElementById('autoriaTxt').classList.toggle('on')" style="flex:0 0 auto;width:20px;height:20px;margin:0 4px;border-radius:50%;border:1px solid rgba(128,128,128,.5);background:transparent;color:inherit;font:11px/18px sans-serif;text-align:center;padding:0;cursor:pointer;opacity:.5">©</button></header>
+
+    <!-- ÁREA PRINCIPAL -->
+    <div class="workspace">
+      <!-- COLUNA DO PALCO (ELDRAN + CANVAS) -->
+      <main class="stage-column">
+        <!-- Cartão de Diálogo de Eldran -->
+        <section id="eldranBar" class="eldran-bar" aria-live="polite">
+          <div class="eldran-badge" aria-hidden="true">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+              <circle cx="12" cy="12" r="9" stroke="#fbbf24" stroke-width="1.5" stroke-dasharray="3 2" />
+              <polygon points="12,4 19,16 5,16" stroke="#38bdf8" stroke-width="1.6" fill="rgba(56,189,248,0.14)" />
+              <circle cx="12" cy="12" r="2.1" fill="#fde68a" />
+            </svg>
+          </div>
+          <div class="eldran-content">
+            <div class="eldran-name">Eldran · Guardião da Estrutura</div>
+            <p id="eldranSpeech" class="eldran-speech">
+              No princípio, há apenas o Vazio. Toque na tela para acender o primeiro Ponto de Energia Lógica (A).
+            </p>
+          </div>
+        </section>
+
+        <!-- Palco Canvas -->
+        <div class="canvas-wrap" id="canvasWrap">
+          <canvas id="cosmosCanvas" aria-label="Espaço Interativo de Energia Lógica"></canvas>
+          <div class="canvas-hud-pill" id="hudPill">
+            <span class="canvas-hud-dot" id="hudDot"></span>
+            <span id="hudText">ETAPA 0/8 · VAZIO ORIGINAL</span>
+          </div>
+        </div>
+      </main>
+
+      <!-- PAINEL DE CONTROLES -->
+      <aside class="control-panel">
+        <!-- ==================== ATO I: A GÊNESE DAS DIMENSÕES (0D -> 3D) ==================== -->
+        <div id="paneAct1" class="act-pane">
+          <div class="progress-bar-wrap">
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+              <span class="section-label" style="margin:0;">Ritual das Dimensões</span>
+              <span id="act1StepCounter" style="font-size:0.7rem; font-weight:800; color:var(--gold-bright);">Etapa 0 / 8</span>
+            </div>
+            <div class="progress-track">
+              <div id="act1ProgressFill" class="progress-fill"></div>
+            </div>
+            <div class="step-grid" id="act1StepGrid">
+              <button type="button" class="step-btn current" data-step="0">0 · Vazio</button>
+              <button type="button" class="step-btn" data-step="1">1 · 0D Ponto</button>
+              <button type="button" class="step-btn" data-step="2">2 · Seg. AB</button>
+              <button type="button" class="step-btn" data-step="3">3 · 1D Reta</button>
+              <button type="button" class="step-btn" data-step="4">4 · Feixe C</button>
+              <button type="button" class="step-btn" data-step="5">5 · 2D Piso</button>
+              <button type="button" class="step-btn" data-step="6">6 · Persp. 3D</button>
+              <button type="button" class="step-btn" data-step="7">7 · Feixe D</button>
+              <button type="button" class="step-btn" data-step="8">8 · 3D Total</button>
+            </div>
+          </div>
+
+          <!-- Cartão de Conceito Atual -->
+          <div id="act1InfoCard" class="info-card tone-gold">
+            <div class="card-title">
+              <span id="act1CardTitle">O Vazio Original</span>
+              <span id="act1CardTag" class="pill-tag pill-gold">Início</span>
+            </div>
+            <p id="act1CardText" class="card-text">
+              Sem pontos, não há posição nem caminho. Toque na tela para forjar o Ponto A.
+            </p>
+          </div>
+
+          <!-- Ação Primária Contextual -->
+          <button id="btnAct1Primary" type="button" class="btn btn-gold">
+            Acender Ponto A no Vazio
+          </button>
+
+          <!-- Controles 3D (visíveis nas etapas 6, 7 e 8; sliders completos na etapa 8) -->
+          <div id="act13DControls" class="hidden" style="display:flex; flex-direction:column; gap:0.46rem;">
+            <div id="slider3DWrap" class="slider-box hidden">
+              <div class="slider-item">
+                <div class="slider-header">
+                  <span>Altitude do Viajante (Eixo Z)</span>
+                  <span id="valZ" style="color:var(--gold-bright);">1,6 u</span>
+                </div>
+                <input id="sliderZ" type="range" min="-2.6" max="3.0" step="0.1" value="1.6" aria-label="Altitude Z do Viajante" />
+              </div>
+              <div class="slider-row-2">
+                <div class="slider-item">
+                  <div class="slider-header">
+                    <span>Eixo X</span>
+                    <span id="valX" style="color:var(--gold-bright);">0,8 u</span>
+                  </div>
+                  <input id="sliderX" type="range" min="-3.2" max="3.2" step="0.1" value="0.8" aria-label="Posição X do Viajante" />
+                </div>
+                <div class="slider-item">
+                  <div class="slider-header">
+                    <span>Eixo Y</span>
+                    <span id="valY" style="color:var(--gold-bright);">0,4 u</span>
+                  </div>
+                  <input id="sliderY" type="range" min="-3.2" max="3.2" step="0.1" value="0.4" aria-label="Posição Y do Viajante" />
+                </div>
+              </div>
+            </div>
+
+            <div class="toggle-row" id="togAutoOrbit" role="switch" aria-checked="false" tabindex="0">
+              <span>Rotação Orbital Automática</span>
+              <div class="switch-track"><div class="switch-thumb"></div></div>
+            </div>
+          </div>
+
+          <!-- Navegação Voltar / Avançar / Reiniciar -->
+          <div class="btn-row">
+            <button id="btnAct1Prev" type="button" class="btn btn-ghost" style="flex:1;" disabled>
+              &larr; Voltar
+            </button>
+            <button id="btnAct1Reset" type="button" class="btn btn-ghost" style="flex:1;">
+              Reiniciar
+            </button>
+          </div>
+
+          <div class="hint-note desktop-only">
+            <strong>Ritual simétrico:</strong> cada dimensão nasce em dois passos — primeiro <strong>conectar</strong> um novo ponto, depois <strong>estender</strong> ao infinito.
+          </div>
+        </div>
+
+        <!-- ==================== ATO II: RETA, SEMIRRETA E SEGMENTO ==================== -->
+        <div id="paneAct2" class="act-pane hidden">
+          <div>
+            <div class="section-label">Forma da Estrutura (Sobre o Piso 2D)</div>
+            <div class="mode-grid" id="act2ModeGrid">
+              <button type="button" class="mode-btn active" data-mode="line">
+                <span class="mode-notation">↔AB</span>
+                <span class="mode-label">Reta</span>
+              </button>
+              <button type="button" class="mode-btn" data-mode="rayAB">
+                <span class="mode-notation">→AB</span>
+                <span class="mode-label">Semirreta (origem A)</span>
+              </button>
+              <button type="button" class="mode-btn" data-mode="rayBA">
+                <span class="mode-notation">→BA</span>
+                <span class="mode-label">Semirreta (origem B)</span>
+              </button>
+              <button type="button" class="mode-btn" data-mode="segment">
+                <span class="mode-notation">—AB</span>
+                <span class="mode-label">Segmento</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Cartão de Leitura do Ato II -->
+          <div id="act2MeasureCard" class="info-card tone-cyan">
+            <div class="card-title">
+              <span id="act2CardTitle">Reta ↔AB</span>
+              <span id="act2CardBadge" class="pill-tag pill-cyan">Infinita</span>
+            </div>
+            <p id="act2CardDesc" class="card-text">
+              Não tem começo nem fim: estende-se indefinidamente nos dois sentidos.
+            </p>
+          </div>
+
+          <!-- Cartão de Colinearidade -->
+          <div id="act2CollinearCard" class="info-card hidden">
+            <div class="card-title">
+              <span id="act2ColTitle">Pontos Colineares</span>
+              <span id="act2ColBadge" class="pill-tag pill-emerald">Alinhados</span>
+            </div>
+            <p id="act2ColDesc" class="card-text"></p>
+          </div>
+
+          <!-- Interruptores do Ato II -->
+          <div class="toggle-list">
+            <div id="togAct2Ruler" class="toggle-row" role="switch" aria-checked="false" tabindex="0">
+              <span>Medidor de Energia (Régua)</span>
+              <div class="switch-track"><div class="switch-thumb"></div></div>
+            </div>
+            <div id="togAct2PointC" class="toggle-row emerald" role="switch" aria-checked="false" tabindex="0">
+              <span>3º Ponto C (Colinearidade)</span>
+              <div class="switch-track"><div class="switch-thumb"></div></div>
+            </div>
+            <div id="togAct2Snap" class="toggle-row is-on" role="switch" aria-checked="true" tabindex="0">
+              <span>Imã Suave na Grade</span>
+              <div class="switch-track"><div class="switch-thumb"></div></div>
+            </div>
+          </div>
+
+          <button id="btnAct2Reset" type="button" class="btn btn-ghost">
+            Resetar Pontos
+          </button>
+        </div>
+
+        <!-- ==================== ATO III: OS CAMINHOS NO PLANO ==================== -->
+        <div id="paneAct3" class="act-pane hidden">
+          <!-- Cartão de Classificação (Modo Visual Puro por padrão) -->
+          <div id="act3ClassCard" class="info-card tone-cyan hidden">
+            <div class="card-title">
+              <span id="act3ClassName">Concorrentes (r × s)</span>
+              <span id="act3ClassBadge" class="pill-tag pill-cyan">1 ponto em comum</span>
+            </div>
+            <p id="act3ClassDesc" class="card-text">
+              Os feixes r e s se cruzam em um único ponto P.
+            </p>
+          </div>
+
+          <div id="act3PureNotice" class="info-card tone-gold">
+            <div class="card-title">
+              <span>Modo Visual Puro</span>
+              <span class="pill-tag pill-gold">Observação</span>
+            </div>
+            <p class="card-text">
+              Classificação oculta para investigação em sala. Observe os feixes r (âmbar) e s (azul-ciano) sobre o Piso 2D.
+            </p>
+          </div>
+
+          <!-- Botão dos Desafios de Eldran -->
+          <div class="btn-row">
+            <button id="btnAct3ChalToggle" type="button" class="btn btn-gold" style="flex:1;">
+              <span id="labelAct3Chal">Desafios de Eldran (0/4)</span>
+            </button>
+            <button id="btnAct3Reset" type="button" class="btn btn-ghost">
+              Resetar
+            </button>
+          </div>
+
+          <!-- Painel Colapsável: 4 Desafios de Eldran -->
+          <div id="act3ChalPanel" class="challenge-panel hidden">
+            <div class="challenge-top">
+              <span style="font-size:0.7rem; font-weight:800; text-transform:uppercase; color:var(--gold);">
+                Desafio <span id="act3ChalNum">1</span>/4 · <span id="act3ChalDone">0</span> concluídos
+              </span>
+              <div class="challenge-nav">
+                <button id="btnChalPrev" type="button" class="btn-mini" aria-label="Desafio anterior">&lsaquo;</button>
+                <button id="btnChalNext" type="button" class="btn-mini" aria-label="Próximo desafio">&rsaquo;</button>
+              </div>
+            </div>
+            <p id="act3ChalDesc" class="challenge-desc"></p>
+            <div class="challenge-footer">
+              <span id="act3ChalStatus" class="status-wait">Arraste A, B, C ou D...</span>
+              <button id="btnChalNextDone" type="button" class="btn btn-cyan hidden" style="padding:0.25rem 0.55rem; font-size:0.72rem;">
+                Próximo &rarr;
+              </button>
+            </div>
+          </div>
+
+          <!-- Interruptores do Ato III -->
+          <div class="toggle-list">
+            <div id="togAct3Reveal" class="toggle-row" role="switch" aria-checked="false" tabindex="0">
+              <span>Revelar Classificação</span>
+              <div class="switch-track"><div class="switch-thumb"></div></div>
+            </div>
+            <div id="togAct3Angle" class="toggle-row emerald" role="switch" aria-checked="false" tabindex="0">
+              <span>Mostrar Ângulo em P (°)</span>
+              <div class="switch-track"><div class="switch-thumb"></div></div>
+            </div>
+            <div id="togAct3Snap" class="toggle-row is-on" role="switch" aria-checked="true" tabindex="0">
+              <span>Imã Suave na Grade</span>
+              <div class="switch-track"><div class="switch-thumb"></div></div>
+            </div>
+          </div>
+
+          <div class="hint-note desktop-only">
+            <strong>Reta r</strong> (âmbar): controlada pelos pontos A e B.<br>
+            <strong>Reta s</strong> (azul-ciano): controlada pelos pontos C e D.
+          </div>
+        </div>
+      </aside>
+    </div>
+  </div>
+
+  <script>
+    /**
+     * =========================================================================
+     * A GÊNESE DAS DIMENSÕES — MÓDULO 0 (6º ANO)
+     * Universo: A Saga dos Reinos Matemáticos | Guia: Eldran
+     * =========================================================================
+     * - Canvas 2D puro a 60fps (incluindo projeção 3D orbital própria).
+     * - Contraste alto projetado para TV/Projetor e telas móveis:
+     *     * Vazio Original: #05070e
+     *     * Piso 2D Estendido: azul-ardósia claro / pérola celeste (#d8e6f2 -> #e6f0f8)
+     *     * Espaço 3D Estendido: atmosfera índigo-turquesa (#153a5b -> #0e4f6e -> #1d6b87)
+     */
+    (function () {
+      'use strict';
+
+      // =======================================================================
+      // REFERÊNCIAS DE DOM
+      // =======================================================================
+      const canvasWrap = document.getElementById('canvasWrap');
+      const canvas = document.getElementById('cosmosCanvas');
+      const ctx = canvas.getContext('2d');
+
+      const eldranBar = document.getElementById('eldranBar');
+      const eldranSpeech = document.getElementById('eldranSpeech');
+      const hudText = document.getElementById('hudText');
+      const hudDot = document.getElementById('hudDot');
+
+      const tabAct1 = document.getElementById('tabAct1');
+      const tabAct2 = document.getElementById('tabAct2');
+      const tabAct3 = document.getElementById('tabAct3');
+      const paneAct1 = document.getElementById('paneAct1');
+      const paneAct2 = document.getElementById('paneAct2');
+      const paneAct3 = document.getElementById('paneAct3');
+
+      // Ato I
+      const act1StepCounter = document.getElementById('act1StepCounter');
+      const act1ProgressFill = document.getElementById('act1ProgressFill');
+      const act1StepGrid = document.getElementById('act1StepGrid');
+      const act1InfoCard = document.getElementById('act1InfoCard');
+      const act1CardTitle = document.getElementById('act1CardTitle');
+      const act1CardTag = document.getElementById('act1CardTag');
+      const act1CardText = document.getElementById('act1CardText');
+      const btnAct1Primary = document.getElementById('btnAct1Primary');
+      const btnAct1Prev = document.getElementById('btnAct1Prev');
+      const btnAct1Reset = document.getElementById('btnAct1Reset');
+      const act13DControls = document.getElementById('act13DControls');
+      const slider3DWrap = document.getElementById('slider3DWrap');
+      const sliderZ = document.getElementById('sliderZ');
+      const sliderX = document.getElementById('sliderX');
+      const sliderY = document.getElementById('sliderY');
+      const valZ = document.getElementById('valZ');
+      const valX = document.getElementById('valX');
+      const valY = document.getElementById('valY');
+      const togAutoOrbit = document.getElementById('togAutoOrbit');
+
+      // Ato II
+      const act2ModeGrid = document.getElementById('act2ModeGrid');
+      const act2MeasureCard = document.getElementById('act2MeasureCard');
+      const act2CardTitle = document.getElementById('act2CardTitle');
+      const act2CardBadge = document.getElementById('act2CardBadge');
+      const act2CardDesc = document.getElementById('act2CardDesc');
+      const act2CollinearCard = document.getElementById('act2CollinearCard');
+      const act2ColTitle = document.getElementById('act2ColTitle');
+      const act2ColBadge = document.getElementById('act2ColBadge');
+      const act2ColDesc = document.getElementById('act2ColDesc');
+      const togAct2Ruler = document.getElementById('togAct2Ruler');
+      const togAct2PointC = document.getElementById('togAct2PointC');
+      const togAct2Snap = document.getElementById('togAct2Snap');
+      const btnAct2Reset = document.getElementById('btnAct2Reset');
+
+      // Ato III
+      const act3ClassCard = document.getElementById('act3ClassCard');
+      const act3ClassName = document.getElementById('act3ClassName');
+      const act3ClassBadge = document.getElementById('act3ClassBadge');
+      const act3ClassDesc = document.getElementById('act3ClassDesc');
+      const act3PureNotice = document.getElementById('act3PureNotice');
+      const btnAct3ChalToggle = document.getElementById('btnAct3ChalToggle');
+      const labelAct3Chal = document.getElementById('labelAct3Chal');
+      const btnAct3Reset = document.getElementById('btnAct3Reset');
+      const act3ChalPanel = document.getElementById('act3ChalPanel');
+      const act3ChalNum = document.getElementById('act3ChalNum');
+      const act3ChalDone = document.getElementById('act3ChalDone');
+      const act3ChalDesc = document.getElementById('act3ChalDesc');
+      const act3ChalStatus = document.getElementById('act3ChalStatus');
+      const btnChalPrev = document.getElementById('btnChalPrev');
+      const btnChalNext = document.getElementById('btnChalNext');
+      const btnChalNextDone = document.getElementById('btnChalNextDone');
+      const togAct3Reveal = document.getElementById('togAct3Reveal');
+      const togAct3Angle = document.getElementById('togAct3Angle');
+      const togAct3Snap = document.getElementById('togAct3Snap');
+
+      // =======================================================================
+      // POEIRA ESTELAR (VAZIO), PARTÍCULAS 3D E DESAFIOS DO ATO III
+      // =======================================================================
+      const STARS = Array.from({ length: 80 }, (_, i) => ({
+        nx: ((i * 73 + 17) % 100) / 100,
+        ny: ((i * 41 + 29) % 100) / 100,
+        r: 0.55 + (i % 3) * 0.45,
+        phase: i * 0.7,
+        speed: 0.5 + (i % 4) * 0.3
+      }));
+
+      // Partículas atmosféricas 3D para a Etapa 8 (Espaço Total)
+      const SPACE_PARTICLES = Array.from({ length: 48 }, (_, i) => ({
+        x: (((i * 37) % 100) / 100 - 0.5) * 9.5,
+        y: (((i * 53) % 100) / 100 - 0.42) * 6.5,
+        z: (((i * 71) % 100) / 100 - 0.5) * 9.5,
+        size: 1.2 + (i % 3) * 0.85,
+        phase: i * 0.9
+      }));
+
+      // 4 Desafios de Eldran (Ato III) na ordem solicitada
+      const ACT3_CHALLENGES = [
+        {
+          id: 1,
+          text: 'Construa duas retas PARALELAS (r ∥ s), mantendo a mesma direção sem se cruzarem.',
+          check: (rel) => rel.type === 'parallel'
+        },
+        {
+          id: 2,
+          text: 'Construa duas retas CONCORRENTES (r × s) que NÃO sejam perpendiculares.',
+          check: (rel) => rel.type === 'concurrent'
+        },
+        {
+          id: 3,
+          text: 'Construa duas retas PERPENDICULARES (r ⊥ s), formando exatamente 90° em P.',
+          check: (rel) => rel.type === 'perpendicular'
+        },
+        {
+          id: 4,
+          text: 'Torne as duas retas COINCIDENTES (r ≡ s), alinhando todos os quatro pontos.',
+          check: (rel) => rel.type === 'coincident'
+        }
+      ];
+
+      // =======================================================================
+      // ESTADO GLOBAL DA APLICAÇÃO
+      // =======================================================================
+      const state = {
+        act: 1, // 1, 2 ou 3
+
+        // Dimensões do canvas em pixels CSS
+        w: 600,
+        h: 500,
+        dpr: 1,
+        cx: 300,
+        cy: 250,
+        unit: 44,
+
+        // Alerta temporário de Eldran
+        alertMsg: null,
+        alertTone: null, // 'coral' | 'emerald'
+        alertUntil: 0,
+
+        // Ondas de Energia Lógica
+        ripples: [],
+
+        // ---- ATO I: 9 ETAPAS (0..8) ----
+        // 0: Vazio | 1: 0D Ponto A | 2: Seg AB | 3: 1D Reta | 4: Conexão C (no Vazio)
+        // 5: 2D Piso Plano | 6: Perspectiva 3D (Piso no Vazio) | 7: Conexão D (no Vazio) | 8: 3D Espaço Total
+        a1: {
+          step: 0,
+          maxStep: 0,
+          A: { x: 0, y: 0 },
+          B: { x: 2.5, y: -0.7 },
+          C: { x: -0.6, y: 2.1 },
+          traveler: { x: 0, y: 0, z: 0 },
+          trail: [],
+          // Prisão elástica em 0D
+          tetherActive: false,
+          tetherPull: { x: 0, y: 0 },
+          vibrateUntil: 0,
+          // Animações das transições
+          lineExtend: 0,      // 0..1 (Etapa 3)
+          fanWeave: 0,        // 0..1 (Etapa 4 — feixe C -> reta AB)
+          planeExpand: 0,     // 0..1 (Etapa 5 — expansão do Piso 2D claro)
+          tilt3D: 0,          // 0..1 (Etapa 6 — inclinação em perspectiva 3D)
+          pyramidWeave: 0,    // 0..1 (Etapa 7 — feixe D -> piso 2D)
+          spaceExpand: 0,     // 0..1 (Etapa 8 — onda volumétrica mudando fundo da tela)
+          // Câmera orbital 3D (Mundo 3D: piso está em Y=0, altitude é Y)
+          yaw: 0.56,
+          pitch: 0.48,
+          autoOrbit: false
+        },
+
+        // ---- ATO II: RETA, SEMIRRETA E SEGMENTO (sobre o Piso 2D claro) ----
+        a2: {
+          mode: 'line', // 'line' | 'rayAB' | 'rayBA' | 'segment'
+          A: { x: -2.5, y: 0.5 },
+          B: { x: 2.5, y: -0.5 },
+          C: { x: 0, y: 2.0 },
+          showRuler: false,
+          showPointC: false,
+          snapGrid: true
+        },
+
+        // ---- ATO III: OS CAMINHOS NO PLANO (sobre o Piso 2D claro) ----
+        a3: {
+          A: { x: -3, y: -1 },
+          B: { x: 3, y: 1 },
+          C: { x: -2, y: 2 },
+          D: { x: 2, y: -2 },
+          revealClass: false, // Modo Visual Puro por padrão!
+          showAngle: false,
+          snapGrid: true,
+          chalOpen: false,
+          chalIdx: 0,
+          solvedIds: new Set()
+        },
+
+        drag: null
+      };
+
+      // =======================================================================
+      // CONVERSÕES DE COORDENADAS E UTILITÁRIOS
+      // =======================================================================
+      function clamp(v, min, max) {
+        return Math.max(min, Math.min(max, v));
+      }
+
+      function easeOutCubic(t) {
+        return 1 - Math.pow(1 - t, 3);
+      }
+
+      function easeInOutCubic(t) {
+        return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+      }
+
+      function toScreen(lx, ly) {
+        return {
+          x: state.cx + lx * state.unit,
+          y: state.cy - ly * state.unit
+        };
+      }
+
+      function toLogic(sx, sy) {
+        return {
+          x: (sx - state.cx) / state.unit,
+          y: (state.cy - sy) / state.unit
+        };
+      }
+
+      function clampLogicToView(pt, padPx = 34) {
+        const maxX = Math.max(2, (state.w / 2 - padPx) / state.unit);
+        const maxY = Math.max(2, (state.h / 2 - padPx) / state.unit);
+        return {
+          x: clamp(pt.x, -maxX, maxX),
+          y: clamp(pt.y, -maxY, maxY)
+        };
+      }
+
+      function snapPoint(pt, enabled) {
+        const c = clampLogicToView(pt, 32);
+        if (!enabled) return c;
+        return { x: Math.round(c.x), y: Math.round(c.y) };
+      }
+
+      function dist2D(p1, p2) {
+        return Math.hypot(p2.x - p1.x, p2.y - p1.y);
+      }
+
+      function projectOnLine(P, A, B, clampToSegment) {
+        const dx = B.x - A.x;
+        const dy = B.y - A.y;
+        const lenSq = dx * dx + dy * dy;
+        if (lenSq < 1e-6) return { x: A.x, y: A.y, t: 0, dist: dist2D(P, A) };
+        let t = ((P.x - A.x) * dx + (P.y - A.y) * dy) / lenSq;
+        if (clampToSegment) t = clamp(t, 0, 1);
+        const px = A.x + t * dx;
+        const py = A.y + t * dy;
+        return { x: px, y: py, t, dist: Math.hypot(P.x - px, P.y - py) };
+      }
+
+      function addRipple(sx, sy, color, maxR = 48) {
+        state.ripples.push({
+          x: sx, y: sy, color, maxR,
+          start: performance.now(),
+          duration: 600
+        });
+      }
+
+      function triggerEldranAlert(msg, tone = 'coral', durationMs = 3600) {
+        state.alertMsg = msg;
+        state.alertTone = tone;
+        state.alertUntil = performance.now() + durationMs;
+        updateEldranBar();
+      }
+
+      // =======================================================================
+      // PROJEÇÃO 3D ORBITAL CUSTOMIZADA (CANVAS 2D PURO — ETAPAS 6, 7 E 8)
+      // Piso 2D α está em Y = 0 (eixos X e Z). Altitude é o eixo Y.
+      // =======================================================================
+      function project3D(wx, wy, wz) {
+        const t = easeInOutCubic(state.a1.tilt3D);
+        const pitch = (Math.PI / 2) * (1 - t) + state.a1.pitch * t;
+        const yaw = state.a1.yaw * t;
+
+        const cosY = Math.cos(yaw);
+        const sinY = Math.sin(yaw);
+        const cosP = Math.cos(pitch);
+        const sinP = Math.sin(pitch);
+
+        const x1 = wx * cosY - wz * sinY;
+        const z1 = wx * sinY + wz * cosY;
+        const y1 = wy;
+
+        const y2 = y1 * cosP - z1 * sinP;
+        const z2 = y1 * sinP + z1 * cosP;
+
+        const camDist = 11.4;
+        const fov = state.unit * camDist * 0.94;
+        const denom = Math.max(1.8, camDist + z2);
+        const persp = fov / denom;
+
+        return {
+          x: state.cx + x1 * persp,
+          y: state.cy - y2 * persp,
+          depth: z2,
+          scale: persp / state.unit
+        };
+      }
+
+      // =======================================================================
+      // ANÁLISE GEOMÉTRICA DO ATO III (POSIÇÕES RELATIVAS)
+      // =======================================================================
+      function analyzeAct3Lines() {
+        const { A, B, C, D } = state.a3;
+        const dx1 = B.x - A.x, dy1 = B.y - A.y;
+        const dx2 = D.x - C.x, dy2 = D.y - C.y;
+        const len1 = Math.hypot(dx1, dy1) || 1;
+        const len2 = Math.hypot(dx2, dy2) || 1;
+
+        const u1x = dx1 / len1, u1y = dy1 / len1;
+        const u2x = dx2 / len2, u2y = dy2 / len2;
+
+        const cross = u1x * u2y - u1y * u2x;
+        const dot = u1x * u2x + u1y * u2y;
+
+        if (Math.abs(cross) < 0.028) {
+          const distC = Math.abs((C.x - A.x) * u1y - (C.y - A.y) * u1x);
+          if (distC < 0.14) {
+            return {
+              type: 'coincident',
+              name: 'Coincidentes (r ≡ s)',
+              badge: 'Infinitos pontos comuns',
+              tone: 'tone-gold',
+              pill: 'pill-gold',
+              desc: 'As retas r e s ocupam exatamente o mesmo caminho: todos os seus pontos coincidem.',
+              dist: 0,
+              u1: { x: u1x, y: u1y }
+            };
+          }
+          return {
+            type: 'parallel',
+            name: 'Paralelas (r ∥ s)',
+            badge: 'Nenhum ponto comum',
+            tone: 'tone-cyan',
+            pill: 'pill-cyan',
+            desc: 'Mantêm sempre a mesma distância entre si e jamais se encontram no plano.',
+            dist: distC,
+            u1: { x: u1x, y: u1y }
+          };
+        }
+
+        const det = dx1 * dy2 - dy1 * dx2;
+        const t = ((C.x - A.x) * dy2 - (C.y - A.y) * dx2) / det;
+        const P = { x: A.x + t * dx1, y: A.y + t * dy1 };
+
+        const rawAngleRad = Math.acos(clamp(Math.abs(dot), 0, 1));
+        const angleDeg = (rawAngleRad * 180) / Math.PI;
+
+        if (Math.abs(dot) < 0.028) {
+          return {
+            type: 'perpendicular',
+            name: 'Perpendiculares (r ⊥ s)',
+            badge: 'Cruzamento em 90°',
+            tone: 'tone-emerald',
+            pill: 'pill-emerald',
+            desc: 'Retas concorrentes especiais: cruzam-se em P formando quatro ângulos retos (90°).',
+            P,
+            angleDeg: 90,
+            u1: { x: u1x, y: u1y },
+            u2: { x: u2x, y: u2y }
+          };
+        }
+
+        return {
+          type: 'concurrent',
+          name: 'Concorrentes (r × s)',
+          badge: '1 ponto em comum',
+          tone: 'tone-cyan',
+          pill: 'pill-cyan',
+          desc: 'Os feixes r e s se cruzam em um único ponto P formando ângulos diferentes de 90°.',
+          P,
+          angleDeg,
+          u1: { x: u1x, y: u1y },
+          u2: { x: u2x, y: u2y }
+        };
+      }
+
+      // =======================================================================
+      // REDIMENSIONAMENTO RESPONSIVO DO CANVAS
+      // =======================================================================
+      function resizeCanvas() {
+        const rect = canvasWrap.getBoundingClientRect();
+        const w = Math.max(240, Math.floor(rect.width));
+        const h = Math.max(200, Math.floor(rect.height));
+        const dpr = Math.min(window.devicePixelRatio || 1, 2.5);
+
+        state.w = w;
+        state.h = h;
+        state.dpr = dpr;
+        state.cx = w / 2;
+        state.cy = h / 2;
+        state.unit = Math.max(28, Math.min(w, h) / 10.5);
+
+        canvas.width = Math.round(w * dpr);
+        canvas.height = Math.round(h * dpr);
+        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      }
+
+      // =======================================================================
+      // CONTROLE DAS 9 ETAPAS DO ATO I (0..8)
+      // =======================================================================
+      function ensureAB() {
+        if (dist2D(state.a1.A, state.a1.B) < 1.2) {
+          state.a1.A = { x: -2.1, y: 0.4 };
+          state.a1.B = { x: 2.2, y: -0.5 };
+        }
+      }
+
+      function ensureC() {
+        ensureAB();
+        const proj = projectOnLine(state.a1.C, state.a1.A, state.a1.B, false);
+        if (proj.dist < 0.85) {
+          state.a1.C = { x: -0.5, y: 2.1 };
+        }
+      }
+
+      function setAct1Step(step) {
+        const a1 = state.a1;
+        const prevStep = a1.step;
+        a1.step = clamp(step, 0, 8);
+        a1.maxStep = Math.max(a1.maxStep, a1.step);
+        a1.tetherActive = false;
+        a1.trail = [];
+        state.alertMsg = null;
+
+        if (a1.step === 0) {
+          a1.lineExtend = 0;
+          a1.fanWeave = 0;
+          a1.planeExpand = 0;
+          a1.tilt3D = 0;
+          a1.pyramidWeave = 0;
+          a1.spaceExpand = 0;
+          a1.traveler = { x: 0, y: 0, z: 0 };
+        } else if (a1.step === 1) {
+          a1.lineExtend = 0;
+          a1.fanWeave = 0;
+          a1.planeExpand = 0;
+          a1.tilt3D = 0;
+          a1.pyramidWeave = 0;
+          a1.spaceExpand = 0;
+          a1.traveler = { x: a1.A.x, y: a1.A.y, z: 0 };
+        } else if (a1.step === 2) {
+          ensureAB();
+          a1.lineExtend = 0;
+          a1.fanWeave = 0;
+          a1.planeExpand = 0;
+          a1.tilt3D = 0;
+          a1.pyramidWeave = 0;
+          a1.spaceExpand = 0;
+          a1.traveler = { x: (a1.A.x + a1.B.x) / 2, y: (a1.A.y + a1.B.y) / 2, z: 0 };
+        } else if (a1.step === 3) {
+          ensureAB();
+          if (prevStep < 3) a1.lineExtend = 0;
+          a1.fanWeave = 0;
+          a1.planeExpand = 0;
+          a1.tilt3D = 0;
+          a1.pyramidWeave = 0;
+          a1.spaceExpand = 0;
+          const proj = projectOnLine(a1.traveler, a1.A, a1.B, false);
+          a1.traveler = { x: proj.x, y: proj.y, z: 0 };
+        } else if (a1.step === 4) {
+          ensureC();
+          a1.lineExtend = 1;
+          a1.fanWeave = 0;
+          a1.planeExpand = 0;
+          a1.tilt3D = 0;
+          a1.pyramidWeave = 0;
+          a1.spaceExpand = 0;
+        } else if (a1.step === 5) {
+          ensureC();
+          a1.lineExtend = 1;
+          a1.fanWeave = 1;
+          if (prevStep < 5) a1.planeExpand = 0;
+          a1.tilt3D = 0;
+          a1.pyramidWeave = 0;
+          a1.spaceExpand = 0;
+          a1.traveler = { x: 0.4, y: 0.3, z: 0 };
+        } else if (a1.step === 6) {
+          ensureC();
+          a1.lineExtend = 1;
+          a1.fanWeave = 1;
+          a1.planeExpand = 1;
+          if (prevStep < 6) a1.tilt3D = 0;
+          a1.pyramidWeave = 0;
+          a1.spaceExpand = 0;
+          a1.traveler = { x: 0.6, y: 0.3, z: 0 };
+        } else if (a1.step === 7) {
+          ensureC();
+          a1.lineExtend = 1;
+          a1.fanWeave = 1;
+          a1.planeExpand = 1;
+          a1.tilt3D = 1;
+          a1.pyramidWeave = 0;
+          a1.spaceExpand = 0;
+          a1.traveler = { x: 0.6, y: 0.3, z: 0 };
+        } else if (a1.step === 8) {
+          ensureC();
+          a1.lineExtend = 1;
+          a1.fanWeave = 1;
+          a1.planeExpand = 1;
+          a1.tilt3D = 1;
+          a1.pyramidWeave = 1;
+          a1.spaceExpand = 0;
+          a1.traveler = {
+            x: Number(sliderX.value) || 0.8,
+            y: Number(sliderY.value) || 0.4,
+            z: Number(sliderZ.value) || 1.6
+          };
+        }
+
+        syncUI();
+      }
+
+      // =======================================================================
+      // SINCRONIZAÇÃO DE ELDRAN E PAINÉIS DE UI
+      // =======================================================================
+      function getDefaultEldranSpeech() {
+        if (state.act === 1) {
+          const speeches = [
+            'No princípio, há apenas o Vazio. Toque na tela para acender o primeiro Ponto de Energia Lógica (A).',
+            'Dimensão 0: no Ponto A só é possível estar. Tente arrastar o Viajante — depois toque outro local para forjar o Ponto B.',
+            'Ligando A e B nasce o Segmento: o Viajante agora pode ir e voltar. Acione "Estender Reta (1D)" para romper os limites!',
+            'Dimensão 1: a Reta segue ao infinito nas duas direções. Agora toque em um 3º ponto (C) FORA da reta.',
+            'Feixes de Energia Lógica conectam C a toda a reta AB ainda sobre o Vazio. Acione "Estender Plano (2D)" para forjar o piso!',
+            'Dimensão 2: o Piso Plano nasceu sobre o Vazio! Arraste o Viajante em qualquer direção 2D — depois incline o plano para o 3D.',
+            'Em perspectiva 3D, o Piso Claro flutua no Vazio escuro. Toque acima do piso ou acione o botão para forjar o Ponto D.',
+            'O Ponto D ergue-se fora do plano, lançando feixes sobre o piso ainda no Vazio. Acione "Estender Espaço (3D)" para preencher tudo!',
+            'Dimensão 3 completa! O Espaço tomou toda a tela e o Piso 2D flutua como referência. Orbita a câmera e mova o Viajante em X, Y e Z.'
+          ];
+          return speeches[state.a1.step];
+        }
+        if (state.act === 2) {
+          if (state.a2.showPointC) {
+            const p = projectOnLine(state.a2.C, state.a2.A, state.a2.B, false);
+            if (p.dist < 0.14) {
+              return 'A, B e C estão alinhados sobre a mesma linha — são Pontos Colineares.';
+            }
+            return 'O ponto C saiu da reta: três pontos não colineares determinam um plano inteiro.';
+          }
+          const m = state.a2.mode;
+          if (m === 'line') return 'A Reta ↔AB não tem começo nem fim. Ative a Régua para ver por que o infinito não pode ser medido.';
+          if (m === 'rayAB') return 'A Semirreta →AB tem origem fixa em A e segue indefinidamente passando por B.';
+          if (m === 'rayBA') return 'Repare na ordem das letras: →BA tem origem fixa em B e segue pelo sentido oposto por A.';
+          return 'O Segmento —AB tem início e fim definidos. É a única destas estruturas que a Régua consegue medir.';
+        }
+        // Ato III
+        const rel = analyzeAct3Lines();
+        if (!state.a3.revealClass) {
+          return 'Modo Visual Puro: observe os feixes r (âmbar) e s (azul-ciano) sobre o Piso 2D e discuta a posição relativa antes de revelar.';
+        }
+        if (rel.type === 'parallel') return 'Retas Paralelas (r ∥ s): mantêm distância constante e nunca se cruzam no plano infinito.';
+        if (rel.type === 'perpendicular') return 'Retas Perpendiculares (r ⊥ s): cruzam-se em P formando um ângulo reto exato de 90°.';
+        if (rel.type === 'coincident') return 'Retas Coincidentes (r ≡ s): fundem-se em um único feixe, compartilhando infinitos pontos.';
+        return 'Retas Concorrentes (r × s): cruzam-se em um único ponto P com abertura diferente de 90°.';
+      }
+
+      function updateEldranBar() {
+        const now = performance.now();
+        eldranBar.classList.remove('alert-coral', 'alert-emerald');
+
+        if (state.alertMsg && now < state.alertUntil) {
+          eldranSpeech.textContent = state.alertMsg;
+          if (state.alertTone === 'coral') eldranBar.classList.add('alert-coral');
+          if (state.alertTone === 'emerald') eldranBar.classList.add('alert-emerald');
+        } else {
+          state.alertMsg = null;
+          eldranSpeech.textContent = getDefaultEldranSpeech();
+        }
+      }
+
+      function setToggleEl(node, isOn) {
+        node.classList.toggle('is-on', isOn);
+        node.setAttribute('aria-checked', String(isOn));
+      }
+
+      function syncUI() {
+        // Abas dos 3 Atos
+        tabAct1.classList.toggle('active', state.act === 1);
+        tabAct1.setAttribute('aria-selected', String(state.act === 1));
+        tabAct2.classList.toggle('active', state.act === 2);
+        tabAct2.setAttribute('aria-selected', String(state.act === 2));
+        tabAct3.classList.toggle('active', state.act === 3);
+        tabAct3.setAttribute('aria-selected', String(state.act === 3));
+
+        paneAct1.classList.toggle('hidden', state.act !== 1);
+        paneAct2.classList.toggle('hidden', state.act !== 2);
+        paneAct3.classList.toggle('hidden', state.act !== 3);
+
+        // --- ATO I ---
+        if (state.act === 1) {
+          const s = state.a1.step;
+          act1StepCounter.textContent = `Etapa ${s} / 8`;
+          act1ProgressFill.style.width = `${(s / 8) * 100}%`;
+          btnAct1Prev.disabled = (s === 0);
+
+          act1StepGrid.querySelectorAll('.step-btn').forEach((btn) => {
+            const st = Number(btn.dataset.step);
+            btn.classList.remove('current', 'completed');
+            if (st === s) btn.classList.add('current');
+            else if (st <= state.a1.maxStep) btn.classList.add('completed');
+          });
+
+          const stepMeta = [
+            {
+              hud: 'ETAPA 0/8 · VAZIO ORIGINAL',
+              dot: '#94a3b8',
+              title: 'O Vazio Original',
+              tag: 'Sem Dimensão',
+              pill: 'pill-gold',
+              cardTone: 'tone-gold',
+              text: 'Antes do primeiro ponto, não há posição nem movimento. Toque no vazio para acender o Ponto A.',
+              btnText: 'Acender Ponto A no Vazio',
+              btnClass: 'btn btn-gold'
+            },
+            {
+              hud: 'ETAPA 1/8 · DIMENSÃO 0 (PONTO A)',
+              dot: '#fbbf24',
+              title: 'Dimensão 0 — Ponto A',
+              tag: '0D',
+              pill: 'pill-gold',
+              cardTone: 'tone-gold',
+              text: 'Aqui só é possível estar. Nenhum movimento existe. Toque outro local para criar o Ponto B.',
+              btnText: 'Forjar 2º Ponto (B)',
+              btnClass: 'btn btn-gold'
+            },
+            {
+              hud: 'ETAPA 2/8 · SEGMENTO AB',
+              dot: '#fbbf24',
+              title: 'Segmento —AB',
+              tag: 'Conexão 1D',
+              pill: 'pill-gold',
+              cardTone: 'tone-gold',
+              text: 'O Viajante já pode ir e voltar entre A e B. Agora estenda o feixe para os dois lados.',
+              btnText: 'Estender Reta (1D)',
+              btnClass: 'btn btn-cyan'
+            },
+            {
+              hud: 'ETAPA 3/8 · DIMENSÃO 1 (RETA INFINITA)',
+              dot: '#38bdf8',
+              title: 'Dimensão 1 — Reta ↔AB',
+              tag: '1D Infinito',
+              pill: 'pill-cyan',
+              cardTone: 'tone-cyan',
+              text: 'Movimento infinito em uma única direção. Toque em um 3º ponto C FORA da reta.',
+              btnText: 'Criar Ponto C fora da Reta',
+              btnClass: 'btn btn-gold'
+            },
+            {
+              hud: 'ETAPA 4/8 · CONEXÃO FORA DA RETA',
+              dot: '#fbbf24',
+              title: 'Feixes de C até a Reta AB',
+              tag: 'Conexão 2D',
+              pill: 'pill-gold',
+              cardTone: 'tone-gold',
+              text: 'Dezenas de feixes ligam C a todos os pontos da reta ainda sobre o Vazio. Estenda para forjar o piso!',
+              btnText: 'Estender Plano (2D)',
+              btnClass: 'btn btn-cyan'
+            },
+            {
+              hud: 'ETAPA 5/8 · DIMENSÃO 2 (PISO PLANO)',
+              dot: '#38bdf8',
+              title: 'Dimensão 2 — O Piso Plano',
+              tag: '2D Infinito',
+              pill: 'pill-cyan',
+              cardTone: 'tone-cyan',
+              text: 'Um piso claro nasce sobre o Vazio: o Viajante agora caminha livremente em qualquer direção 2D.',
+              btnText: 'Preparar 3ª Dimensão (Inclinar Plano)',
+              btnClass: 'btn btn-gold'
+            },
+            {
+              hud: 'ETAPA 6/8 · PERSPECTIVA 3D (PISO NO VAZIO)',
+              dot: '#38bdf8',
+              title: 'O Piso 2D no Vazio Escuro',
+              tag: 'Perspectiva',
+              pill: 'pill-cyan',
+              cardTone: 'tone-cyan',
+              text: 'O piso claro flutua no Vazio original. Toque acima do piso ou clique abaixo para lançar o Ponto D.',
+              btnText: 'Criar Ponto D acima do Plano',
+              btnClass: 'btn btn-gold'
+            },
+            {
+              hud: 'ETAPA 7/8 · CONEXÃO FORA DO PLANO',
+              dot: '#fbbf24',
+              title: 'Feixes de D até o Piso 2D',
+              tag: 'Conexão 3D',
+              pill: 'pill-gold',
+              cardTone: 'tone-gold',
+              text: 'Feixes descem de D até o piso sobre o Vazio escuro. Estenda para preencher todo o Espaço 3D!',
+              btnText: 'Estender Espaço (3D)',
+              btnClass: 'btn btn-emerald'
+            },
+            {
+              hud: 'ETAPA 8/8 · DIMENSÃO 3 (ESPAÇO TOTAL)',
+              dot: '#34d399',
+              title: 'Dimensão 3 — Espaço Total',
+              tag: '3D Completo',
+              pill: 'pill-emerald',
+              cardTone: 'tone-emerald',
+              text: 'O Espaço 3D preencheu toda a tela! Arraste para orbitar e controle o Viajante em X, Y e Z.',
+              btnText: 'Centralizar Câmera 3D',
+              btnClass: 'btn btn-ghost'
+            }
+          ][s];
+
+          hudText.textContent = stepMeta.hud;
+          hudDot.style.background = stepMeta.dot;
+          hudDot.style.boxShadow = `0 0 8px ${stepMeta.dot}`;
+
+          act1InfoCard.className = `info-card ${stepMeta.cardTone}`;
+          act1CardTitle.textContent = stepMeta.title;
+          act1CardTag.className = `pill-tag ${stepMeta.pill}`;
+          act1CardTag.textContent = stepMeta.tag;
+          act1CardText.textContent = stepMeta.text;
+
+          btnAct1Primary.textContent = stepMeta.btnText;
+          btnAct1Primary.className = stepMeta.btnClass;
+
+          act13DControls.classList.toggle('hidden', s < 6);
+          slider3DWrap.classList.toggle('hidden', s !== 8);
+          valZ.textContent = `${state.a1.traveler.z.toFixed(1).replace('.', ',')} u`;
+          valX.textContent = `${state.a1.traveler.x.toFixed(1).replace('.', ',')} u`;
+          valY.textContent = `${state.a1.traveler.y.toFixed(1).replace('.', ',')} u`;
+          setToggleEl(togAutoOrbit, state.a1.autoOrbit);
+        }
+
+        // --- ATO II ---
+        if (state.act === 2) {
+          hudText.textContent = 'ATO II · RETA, SEMIRRETA E SEGMENTO (PISO 2D)';
+          hudDot.style.background = '#fbbf24';
+          hudDot.style.boxShadow = '0 0 8px #fbbf24';
+
+          act2ModeGrid.querySelectorAll('.mode-btn').forEach((btn) => {
+            btn.classList.toggle('active', btn.dataset.mode === state.a2.mode);
+          });
+
+          const distAB = dist2D(state.a2.A, state.a2.B);
+          const distStr = distAB.toFixed(1).replace('.', ',') + ' u';
+          const m = state.a2.mode;
+
+          if (m === 'line') {
+            act2MeasureCard.className = 'info-card tone-cyan';
+            act2CardTitle.textContent = 'Reta ↔AB';
+            act2CardBadge.className = 'pill-tag pill-cyan';
+            act2CardBadge.textContent = state.a2.showRuler ? '∞ (Não mensurável)' : 'Infinita';
+            act2CardDesc.textContent = state.a2.showRuler
+              ? 'Comprimento infinito nos dois sentidos: não é possível medir uma reta inteira.'
+              : 'Estende-se indefinidamente passando por A e B nos dois sentidos.';
+          } else if (m === 'rayAB') {
+            act2MeasureCard.className = 'info-card tone-gold';
+            act2CardTitle.textContent = 'Semirreta →AB';
+            act2CardBadge.className = 'pill-tag pill-gold';
+            act2CardBadge.textContent = state.a2.showRuler ? '∞ (Não mensurável)' : 'Origem em A';
+            act2CardDesc.textContent = state.a2.showRuler
+              ? 'Começa exatamente em A, mas segue sem fim após B — comprimento infinito.'
+              : 'Tem origem destacada em A e segue indefinidamente no sentido de B.';
+          } else if (m === 'rayBA') {
+            act2MeasureCard.className = 'info-card tone-gold';
+            act2CardTitle.textContent = 'Semirreta →BA';
+            act2CardBadge.className = 'pill-tag pill-gold';
+            act2CardBadge.textContent = state.a2.showRuler ? '∞ (Não mensurável)' : 'Origem em B';
+            act2CardDesc.textContent = state.a2.showRuler
+              ? 'Começa exatamente em B, mas segue ao infinito por A — comprimento infinito.'
+              : 'A ordem das letras inverte o sentido: agora a origem é B e o feixe passa por A.';
+          } else {
+            act2MeasureCard.className = 'info-card tone-emerald';
+            act2CardTitle.textContent = 'Segmento —AB';
+            act2CardBadge.className = 'pill-tag pill-emerald';
+            act2CardBadge.textContent = state.a2.showRuler ? `Medida: ${distStr}` : 'Limitado';
+            act2CardDesc.textContent = state.a2.showRuler
+              ? `Possui início e fim: distância exata entre A e B igual a ${distStr}.`
+              : 'Porção limitada entre A e B. Ative o Medidor de Energia para medir seu tamanho.';
+          }
+
+          setToggleEl(togAct2Ruler, state.a2.showRuler);
+          setToggleEl(togAct2PointC, state.a2.showPointC);
+          setToggleEl(togAct2Snap, state.a2.snapGrid);
+
+          act2CollinearCard.classList.toggle('hidden', !state.a2.showPointC);
+          if (state.a2.showPointC) {
+            const p = projectOnLine(state.a2.C, state.a2.A, state.a2.B, false);
+            const isCol = p.dist < 0.14;
+            act2CollinearCard.className = `info-card ${isCol ? 'tone-emerald' : 'tone-coral'}`;
+            act2ColTitle.textContent = isCol ? 'Pontos Colineares' : 'Não Colineares';
+            act2ColBadge.className = `pill-tag ${isCol ? 'pill-emerald' : 'pill-coral'}`;
+            act2ColBadge.textContent = isCol ? 'Mesma reta' : 'Fora da reta';
+            act2ColDesc.textContent = isCol
+              ? 'A, B e C pertencem exatamente à mesma linha reta.'
+              : 'A, B e C não estão alinhados — juntos determinam um único plano.';
+          }
+        }
+
+        // --- ATO III ---
+        if (state.act === 3) {
+          const rel = analyzeAct3Lines();
+          hudText.textContent = state.a3.revealClass
+            ? `ATO III · ${rel.name.toUpperCase()}`
+            : 'ATO III · CAMINHOS NO PLANO (VISUAL PURO)';
+          hudDot.style.background = (state.a3.revealClass && rel.type === 'perpendicular') ? '#34d399' : '#38bdf8';
+          hudDot.style.boxShadow = `0 0 8px ${hudDot.style.background}`;
+
+          act3ClassCard.classList.toggle('hidden', !state.a3.revealClass);
+          act3PureNotice.classList.toggle('hidden', state.a3.revealClass);
+
+          if (state.a3.revealClass) {
+            act3ClassCard.className = `info-card ${rel.tone}`;
+            act3ClassName.textContent = rel.name;
+            act3ClassBadge.className = `pill-tag ${rel.pill}`;
+            act3ClassBadge.textContent = rel.badge;
+            act3ClassDesc.textContent = rel.desc;
+          }
+
+          setToggleEl(togAct3Reveal, state.a3.revealClass);
+          setToggleEl(togAct3Angle, state.a3.showAngle);
+          setToggleEl(togAct3Snap, state.a3.snapGrid);
+
+          act3ChalPanel.classList.toggle('hidden', !state.a3.chalOpen);
+          if (state.a3.chalOpen) {
+            const chal = ACT3_CHALLENGES[state.a3.chalIdx];
+            const ok = chal.check(rel);
+            if (ok) state.a3.solvedIds.add(chal.id);
+
+            act3ChalNum.textContent = String(state.a3.chalIdx + 1);
+            act3ChalDone.textContent = String(state.a3.solvedIds.size);
+            act3ChalDesc.textContent = chal.text;
+            act3ChalPanel.classList.toggle('solved', ok);
+
+            if (ok) {
+              act3ChalStatus.className = 'status-ok';
+              act3ChalStatus.innerHTML = '&#10004; Estrutura validada por Eldran!';
+              btnChalNextDone.classList.toggle('hidden', state.a3.chalIdx >= ACT3_CHALLENGES.length - 1);
+            } else {
+              act3ChalStatus.className = 'status-wait';
+              act3ChalStatus.textContent = state.a3.solvedIds.has(chal.id)
+                ? 'Já concluído antes — ajuste para validar novamente.'
+                : 'Arraste A, B, C ou D...';
+              btnChalNextDone.classList.add('hidden');
+            }
+          }
+          labelAct3Chal.textContent = `Desafios de Eldran (${state.a3.solvedIds.size}/4)`;
+        }
+
+        updateEldranBar();
+      }
+
+      // =======================================================================
+      // PRIMITIVAS DE DESENHO (VAZIO ESCURO, PISO 2D CLARO E ESPAÇO 3D)
+      // =======================================================================
+      function drawVoidBackground(now) {
+        const { w, h } = state;
+        ctx.fillStyle = '#05070e';
+        ctx.fillRect(0, 0, w, h);
+
+        // Poeira estelar muito sutil
+        for (let i = 0; i < STARS.length; i++) {
+          const st = STARS[i];
+          const alpha = 0.12 + 0.18 * (0.5 + 0.5 * Math.sin(now * 0.0011 * st.speed + st.phase));
+          ctx.fillStyle = `rgba(203, 213, 225, ${alpha.toFixed(3)})`;
+          ctx.beginPath();
+          ctx.arc(st.nx * w, st.ny * h, st.r, 0, Math.PI * 2);
+          ctx.fill();
+        }
+      }
+
+      /**
+       * Desenha o Piso 2D Claro (#d8e6f2 -> #e6f0f8) com expansão planar suave.
+       * expandProgress = 1 preenche o palco todo (com sutil moldura brilhante);
+       * valores em (0..1) expandem o piso radialmente sobre o Vazio original.
+       */
+      function drawLightFloor2D(expandProgress = 1, showSnapDots = false, centerPx = null) {
+        if (expandProgress <= 0.005) return;
+        const { w, h, cx, cy, unit } = state;
+        const ox = centerPx ? centerPx.x : cx;
+        const oy = centerPx ? centerPx.y : cy;
+        const maxR = Math.hypot(w, h);
+        const curR = maxR * easeOutCubic(expandProgress);
+
+        ctx.save();
+        if (expandProgress < 0.999) {
+          ctx.beginPath();
+          ctx.arc(ox, oy, curR, 0, Math.PI * 2);
+          ctx.clip();
+        }
+
+        // Superfície clara do Piso 2D (pérola celeste / azul-ardósia claro)
+        const grad = ctx.createRadialGradient(cx, cy * 0.85, 20, cx, cy, Math.max(w, h) * 0.75);
+        grad.addColorStop(0, '#eef5fb');
+        grad.addColorStop(0.55, '#e6f0f8');
+        grad.addColorStop(1, '#d8e6f2');
+        ctx.fillStyle = grad;
+        ctx.fillRect(0, 0, w, h);
+
+        // Malha geométrica suave sobre o piso claro
+        const maxX = Math.ceil(w / (2 * unit)) + 1;
+        const maxY = Math.ceil(h / (2 * unit)) + 1;
+        ctx.strokeStyle = 'rgba(15, 41, 66, 0.11)';
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        for (let ix = -maxX; ix <= maxX; ix++) {
+          const sx = cx + ix * unit;
+          ctx.moveTo(sx, 0);
+          ctx.lineTo(sx, h);
+        }
+        for (let iy = -maxY; iy <= maxY; iy++) {
+          const sy = cy - iy * unit;
+          ctx.moveTo(0, sy);
+          ctx.lineTo(w, sy);
+        }
+        ctx.stroke();
+
+        // Eixos centrais sutis
+        ctx.strokeStyle = 'rgba(2, 132, 199, 0.22)';
+        ctx.lineWidth = 1.2;
+        ctx.beginPath();
+        ctx.moveTo(cx, 0); ctx.lineTo(cx, h);
+        ctx.moveTo(0, cy); ctx.lineTo(w, cy);
+        ctx.stroke();
+
+        // Pontos de imã da grade (Atos II e III)
+        if (showSnapDots) {
+          ctx.fillStyle = 'rgba(15, 41, 66, 0.26)';
+          for (let ix = -maxX; ix <= maxX; ix++) {
+            for (let iy = -maxY; iy <= maxY; iy++) {
+              ctx.beginPath();
+              ctx.arc(cx + ix * unit, cy - iy * unit, 1.7, 0, Math.PI * 2);
+              ctx.fill();
+            }
+          }
+        }
+
+        // Borda interna brilhante do piso
+        ctx.strokeStyle = 'rgba(56, 189, 248, 0.42)';
+        ctx.lineWidth = 3;
+        ctx.strokeRect(1.5, 1.5, w - 3, h - 3);
+
+        ctx.restore();
+
+        // Anel luminoso da frente de expansão durante a animação
+        if (expandProgress > 0.01 && expandProgress < 0.99) {
+          ctx.save();
+          ctx.beginPath();
+          ctx.arc(ox, oy, curR, 0, Math.PI * 2);
+          ctx.strokeStyle = '#38bdf8';
+          ctx.lineWidth = 3.5;
+          ctx.globalAlpha = 1 - expandProgress * 0.7;
+          ctx.stroke();
+          ctx.restore();
+        }
+      }
+
+      // Desenha feixe luminoso com contraste calibrado para fundo escuro ou piso claro
+      function drawBeam(x1, y1, x2, y2, color, width = 3.2, glowWidth = 10, alpha = 1, onLight = false) {
+        ctx.save();
+        ctx.globalAlpha = alpha;
+        ctx.lineCap = 'round';
+
+        // Halo
+        ctx.strokeStyle = color;
+        ctx.globalAlpha = alpha * (onLight ? 0.20 : 0.28);
+        ctx.lineWidth = glowWidth;
+        ctx.beginPath();
+        ctx.moveTo(x1, y1);
+        ctx.lineTo(x2, y2);
+        ctx.stroke();
+
+        // Núcleo principal
+        ctx.globalAlpha = alpha;
+        ctx.strokeStyle = color;
+        ctx.lineWidth = width;
+        ctx.beginPath();
+        ctx.moveTo(x1, y1);
+        ctx.lineTo(x2, y2);
+        ctx.stroke();
+
+        // Filete central (branco no vazio, brilho suave no piso claro)
+        ctx.strokeStyle = '#ffffff';
+        ctx.globalAlpha = alpha * (onLight ? 0.35 : 0.58);
+        ctx.lineWidth = Math.max(1, width * 0.32);
+        ctx.beginPath();
+        ctx.moveTo(x1, y1);
+        ctx.lineTo(x2, y2);
+        ctx.stroke();
+
+        ctx.restore();
+      }
+
+      function drawArrowHead(x, y, ang, color, size = 12) {
+        ctx.save();
+        ctx.translate(x, y);
+        ctx.rotate(ang);
+        ctx.fillStyle = color;
+        ctx.beginPath();
+        ctx.moveTo(0, 0);
+        ctx.lineTo(-size, -size * 0.52);
+        ctx.lineTo(-size * 0.72, 0);
+        ctx.lineTo(-size, size * 0.52);
+        ctx.closePath();
+        ctx.fill();
+        ctx.restore();
+      }
+
+      function clipLineToCanvas(p1, p2, margin = 16) {
+        const dx = p2.x - p1.x;
+        const dy = p2.y - p1.y;
+        const len = Math.hypot(dx, dy);
+        if (len < 1e-4) return null;
+        const ux = dx / len;
+        const uy = dy / len;
+
+        let tMin = -Infinity;
+        let tMax = Infinity;
+        const minX = margin, maxX = state.w - margin;
+        const minY = margin, maxY = state.h - margin;
+
+        if (Math.abs(ux) > 1e-6) {
+          const tx1 = (minX - p1.x) / ux;
+          const tx2 = (maxX - p1.x) / ux;
+          tMin = Math.max(tMin, Math.min(tx1, tx2));
+          tMax = Math.min(tMax, Math.max(tx1, tx2));
+        } else if (p1.x < minX || p1.x > maxX) {
+          return null;
+        }
+
+        if (Math.abs(uy) > 1e-6) {
+          const ty1 = (minY - p1.y) / uy;
+          const ty2 = (maxY - p1.y) / uy;
+          tMin = Math.max(tMin, Math.min(ty1, ty2));
+          tMax = Math.min(tMax, Math.max(ty1, ty2));
+        } else if (p1.y < minY || p1.y > maxY) {
+          return null;
+        }
+
+        if (tMax < tMin) return null;
+        return {
+          start: { x: p1.x + ux * tMin, y: p1.y + uy * tMin },
+          end: { x: p1.x + ux * tMax, y: p1.y + uy * tMax },
+          ux, uy
+        };
+      }
+
+      // Ponto de Energia Lógica com rótulo de altíssimo contraste (tanto no Vazio quanto no Piso Claro)
+      function drawLogicPoint(sx, sy, label, color = '#fbbf24', opts = {}) {
+        const r = opts.radius || 7.5;
+        const ring = opts.ring || false;
+        const pulse = opts.pulse || false;
+        const onLight = opts.onLight || false;
+
+        ctx.save();
+        if (pulse) {
+          const p = 0.5 + 0.5 * Math.sin(performance.now() * 0.005);
+          ctx.beginPath();
+          ctx.arc(sx, sy, r + 7 + p * 5, 0, Math.PI * 2);
+          ctx.strokeStyle = color;
+          ctx.globalAlpha = 0.28 + (1 - p) * 0.38;
+          ctx.lineWidth = 2.2;
+          ctx.stroke();
+          ctx.globalAlpha = 1;
+        }
+
+        // Halo
+        const g = ctx.createRadialGradient(sx, sy, 1, sx, sy, r * 2.8);
+        g.addColorStop(0, color);
+        g.addColorStop(1, 'rgba(0,0,0,0)');
+        ctx.fillStyle = g;
+        ctx.globalAlpha = onLight ? 0.28 : 0.44;
+        ctx.beginPath();
+        ctx.arc(sx, sy, r * 2.8, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.globalAlpha = 1;
+
+        if (ring) {
+          ctx.beginPath();
+          ctx.arc(sx, sy, r + 5.5, 0, Math.PI * 2);
+          ctx.strokeStyle = color;
+          ctx.lineWidth = 2.5;
+          ctx.stroke();
+        }
+
+        // Núcleo com contorno de alto contraste
+        ctx.beginPath();
+        ctx.arc(sx, sy, r, 0, Math.PI * 2);
+        ctx.fillStyle = color;
+        ctx.fill();
+        ctx.lineWidth = 2.2;
+        ctx.strokeStyle = onLight ? '#0f172a' : '#ffffff';
+        ctx.stroke();
+
+        // Rótulo em medalhão escuro (garante contraste perfeito sobre o piso claro e sobre o vazio)
+        if (label) {
+          const ox = opts.labelDx !== undefined ? opts.labelDx : 15;
+          const oy = opts.labelDy !== undefined ? opts.labelDy : -15;
+          ctx.font = '800 13px "Segoe UI", system-ui, sans-serif';
+          ctx.textAlign = 'center';
+          ctx.textBaseline = 'middle';
+          ctx.fillStyle = '#0f172a';
+          ctx.beginPath();
+          ctx.arc(sx + ox, sy + oy, 11.8, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.strokeStyle = color;
+          ctx.lineWidth = 1.8;
+          ctx.stroke();
+          ctx.fillStyle = '#ffffff';
+          ctx.fillText(label, sx + ox, sy + oy + 0.5);
+        }
+        ctx.restore();
+      }
+
+      function drawTraveler(sx, sy, now, alertMode = false, onLight = false) {
+        const col = alertMode ? '#e11d48' : (onLight ? '#059669' : '#34d399');
+        const rot = now * 0.0024;
+
+        ctx.save();
+        ctx.translate(sx, sy);
+
+        const g = ctx.createRadialGradient(0, 0, 2, 0, 0, 22);
+        g.addColorStop(0, col);
+        g.addColorStop(1, 'rgba(0,0,0,0)');
+        ctx.fillStyle = g;
+        ctx.globalAlpha = onLight ? 0.34 : 0.48;
+        ctx.beginPath();
+        ctx.arc(0, 0, 22, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.globalAlpha = 1;
+
+        ctx.rotate(rot);
+        ctx.strokeStyle = col;
+        ctx.lineWidth = 2.4;
+        ctx.strokeRect(-9, -9, 18, 18);
+
+        ctx.rotate(-rot);
+        ctx.fillStyle = onLight ? '#0f172a' : '#ffffff';
+        ctx.beginPath();
+        ctx.arc(0, 0, 4.6, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.restore();
+      }
+
+      function drawRipples(now) {
+        for (let i = state.ripples.length - 1; i >= 0; i--) {
+          const rp = state.ripples[i];
+          const t = (now - rp.start) / rp.duration;
+          if (t >= 1) {
+            state.ripples.splice(i, 1);
+            continue;
+          }
+          const k = easeOutCubic(t);
+          ctx.save();
+          ctx.beginPath();
+          ctx.arc(rp.x, rp.y, 8 + rp.maxR * k, 0, Math.PI * 2);
+          ctx.strokeStyle = rp.color;
+          ctx.globalAlpha = (1 - t) * 0.88;
+          ctx.lineWidth = 2.8 * (1 - t * 0.5);
+          ctx.stroke();
+          ctx.restore();
+        }
+      }
+
+      function drawBadgePillOnCanvas(sx, sy, text, borderColor = '#38bdf8', textColor = '#ffffff') {
+        ctx.save();
+        ctx.font = '800 12.5px "Segoe UI", system-ui, sans-serif';
+        const tw = ctx.measureText(text).width;
+        const w = tw + 18;
+        const h = 25;
+        const rx = sx - w / 2;
+        const ry = sy - h / 2;
+
+        ctx.fillStyle = 'rgba(11, 18, 34, 0.92)';
+        ctx.strokeStyle = borderColor;
+        ctx.lineWidth = 1.8;
+        ctx.beginPath();
+        ctx.roundRect ? ctx.roundRect(rx, ry, w, h, 12.5) : ctx.rect(rx, ry, w, h);
+        ctx.fill();
+        ctx.stroke();
+
+        ctx.fillStyle = textColor;
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText(text, sx, sy + 0.5);
+        ctx.restore();
+      }
+
+      // =======================================================================
+      // RENDERIZAÇÃO DO ATO I — 9 ETAPAS (0D -> 3D)
+      // =======================================================================
+      function renderAct1(now, dt) {
+        const a1 = state.a1;
+
+        // Atualiza animações suaves
+        if (a1.step >= 3 && a1.lineExtend < 1) a1.lineExtend = Math.min(1, a1.lineExtend + dt * 1.9);
+        if (a1.step >= 4 && a1.fanWeave < 1) a1.fanWeave = Math.min(1, a1.fanWeave + dt * 1.45);
+        if (a1.step >= 5 && a1.planeExpand < 1) a1.planeExpand = Math.min(1, a1.planeExpand + dt * 1.15);
+        if (a1.step >= 6 && a1.tilt3D < 1) a1.tilt3D = Math.min(1, a1.tilt3D + dt * 1.15);
+        if (a1.step >= 7 && a1.pyramidWeave < 1) a1.pyramidWeave = Math.min(1, a1.pyramidWeave + dt * 1.35);
+        if (a1.step === 8 && a1.spaceExpand < 1) a1.spaceExpand = Math.min(1, a1.spaceExpand + dt * 0.9);
+        if (a1.step >= 6 && a1.autoOrbit && (!state.drag || state.drag.type !== 'orbit3d')) {
+          a1.yaw += dt * 0.42;
+        }
+
+        // ---- ETAPAS 6, 7 E 8: PERSPECTIVA 3D E ESPAÇO TOTAL ----
+        if (a1.step >= 6) {
+          renderAct1Perspective3D(now);
+          return;
+        }
+
+        // ---- FUNDO BASE: VAZIO ORIGINAL (#05070e) ----
+        drawVoidBackground(now);
+
+        // ---- ETAPA 5: PISO 2D CLARO EXPANDIDO SOBRE O VAZIO ----
+        const onLightFloor = (a1.step === 5);
+        if (onLightFloor) {
+          const sC = toScreen(a1.C.x, a1.C.y);
+          drawLightFloor2D(a1.planeExpand, false, sC);
+
+          if (a1.planeExpand > 0.35) {
+            ctx.save();
+            ctx.globalAlpha = Math.min(1, (a1.planeExpand - 0.35) / 0.45);
+            drawBadgePillOnCanvas(state.w - 78, state.h - 22, 'Piso Plano α (2D)', '#0284c7', '#e0f2fe');
+            ctx.restore();
+          }
+        }
+
+        // ---- ETAPA 0: VAZIO (CONVITE PULSANTE) ----
+        if (a1.step === 0) {
+          const p = 0.5 + 0.5 * Math.sin(now * 0.0032);
+          ctx.save();
+          ctx.strokeStyle = 'rgba(251, 191, 36, 0.38)';
+          ctx.lineWidth = 1.6;
+          ctx.setLineDash([5, 6]);
+          ctx.beginPath();
+          ctx.arc(state.cx, state.cy, 28 + p * 12, 0, Math.PI * 2);
+          ctx.stroke();
+          ctx.setLineDash([]);
+          ctx.font = '700 13.5px "Segoe UI", system-ui, sans-serif';
+          ctx.fillStyle = 'rgba(253, 230, 138, 0.85)';
+          ctx.textAlign = 'center';
+          ctx.fillText('Toque em qualquer lugar do Vazio', state.cx, state.cy + 62);
+          ctx.restore();
+          return;
+        }
+
+        const sA = toScreen(a1.A.x, a1.A.y);
+
+        // ---- ETAPA 1: DIMENSÃO 0 (PONTO A + PRISÃO ELÁSTICA) ----
+        if (a1.step === 1) {
+          let tx = sA.x, ty = sA.y;
+          const isVibrating = now < a1.vibrateUntil;
+
+          if (a1.tetherActive) {
+            const dx = a1.tetherPull.x - sA.x;
+            const dy = a1.tetherPull.y - sA.y;
+            const d = Math.hypot(dx, dy);
+            const capped = Math.min(28, d * 0.28);
+            tx = sA.x + (d > 1 ? (dx / d) * capped : 0);
+            ty = sA.y + (d > 1 ? (dy / d) * capped : 0);
+
+            ctx.save();
+            ctx.strokeStyle = '#fb7185';
+            ctx.lineWidth = 2.2;
+            ctx.setLineDash([4, 4]);
+            ctx.beginPath();
+            ctx.moveTo(sA.x, sA.y);
+            ctx.lineTo(tx, ty);
+            ctx.stroke();
+            ctx.setLineDash([]);
+            ctx.restore();
+          } else if (isVibrating) {
+            const decay = (a1.vibrateUntil - now) / 420;
+            tx += Math.sin(now * 0.085) * 7 * decay;
+            ty += Math.cos(now * 0.075) * 5 * decay;
+          }
+
+          drawLogicPoint(sA.x, sA.y, 'A', '#fbbf24', { pulse: true, radius: 8 });
+          drawTraveler(tx, ty, now, a1.tetherActive || isVibrating, false);
+          return;
+        }
+
+        // ---- ETAPAS 2, 3, 4 E 5 ----
+        const sB = toScreen(a1.B.x, a1.B.y);
+        const lineColor = onLightFloor ? '#0284c7' : '#38bdf8';
+        const goldColor = onLightFloor ? '#b45309' : '#fbbf24';
+
+        // Etapa 4 (e transição da Etapa 5): Leque de feixes conectando C a toda a reta AB
+        if (a1.step === 4 || (a1.step === 5 && a1.planeExpand < 0.85)) {
+          const sC = toScreen(a1.C.x, a1.C.y);
+          const clip = clipLineToCanvas(sA, sB, 14);
+          if (clip) {
+            const numRays = 22;
+            const weave = easeOutCubic(a1.fanWeave);
+            const fanAlpha = a1.step === 4 ? 0.52 : (1 - a1.planeExpand) * 0.5;
+            ctx.save();
+            for (let i = 0; i <= numRays; i++) {
+              const frac = i / numRays;
+              const tx = clip.start.x + (clip.end.x - clip.start.x) * frac;
+              const ty = clip.start.y + (clip.end.y - clip.start.y) * frac;
+              const ex = sC.x + (tx - sC.x) * weave;
+              const ey = sC.y + (ty - sC.y) * weave;
+              ctx.strokeStyle = i % 2 === 0 ? '#38bdf8' : '#fbbf24';
+              ctx.globalAlpha = fanAlpha * (0.55 + 0.45 * Math.sin(frac * Math.PI));
+              ctx.lineWidth = 1.45;
+              ctx.beginPath();
+              ctx.moveTo(sC.x, sC.y);
+              ctx.lineTo(ex, ey);
+              ctx.stroke();
+            }
+            ctx.restore();
+          }
+        }
+
+        // Extensão da reta infinita (Etapas 3, 4 e 5)
+        if (a1.step >= 3) {
+          const clip = clipLineToCanvas(sA, sB, 18);
+          if (clip) {
+            const ext = easeOutCubic(a1.lineExtend);
+            const pStart = { x: sA.x + (clip.start.x - sA.x) * ext, y: sA.y + (clip.start.y - sA.y) * ext };
+            const pEnd = { x: sB.x + (clip.end.x - sB.x) * ext, y: sB.y + (clip.end.y - sB.y) * ext };
+            drawBeam(pStart.x, pStart.y, pEnd.x, pEnd.y, lineColor, 3.2, 11, 0.95, onLightFloor);
+            if (ext > 0.75) {
+              const ang = Math.atan2(clip.uy, clip.ux);
+              drawArrowHead(pEnd.x, pEnd.y, ang, lineColor, 12);
+              drawArrowHead(pStart.x, pStart.y, ang + Math.PI, lineColor, 12);
+            }
+          }
+        }
+
+        // Segmento AB
+        drawBeam(sA.x, sA.y, sB.x, sB.y, goldColor, 3.8, 12, 1, onLightFloor);
+
+        // Rastro do Viajante na Etapa 5 (Piso 2D)
+        if (a1.step === 5 && a1.trail.length > 1) {
+          ctx.save();
+          for (let i = 1; i < a1.trail.length; i++) {
+            const p0 = toScreen(a1.trail[i - 1].x, a1.trail[i - 1].y);
+            const p1 = toScreen(a1.trail[i].x, a1.trail[i].y);
+            ctx.strokeStyle = `rgba(5, 150, 105, ${(i / a1.trail.length) * 0.65})`;
+            ctx.lineWidth = 2.8;
+            ctx.beginPath();
+            ctx.moveTo(p0.x, p0.y);
+            ctx.lineTo(p1.x, p1.y);
+            ctx.stroke();
+          }
+          ctx.restore();
+        }
+
+        // Pontos A, B e (nas Etapas 4 e 5) C
+        drawLogicPoint(sA.x, sA.y, 'A', goldColor, { radius: 7.5, onLight: onLightFloor });
+        drawLogicPoint(sB.x, sB.y, 'B', goldColor, { radius: 7.5, onLight: onLightFloor });
+        if (a1.step >= 4) {
+          const sC = toScreen(a1.C.x, a1.C.y);
+          drawLogicPoint(sC.x, sC.y, 'C', lineColor, { radius: 7.5, pulse: a1.step === 4, onLight: onLightFloor });
+        }
+
+        // Viajante
+        const sT = toScreen(a1.traveler.x, a1.traveler.y);
+        drawTraveler(sT.x, sT.y, now, false, onLightFloor);
+      }
+
+      // ---- RENDERIZAÇÃO 3D (ETAPAS 6, 7 E 8) ----
+      function renderAct1Perspective3D(now) {
+        const a1 = state.a1;
+        const { w, h } = state;
+
+        // 1. Fundo: Vazio Original (#05070e) nas Etapas 6 e 7;
+        //    Na Etapa 8, onda volumétrica a partir do Ponto D transforma TODA A TELA
+        //    no gradiente atmosférico índigo-turquesa (#153a5b -> #0e4f6e -> #1d6b87)!
+        drawVoidBackground(now);
+
+        const pDTop = project3D(0, 2.7, 0);
+
+        if (a1.step === 8 && a1.spaceExpand > 0.005) {
+          const maxR = Math.hypot(w, h);
+          const waveR = maxR * easeOutCubic(a1.spaceExpand);
+
+          ctx.save();
+          if (a1.spaceExpand < 0.999) {
+            ctx.beginPath();
+            ctx.arc(pDTop.x, pDTop.y, waveR, 0, Math.PI * 2);
+            ctx.clip();
+          }
+
+          // Atmosfera espacial distinta do vazio original
+          const atmo = ctx.createRadialGradient(pDTop.x, pDTop.y, 18, state.cx, state.cy, Math.max(w, h) * 0.85);
+          atmo.addColorStop(0, '#1d6b87');
+          atmo.addColorStop(0.52, '#0e4f6e');
+          atmo.addColorStop(1, '#153a5b');
+          ctx.fillStyle = atmo;
+          ctx.fillRect(0, 0, w, h);
+
+          // Partículas 3D suaves flutuando no espaço
+          const sw = easeOutCubic(a1.spaceExpand);
+          for (let i = 0; i < SPACE_PARTICLES.length; i++) {
+            const sp = SPACE_PARTICLES[i];
+            const driftY = Math.sin(now * 0.0012 + sp.phase) * 0.14;
+            const pp = project3D(sp.x, sp.y + driftY, sp.z);
+            const alpha = clamp(0.18 + 0.28 * (1 - pp.depth / 12), 0.08, 0.55) * sw;
+            ctx.fillStyle = `rgba(186, 230, 253, ${alpha.toFixed(3)})`;
+            ctx.beginPath();
+            ctx.arc(pp.x, pp.y, Math.max(1, sp.size * pp.scale * 0.75), 0, Math.PI * 2);
+            ctx.fill();
+          }
+          ctx.restore();
+
+          // Onda luminosa de expansão saindo de D
+          if (a1.spaceExpand < 0.98) {
+            ctx.save();
+            ctx.beginPath();
+            ctx.arc(pDTop.x, pDTop.y, waveR, 0, Math.PI * 2);
+            ctx.strokeStyle = '#7dd3fc';
+            ctx.lineWidth = 4;
+            ctx.globalAlpha = 1 - a1.spaceExpand;
+            ctx.stroke();
+            ctx.restore();
+          }
+        }
+
+        // 2. Grade volumétrica 3D sutil (Etapa 8) — metade traseira/envolvente
+        if (a1.step === 8) {
+          const sw = easeOutCubic(a1.spaceExpand);
+          const boxR = 3.5;
+          const boxTop = 2.9;
+          const boxBot = -2.2;
+          const corners = [[-boxR, -boxR], [boxR, -boxR], [boxR, boxR], [-boxR, boxR]];
+
+          ctx.save();
+          ctx.strokeStyle = `rgba(186, 230, 253, ${0.26 * sw})`;
+          ctx.lineWidth = 1.1;
+          ctx.setLineDash([4, 6]);
+          ctx.beginPath();
+          for (const [cx3, cz3] of corners) {
+            const pb = project3D(cx3, boxBot, cz3);
+            const pt = project3D(cx3, boxTop, cz3);
+            ctx.moveTo(pb.x, pb.y);
+            ctx.lineTo(pt.x, pt.y);
+          }
+          for (let i = 0; i < 4; i++) {
+            const [x1, z1] = corners[i];
+            const [x2, z2] = corners[(i + 1) % 4];
+            const t1 = project3D(x1, boxTop, z1);
+            const t2 = project3D(x2, boxTop, z2);
+            ctx.moveTo(t1.x, t1.y); ctx.lineTo(t2.x, t2.y);
+            const b1 = project3D(x1, boxBot, z1);
+            const b2 = project3D(x2, boxBot, z2);
+            ctx.moveTo(b1.x, b1.y); ctx.lineTo(b2.x, b2.y);
+          }
+          ctx.stroke();
+          ctx.setLineDash([]);
+          ctx.restore();
+        }
+
+        // 3. PISO 2D CLARO FLUTUANDO (Y = 0) — referência espacial clara em todas as etapas 3D
+        const gridN = 4;
+        const c1 = project3D(-gridN, 0, -gridN);
+        const c2 = project3D(gridN, 0, -gridN);
+        const c3 = project3D(gridN, 0, gridN);
+        const c4 = project3D(-gridN, 0, gridN);
+
+        ctx.save();
+        ctx.beginPath();
+        ctx.moveTo(c1.x, c1.y);
+        ctx.lineTo(c2.x, c2.y);
+        ctx.lineTo(c3.x, c3.y);
+        ctx.lineTo(c4.x, c4.y);
+        ctx.closePath();
+
+        // Piso 2D claro (#d8e6f2 -> #e6f0f8) bem visível tanto no Vazio quanto no Espaço 3D
+        ctx.fillStyle = a1.step === 8 ? 'rgba(226, 238, 248, 0.78)' : 'rgba(226, 238, 248, 0.90)';
+        ctx.fill();
+        ctx.strokeStyle = '#7dd3fc';
+        ctx.lineWidth = 2.4;
+        ctx.stroke();
+
+        // Grade do Piso Claro
+        ctx.strokeStyle = 'rgba(15, 41, 66, 0.17)';
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        for (let i = -gridN; i <= gridN; i++) {
+          const a = project3D(i, 0, -gridN);
+          const b = project3D(i, 0, gridN);
+          ctx.moveTo(a.x, a.y); ctx.lineTo(b.x, b.y);
+          const c = project3D(-gridN, 0, i);
+          const d = project3D(gridN, 0, i);
+          ctx.moveTo(c.x, c.y); ctx.lineTo(d.x, d.y);
+        }
+        ctx.stroke();
+        ctx.restore();
+
+        // Reta AB e pontos A, B, C sobre o piso claro
+        const pA = project3D(a1.A.x, 0, -a1.A.y);
+        const pB = project3D(a1.B.x, 0, -a1.B.y);
+        const pC = project3D(a1.C.x, 0, -a1.C.y);
+        drawBeam(pA.x, pA.y, pB.x, pB.y, '#b45309', 3, 9, 0.95, true);
+        drawLogicPoint(pA.x, pA.y, 'A', '#d97706', { radius: 6, onLight: true });
+        drawLogicPoint(pB.x, pB.y, 'B', '#d97706', { radius: 6, onLight: true });
+        drawLogicPoint(pC.x, pC.y, 'C', '#0284c7', { radius: 6, onLight: true });
+
+        // 4. Etapa 7 e 8: Ponto D suspenso + projeção tracejada + feixes piramidais até o piso
+        if (a1.step >= 7) {
+          const pw = easeOutCubic(a1.pyramidWeave);
+          const pDO = project3D(0, 0, 0);
+
+          // Projeção tracejada de D no chão (eixo Z)
+          ctx.save();
+          if (a1.step === 8) {
+            const zBot = project3D(0, -2.5, 0);
+            const zTop = project3D(0, 3.2, 0);
+            drawBeam(zBot.x, zBot.y, zTop.x, zTop.y, '#34d399', 2.2, 8, 0.82, false);
+          } else {
+            ctx.strokeStyle = '#fbbf24';
+            ctx.lineWidth = 2;
+            ctx.setLineDash([5, 5]);
+            ctx.beginPath();
+            ctx.moveTo(pDTop.x, pDTop.y);
+            ctx.lineTo(pDO.x, pDO.y);
+            ctx.stroke();
+            ctx.setLineDash([]);
+            ctx.fillStyle = '#b45309';
+            ctx.beginPath();
+            ctx.arc(pDO.x, pDO.y, 4.2, 0, Math.PI * 2);
+            ctx.fill();
+          }
+
+          // Feixes luminosos descendo de D até diversos pontos do piso claro
+          const baseNodes = [
+            [-3.5, -3.5], [0, -3.5], [3.5, -3.5],
+            [-3.5, 0], [3.5, 0],
+            [-3.5, 3.5], [0, 3.5], [3.5, 3.5],
+            [-1.8, -1.8], [1.8, -1.8], [1.8, 1.8], [-1.8, 1.8]
+          ];
+          const beamAlpha = a1.step === 7 ? 0.62 : 0.28;
+          for (let i = 0; i < baseNodes.length; i++) {
+            const [bx, bz] = baseNodes[i];
+            const pb = project3D(bx, 0, bz);
+            const ex = pDTop.x + (pb.x - pDTop.x) * pw;
+            const ey = pDTop.y + (pb.y - pDTop.y) * pw;
+            ctx.strokeStyle = i % 2 === 0 ? '#fbbf24' : '#38bdf8';
+            ctx.globalAlpha = beamAlpha;
+            ctx.lineWidth = 1.4;
+            ctx.beginPath();
+            ctx.moveTo(pDTop.x, pDTop.y);
+            ctx.lineTo(ex, ey);
+            ctx.stroke();
+          }
+          ctx.restore();
+
+          // Ponto D no topo
+          drawLogicPoint(pDTop.x, pDTop.y, 'D', '#fbbf24', { pulse: true, radius: 8.5, onLight: false });
+        } else if (a1.step === 6 && a1.tilt3D > 0.75) {
+          // Convite pulsante acima do piso na Etapa 6
+          const p = 0.5 + 0.5 * Math.sin(now * 0.004);
+          ctx.save();
+          ctx.strokeStyle = 'rgba(251, 191, 36, 0.65)';
+          ctx.lineWidth = 1.8;
+          ctx.setLineDash([4, 5]);
+          ctx.beginPath();
+          ctx.arc(pDTop.x, pDTop.y, 18 + p * 8, 0, Math.PI * 2);
+          ctx.stroke();
+          ctx.setLineDash([]);
+          ctx.font = '700 12.5px "Segoe UI", system-ui, sans-serif';
+          ctx.fillStyle = '#fde68a';
+          ctx.textAlign = 'center';
+          ctx.fillText('Toque aqui acima do piso para criar D', pDTop.x, pDTop.y - 30);
+          ctx.restore();
+        }
+
+        // 5. Viajante em 3D (com projeção vertical sobre o piso claro)
+        const alt = a1.step === 8 ? a1.traveler.z : 0;
+        const pTBase = project3D(a1.traveler.x, 0, -a1.traveler.y);
+        const pT3D = project3D(a1.traveler.x, alt, -a1.traveler.y);
+
+        if (Math.abs(alt) > 0.05) {
+          ctx.save();
+          ctx.strokeStyle = '#34d399';
+          ctx.lineWidth = 2;
+          ctx.setLineDash([4, 4]);
+          ctx.beginPath();
+          ctx.moveTo(pTBase.x, pTBase.y);
+          ctx.lineTo(pT3D.x, pT3D.y);
+          ctx.stroke();
+          ctx.setLineDash([]);
+
+          ctx.fillStyle = '#059669';
+          ctx.beginPath();
+          ctx.arc(pTBase.x, pTBase.y, 4.2, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.restore();
+        }
+        drawTraveler(pT3D.x, pT3D.y, now, false, a1.step < 8 && Math.abs(alt) < 0.05);
+
+        // Dica discreta de órbita
+        drawBadgePillOnCanvas(state.w - 92, state.h - 20, 'Arraste para orbitar', '#38bdf8', '#e0f2fe');
+      }
+
+      // =======================================================================
+      // RENDERIZAÇÃO DO ATO II — RETA, SEMIRRETA E SEGMENTO (PISO 2D CLARO)
+      // =======================================================================
+      function renderAct2() {
+        drawLightFloor2D(1, state.a2.snapGrid);
+
+        const sA = toScreen(state.a2.A.x, state.a2.A.y);
+        const sB = toScreen(state.a2.B.x, state.a2.B.y);
+        const clip = clipLineToCanvas(sA, sB, 18);
+
+        // Se 3º Ponto C estiver ativo e NÃO colinear, destaca o plano/triângulo determinado
+        if (state.a2.showPointC) {
+          const sC = toScreen(state.a2.C.x, state.a2.C.y);
+          const proj = projectOnLine(state.a2.C, state.a2.A, state.a2.B, false);
+          if (proj.dist >= 0.14) {
+            ctx.save();
+            ctx.beginPath();
+            ctx.moveTo(sA.x, sA.y);
+            ctx.lineTo(sB.x, sB.y);
+            ctx.lineTo(sC.x, sC.y);
+            ctx.closePath();
+            ctx.fillStyle = 'rgba(225, 29, 72, 0.10)';
+            ctx.fill();
+            ctx.strokeStyle = 'rgba(225, 29, 72, 0.6)';
+            ctx.lineWidth = 1.6;
+            ctx.setLineDash([5, 5]);
+            ctx.stroke();
+            ctx.setLineDash([]);
+            ctx.restore();
+          }
+        }
+
+        const mode = state.a2.mode;
+        if (clip) {
+          const angAB = Math.atan2(sB.y - sA.y, sB.x - sA.x);
+
+          if (mode === 'line') {
+            drawBeam(clip.start.x, clip.start.y, clip.end.x, clip.end.y, '#0284c7', 3.6, 11, 1, true);
+            drawArrowHead(clip.end.x, clip.end.y, Math.atan2(clip.uy, clip.ux), '#0284c7', 13);
+            drawArrowHead(clip.start.x, clip.start.y, Math.atan2(-clip.uy, -clip.ux), '#0284c7', 13);
+          } else if (mode === 'rayAB') {
+            const targetEnd = ((clip.end.x - sA.x) * Math.cos(angAB) + (clip.end.y - sA.y) * Math.sin(angAB)) > 0
+              ? clip.end : clip.start;
+            drawBeam(sA.x, sA.y, targetEnd.x, targetEnd.y, '#b45309', 3.8, 12, 1, true);
+            drawArrowHead(targetEnd.x, targetEnd.y, angAB, '#b45309', 13);
+          } else if (mode === 'rayBA') {
+            const angBA = angAB + Math.PI;
+            const targetEnd = ((clip.end.x - sB.x) * Math.cos(angBA) + (clip.end.y - sB.y) * Math.sin(angBA)) > 0
+              ? clip.end : clip.start;
+            drawBeam(sB.x, sB.y, targetEnd.x, targetEnd.y, '#b45309', 3.8, 12, 1, true);
+            drawArrowHead(targetEnd.x, targetEnd.y, angBA, '#b45309', 13);
+          } else if (mode === 'segment') {
+            drawBeam(sA.x, sA.y, sB.x, sB.y, '#059669', 4.2, 12, 1, true);
+          }
+        }
+
+        // Medidor de Energia (Régua)
+        if (state.a2.showRuler) {
+          const midX = (sA.x + sB.x) / 2;
+          const midY = (sA.y + sB.y) / 2;
+          const ang = Math.atan2(sB.y - sA.y, sB.x - sA.x);
+          const nx = -Math.sin(ang);
+          const ny = Math.cos(ang);
+
+          if (mode === 'segment') {
+            const distU = dist2D(state.a2.A, state.a2.B);
+            const lenPx = Math.hypot(sB.x - sA.x, sB.y - sA.y);
+            const ux = (sB.x - sA.x) / (lenPx || 1);
+            const uy = (sB.y - sA.y) / (lenPx || 1);
+
+            ctx.save();
+            ctx.strokeStyle = '#0f172a';
+            const maxHalfSteps = Math.floor(distU * 2);
+            for (let k = 0; k <= maxHalfSteps; k++) {
+              const dPx = (k * 0.5) * state.unit;
+              const px = sA.x + ux * dPx;
+              const py = sA.y + uy * dPx;
+              const isWhole = k % 2 === 0;
+              const tick = isWhole ? 10 : 5;
+              ctx.lineWidth = isWhole ? 1.8 : 1.1;
+              ctx.beginPath();
+              ctx.moveTo(px + nx * 5, py + ny * 5);
+              ctx.lineTo(px + nx * (5 + tick), py + ny * (5 + tick));
+              ctx.stroke();
+            }
+            ctx.restore();
+
+            drawBadgePillOnCanvas(midX + nx * 30, midY + ny * 30, `${distU.toFixed(1).replace('.', ',')} u`, '#34d399', '#6ee7b7');
+          } else {
+            drawBadgePillOnCanvas(midX + nx * 30, midY + ny * 30, '∞ (Infinito — não mensurável)', '#fb7185', '#fda4af');
+          }
+        }
+
+        drawLogicPoint(sA.x, sA.y, 'A', '#d97706', { ring: mode === 'rayAB', pulse: mode === 'rayAB', radius: 7.5, onLight: true });
+        drawLogicPoint(sB.x, sB.y, 'B', '#d97706', { ring: mode === 'rayBA', pulse: mode === 'rayBA', radius: 7.5, onLight: true });
+
+        if (state.a2.showPointC) {
+          const sC = toScreen(state.a2.C.x, state.a2.C.y);
+          const proj = projectOnLine(state.a2.C, state.a2.A, state.a2.B, false);
+          const isCol = proj.dist < 0.14;
+          drawLogicPoint(sC.x, sC.y, 'C', isCol ? '#059669' : '#e11d48', { pulse: isCol, radius: 7.5, onLight: true });
+        }
+      }
+
+      // =======================================================================
+      // RENDERIZAÇÃO DO ATO III — OS CAMINHOS NO PLANO (PISO 2D CLARO)
+      // =======================================================================
+      function renderAct3() {
+        drawLightFloor2D(1, state.a3.snapGrid);
+
+        const rel = analyzeAct3Lines();
+        const sA = toScreen(state.a3.A.x, state.a3.A.y);
+        const sB = toScreen(state.a3.B.x, state.a3.B.y);
+        const sC = toScreen(state.a3.C.x, state.a3.C.y);
+        const sD = toScreen(state.a3.D.x, state.a3.D.y);
+
+        const clipR = clipLineToCanvas(sA, sB, 18);
+        const clipS = clipLineToCanvas(sC, sD, 18);
+
+        // Retas r (âmbar forte #b45309) e s (azul-ciano profundo #0284c7)
+        if (rel.type === 'coincident' && clipR) {
+          drawBeam(clipR.start.x, clipR.start.y, clipR.end.x, clipR.end.y, '#b45309', 5.2, 14, 0.96, true);
+          ctx.save();
+          ctx.strokeStyle = '#0284c7';
+          ctx.lineWidth = 3.4;
+          ctx.setLineDash([12, 10]);
+          ctx.lineDashOffset = -(performance.now() * 0.035);
+          ctx.beginPath();
+          ctx.moveTo(clipR.start.x, clipR.start.y);
+          ctx.lineTo(clipR.end.x, clipR.end.y);
+          ctx.stroke();
+          ctx.setLineDash([]);
+          ctx.restore();
+
+          const ang = Math.atan2(clipR.uy, clipR.ux);
+          drawArrowHead(clipR.end.x, clipR.end.y, ang, '#b45309', 13);
+          drawArrowHead(clipR.start.x, clipR.start.y, ang + Math.PI, '#0284c7', 13);
+        } else {
+          if (clipR) {
+            drawBeam(clipR.start.x, clipR.start.y, clipR.end.x, clipR.end.y, '#b45309', 3.6, 11, 0.98, true);
+            const angR = Math.atan2(clipR.uy, clipR.ux);
+            drawArrowHead(clipR.end.x, clipR.end.y, angR, '#b45309', 12);
+            drawArrowHead(clipR.start.x, clipR.start.y, angR + Math.PI, '#b45309', 12);
+          }
+          if (clipS) {
+            drawBeam(clipS.start.x, clipS.start.y, clipS.end.x, clipS.end.y, '#0284c7', 3.6, 11, 0.98, true);
+            const angS = Math.atan2(clipS.uy, clipS.ux);
+            drawArrowHead(clipS.end.x, clipS.end.y, angS, '#0284c7', 12);
+            drawArrowHead(clipS.start.x, clipS.start.y, angS + Math.PI, '#0284c7', 12);
+          }
+        }
+
+        // Indicadores visuais (respeitando o Modo Visual Puro)
+        if (rel.type === 'parallel' && state.a3.revealClass) {
+          const midR = { x: (state.a3.A.x + state.a3.B.x) / 2, y: (state.a3.A.y + state.a3.B.y) / 2 };
+          ctx.save();
+          ctx.strokeStyle = '#059669';
+          ctx.lineWidth = 2;
+          ctx.setLineDash([5, 4]);
+          for (const off of [-1.6, 0, 1.6]) {
+            const pOnR = { x: midR.x + rel.u1.x * off, y: midR.y + rel.u1.y * off };
+            const pOnS = projectOnLine(pOnR, state.a3.C, state.a3.D, false);
+            const sp1 = toScreen(pOnR.x, pOnR.y);
+            const sp2 = toScreen(pOnS.x, pOnS.y);
+            ctx.beginPath();
+            ctx.moveTo(sp1.x, sp1.y);
+            ctx.lineTo(sp2.x, sp2.y);
+            ctx.stroke();
+          }
+          ctx.setLineDash([]);
+          ctx.restore();
+        }
+
+        if ((rel.type === 'perpendicular' || rel.type === 'concurrent') && rel.P) {
+          const sP = toScreen(rel.P.x, rel.P.y);
+          const inside = sP.x > 10 && sP.x < state.w - 10 && sP.y > 10 && sP.y < state.h - 10;
+
+          if (inside) {
+            // Verificador esmeralda de 90° nas perpendiculares (quando Revelar ou Ângulo estiver ligado)
+            if (rel.type === 'perpendicular' && (state.a3.revealClass || state.a3.showAngle)) {
+              const sz = 20;
+              const u1s = { x: rel.u1.x, y: -rel.u1.y };
+              const u2s = { x: rel.u2.x, y: -rel.u2.y };
+              ctx.save();
+              ctx.fillStyle = 'rgba(5, 150, 105, 0.24)';
+              ctx.beginPath();
+              ctx.moveTo(sP.x, sP.y);
+              ctx.lineTo(sP.x + u1s.x * sz, sP.y + u1s.y * sz);
+              ctx.lineTo(sP.x + (u1s.x + u2s.x) * sz, sP.y + (u1s.y + u2s.y) * sz);
+              ctx.lineTo(sP.x + u2s.x * sz, sP.y + u2s.y * sz);
+              ctx.closePath();
+              ctx.fill();
+              ctx.strokeStyle = '#059669';
+              ctx.lineWidth = 2.5;
+              ctx.stroke();
+              ctx.restore();
+            }
+
+            // Marcador do ponto de interseção P
+            if (state.a3.revealClass || state.a3.showAngle) {
+              drawLogicPoint(sP.x, sP.y, 'P', rel.type === 'perpendicular' ? '#059669' : '#0f172a', {
+                radius: 5.5,
+                labelDx: -15,
+                labelDy: -15,
+                onLight: true
+              });
+            }
+
+            if (state.a3.showAngle) {
+              const degText = `${Math.round(rel.angleDeg)}°`;
+              drawBadgePillOnCanvas(
+                sP.x + 28,
+                sP.y + 24,
+                degText,
+                rel.type === 'perpendicular' ? '#34d399' : '#38bdf8',
+                rel.type === 'perpendicular' ? '#6ee7b7' : '#ffffff'
+              );
+            }
+          }
+        }
+
+        // Pontos de controle A, B (r) e C, D (s)
+        drawLogicPoint(sA.x, sA.y, 'A', '#d97706', { radius: 7.5, onLight: true });
+        drawLogicPoint(sB.x, sB.y, 'B', '#d97706', { radius: 7.5, onLight: true });
+        drawLogicPoint(sC.x, sC.y, 'C', '#0284c7', { radius: 7.5, onLight: true });
+        drawLogicPoint(sD.x, sD.y, 'D', '#0284c7', { radius: 7.5, onLight: true });
+      }
+
+      // =======================================================================
+      // LOOP PRINCIPAL A 60FPS
+      // =======================================================================
+      let lastTime = performance.now();
+
+      function frame(now) {
+        const dt = Math.min(0.05, (now - lastTime) / 1000);
+        lastTime = now;
+
+        if (state.alertMsg && now >= state.alertUntil) {
+          state.alertMsg = null;
+          updateEldranBar();
+        }
+
+        if (state.act === 1) {
+          renderAct1(now, dt);
+        } else if (state.act === 2) {
+          renderAct2();
+        } else {
+          renderAct3();
+        }
+
+        drawRipples(now);
+        requestAnimationFrame(frame);
+      }
+
+      // =======================================================================
+      // INTERAÇÕES VIA POINTER EVENTS (MOUSE + TOQUE COM RAIO >= 28px)
+      // =======================================================================
+      function getPointerPos(e) {
+        const rect = canvas.getBoundingClientRect();
+        return { x: e.clientX - rect.left, y: e.clientY - rect.top };
+      }
+
+      const HIT_R = 28;
+
+      canvas.addEventListener('pointerdown', (e) => {
+        if (state.drag) return;
+        const pos = getPointerPos(e);
+        const logic = toLogic(pos.x, pos.y);
+
+        // ---- ATO I ----
+        if (state.act === 1) {
+          const a1 = state.a1;
+
+          // Etapa 0: toque no Vazio acende Ponto A
+          if (a1.step === 0) {
+            const p = clampLogicToView(logic, 48);
+            a1.A = p;
+            a1.traveler = { x: p.x, y: p.y, z: 0 };
+            addRipple(pos.x, pos.y, '#fbbf24', 52);
+            setAct1Step(1);
+            return;
+          }
+
+          // Etapa 1 (0D): arrastar Viajante -> vibração elástica; tocar fora -> cria Ponto B
+          if (a1.step === 1) {
+            const sA = toScreen(a1.A.x, a1.A.y);
+            if (Math.hypot(pos.x - sA.x, pos.y - sA.y) <= HIT_R + 6) {
+              a1.tetherActive = true;
+              a1.tetherPull = { x: pos.x, y: pos.y };
+              state.drag = { type: 'a1-tether0d', pointerId: e.pointerId };
+              canvas.setPointerCapture(e.pointerId);
+              return;
+            }
+            const pB = clampLogicToView(logic, 44);
+            if (dist2D(pB, a1.A) >= 0.8) {
+              a1.B = pB;
+              addRipple(pos.x, pos.y, '#fbbf24', 52);
+              setAct1Step(2);
+            }
+            return;
+          }
+
+          // Etapas 2, 3, 4 e 5
+          if (a1.step >= 2 && a1.step <= 5) {
+            const sT = toScreen(a1.traveler.x, a1.traveler.y);
+            const sA = toScreen(a1.A.x, a1.A.y);
+            const sB = toScreen(a1.B.x, a1.B.y);
+
+            if (Math.hypot(pos.x - sT.x, pos.y - sT.y) <= HIT_R) {
+              state.drag = { type: 'a1-traveler', pointerId: e.pointerId };
+              canvas.setPointerCapture(e.pointerId);
+              return;
+            }
+            if (Math.hypot(pos.x - sA.x, pos.y - sA.y) <= HIT_R) {
+              state.drag = { type: 'a1-point', key: 'A', pointerId: e.pointerId };
+              canvas.setPointerCapture(e.pointerId);
+              return;
+            }
+            if (Math.hypot(pos.x - sB.x, pos.y - sB.y) <= HIT_R) {
+              state.drag = { type: 'a1-point', key: 'B', pointerId: e.pointerId };
+              canvas.setPointerCapture(e.pointerId);
+              return;
+            }
+            if (a1.step >= 4) {
+              const sC = toScreen(a1.C.x, a1.C.y);
+              if (Math.hypot(pos.x - sC.x, pos.y - sC.y) <= HIT_R) {
+                state.drag = { type: 'a1-point', key: 'C', pointerId: e.pointerId };
+                canvas.setPointerCapture(e.pointerId);
+                return;
+              }
+            }
+
+            // Etapa 3 (Reta): toque fora da reta cria Ponto C (Etapa 4)
+            if (a1.step === 3) {
+              const proj = projectOnLine(logic, a1.A, a1.B, false);
+              if (proj.dist * state.unit < 26) {
+                addRipple(pos.x, pos.y, '#fb7185', 46);
+                triggerEldranAlert(
+                  'Pontos alinhados (colineares) mantêm tudo preso na 1ª dimensão! Escolha um ponto FORA da reta.',
+                  'coral',
+                  3800
+                );
+                return;
+              }
+              a1.C = clampLogicToView(logic, 40);
+              addRipple(pos.x, pos.y, '#38bdf8', 58);
+              setAct1Step(4);
+              return;
+            }
+
+            // Etapa 5 (Piso 2D): toque em qualquer lugar move o Viajante livremente
+            if (a1.step === 5) {
+              const c = clampLogicToView(logic, 24);
+              a1.traveler = { x: c.x, y: c.y, z: 0 };
+              a1.trail.push({ x: c.x, y: c.y });
+              if (a1.trail.length > 40) a1.trail.shift();
+              state.drag = { type: 'a1-traveler', pointerId: e.pointerId };
+              canvas.setPointerCapture(e.pointerId);
+              return;
+            }
+          }
+
+          // Etapas 6, 7 e 8 (3D)
+          if (a1.step >= 6) {
+            // Na Etapa 6, clicar na região acima do piso cria Ponto D (Etapa 7)
+            if (a1.step === 6) {
+              const pDTop = project3D(0, 2.7, 0);
+              if (Math.hypot(pos.x - pDTop.x, pos.y - pDTop.y) <= 52) {
+                addRipple(pDTop.x, pDTop.y, '#fbbf24', 58);
+                setAct1Step(7);
+                return;
+              }
+            }
+            state.drag = { type: 'orbit3d', pointerId: e.pointerId, lastX: pos.x, lastY: pos.y };
+            canvas.setPointerCapture(e.pointerId);
+            return;
+          }
+        }
+
+        // ---- ATO II ----
+        if (state.act === 2) {
+          const targets = [{ key: 'A', pt: state.a2.A }, { key: 'B', pt: state.a2.B }];
+          if (state.a2.showPointC) targets.unshift({ key: 'C', pt: state.a2.C });
+
+          for (const t of targets) {
+            const sp = toScreen(t.pt.x, t.pt.y);
+            if (Math.hypot(pos.x - sp.x, pos.y - sp.y) <= HIT_R) {
+              state.drag = { type: 'a2-point', key: t.key, pointerId: e.pointerId };
+              canvas.setPointerCapture(e.pointerId);
+              return;
+            }
+          }
+        }
+
+        // ---- ATO III ----
+        if (state.act === 3) {
+          const targets = [
+            { key: 'A', pt: state.a3.A },
+            { key: 'B', pt: state.a3.B },
+            { key: 'C', pt: state.a3.C },
+            { key: 'D', pt: state.a3.D }
+          ];
+          for (const t of targets) {
+            const sp = toScreen(t.pt.x, t.pt.y);
+            if (Math.hypot(pos.x - sp.x, pos.y - sp.y) <= HIT_R) {
+              state.drag = { type: 'a3-point', key: t.key, pointerId: e.pointerId };
+              canvas.setPointerCapture(e.pointerId);
+              return;
+            }
+          }
+        }
+      });
+
+      canvas.addEventListener('pointermove', (e) => {
+        if (!state.drag || e.pointerId !== state.drag.pointerId) return;
+        const pos = getPointerPos(e);
+        const logic = toLogic(pos.x, pos.y);
+
+        if (state.drag.type === 'a1-tether0d') {
+          state.a1.tetherPull = { x: pos.x, y: pos.y };
+          return;
+        }
+
+        if (state.drag.type === 'a1-traveler') {
+          const a1 = state.a1;
+          if (a1.step === 2) {
+            const proj = projectOnLine(logic, a1.A, a1.B, true);
+            a1.traveler = { x: proj.x, y: proj.y, z: 0 };
+          } else if (a1.step === 3 || a1.step === 4) {
+            const proj = projectOnLine(logic, a1.A, a1.B, false);
+            const clamped = clampLogicToView(proj, 24);
+            const proj2 = projectOnLine(clamped, a1.A, a1.B, false);
+            a1.traveler = { x: proj2.x, y: proj2.y, z: 0 };
+          } else if (a1.step === 5) {
+            const c = clampLogicToView(logic, 24);
+            a1.traveler = { x: c.x, y: c.y, z: 0 };
+            a1.trail.push({ x: c.x, y: c.y });
+            if (a1.trail.length > 40) a1.trail.shift();
+          }
+          return;
+        }
+
+        if (state.drag.type === 'a1-point') {
+          const a1 = state.a1;
+          const key = state.drag.key;
+          const p = clampLogicToView(logic, 36);
+          const other = key === 'A' ? a1.B : a1.A;
+          if (key !== 'C' && dist2D(p, other) < 0.7) return;
+          if (key === 'C' && projectOnLine(p, a1.A, a1.B, false).dist < 0.5) return;
+          a1[key] = p;
+          if (a1.step === 2 || a1.step === 3) {
+            const proj = projectOnLine(a1.traveler, a1.A, a1.B, a1.step === 2);
+            a1.traveler = { x: proj.x, y: proj.y, z: 0 };
+          }
+          return;
+        }
+
+        if (state.drag.type === 'orbit3d') {
+          const dx = pos.x - state.drag.lastX;
+          const dy = pos.y - state.drag.lastY;
+          state.drag.lastX = pos.x;
+          state.drag.lastY = pos.y;
+          state.a1.yaw += dx * 0.0085;
+          state.a1.pitch = clamp(state.a1.pitch + dy * 0.007, 0.12, 1.42);
+          return;
+        }
+
+        if (state.drag.type === 'a2-point') {
+          const key = state.drag.key;
+          let p = snapPoint(logic, state.a2.snapGrid);
+          if (key === 'A' && dist2D(p, state.a2.B) < 0.4) return;
+          if (key === 'B' && dist2D(p, state.a2.A) < 0.4) return;
+          if (key === 'C') {
+            const proj = projectOnLine(logic, state.a2.A, state.a2.B, false);
+            if (proj.dist * state.unit < 15) {
+              p = clampLogicToView({ x: proj.x, y: proj.y }, 30);
+            }
+          }
+          state.a2[key] = p;
+          syncUI();
+          return;
+        }
+
+        if (state.drag.type === 'a3-point') {
+          const key = state.drag.key;
+          const p = snapPoint(logic, state.a3.snapGrid);
+          if (key === 'A' && dist2D(p, state.a3.B) < 0.4) return;
+          if (key === 'B' && dist2D(p, state.a3.A) < 0.4) return;
+          if (key === 'C' && dist2D(p, state.a3.D) < 0.4) return;
+          if (key === 'D' && dist2D(p, state.a3.C) < 0.4) return;
+          state.a3[key] = p;
+          syncUI();
+        }
+      });
+
+      function endPointer(e) {
+        if (!state.drag || e.pointerId !== state.drag.pointerId) return;
+        if (state.drag.type === 'a1-tether0d') {
+          state.a1.tetherActive = false;
+          state.a1.vibrateUntil = performance.now() + 420;
+          const sA = toScreen(state.a1.A.x, state.a1.A.y);
+          addRipple(sA.x, sA.y, '#fb7185', 38);
+          triggerEldranAlert('Aqui só é possível estar. Nenhum movimento existe na Dimensão 0!', 'coral', 3200);
+        }
+        state.drag = null;
+      }
+
+      canvas.addEventListener('pointerup', endPointer);
+      canvas.addEventListener('pointercancel', endPointer);
+
+      // =======================================================================
+      // EVENTOS DE BOTÕES, ABAS E SLIDERS
+      // =======================================================================
+      function switchAct(actNum) {
+        if (state.act === actNum) return;
+        state.act = actNum;
+        state.drag = null;
+        state.alertMsg = null;
+        syncUI();
+      }
+
+      tabAct1.addEventListener('click', () => switchAct(1));
+      tabAct2.addEventListener('click', () => switchAct(2));
+      tabAct3.addEventListener('click', () => switchAct(3));
+
+      act1StepGrid.addEventListener('click', (e) => {
+        const btn = e.target.closest('.step-btn');
+        if (!btn) return;
+        setAct1Step(Number(btn.dataset.step));
+      });
+
+      btnAct1Primary.addEventListener('click', () => {
+        const a1 = state.a1;
+        if (a1.step === 0) {
+          a1.A = { x: 0, y: 0 };
+          addRipple(state.cx, state.cy, '#fbbf24', 52);
+          setAct1Step(1);
+        } else if (a1.step === 1) {
+          a1.A = { x: -2.1, y: 0.4 };
+          a1.B = { x: 2.2, y: -0.5 };
+          const sB = toScreen(a1.B.x, a1.B.y);
+          addRipple(sB.x, sB.y, '#fbbf24', 52);
+          setAct1Step(2);
+        } else if (a1.step === 2) {
+          setAct1Step(3);
+        } else if (a1.step === 3) {
+          a1.C = { x: -0.5, y: 2.1 };
+          const sC = toScreen(a1.C.x, a1.C.y);
+          addRipple(sC.x, sC.y, '#38bdf8', 56);
+          setAct1Step(4);
+        } else if (a1.step === 4) {
+          setAct1Step(5);
+        } else if (a1.step === 5) {
+          setAct1Step(6);
+        } else if (a1.step === 6) {
+          const pDTop = project3D(0, 2.7, 0);
+          addRipple(pDTop.x, pDTop.y, '#fbbf24', 58);
+          setAct1Step(7);
+        } else if (a1.step === 7) {
+          setAct1Step(8);
+        } else if (a1.step === 8) {
+          a1.yaw = 0.56;
+          a1.pitch = 0.48;
+        }
+      });
+
+      btnAct1Prev.addEventListener('click', () => {
+        if (state.a1.step > 0) setAct1Step(state.a1.step - 1);
+      });
+
+      btnAct1Reset.addEventListener('click', () => {
+        state.a1.maxStep = 0;
+        state.a1.autoOrbit = false;
+        state.a1.yaw = 0.56;
+        state.a1.pitch = 0.48;
+        sliderZ.value = '1.6';
+        sliderX.value = '0.8';
+        sliderY.value = '0.4';
+        setAct1Step(0);
+      });
+
+      function updateTravelerFromSliders() {
+        state.a1.traveler.z = Number(sliderZ.value);
+        state.a1.traveler.x = Number(sliderX.value);
+        state.a1.traveler.y = Number(sliderY.value);
+        valZ.textContent = `${state.a1.traveler.z.toFixed(1).replace('.', ',')} u`;
+        valX.textContent = `${state.a1.traveler.x.toFixed(1).replace('.', ',')} u`;
+        valY.textContent = `${state.a1.traveler.y.toFixed(1).replace('.', ',')} u`;
+      }
+
+      sliderZ.addEventListener('input', updateTravelerFromSliders);
+      sliderX.addEventListener('input', updateTravelerFromSliders);
+      sliderY.addEventListener('input', updateTravelerFromSliders);
+
+      function bindToggle(el, fn) {
+        el.addEventListener('click', () => { fn(); syncUI(); });
+        el.addEventListener('keydown', (e) => {
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            fn();
+            syncUI();
+          }
+        });
+      }
+
+      bindToggle(togAutoOrbit, () => { state.a1.autoOrbit = !state.a1.autoOrbit; });
+
+      // Ato II
+      act2ModeGrid.addEventListener('click', (e) => {
+        const btn = e.target.closest('.mode-btn');
+        if (!btn) return;
+        state.a2.mode = btn.dataset.mode;
+        syncUI();
+      });
+
+      bindToggle(togAct2Ruler, () => { state.a2.showRuler = !state.a2.showRuler; });
+      bindToggle(togAct2PointC, () => { state.a2.showPointC = !state.a2.showPointC; });
+      bindToggle(togAct2Snap, () => { state.a2.snapGrid = !state.a2.snapGrid; });
+
+      btnAct2Reset.addEventListener('click', () => {
+        state.a2.A = { x: -2.5, y: 0.5 };
+        state.a2.B = { x: 2.5, y: -0.5 };
+        state.a2.C = { x: 0, y: 2.0 };
+        state.a2.mode = 'line';
+        state.a2.showRuler = false;
+        state.a2.showPointC = false;
+        syncUI();
+      });
+
+      // Ato III
+      bindToggle(togAct3Reveal, () => { state.a3.revealClass = !state.a3.revealClass; });
+      bindToggle(togAct3Angle, () => { state.a3.showAngle = !state.a3.showAngle; });
+      bindToggle(togAct3Snap, () => { state.a3.snapGrid = !state.a3.snapGrid; });
+
+      btnAct3ChalToggle.addEventListener('click', () => {
+        state.a3.chalOpen = !state.a3.chalOpen;
+        syncUI();
+      });
+
+      btnChalPrev.addEventListener('click', () => {
+        state.a3.chalIdx = (state.a3.chalIdx - 1 + ACT3_CHALLENGES.length) % ACT3_CHALLENGES.length;
+        syncUI();
+      });
+
+      btnChalNext.addEventListener('click', () => {
+        state.a3.chalIdx = (state.a3.chalIdx + 1) % ACT3_CHALLENGES.length;
+        syncUI();
+      });
+
+      btnChalNextDone.addEventListener('click', () => {
+        state.a3.chalIdx = (state.a3.chalIdx + 1) % ACT3_CHALLENGES.length;
+        syncUI();
+      });
+
+      btnAct3Reset.addEventListener('click', () => {
+        state.a3.A = { x: -3, y: -1 };
+        state.a3.B = { x: 3, y: 1 };
+        state.a3.C = { x: -2, y: 2 };
+        state.a3.D = { x: 2, y: -2 };
+        syncUI();
+      });
+
+      // =======================================================================
+      // INICIALIZAÇÃO
+      // =======================================================================
+      if (typeof ResizeObserver !== 'undefined') {
+        new ResizeObserver(resizeCanvas).observe(canvasWrap);
+      }
+      window.addEventListener('resize', resizeCanvas);
+
+      window.onload = function () {
+        resizeCanvas();
+        syncUI();
+        requestAnimationFrame(frame);
+      };
+    })();
+  </script>
+<div id="autoriaTxt" onclick="this.classList.remove('on')" style="position:fixed;top:44px;right:8px;z-index:2147483000;max-width:260px;padding:8px 10px;border-radius:8px;background:#222;color:#fff;font:12px/1.35 sans-serif;display:none">© Ygor B. F. Ferreira · A Saga dos Reinos Matemáticos · Matematkês · uso livre em sala</div><style>#autoriaTxt.on{display:block!important}</style>
+</body>
+</html>

@@ -1,0 +1,3191 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>Corrida dos MCs — Saltos, Múltiplos, MMC e Primos</title>
+  <style>
+    /* =========================================================================
+       DESIGN TOKENS — PISTA ESPORTIVA ENSOLARADA & ENCAIXE 100dvh × 100vw
+       ========================================================================= */
+    :root {
+      --bg-sky: #f2f7fc;
+      --bg-paper: #ffffff;
+      --bg-soft: #eef4fa;
+      --ink: #1e293b;
+      --ink-muted: #5b6b82;
+      --border: #d5e1ee;
+
+      --track-grass: #e8f5e9;
+      --track-lane: #fffdf8;
+      --track-line: #cbd5e1;
+
+      --gold: #f59e0b;
+      --gold-dark: #b45309;
+      --gold-bg: #fef3c7;
+
+      --prime: #7c3aed;
+      --prime-bg: #f3e8ff;
+      --comp: #059669;
+      --comp-bg: #d1fae5;
+      --miss: #e11d48;
+      --miss-bg: #ffe4e6;
+
+      --radius-md: 11px;
+      --radius-sm: 7px;
+      --shadow-sm: 0 2px 8px rgba(15, 23, 42, 0.08);
+      --shadow-md: 0 6px 20px rgba(15, 23, 42, 0.14);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html, body {
+      width: 100vw;
+      height: 100dvh;
+      overflow: hidden;
+      font-family: 'Nunito', 'Segoe UI', system-ui, -apple-system, sans-serif;
+      background: linear-gradient(180deg, #e7f2fc 0%, #f5f9fd 100%);
+      color: var(--ink);
+      line-height: 1.25;
+      -webkit-tap-highlight-color: transparent;
+      user-select: none;
+    }
+
+    /* Fallback seguro para telas extremamente baixas (< 400px) */
+    @media (max-height: 399px) {
+      html, body {
+        height: auto;
+        min-height: 100dvh;
+        overflow-y: auto;
+      }
+      .app-shell {
+        height: auto !important;
+        min-height: 410px;
+      }
+    }
+
+    .app-shell {
+      width: 100vw;
+      height: 100dvh;
+      display: flex;
+      flex-direction: column;
+      padding: 5px 7px;
+      gap: 5px;
+      overflow: hidden;
+    }
+
+    /* =========================================================================
+       1. BARRA SUPERIOR COMPACTA (~44px)
+       ========================================================================= */
+    .top-bar {
+      height: 44px;
+      min-height: 40px;
+      max-height: 46px;
+      flex-shrink: 0;
+      background: var(--bg-paper);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 0 8px;
+      box-shadow: var(--shadow-sm);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 6px;
+      overflow-x: auto;
+      overflow-y: hidden;
+      scrollbar-width: none;
+    }
+    .top-bar::-webkit-scrollbar { display: none; }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      font-weight: 900;
+      font-size: clamp(0.78rem, 1.3vw, 0.92rem);
+      color: #1d4ed8;
+      white-space: nowrap;
+      flex-shrink: 0;
+      padding-right: 6px;
+      border-right: 1.5px solid var(--border);
+    }
+    @media (max-width: 560px) {
+      .brand-text { display: none; }
+      .brand { border-right: none; padding-right: 2px; }
+    }
+
+    .phase-tabs {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      flex-shrink: 0;
+    }
+
+    .phase-tab {
+      appearance: none;
+      border: 1.5px solid var(--border);
+      background: var(--bg-soft);
+      color: var(--ink);
+      font-family: inherit;
+      font-weight: 800;
+      font-size: clamp(0.68rem, 1.15vw, 0.79rem);
+      padding: 5px clamp(6px, 0.95vw, 11px);
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      white-space: nowrap;
+      transition: all 0.14s ease;
+    }
+    .phase-tab:hover {
+      background: #fff;
+      border-color: #93c5fd;
+    }
+    .phase-tab.active {
+      background: linear-gradient(180deg, #eff6ff 0%, #dbeafe 100%);
+      border-color: #2563eb;
+      color: #1e40af;
+      box-shadow: 0 1px 4px rgba(37, 99, 235, 0.2);
+    }
+
+    .top-utils {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      margin-left: auto;
+      flex-shrink: 0;
+    }
+
+    .icon-btn {
+      appearance: none;
+      border: 1.5px solid var(--border);
+      background: var(--bg-soft);
+      color: var(--ink);
+      font-family: inherit;
+      font-weight: 800;
+      font-size: clamp(0.69rem, 1.1vw, 0.78rem);
+      padding: 4px 8px;
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      white-space: nowrap;
+      position: relative;
+      transition: all 0.14s ease;
+    }
+    .icon-btn:hover { background: #fff; border-color: #93c5fd; }
+    .icon-btn.active {
+      background: #dbeafe;
+      border-color: #2563eb;
+      color: #1e40af;
+    }
+
+    .badge-dot {
+      position: absolute;
+      top: -3px;
+      right: -3px;
+      width: 9px;
+      height: 9px;
+      border-radius: 50%;
+      background: #f59e0b;
+      border: 1.5px solid #fff;
+      display: none;
+    }
+    .badge-dot.is-visible { display: block; }
+
+    /* =========================================================================
+       2. FAIXA DE MISSÃO / CONTEXTO COMPACTA (~38px)
+       ========================================================================= */
+    .context-strip {
+      min-height: 38px;
+      max-height: 44px;
+      flex-shrink: 0;
+      background: linear-gradient(90deg, #ffffff 0%, #f8fbff 100%);
+      border: 1px solid var(--border);
+      border-left: 4px solid #2563eb;
+      border-radius: 9px;
+      padding: 3px 9px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      overflow-x: auto;
+      overflow-y: hidden;
+      scrollbar-width: none;
+    }
+    .context-strip::-webkit-scrollbar { display: none; }
+    .context-strip.is-gold   { border-left-color: var(--gold); background: linear-gradient(90deg, #fffbeb 0%, #fef3c7 100%); }
+    .context-strip.is-prime  { border-left-color: var(--prime); background: linear-gradient(90deg, #faf5ff 0%, #f3e8ff 100%); }
+    .context-strip.is-comp   { border-left-color: var(--comp); background: linear-gradient(90deg, #ecfdf5 0%, #d1fae5 100%); }
+    .context-strip.is-miss   { border-left-color: var(--miss); background: linear-gradient(90deg, #fff1f2 0%, #ffe4e6 100%); }
+
+    .ctx-controls {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      flex-shrink: 0;
+    }
+
+    .ctx-label {
+      font-size: 0.72rem;
+      font-weight: 800;
+      color: var(--ink-muted);
+      white-space: nowrap;
+    }
+
+    .ctx-select, .ctx-num {
+      border: 1.5px solid #cbd5e1;
+      border-radius: 6px;
+      background: #fff;
+      color: var(--ink);
+      font-family: inherit;
+      font-weight: 800;
+      font-size: 0.76rem;
+      padding: 3px 6px;
+      cursor: pointer;
+    }
+    .ctx-num {
+      width: 54px;
+      text-align: center;
+      cursor: text;
+    }
+    .ctx-select:focus, .ctx-num:focus {
+      outline: none;
+      border-color: #2563eb;
+    }
+
+    .mini-chip {
+      appearance: none;
+      border: 1.5px solid #cbd5e1;
+      background: #fff;
+      color: var(--ink);
+      font-family: inherit;
+      font-weight: 900;
+      font-size: 0.72rem;
+      padding: 3px 7px;
+      border-radius: 999px;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: all 0.12s ease;
+    }
+    .mini-chip:hover { border-color: #2563eb; }
+    .mini-chip.active {
+      background: #2563eb;
+      border-color: #1d4ed8;
+      color: #fff;
+    }
+
+    .ctx-feedback {
+      font-size: clamp(0.72rem, 1.25vw, 0.84rem);
+      font-weight: 800;
+      color: var(--ink);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      margin-left: auto;
+    }
+
+    /* =========================================================================
+       3. ÁREA PRINCIPAL: PALCO SVG + DRAWER / PAINEL LATERAL
+       ========================================================================= */
+    .main-stage {
+      flex: 1 1 0;
+      min-height: 0;
+      display: flex;
+      gap: 6px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .track-pane {
+      flex: 1 1 0;
+      min-width: 0;
+      min-height: 0;
+      background: linear-gradient(180deg, #dff0ff 0%, #f1f8ff 34%, #eef7ef 100%);
+      border: 1.5px solid #c9dced;
+      border-radius: 12px;
+      box-shadow: var(--shadow-sm);
+      display: flex;
+      flex-direction: column;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .svg-viewport {
+      flex: 1 1 0;
+      min-height: 0;
+      width: 100%;
+      position: relative;
+      cursor: grab;
+      touch-action: none;
+    }
+    .svg-viewport:active { cursor: grabbing; }
+
+    #track-svg {
+      width: 100%;
+      height: 100%;
+      display: block;
+    }
+
+    /* Controles flutuantes de Câmera e Zoom */
+    .cam-overlay-top {
+      position: absolute;
+      top: 7px;
+      right: 8px;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      background: rgba(255, 255, 255, 0.92);
+      backdrop-filter: blur(4px);
+      border: 1px solid #cbd5e1;
+      border-radius: 9px;
+      padding: 3px 5px;
+      box-shadow: var(--shadow-sm);
+      z-index: 8;
+    }
+
+    .cam-btn {
+      appearance: none;
+      border: 1px solid #cbd5e1;
+      background: #f8fafc;
+      color: var(--ink);
+      font-family: inherit;
+      font-weight: 900;
+      font-size: 0.72rem;
+      min-width: 24px;
+      height: 24px;
+      padding: 0 6px;
+      border-radius: 6px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.12s ease;
+    }
+    .cam-btn:hover { background: #eff6ff; border-color: #2563eb; color: #1d4ed8; }
+    .cam-zoom-label {
+      font-size: 0.7rem;
+      font-weight: 900;
+      color: var(--ink-muted);
+      min-width: 36px;
+      text-align: center;
+    }
+
+    .pan-arrow {
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 30px;
+      height: 44px;
+      border-radius: 9px;
+      border: 1.5px solid rgba(148, 163, 184, 0.7);
+      background: rgba(255, 255, 255, 0.85);
+      color: #1e293b;
+      font-size: 0.95rem;
+      font-weight: 900;
+      cursor: pointer;
+      z-index: 7;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: var(--shadow-sm);
+      transition: all 0.14s ease;
+    }
+    .pan-arrow:hover { background: #fff; border-color: #2563eb; color: #2563eb; }
+    .pan-arrow.left { left: 7px; }
+    .pan-arrow.right { right: 7px; }
+
+    /* Mini-barra de navegação (scrubber) na base da pista */
+    .scrubber-bar {
+      height: 24px;
+      flex-shrink: 0;
+      background: rgba(255, 255, 255, 0.9);
+      border-top: 1px solid #d5e1ee;
+      padding: 0 10px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.68rem;
+      font-weight: 800;
+      color: var(--ink-muted);
+    }
+
+    .scrubber-track {
+      flex: 1;
+      height: 10px;
+      background: #e2e8f0;
+      border-radius: 999px;
+      position: relative;
+      cursor: pointer;
+      overflow: hidden;
+    }
+
+    .scrubber-thumb {
+      position: absolute;
+      top: 1px;
+      bottom: 1px;
+      background: linear-gradient(90deg, #3b82f6, #2563eb);
+      border-radius: 999px;
+      min-width: 18px;
+      pointer-events: none;
+    }
+
+    .scrubber-marker {
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      width: 3px;
+      border-radius: 2px;
+      pointer-events: none;
+    }
+
+    /* Toast de conquista / descoberta na pista */
+    .stage-banner {
+      position: absolute;
+      bottom: 32px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(255, 255, 255, 0.97);
+      border: 2px solid var(--gold);
+      border-radius: 12px;
+      padding: 7px 14px;
+      box-shadow: var(--shadow-md);
+      display: none;
+      align-items: center;
+      gap: 9px;
+      max-width: 92%;
+      z-index: 12;
+      animation: popUp 0.22s ease-out;
+    }
+    .stage-banner.is-visible { display: flex; }
+    .stage-banner.is-prime { border-color: var(--prime); background: #faf5ff; }
+    .stage-banner.is-comp  { border-color: var(--comp); background: #ecfdf5; }
+    .stage-banner.is-miss  { border-color: var(--miss); background: #fff1f2; }
+
+    @keyframes popUp {
+      from { opacity: 0; transform: translate(-50%, 8px) scale(0.96); }
+      to   { opacity: 1; transform: translate(-50%, 0) scale(1); }
+    }
+
+    .stage-banner-text {
+      font-size: clamp(0.73rem, 1.25vw, 0.85rem);
+      font-weight: 800;
+      color: var(--ink);
+    }
+
+    .banner-next-btn {
+      appearance: none;
+      border: none;
+      border-radius: 8px;
+      background: linear-gradient(180deg, #f59e0b 0%, #d97706 100%);
+      color: #fff;
+      font-family: inherit;
+      font-weight: 900;
+      font-size: 0.74rem;
+      padding: 5px 10px;
+      cursor: pointer;
+      white-space: nowrap;
+      box-shadow: 0 2px 6px rgba(217, 119, 6, 0.35);
+      flex-shrink: 0;
+      transition: transform 0.12s ease, filter 0.12s ease;
+    }
+    .banner-next-btn:hover { filter: brightness(1.07); transform: translateY(-1px); }
+
+    .stage-banner-close {
+      appearance: none;
+      border: none;
+      background: rgba(15, 23, 42, 0.1);
+      color: var(--ink);
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      font-weight: 900;
+      cursor: pointer;
+      flex-shrink: 0;
+    }
+
+    /* =========================================================================
+       PAINEL LATERAL / DRAWER RETRÁTIL (📊)
+       ========================================================================= */
+    .drawer-backdrop {
+      display: none;
+      position: absolute;
+      inset: 0;
+      background: rgba(15, 23, 42, 0.28);
+      z-index: 20;
+      border-radius: 12px;
+    }
+    .drawer-backdrop.is-open { display: block; }
+
+    .side-panel {
+      position: absolute;
+      top: 0;
+      right: 0;
+      bottom: 0;
+      width: min(350px, 90vw);
+      background: var(--bg-paper);
+      border: 1.5px solid var(--border);
+      border-radius: 12px;
+      box-shadow: -6px 0 22px rgba(15, 23, 42, 0.16);
+      padding: 9px 10px;
+      display: flex;
+      flex-direction: column;
+      gap: 7px;
+      z-index: 25;
+      transform: translateX(106%);
+      transition: transform 0.22s cubic-bezier(0.22, 1, 0.36, 1);
+      overflow: hidden;
+    }
+    .side-panel.is-open { transform: translateX(0); }
+
+    @media (min-width: 1020px) {
+      .drawer-backdrop { display: none !important; }
+      .side-panel {
+        position: static;
+        width: clamp(295px, 28vw, 355px);
+        flex-shrink: 0;
+        transform: none !important;
+        box-shadow: var(--shadow-sm);
+        transition: none;
+      }
+      .side-panel:not(.is-open) { display: none; }
+    }
+
+    .panel-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 0.75rem;
+      font-weight: 900;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      color: var(--ink-muted);
+      padding-bottom: 5px;
+      border-bottom: 1.5px solid var(--border);
+      flex-shrink: 0;
+    }
+
+    .close-btn {
+      appearance: none;
+      border: 1px solid var(--border);
+      background: var(--bg-soft);
+      color: var(--ink);
+      width: 22px;
+      height: 22px;
+      border-radius: 6px;
+      font-weight: 900;
+      cursor: pointer;
+    }
+
+    .panel-body {
+      flex: 1 1 0;
+      min-height: 0;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      padding-right: 2px;
+    }
+
+    .info-card {
+      background: #f8fafc;
+      border: 1.5px solid #e2e8f0;
+      border-radius: 9px;
+      padding: 7px 9px;
+    }
+    .info-card.gold  { background: #fffbeb; border-color: #fcd34d; }
+    .info-card.prime { background: #faf5ff; border-color: #d8b4fe; }
+    .info-card.comp  { background: #ecfdf5; border-color: #6ee7b7; }
+
+    .info-card-title {
+      font-size: 0.7rem;
+      font-weight: 900;
+      text-transform: uppercase;
+      color: var(--ink-muted);
+      margin-bottom: 5px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .pill-wrap {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 4px;
+    }
+
+    .num-pill {
+      font-size: 0.75rem;
+      font-weight: 900;
+      padding: 2px 7px;
+      border-radius: 999px;
+      color: #fff;
+      background: #3b82f6;
+    }
+    .num-pill.is-mc  { background: #f59e0b; color: #451a03; }
+    .num-pill.is-mmc { background: linear-gradient(135deg, #f59e0b, #d97706); color: #fff; box-shadow: 0 2px 6px rgba(217,119,6,0.35); }
+
+    /* Quadro Interativo de 1 a 100 */
+    .grid-100 {
+      display: grid;
+      grid-template-columns: repeat(10, 1fr);
+      gap: 3px;
+    }
+    .cell-100 {
+      aspect-ratio: 1;
+      border: 1px solid #cbd5e1;
+      border-radius: 5px;
+      background: #fff;
+      font-size: 0.68rem;
+      font-weight: 900;
+      color: #475569;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: transform 0.1s ease, border-color 0.12s ease;
+    }
+    .cell-100:hover:not(.is-one) { transform: scale(1.1); border-color: #2563eb; z-index: 2; }
+    .cell-100.is-one { background: #e2e8f0; color: #94a3b8; cursor: default; }
+    .cell-100.is-prime { background: linear-gradient(135deg, #7c3aed, #6d28d9); color: #fff; border-color: #5b21b6; }
+    .cell-100.is-comp  { background: #d1fae5; color: #065f46; border-color: #34d399; }
+    .cell-100.is-target { box-shadow: 0 0 0 2px #f59e0b; transform: scale(1.08); z-index: 3; }
+
+    /* =========================================================================
+       4. BARRA INFERIOR DE CONTROLES COMPACTA (~52px)
+       ========================================================================= */
+    .action-bar {
+      height: 52px;
+      min-height: 46px;
+      max-height: 56px;
+      flex-shrink: 0;
+      background: var(--bg-paper);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 5px 8px;
+      box-shadow: var(--shadow-sm);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      overflow-x: auto;
+      scrollbar-width: none;
+    }
+    .action-bar::-webkit-scrollbar { display: none; }
+
+    .act-btn {
+      appearance: none;
+      border: none;
+      border-radius: 9px;
+      height: 38px;
+      padding: 0 clamp(9px, 1.3vw, 15px);
+      font-family: inherit;
+      font-size: clamp(0.72rem, 1.3vw, 0.85rem);
+      font-weight: 800;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 5px;
+      white-space: nowrap;
+      box-shadow: 0 2.5px 0 rgba(15, 23, 42, 0.2);
+      transition: transform 0.1s ease, filter 0.14s ease, opacity 0.14s ease;
+    }
+    .act-btn:hover:not(:disabled) { filter: brightness(1.06); transform: translateY(-1px); }
+    .act-btn:active:not(:disabled) { transform: translateY(1.5px); box-shadow: 0 1px 0 rgba(15, 23, 42, 0.2); }
+    .act-btn:disabled { opacity: 0.4; cursor: not-allowed; box-shadow: none; }
+
+    .btn-play   { background: linear-gradient(180deg, #22c55e 0%, #16a34a 100%); color: #fff; }
+    .btn-pause  { background: linear-gradient(180deg, #f59e0b 0%, #d97706 100%); color: #fff; }
+    .btn-step   { background: linear-gradient(180deg, #3b82f6 0%, #2563eb 100%); color: #fff; }
+    .btn-prime  { background: linear-gradient(180deg, #8b5cf6 0%, #7c3aed 100%); color: #fff; }
+    .btn-comp   { background: linear-gradient(180deg, #10b981 0%, #059669 100%); color: #fff; }
+    .btn-auto   { background: linear-gradient(180deg, #ec4899 0%, #db2777 100%); color: #fff; }
+    .btn-soft   {
+      background: var(--bg-soft);
+      color: var(--ink);
+      border: 1.5px solid var(--border);
+      box-shadow: 0 2px 0 rgba(15, 23, 42, 0.1);
+    }
+
+    /* Grupo de navegação de desafios (◀ 1/5 Próximo ▶) */
+    .challenge-nav {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      background: var(--bg-soft);
+      border: 1.5px solid var(--border);
+      border-radius: 10px;
+      padding: 2px 4px;
+      height: 40px;
+      flex-shrink: 0;
+    }
+
+    .nav-mini-btn {
+      appearance: none;
+      border: 1px solid #cbd5e1;
+      background: #fff;
+      color: var(--ink);
+      font-family: inherit;
+      font-weight: 900;
+      font-size: 0.78rem;
+      width: 28px;
+      height: 30px;
+      border-radius: 7px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.12s ease;
+    }
+    .nav-mini-btn:hover:not(:disabled) { border-color: #2563eb; color: #1d4ed8; background: #eff6ff; }
+    .nav-mini-btn:disabled { opacity: 0.38; cursor: not-allowed; }
+
+    .challenge-counter {
+      font-size: 0.7rem;
+      font-weight: 900;
+      color: var(--ink-muted);
+      padding: 0 4px;
+      white-space: nowrap;
+    }
+
+    .btn-next-challenge {
+      appearance: none;
+      border: none;
+      border-radius: 7px;
+      height: 30px;
+      padding: 0 10px;
+      font-family: inherit;
+      font-size: 0.75rem;
+      font-weight: 900;
+      cursor: pointer;
+      background: linear-gradient(180deg, #334155 0%, #1e293b 100%);
+      color: #fff;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      white-space: nowrap;
+      transition: transform 0.12s ease, filter 0.12s ease;
+    }
+    .btn-next-challenge:hover { filter: brightness(1.08); transform: translateY(-1px); }
+    .btn-next-challenge.is-highlight {
+      background: linear-gradient(180deg, #f59e0b 0%, #d97706 100%);
+      box-shadow: 0 0 0 0 rgba(245, 158, 11, 0.7);
+      animation: nextPulse 1.3s ease-in-out infinite;
+    }
+
+    @keyframes nextPulse {
+      0%, 100% { box-shadow: 0 0 0 0 rgba(245, 158, 11, 0.65); transform: scale(1); }
+      50%      { box-shadow: 0 0 0 7px rgba(245, 158, 11, 0); transform: scale(1.04); }
+    }
+
+    /* Mini stepper (− N +) da Fase Livre */
+    .step-spinner {
+      display: inline-flex;
+      align-items: center;
+      background: #fff;
+      border: 1.5px solid #cbd5e1;
+      border-radius: 7px;
+      overflow: hidden;
+      height: 27px;
+    }
+    .step-spinner button {
+      appearance: none;
+      border: none;
+      background: #f1f5f9;
+      color: var(--ink);
+      font-weight: 900;
+      width: 21px;
+      height: 100%;
+      cursor: pointer;
+      font-size: 0.78rem;
+    }
+    .step-spinner button:hover { background: #dbeafe; color: #1d4ed8; }
+    .step-spinner span {
+      min-width: 30px;
+      text-align: center;
+      font-size: 0.74rem;
+      font-weight: 900;
+      padding: 0 3px;
+    }
+
+    .speed-group {
+      display: inline-flex;
+      align-items: center;
+      background: var(--bg-soft);
+      border: 1.5px solid var(--border);
+      border-radius: 9px;
+      padding: 2px;
+      height: 36px;
+      flex-shrink: 0;
+    }
+    .speed-opt {
+      appearance: none;
+      border: none;
+      background: transparent;
+      color: var(--ink-muted);
+      font-family: inherit;
+      font-weight: 800;
+      font-size: 0.7rem;
+      padding: 4px 7px;
+      border-radius: 6px;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+    .speed-opt.active {
+      background: #fff;
+      color: #1d4ed8;
+      box-shadow: 0 1px 3px rgba(15, 23, 42, 0.12);
+    }
+
+    @media (max-width: 520px) {
+      .app-shell { padding: 4px; gap: 4px; }
+      .hide-xs { display: none; }
+      .act-btn { height: 35px; padding: 0 9px; font-size: 0.74rem; }
+      .speed-opt { padding: 3px 5px; font-size: 0.66rem; }
+    }
+  </style>
+</head>
+<body>
+  <div class="app-shell">
+    <!-- 1. BARRA SUPERIOR COMPACTA -->
+    <header class="top-bar"><button id="autoriaBtn" type="button" aria-label="Autoria" onclick="document.getElementById('autoriaTxt').classList.toggle('on')" style="flex:0 0 auto;width:20px;height:20px;margin:0 4px;border-radius:50%;border:1px solid rgba(128,128,128,.5);background:transparent;color:inherit;font:11px/18px sans-serif;text-align:center;padding:0;cursor:pointer;opacity:.5">©</button>
+      <div class="brand">
+        <span>🏃</span>
+        <span class="brand-text">Corrida dos MCs</span>
+      </div>
+
+      <nav class="phase-tabs" aria-label="Fases do jogo">
+        <button class="phase-tab active" data-phase="1" type="button">1. Saltos</button>
+        <button class="phase-tab" data-phase="2" type="button">2. MCs &amp; MMC</button>
+        <button class="phase-tab" data-phase="3" type="button">3. Missões</button>
+        <button class="phase-tab" data-phase="4" type="button">4. Primos 1–100</button>
+        <button class="phase-tab" data-phase="5" type="button">5. Livre / MMC</button>
+      </nav>
+
+      <div class="top-utils">
+        <button id="btn-sound" class="icon-btn active" type="button" title="Ativar ou silenciar som">
+          <span id="sound-icon">🔊</span>
+        </button>
+        <button id="btn-panel" class="icon-btn" type="button" title="Abrir ou fechar Painel e Quadro">
+          <span>📊</span><span class="hide-xs">Quadro</span>
+          <span id="panel-dot" class="badge-dot"></span>
+        </button>
+      </div>
+    </header>
+
+    <!-- 2. FAIXA DE MISSÃO / CONTEXTO -->
+    <div id="context-strip" class="context-strip" role="status" aria-live="polite">
+      <div id="ctx-controls" class="ctx-controls"></div>
+      <div id="ctx-feedback" class="ctx-feedback">Escolha um saltador e aperte Correr!</div>
+    </div>
+
+    <!-- 3. ÁREA PRINCIPAL: PALCO SVG + PAINEL LATERAL -->
+    <main class="main-stage">
+      <section class="track-pane">
+        <div id="svg-viewport" class="svg-viewport">
+          <!-- Controles discretos de Zoom -->
+          <div class="cam-overlay-top" aria-label="Controles de câmera e zoom">
+            <button id="btn-zoom-out" class="cam-btn" type="button" title="Diminuir zoom">−</button>
+            <span id="zoom-label" class="cam-zoom-label">100%</span>
+            <button id="btn-zoom-in" class="cam-btn" type="button" title="Aumentar zoom">+</button>
+            <button id="btn-zoom-fit" class="cam-btn" type="button" title="Enquadrar trecho ativo">⊞ Ajustar</button>
+          </div>
+
+          <!-- Botões laterais de Pan -->
+          <button id="btn-pan-left" class="pan-arrow left" type="button" title="Mover câmera para a esquerda">◀</button>
+          <button id="btn-pan-right" class="pan-arrow right" type="button" title="Mover câmera para a direita">▶</button>
+
+          <!-- Banner flutuante de descoberta -->
+          <div id="stage-banner" class="stage-banner">
+            <span id="stage-banner-icon" style="font-size:1.25rem;">⭐</span>
+            <div id="stage-banner-text" class="stage-banner-text"></div>
+            <button id="banner-next-btn" class="banner-next-btn" type="button" style="display:none;">Próximo Desafio →</button>
+            <button id="stage-banner-close" class="stage-banner-close" type="button" title="Fechar">✕</button>
+          </div>
+
+          <!-- Palco SVG 100% responsivo -->
+          <svg id="track-svg" role="img" aria-label="Pista numerada de 0 a 100 da Corrida dos MCs">
+            <defs>
+              <linearGradient id="goldBeamGrad" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stop-color="#fde047" stop-opacity="0.18" />
+                <stop offset="50%" stop-color="#f59e0b" stop-opacity="0.45" />
+                <stop offset="100%" stop-color="#fde047" stop-opacity="0.18" />
+              </linearGradient>
+              <linearGradient id="mmcBeamGrad" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stop-color="#fef08a" stop-opacity="0.28" />
+                <stop offset="50%" stop-color="#f59e0b" stop-opacity="0.65" />
+                <stop offset="100%" stop-color="#fef08a" stop-opacity="0.28" />
+              </linearGradient>
+              <filter id="softGlow" x="-25%" y="-25%" width="150%" height="150%">
+                <feDropShadow dx="0" dy="2" stdDeviation="2.5" flood-color="#0f172a" flood-opacity="0.22" />
+              </filter>
+              <filter id="goldGlow" x="-30%" y="-30%" width="160%" height="160%">
+                <feDropShadow dx="0" dy="0" stdDeviation="4" flood-color="#f59e0b" flood-opacity="0.85" />
+              </filter>
+            </defs>
+            <g id="world-layer">
+              <g id="layer-lanes"></g>
+              <g id="layer-beams"></g>
+              <g id="layer-ruler"></g>
+              <g id="layer-arcs"></g>
+              <g id="layer-footprints"></g>
+              <g id="layer-flag"></g>
+              <g id="layer-runners"></g>
+              <g id="layer-popups"></g>
+            </g>
+          </svg>
+        </div>
+
+        <!-- Mini-barra de navegação (scrubber 0 a maxNum) -->
+        <div class="scrubber-bar">
+          <span>0</span>
+          <div id="scrubber-track" class="scrubber-track" title="Clique ou arraste para navegar pela pista">
+            <div id="scrubber-markers"></div>
+            <div id="scrubber-thumb" class="scrubber-thumb"></div>
+          </div>
+          <span id="scrubber-max-label">100</span>
+        </div>
+      </section>
+
+      <!-- Backdrop para drawer em telas < 1050px -->
+      <div id="drawer-backdrop" class="drawer-backdrop"></div>
+
+      <!-- Painel Lateral / Drawer (📊) -->
+      <aside id="side-panel" class="side-panel" aria-label="Quadro de Descobertas">
+        <div class="panel-head">
+          <span id="panel-title">📊 Múltiplos Descobertos</span>
+          <button id="btn-close-panel" class="close-btn" type="button" title="Fechar painel">✕</button>
+        </div>
+        <div id="panel-body" class="panel-body"></div>
+      </aside>
+    </main>
+
+    <!-- 4. BARRA INFERIOR DE CONTROLES -->
+    <footer class="action-bar">
+      <button id="btn-play" class="act-btn btn-play" type="button">
+        <span id="play-icon">▶</span><span id="play-label">Correr</span>
+      </button>
+      <button id="btn-step" class="act-btn btn-step" type="button">
+        <span>⏭</span><span>+1 Salto</span>
+      </button>
+      <button id="btn-reset" class="act-btn btn-soft" type="button">
+        <span>↺</span><span>Reiniciar</span>
+      </button>
+
+      <!-- Botões extras da Fase 4 (Primos vs. Compostos) -->
+      <button id="btn-test-all" class="act-btn btn-auto" type="button" style="display:none;">
+        <span>⚡</span><span>Testar Saltadores</span>
+      </button>
+      <button id="btn-guess-prime" class="act-btn btn-prime" type="button" style="display:none;">
+        <span>💎</span><span>É Primo!</span>
+      </button>
+      <button id="btn-guess-comp" class="act-btn btn-comp" type="button" style="display:none;">
+        <span>🧩</span><span>É Composto!</span>
+      </button>
+
+      <!-- Navegação de Desafios sempre visível (Fases 1 a 4) -->
+      <div id="challenge-nav" class="challenge-nav" aria-label="Navegação entre desafios">
+        <button id="btn-prev-challenge" class="nav-mini-btn" type="button" title="Desafio anterior">◀</button>
+        <span id="challenge-counter" class="challenge-counter">1/9</span>
+        <button id="btn-next-challenge" class="btn-next-challenge" type="button" title="Ir para o próximo desafio">
+          <span>Próximo</span><span>▶</span>
+        </button>
+      </div>
+
+      <div class="speed-group" role="group" aria-label="Velocidade da corrida">
+        <button class="speed-opt" data-speed="slow" type="button">🐢 <span class="hide-xs">Lento</span></button>
+        <button class="speed-opt active" data-speed="normal" type="button">⚡ <span class="hide-xs">Normal</span></button>
+        <button class="speed-opt" data-speed="fast" type="button">🚀 <span class="hide-xs">Rápido</span></button>
+      </div>
+    </footer>
+  </div>
+
+  <script>
+    /* =========================================================================
+       CONSTANTES DE GEOMETRIA DO MUNDO, CORES DOS ESCUDOS E MISSÕES
+       ========================================================================= */
+    const SVG_NS = 'http://www.w3.org/2000/svg';
+    const UNIT_W = 54;       // Distância horizontal (px) entre números consecutivos no zoom 100%
+    const LEFT_PAD = 72;     // Margem esquerda antes do 0
+    const RIGHT_PAD = 96;    // Margem direita após o último número
+
+    const PHASE1_STEPS = [2, 3, 4, 5, 6, 7, 8, 9, 10];
+
+    const SHIELD_COLORS = {
+      1:  { main: '#475569', dark: '#1e293b', light: '#cbd5e1' },
+      2:  { main: '#2563eb', dark: '#1e3a8a', light: '#bfdbfe' },
+      3:  { main: '#ea580c', dark: '#9a3412', light: '#fed7aa' },
+      4:  { main: '#059669', dark: '#065f46', light: '#a7f3d0' },
+      5:  { main: '#7c3aed', dark: '#4c1d95', light: '#ddd6fe' },
+      6:  { main: '#db2777', dark: '#831843', light: '#fbcfe8' },
+      7:  { main: '#0891b2', dark: '#164e63', light: '#a5f3fc' },
+      8:  { main: '#d97706', dark: '#78350f', light: '#fde68a' },
+      9:  { main: '#4f46e5', dark: '#312e81', light: '#c7d2fe' },
+      10: { main: '#dc2626', dark: '#7f1d1d', light: '#fecaca' },
+      11: { main: '#0d9488', dark: '#134e4a', light: '#99f6e4' },
+      12: { main: '#9333ea', dark: '#581c87', light: '#e9d5ff' }
+    };
+
+    function getStepPalette(step) {
+      if (SHIELD_COLORS[step]) return SHIELD_COLORS[step];
+      const hue = (step * 47) % 360;
+      return {
+        main: `hsl(${hue}, 72%, 45%)`,
+        dark: `hsl(${hue}, 78%, 28%)`,
+        light: `hsl(${hue}, 85%, 86%)`
+      };
+    }
+
+    const PHASE2_PRESETS = [
+      { label: '2x e 3x', steps: [2, 3] },
+      { label: '3x e 4x', steps: [3, 4] },
+      { label: '4x e 6x', steps: [4, 6] },
+      { label: '3x e 5x', steps: [3, 5] },
+      { label: '2x, 3x e 4x', steps: [2, 3, 4] },
+      { label: '2x, 4x e 6x', steps: [2, 4, 6] },
+      { label: '3x, 4x e 6x', steps: [3, 4, 6] }
+    ];
+
+    const MISSIONS = [
+      { id: 'm1', mode: '3A', target: 12, title: '3A • Chegue exato na casa 12', hint: 'Escolha um saltador (ex: 3x, 4x ou 6x) que pise bem na bandeira 12!' },
+      { id: 'm2', mode: '3A', target: 18, title: '3A • Chegue exato na casa 18', hint: 'Qual saltador cai exatamente em 18 sem pular por cima?' },
+      { id: 'm3', mode: '3A', target: 24, title: '3A • Chegue exato na casa 24', hint: 'Teste um saltador para aterrissar cravado no 24!' },
+      { id: 'm4', mode: '3A', target: 30, title: '3A • Chegue exato na casa 30', hint: 'Dica: tente 5x, 6x ou 10x para chegar em 30!' },
+      { id: 'm5', mode: '3A', target: 35, title: '3A • Chegue exato na casa 35', hint: 'Cuidado! 4x e 6x pulam por cima do 35. Quem acerta?' },
+      { id: 'm6', mode: '3B', target: 12, title: '3B • Todos os saltadores (2x–12x) para 12', hint: 'Descubra todos os saltadores únicos (de 2x a 11x) que acertam 12!' },
+      { id: 'm7', mode: '3B', target: 18, title: '3B • Todos os saltadores (2x–12x) para 18', hint: 'Encontre todos os divisores entre 2x e 12x que caem exato em 18!' },
+      { id: 'm8', mode: '3B', target: 24, title: '3B • Todos os saltadores (2x–12x) para 24', hint: 'Quantos saltadores de 2x a 12x aterrissam na bandeira 24?' },
+      { id: 'm9', mode: '3B', target: 36, title: '3B • Todos os saltadores (2x–12x) para 36', hint: 'Desafio mestre: ache todos os saltadores de 2x a 12x que acertam 36!' }
+    ];
+
+    const PRIME_PRESETS = [7, 12, 13, 15, 17, 21, 23, 29, 36, 47, 51, 97];
+
+    /* =========================================================================
+       SÍNTESE DE ÁUDIO DE LATÊNCIA ZERO + COALESCÊNCIA (WEB AUDIO API)
+       ========================================================================= */
+    const SoundFX = {
+      ctx: null,
+      enabled: true,
+      unlocked: false,
+      lastJumpMs: 0,
+      lastLandMs: 0,
+
+      ensure() {
+        if (!this.enabled) return null;
+        if (!this.ctx) {
+          const AC = window.AudioContext || window.webkitAudioContext;
+          if (!AC) return null;
+          try {
+            this.ctx = new AC({ latencyHint: 'interactive' });
+          } catch {
+            this.ctx = new AC();
+          }
+        }
+        if (this.ctx.state === 'suspended') {
+          this.ctx.resume().catch(() => {});
+        }
+        return this.ctx;
+      },
+
+      unlock() {
+        if (this.unlocked) return;
+        const ctx = this.ensure();
+        if (!ctx) return;
+        try {
+          const buf = ctx.createBuffer(1, 1, ctx.sampleRate);
+          const src = ctx.createBufferSource();
+          src.buffer = buf;
+          src.connect(ctx.destination);
+          src.start(0);
+          this.unlocked = true;
+        } catch {
+          // Ignora caso o navegador ainda bloqueie
+        }
+      },
+
+      // Som único e curto na decolagem (coalescido em janela de 30ms)
+      playJump(step = 2) {
+        const nowMs = performance.now();
+        if (nowMs - this.lastJumpMs < 30) return;
+        this.lastJumpMs = nowMs;
+
+        const ctx = this.ensure();
+        if (!ctx) return;
+        const t = ctx.currentTime;
+        const baseFreq = 260 + (step % 12) * 28;
+
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(baseFreq * 0.9, t);
+        osc.frequency.exponentialRampToValueAtTime(baseFreq * 1.45, t + 0.055);
+
+        gain.gain.setValueAtTime(0.0001, t);
+        gain.gain.linearRampToValueAtTime(0.11, t + 0.002);
+        gain.gain.exponentialRampToValueAtTime(0.0001, t + 0.075);
+
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.start(t);
+        osc.stop(t + 0.08);
+      },
+
+      // Pop/tap curto de aterrissagem normal (coalescido em 30ms)
+      playLand(step = 2) {
+        const nowMs = performance.now();
+        if (nowMs - this.lastLandMs < 30) return;
+        this.lastLandMs = nowMs;
+
+        const ctx = this.ensure();
+        if (!ctx) return;
+        const t = ctx.currentTime;
+        const freq = 420 + (step % 10) * 35;
+
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.type = 'triangle';
+        osc.frequency.setValueAtTime(freq, t);
+        osc.frequency.exponentialRampToValueAtTime(freq * 0.68, t + 0.055);
+
+        gain.gain.setValueAtTime(0.0001, t);
+        gain.gain.linearRampToValueAtTime(0.12, t + 0.002);
+        gain.gain.exponentialRampToValueAtTime(0.0001, t + 0.065);
+
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.start(t);
+        osc.stop(t + 0.07);
+      },
+
+      // Acorde cristalino curto para Múltiplo Comum ou acerto exato
+      playMC() {
+        const ctx = this.ensure();
+        if (!ctx) return;
+        const t = ctx.currentTime;
+        const notes = [587.33, 880]; // D5 + A5
+        notes.forEach((f, i) => {
+          const osc = ctx.createOscillator();
+          const gain = ctx.createGain();
+          osc.type = 'triangle';
+          const start = t + i * 0.032;
+          osc.frequency.setValueAtTime(f, start);
+          gain.gain.setValueAtTime(0.0001, start);
+          gain.gain.linearRampToValueAtTime(0.11, start + 0.002);
+          gain.gain.exponentialRampToValueAtTime(0.0001, start + 0.11);
+          osc.connect(gain);
+          gain.connect(ctx.destination);
+          osc.start(start);
+          osc.stop(start + 0.12);
+        });
+      },
+
+      // Fanfarra imediata para MMC e conclusão de missão (zero setTimeout)
+      playMMC() {
+        const ctx = this.ensure();
+        if (!ctx) return;
+        const t = ctx.currentTime;
+        const notes = [523.25, 659.25, 783.99, 1046.5];
+        notes.forEach((f, i) => {
+          const osc = ctx.createOscillator();
+          const gain = ctx.createGain();
+          osc.type = 'triangle';
+          const start = t + i * 0.048;
+          osc.frequency.setValueAtTime(f, start);
+          gain.gain.setValueAtTime(0.0001, start);
+          gain.gain.linearRampToValueAtTime(0.11, start + 0.002);
+          gain.gain.exponentialRampToValueAtTime(0.0001, start + 0.11);
+          osc.connect(gain);
+          gain.connect(ctx.destination);
+          osc.start(start);
+          osc.stop(start + 0.12);
+        });
+      },
+
+      playPrime() {
+        const ctx = this.ensure();
+        if (!ctx) return;
+        const t = ctx.currentTime;
+        const notes = [440, 554.37, 659.25, 880];
+        notes.forEach((f, i) => {
+          const osc = ctx.createOscillator();
+          const gain = ctx.createGain();
+          osc.type = 'sine';
+          const start = t + i * 0.05;
+          osc.frequency.setValueAtTime(f, start);
+          gain.gain.setValueAtTime(0.0001, start);
+          gain.gain.linearRampToValueAtTime(0.12, start + 0.002);
+          gain.gain.exponentialRampToValueAtTime(0.0001, start + 0.12);
+          osc.connect(gain);
+          gain.connect(ctx.destination);
+          osc.start(start);
+          osc.stop(start + 0.13);
+        });
+      },
+
+      playOvershoot() {
+        const ctx = this.ensure();
+        if (!ctx) return;
+        const t = ctx.currentTime;
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.type = 'sawtooth';
+        osc.frequency.setValueAtTime(280, t);
+        osc.frequency.exponentialRampToValueAtTime(140, t + 0.1);
+
+        gain.gain.setValueAtTime(0.0001, t);
+        gain.gain.linearRampToValueAtTime(0.075, t + 0.002);
+        gain.gain.exponentialRampToValueAtTime(0.0001, t + 0.11);
+
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.start(t);
+        osc.stop(t + 0.12);
+      }
+    };
+
+    // Desbloqueia o AudioContext no primeiro gesto do usuário (latência zero)
+    ['pointerdown', 'click', 'keydown'].forEach((evt) => {
+      window.addEventListener(evt, () => SoundFX.unlock(), { once: true, passive: true });
+    });
+
+    /* =========================================================================
+       ESTADO GLOBAL DA APLICAÇÃO
+       ========================================================================= */
+    const state = {
+      phase: '1', // '1' | '2' | '3' | '4' | '5'
+      speed: 'normal', // 'slow' | 'normal' | 'fast'
+      running: false,
+      panelOpen: window.innerWidth >= 1020,
+      panelHasUpdate: false,
+      maxNum: 100,
+      challengeCompleted: false,
+
+      // Configurações por fase
+      p1ChallengeIdx: 1, // começa em 3x
+      p1Step: 3,
+      p2ChallengeIdx: 0,
+      p2Count: 2,
+      p2Steps: [2, 3, 4],
+      p3MissionIdx: 0,
+      p3CustomTarget: null,
+      p3SelectedStep: 3,
+      p3FoundDivisors: {}, // { target: Set<number> }
+      p3CompletedMissions: new Set(),
+
+      p4ChallengeIdx: 2, // começa em 13
+      p4Target: 13,
+      p4SelectedStep: 2,
+      p4TestedSteps: new Set(),
+      p4HitSteps: new Set(),
+      p4MissSteps: new Set(),
+      p4AutoTesting: false,
+      p4Verdict: null, // null | 'prime' | 'composite'
+      p4Guess: null,
+      discovered100: {}, // { num: 'prime' | 'composite' }
+
+      // Fase 5: Livre / MMC Personalizado
+      p5Count: 2,
+      p5Steps: [4, 6, 8],
+      p5UseTarget: false,
+      p5Target: 24,
+
+      // Estado ativo dos saltadores na pista
+      runners: [],
+      commonMultiples: [],
+      mmcValue: null,
+      popups: [],
+
+      // Câmera
+      viewW: 800,
+      viewH: 400,
+      cameraX: 0,
+      targetCameraX: 0,
+      zoom: 1.0,
+      autoFollow: true,
+      isDragging: false,
+      dragStartX: 0,
+      dragStartCamX: 0,
+
+      // Loop de animação
+      rafId: null,
+      lastFrameTime: 0,
+      nextAutoJumpAt: 0
+    };
+
+    /* =========================================================================
+       REFERÊNCIAS DE DOM
+       ========================================================================= */
+    const dom = {
+      phaseTabs: document.querySelectorAll('.phase-tab'),
+      btnSound: document.getElementById('btn-sound'),
+      soundIcon: document.getElementById('sound-icon'),
+      btnPanel: document.getElementById('btn-panel'),
+      panelDot: document.getElementById('panel-dot'),
+      btnClosePanel: document.getElementById('btn-close-panel'),
+      sidePanel: document.getElementById('side-panel'),
+      drawerBackdrop: document.getElementById('drawer-backdrop'),
+      panelTitle: document.getElementById('panel-title'),
+      panelBody: document.getElementById('panel-body'),
+
+      contextStrip: document.getElementById('context-strip'),
+      ctxControls: document.getElementById('ctx-controls'),
+      ctxFeedback: document.getElementById('ctx-feedback'),
+
+      svgViewport: document.getElementById('svg-viewport'),
+      svg: document.getElementById('track-svg'),
+      worldLayer: document.getElementById('world-layer'),
+      layerLanes: document.getElementById('layer-lanes'),
+      layerBeams: document.getElementById('layer-beams'),
+      layerRuler: document.getElementById('layer-ruler'),
+      layerArcs: document.getElementById('layer-arcs'),
+      layerFootprints: document.getElementById('layer-footprints'),
+      layerFlag: document.getElementById('layer-flag'),
+      layerRunners: document.getElementById('layer-runners'),
+      layerPopups: document.getElementById('layer-popups'),
+
+      btnZoomOut: document.getElementById('btn-zoom-out'),
+      btnZoomIn: document.getElementById('btn-zoom-in'),
+      btnZoomFit: document.getElementById('btn-zoom-fit'),
+      zoomLabel: document.getElementById('zoom-label'),
+      btnPanLeft: document.getElementById('btn-pan-left'),
+      btnPanRight: document.getElementById('btn-pan-right'),
+
+      scrubberTrack: document.getElementById('scrubber-track'),
+      scrubberThumb: document.getElementById('scrubber-thumb'),
+      scrubberMarkers: document.getElementById('scrubber-markers'),
+      scrubberMaxLabel: document.getElementById('scrubber-max-label'),
+
+      stageBanner: document.getElementById('stage-banner'),
+      stageBannerIcon: document.getElementById('stage-banner-icon'),
+      stageBannerText: document.getElementById('stage-banner-text'),
+      bannerNextBtn: document.getElementById('banner-next-btn'),
+      stageBannerClose: document.getElementById('stage-banner-close'),
+
+      btnPlay: document.getElementById('btn-play'),
+      playIcon: document.getElementById('play-icon'),
+      playLabel: document.getElementById('play-label'),
+      btnStep: document.getElementById('btn-step'),
+      btnReset: document.getElementById('btn-reset'),
+      btnTestAll: document.getElementById('btn-test-all'),
+      btnGuessPrime: document.getElementById('btn-guess-prime'),
+      btnGuessComp: document.getElementById('btn-guess-comp'),
+      challengeNav: document.getElementById('challenge-nav'),
+      btnPrevChallenge: document.getElementById('btn-prev-challenge'),
+      challengeCounter: document.getElementById('challenge-counter'),
+      btnNextChallenge: document.getElementById('btn-next-challenge'),
+      speedBtns: document.querySelectorAll('.speed-opt')
+    };
+
+    /* =========================================================================
+       HELPERS MATEMÁTICOS E DE SVG
+       ========================================================================= */
+    function svgEl(tag, attrs = {}, text = null) {
+      const el = document.createElementNS(SVG_NS, tag);
+      for (const [k, v] of Object.entries(attrs)) {
+        el.setAttribute(k, String(v));
+      }
+      if (text !== null) el.textContent = text;
+      return el;
+    }
+
+    function getWorldW() {
+      return LEFT_PAD + state.maxNum * UNIT_W + RIGHT_PAD;
+    }
+
+    function numToX(n) {
+      return LEFT_PAD + n * UNIT_W;
+    }
+
+    function gcd(a, b) {
+      let x = Math.abs(a), y = Math.abs(b);
+      while (y) { const t = y; y = x % y; x = t; }
+      return x || 1;
+    }
+
+    function lcmTwo(a, b) {
+      return Math.abs(a * b) / gcd(a, b);
+    }
+
+    function calcLCM(arr) {
+      if (!arr || arr.length === 0) return 1;
+      return arr.reduce((acc, v) => lcmTwo(acc, v), 1);
+    }
+
+    function isPrimeNumber(n) {
+      if (n < 2) return false;
+      for (let i = 2; i * i <= n; i++) {
+        if (n % i === 0) return false;
+      }
+      return true;
+    }
+
+    function getProperDivisors(n, maxStep = 12) {
+      const res = [];
+      for (let d = 2; d <= Math.min(n - 1, maxStep); d++) {
+        if (n % d === 0) res.push(d);
+      }
+      return res;
+    }
+
+    function getPrimeTestCandidates(n) {
+      // Testa 2, 3, 5, 7 (primos até sqrt(100)=10) que sejam < n
+      const primes = [2, 3, 5, 7];
+      return primes.filter((p) => p * p <= n);
+    }
+
+    function getCurrentTarget() {
+      if (state.phase === '3') {
+        if (state.p3CustomTarget !== null) return state.p3CustomTarget;
+        return MISSIONS[state.p3MissionIdx].target;
+      }
+      if (state.phase === '4') return state.p4Target;
+      if (state.phase === '5' && state.p5UseTarget) return state.p5Target;
+      return null;
+    }
+
+    function computeDynamicMaxNum() {
+      if (state.phase !== '5') return 100;
+      const steps = state.p5Steps.slice(0, state.p5Count);
+      let needed = 100;
+      if (steps.length >= 2) {
+        const expectedMMC = calcLCM(steps);
+        if (expectedMMC > 100) {
+          needed = Math.max(needed, expectedMMC + 20);
+        }
+      }
+      if (state.p5UseTarget && state.p5Target > 90) {
+        needed = Math.max(needed, state.p5Target + 20);
+      }
+      return Math.min(240, Math.max(100, needed));
+    }
+
+    function isMultiRunnerMMCPhase() {
+      return state.phase === '2' || (state.phase === '5' && state.runners.length >= 2);
+    }
+
+    function getSpeedDuration() {
+      if (state.speed === 'slow') return { jumpMs: 740, pauseMs: 360 };
+      if (state.speed === 'fast') return { jumpMs: 220, pauseMs: 70 };
+      return { jumpMs: 430, pauseMs: 170 };
+    }
+
+    /* =========================================================================
+       GEOMETRIA VERTICAL DAS PISTAS (SE ADAPTA A 1, 2, 3 OU 4 PISTAS)
+       ========================================================================= */
+    function getLaneLayout() {
+      const h = Math.max(200, state.viewH);
+      const count = Math.max(1, state.runners.length);
+      const topPad = 36;
+      const rulerH = 38;
+      const usableH = h - topPad - rulerH;
+      const laneH = usableH / count;
+      const lanes = [];
+      for (let i = 0; i < count; i++) {
+        const topY = topPad + i * laneH;
+        const groundY = topY + laneH * 0.78;
+        lanes.push({ topY, laneH, groundY });
+      }
+      return { lanes, rulerY: h - rulerH, h };
+    }
+
+    /* =========================================================================
+       DESENHO DO BONECO CORREDOR COM ESCUDO EM SVG
+       ========================================================================= */
+    function createRunnerSVG(runner, cx, cy, scale, phaseProgress = 0, isJumping = false) {
+      const pal = getStepPalette(runner.step);
+      const g = svgEl('g');
+
+      // Squash & stretch suave na decolagem/aterrissagem
+      let sx = 1, sy = 1;
+      if (isJumping) {
+        if (phaseProgress < 0.15) {
+          sx = 1.08; sy = 0.92;
+        } else if (phaseProgress > 0.85) {
+          sx = 1.1; sy = 0.9;
+        } else {
+          sx = 0.94; sy = 1.07;
+        }
+      }
+      g.setAttribute('transform', `translate(${cx.toFixed(1)}, ${cy.toFixed(1)}) scale(${(scale * sx).toFixed(3)}, ${(scale * sy).toFixed(3)})`);
+
+      // Sombra no chão (quando está parado)
+      if (!isJumping) {
+        g.appendChild(svgEl('ellipse', {
+          cx: 0, cy: 2, rx: 16, ry: 4.5,
+          fill: 'rgba(15, 23, 42, 0.18)'
+        }));
+      }
+
+      // Capa esportiva dinâmica atrás do boneco
+      const capeLift = isJumping ? -10 * Math.sin(phaseProgress * Math.PI) : 0;
+      g.appendChild(svgEl('path', {
+        d: `M -6 -32 Q -24 ${-28 + capeLift} -27 ${-14 + capeLift} Q -16 ${-10 + capeLift} -5 -16 Z`,
+        fill: pal.dark,
+        opacity: '0.88'
+      }));
+
+      // Pernas que flexionam no pulo
+      const legBend = isJumping ? 7 : 0;
+      g.appendChild(svgEl('path', {
+        d: `M -5 -14 Q ${-10 - legBend} -7 ${-8 - legBend * 0.6} ${-2 - legBend * 0.4}`,
+        stroke: '#1e293b', 'stroke-width': 4.2, 'stroke-linecap': 'round', fill: 'none'
+      }));
+      g.appendChild(svgEl('path', {
+        d: `M 5 -14 Q ${10 + legBend} -7 ${9 + legBend * 0.5} ${-2 - legBend * 0.4}`,
+        stroke: '#1e293b', 'stroke-width': 4.2, 'stroke-linecap': 'round', fill: 'none'
+      }));
+
+      // Tênis
+      g.appendChild(svgEl('ellipse', { cx: -8 - legBend * 0.5, cy: -1 - legBend * 0.4, rx: 5, ry: 2.7, fill: pal.main }));
+      g.appendChild(svgEl('ellipse', { cx: 10 + legBend * 0.5, cy: -1 - legBend * 0.4, rx: 5, ry: 2.7, fill: pal.main }));
+
+      // Tronco
+      g.appendChild(svgEl('rect', {
+        x: -11, y: -35, width: 22, height: 23, rx: 9,
+        fill: pal.main, stroke: pal.dark, 'stroke-width': 1.5
+      }));
+
+      // Cabeça amigável
+      g.appendChild(svgEl('circle', {
+        cx: 1, cy: -46, r: 12.5,
+        fill: '#fde68a', stroke: '#b45309', 'stroke-width': 1.3
+      }));
+
+      // Faixa esportiva na testa
+      g.appendChild(svgEl('path', {
+        d: 'M -11 -50 Q 1 -54 13 -50 L 12 -46 Q 1 -49 -10 -46 Z',
+        fill: pal.main
+      }));
+
+      // Olhos expressivos e sorriso
+      g.appendChild(svgEl('circle', { cx: -2.5, cy: -45, r: 1.9, fill: '#0f172a' }));
+      g.appendChild(svgEl('circle', { cx: 5.5, cy: -45, r: 1.9, fill: '#0f172a' }));
+      g.appendChild(svgEl('circle', { cx: -2, cy: -45.7, r: 0.65, fill: '#fff' }));
+      g.appendChild(svgEl('circle', { cx: 6, cy: -45.7, r: 0.65, fill: '#fff' }));
+      g.appendChild(svgEl('path', {
+        d: isJumping ? 'M -2 -40 Q 2 -36.5 6 -40' : 'M -1.5 -40.5 Q 2 -38 5.5 -40.5',
+        stroke: '#78350f', 'stroke-width': 1.6, 'stroke-linecap': 'round', fill: 'none'
+      }));
+
+      // ESCUDO HERÁLDICO BEM LEGÍVEL NA FRENTE (ex: "2x", "3x", "4x"...)
+      const shieldG = svgEl('g', { transform: 'translate(2, -23)', filter: 'url(#softGlow)' });
+      shieldG.appendChild(svgEl('path', {
+        d: 'M -14 -12 L 14 -12 L 14 0 C 14 9 6 14 0 16 C -6 14 -14 9 -14 0 Z',
+        fill: pal.main,
+        stroke: '#ffffff',
+        'stroke-width': 2.2
+      }));
+      shieldG.appendChild(svgEl('path', {
+        d: 'M -11 -9 L 11 -9 L 11 -1 C 11 6 5 10.5 0 12.2 C -5 10.5 -11 6 -11 -1 Z',
+        fill: 'none',
+        stroke: pal.light,
+        'stroke-width': 1,
+        opacity: '0.65'
+      }));
+
+      const labelText = `${runner.step}x`;
+      const fontSize = labelText.length >= 3 ? 10.5 : 12.5;
+      shieldG.appendChild(svgEl('text', {
+        x: 0, y: 4.5,
+        'text-anchor': 'middle',
+        fill: '#ffffff',
+        'font-size': fontSize,
+        'font-weight': '900',
+        'letter-spacing': '-0.3px'
+      }, labelText));
+
+      g.appendChild(shieldG);
+      return g;
+    }
+
+    /* =========================================================================
+       CONTROLE DE CÂMERA (PAN, ZOOM, AUTO-FOLLOW E SCRUBBER)
+       ========================================================================= */
+    function clampCamera(x) {
+      const visibleWorldW = state.viewW / state.zoom;
+      const maxCam = Math.max(0, getWorldW() - visibleWorldW);
+      return Math.max(0, Math.min(maxCam, x));
+    }
+
+    function applyCameraTransform() {
+      const visibleWorldW = state.viewW / state.zoom;
+      dom.svg.setAttribute('viewBox', `${state.cameraX.toFixed(1)} 0 ${visibleWorldW.toFixed(1)} ${state.viewH.toFixed(1)}`);
+      dom.zoomLabel.textContent = `${Math.round(state.zoom * 100)}%`;
+      updateScrubberUI();
+    }
+
+    function setZoom(newZoom, anchorRatio = 0.5) {
+      const clamped = Math.max(0.45, Math.min(2.0, newZoom));
+      const oldVisibleW = state.viewW / state.zoom;
+      const anchorWorldX = state.cameraX + oldVisibleW * anchorRatio;
+      state.zoom = clamped;
+      const newVisibleW = state.viewW / state.zoom;
+      state.cameraX = clampCamera(anchorWorldX - newVisibleW * anchorRatio);
+      state.targetCameraX = state.cameraX;
+      applyCameraTransform();
+    }
+
+    function fitCameraToContext() {
+      state.autoFollow = true;
+      const target = getCurrentTarget();
+      let maxFocusNum = 16;
+
+      if (target !== null) {
+        maxFocusNum = Math.min(state.maxNum, target + 3);
+      } else if (isMultiRunnerMMCPhase() && state.mmcValue) {
+        maxFocusNum = Math.min(state.maxNum, state.mmcValue + 3);
+      } else {
+        const furthest = state.runners.reduce((m, r) => Math.max(m, r.pos), 0);
+        maxFocusNum = Math.max(14, Math.min(state.maxNum, furthest + 5));
+      }
+
+      const neededWorldW = numToX(maxFocusNum) + 50;
+      const idealZoom = Math.max(0.45, Math.min(1.15, state.viewW / neededWorldW));
+      state.zoom = idealZoom;
+      state.cameraX = 0;
+      state.targetCameraX = 0;
+      applyCameraTransform();
+    }
+
+    function focusCameraOnNumber(num, immediate = false) {
+      const worldX = numToX(num);
+      const visibleW = state.viewW / state.zoom;
+      const desired = clampCamera(worldX - visibleW * 0.62);
+      state.targetCameraX = desired;
+      if (immediate) {
+        state.cameraX = desired;
+        applyCameraTransform();
+      }
+    }
+
+    function updateScrubberUI() {
+      const worldW = getWorldW();
+      const visibleW = state.viewW / state.zoom;
+      const pctLeft = (state.cameraX / worldW) * 100;
+      const pctWidth = Math.min(100, (visibleW / worldW) * 100);
+      dom.scrubberThumb.style.left = `${Math.max(0, Math.min(100 - pctWidth, pctLeft))}%`;
+      dom.scrubberThumb.style.width = `${pctWidth}%`;
+      dom.scrubberMaxLabel.textContent = String(state.maxNum);
+
+      // Marcadores dos saltadores e alvo no scrubber
+      let html = '';
+      const target = getCurrentTarget();
+      if (target !== null) {
+        const tx = (numToX(target) / worldW) * 100;
+        html += `<div class="scrubber-marker" style="left:${tx}%;background:#f59e0b;width:4px;"></div>`;
+      }
+      state.runners.forEach((r) => {
+        const rx = (numToX(r.pos) / worldW) * 100;
+        const pal = getStepPalette(r.step);
+        html += `<div class="scrubber-marker" style="left:${rx}%;background:${pal.main};"></div>`;
+      });
+      dom.scrubberMarkers.innerHTML = html;
+    }
+
+    /* =========================================================================
+       INICIALIZAÇÃO DAS FASES E CRIAÇÃO DOS SALTADORES
+       ========================================================================= */
+    function makeRunner(id, step) {
+      return {
+        id,
+        step,
+        pos: 0,
+        jumpCount: 0,
+        landings: [0],
+        arcs: [],
+        anim: null,
+        status: 'idle'
+      };
+    }
+
+    function stopAnimationLoop() {
+      state.running = false;
+      state.p4AutoTesting = false;
+      if (state.rafId) {
+        cancelAnimationFrame(state.rafId);
+        state.rafId = null;
+      }
+      syncPlayButton();
+    }
+
+    function resetRunnersForCurrentPhase() {
+      stopAnimationLoop();
+      hideBanner();
+      state.commonMultiples = [];
+      state.mmcValue = null;
+      state.popups = [];
+      state.challengeCompleted = false;
+      state.maxNum = computeDynamicMaxNum();
+
+      if (state.phase === '1') {
+        state.runners = [makeRunner('r0', state.p1Step)];
+      } else if (state.phase === '2') {
+        const activeSteps = state.p2Steps.slice(0, state.p2Count);
+        state.runners = activeSteps.map((s, i) => makeRunner(`r${i}`, s));
+      } else if (state.phase === '3') {
+        state.runners = [makeRunner('r0', state.p3SelectedStep)];
+      } else if (state.phase === '4') {
+        state.runners = [makeRunner('r0', state.p4SelectedStep)];
+      } else if (state.phase === '5') {
+        const activeSteps = state.p5Steps.slice(0, state.p5Count);
+        state.runners = activeSteps.map((s, i) => makeRunner(`r${i}`, s));
+      }
+
+      state.autoFollow = true;
+      state.cameraX = 0;
+      state.targetCameraX = 0;
+      if (state.phase === '3' || state.phase === '4' || (state.phase === '5' && state.p5UseTarget)) {
+        const t = getCurrentTarget();
+        if (t !== null && t <= 22) {
+          state.zoom = Math.min(1.05, Math.max(0.7, state.viewW / (numToX(t + 3) + 40)));
+        } else {
+          state.zoom = 0.92;
+        }
+      } else {
+        state.zoom = 1.0;
+      }
+
+      buildStaticTrackAndRuler();
+      renderDynamicSVG(performance.now());
+      applyCameraTransform();
+      renderContextBar();
+      renderPanel();
+      syncBottomButtons();
+    }
+
+    /* =========================================================================
+       RENDERIZAÇÃO ESTÁTICA DAS PISTAS E RÉGUA (0 A state.maxNum)
+       ========================================================================= */
+    function buildStaticTrackAndRuler() {
+      dom.layerLanes.innerHTML = '';
+      dom.layerRuler.innerHTML = '';
+
+      const { lanes, rulerY, h } = getLaneLayout();
+      const worldW = getWorldW();
+
+      // Pistas empilhadas
+      lanes.forEach((lane, i) => {
+        const bg = i % 2 === 0 ? '#ffffff' : '#f8fbff';
+        dom.layerLanes.appendChild(svgEl('rect', {
+          x: 0, y: lane.topY, width: worldW, height: lane.laneH,
+          fill: bg, opacity: '0.84'
+        }));
+
+        // Linha divisória entre pistas
+        dom.layerLanes.appendChild(svgEl('line', {
+          x1: 0, y1: lane.topY, x2: worldW, y2: lane.topY,
+          stroke: '#d5e1ee', 'stroke-width': 1.2
+        }));
+
+        // Chão da pista (trilha)
+        dom.layerLanes.appendChild(svgEl('line', {
+          x1: LEFT_PAD - 20, y1: lane.groundY,
+          x2: worldW - 24, y2: lane.groundY,
+          stroke: '#94a3b8', 'stroke-width': 2.5, 'stroke-linecap': 'round'
+        }));
+      });
+
+      // Linhas verticais suaves de alinhamento e régua numérica de 0 a state.maxNum
+      dom.layerRuler.appendChild(svgEl('rect', {
+        x: 0, y: rulerY, width: worldW, height: h - rulerY,
+        fill: '#ffffff', stroke: '#cbd5e1', 'stroke-width': 1.2
+      }));
+
+      for (let n = 0; n <= state.maxNum; n++) {
+        const x = numToX(n);
+        const isTen = n % 10 === 0;
+        const isFive = n % 5 === 0;
+
+        // Grade vertical sutil conectando todas as pistas
+        dom.layerLanes.appendChild(svgEl('line', {
+          x1: x, y1: 30, x2: x, y2: rulerY,
+          stroke: isTen ? '#cbd5e1' : '#e2e8f0',
+          'stroke-width': isTen ? 1.3 : 0.8,
+          'stroke-dasharray': isTen ? '' : '3 4'
+        }));
+
+        // Marca na régua
+        dom.layerRuler.appendChild(svgEl('line', {
+          x1: x, y1: rulerY, x2: x, y2: rulerY + (isFive ? 10 : 6),
+          stroke: isTen ? '#1e293b' : '#64748b',
+          'stroke-width': isTen ? 2 : 1.2
+        }));
+
+        // Número
+        dom.layerRuler.appendChild(svgEl('text', {
+          x, y: rulerY + 25,
+          'text-anchor': 'middle',
+          fill: isTen ? '#0f172a' : '#475569',
+          'font-size': isTen ? '13.5' : '11.5',
+          'font-weight': isTen ? '900' : '800'
+        }, String(n)));
+      }
+    }
+
+    /* =========================================================================
+       RENDERIZAÇÃO DINÂMICA DO PALCO SVG (FEIXES, ARCOS, PEGADAS, BANDEIRA, BONECOS)
+       ========================================================================= */
+    function renderDynamicSVG(now) {
+      dom.layerBeams.innerHTML = '';
+      dom.layerArcs.innerHTML = '';
+      dom.layerFootprints.innerHTML = '';
+      dom.layerFlag.innerHTML = '';
+      dom.layerRunners.innerHTML = '';
+      dom.layerPopups.innerHTML = '';
+
+      const { lanes, rulerY } = getLaneLayout();
+      const runnerScale = lanes.length >= 4 ? 0.62 : lanes.length === 3 ? 0.76 : lanes.length === 2 ? 0.9 : 1.05;
+      const arcMaxH = Math.min(62, lanes[0].laneH * 0.48);
+
+      // 1. Feixes verticais de Múltiplos Comuns (MC) e MMC (Fase 2 e Fase 5 com 2+ saltadores)
+      if (isMultiRunnerMMCPhase() && state.commonMultiples.length > 0) {
+        state.commonMultiples.forEach((mc) => {
+          const x = numToX(mc);
+          const isMMC = mc === state.mmcValue;
+          const beamW = isMMC ? 36 : 26;
+
+          dom.layerBeams.appendChild(svgEl('rect', {
+            x: x - beamW / 2, y: 26, width: beamW, height: rulerY - 26,
+            rx: 8,
+            fill: isMMC ? 'url(#mmcBeamGrad)' : 'url(#goldBeamGrad)',
+            stroke: isMMC ? '#d97706' : '#f59e0b',
+            'stroke-width': isMMC ? 2 : 1.2,
+            filter: isMMC ? 'url(#goldGlow)' : ''
+          }));
+
+          // Selo no topo do feixe
+          const badgeW = isMMC ? 84 : 42;
+          dom.layerBeams.appendChild(svgEl('rect', {
+            x: x - badgeW / 2, y: 5, width: badgeW, height: 22, rx: 11,
+            fill: isMMC ? '#d97706' : '#f59e0b',
+            stroke: '#fff', 'stroke-width': 1.6,
+            filter: 'url(#softGlow)'
+          }));
+          dom.layerBeams.appendChild(svgEl('text', {
+            x, y: 19.5, 'text-anchor': 'middle', fill: '#fff',
+            'font-size': isMMC ? '11' : '10.5', 'font-weight': '900'
+          }, isMMC ? `★ MMC = ${mc}` : `MC ${mc}`));
+        });
+      }
+
+      // 2. Bandeira de Chegada (Fases 3 e 4)
+      const target = getCurrentTarget();
+      if (target !== null) {
+        const fx = numToX(target);
+        // Faixa vertical destacada do alvo
+        dom.layerFlag.appendChild(svgEl('rect', {
+          x: fx - 14, y: 28, width: 28, height: rulerY - 28,
+          fill: 'rgba(245, 158, 11, 0.14)',
+          stroke: '#f59e0b', 'stroke-width': 1.6, 'stroke-dasharray': '5 4'
+        }));
+
+        // Mastro e bandeira quadriculada no topo
+        dom.layerFlag.appendChild(svgEl('line', {
+          x1: fx, y1: 6, x2: fx, y2: rulerY,
+          stroke: '#b45309', 'stroke-width': 2.5
+        }));
+        const flagG = svgEl('g', { transform: `translate(${fx}, 6)` });
+        flagG.appendChild(svgEl('rect', { x: 0, y: 0, width: 32, height: 20, rx: 3, fill: '#fff', stroke: '#1e293b', 'stroke-width': 1.4 }));
+        // Quadriculado
+        for (let r = 0; r < 2; r++) {
+          for (let c = 0; c < 4; c++) {
+            if ((r + c) % 2 === 0) {
+              flagG.appendChild(svgEl('rect', { x: c * 8, y: r * 10, width: 8, height: 10, fill: '#1e293b' }));
+            }
+          }
+        }
+        dom.layerFlag.appendChild(flagG);
+
+        // Etiqueta do alvo na régua
+        dom.layerFlag.appendChild(svgEl('rect', {
+          x: fx - 17, y: rulerY + 6, width: 34, height: 24, rx: 7,
+          fill: '#f59e0b', stroke: '#fff', 'stroke-width': 1.5
+        }));
+        dom.layerFlag.appendChild(svgEl('text', {
+          x: fx, y: rulerY + 22, 'text-anchor': 'middle', fill: '#fff',
+          'font-size': '13', 'font-weight': '900'
+        }, String(target)));
+      }
+
+      // 3. Arcos, pegadas e bonecos de cada pista
+      state.runners.forEach((r, i) => {
+        const lane = lanes[i];
+        if (!lane) return;
+        const pal = getStepPalette(r.step);
+
+        // Etiqueta fixa do saltador no início da pista (x = 18)
+        dom.layerFootprints.appendChild(svgEl('rect', {
+          x: 8, y: lane.groundY - 26, width: 38, height: 22, rx: 7,
+          fill: pal.main, stroke: '#fff', 'stroke-width': 1.5
+        }));
+        dom.layerFootprints.appendChild(svgEl('text', {
+          x: 27, y: lane.groundY - 11.5, 'text-anchor': 'middle', fill: '#fff',
+          'font-size': '11.5', 'font-weight': '900'
+        }, `${r.step}x`));
+
+        // Arcos concluídos
+        r.arcs.forEach((arc) => {
+          const x1 = numToX(arc.from);
+          const x2 = numToX(arc.to);
+          const mx = (x1 + x2) / 2;
+          const cy = lane.groundY - arcMaxH;
+          dom.layerArcs.appendChild(svgEl('path', {
+            d: `M ${x1} ${lane.groundY} Q ${mx} ${cy} ${x2} ${lane.groundY}`,
+            fill: 'none',
+            stroke: arc.miss ? '#e11d48' : pal.main,
+            'stroke-width': arc.miss ? 3 : 2.6,
+            'stroke-dasharray': arc.miss ? '6 5' : '5 4',
+            opacity: arc.miss ? '0.9' : '0.78'
+          }));
+        });
+
+        // Arco em andamento durante o pulo
+        let drawX = numToX(r.pos);
+        let drawY = lane.groundY;
+        let jumping = false;
+        let progress = 0;
+
+        if (r.anim) {
+          jumping = true;
+          progress = Math.min(1, (now - r.anim.startTime) / r.anim.duration);
+          const x1 = numToX(r.anim.from);
+          const x2 = numToX(r.anim.to);
+          drawX = x1 + (x2 - x1) * progress;
+          const jumpHeight = Math.sin(progress * Math.PI) * (arcMaxH * 0.82);
+          drawY = lane.groundY - jumpHeight;
+
+          // Rastro parcial do arco
+          const mx = (x1 + drawX) / 2;
+          dom.layerArcs.appendChild(svgEl('path', {
+            d: `M ${x1} ${lane.groundY} Q ${mx} ${lane.groundY - jumpHeight * 1.15} ${drawX} ${drawY}`,
+            fill: 'none', stroke: pal.main, 'stroke-width': 3, opacity: '0.9'
+          }));
+        }
+
+        // Pegadas brilhantes onde o saltador aterrissou
+        r.landings.forEach((posNum) => {
+          if (posNum === 0) return;
+          const px = numToX(posNum);
+          const isMC = isMultiRunnerMMCPhase() && state.commonMultiples.includes(posNum);
+          const isExactTarget = target !== null && posNum === target;
+
+          dom.layerFootprints.appendChild(svgEl('circle', {
+            cx: px, cy: lane.groundY,
+            r: isMC || isExactTarget ? 7.5 : 5.5,
+            fill: isMC || isExactTarget ? '#f59e0b' : pal.main,
+            stroke: '#fff', 'stroke-width': 2,
+            filter: isMC || isExactTarget ? 'url(#goldGlow)' : ''
+          }));
+        });
+
+        // Boneco com escudo
+        const runnerEl = createRunnerSVG(r, drawX, drawY, runnerScale, progress, jumping);
+        dom.layerRunners.appendChild(runnerEl);
+      });
+
+      // 4. Popups flutuantes (ex: "3 × 4 = 12", "Passou direto!")
+      state.popups = state.popups.filter((p) => now - p.bornAt < p.duration);
+      state.popups.forEach((p) => {
+        const t = (now - p.bornAt) / p.duration;
+        const yOff = -t * 22;
+        const op = t < 0.7 ? 1 : (1 - t) / 0.3;
+        const g = svgEl('g', { transform: `translate(${p.x}, ${p.y + yOff})`, opacity: op.toFixed(2) });
+        const w = Math.max(54, p.text.length * 7.2 + 14);
+        g.appendChild(svgEl('rect', {
+          x: -w / 2, y: -13, width: w, height: 22, rx: 11,
+          fill: p.color, stroke: '#fff', 'stroke-width': 1.5, filter: 'url(#softGlow)'
+        }));
+        g.appendChild(svgEl('text', {
+          x: 0, y: 2, 'text-anchor': 'middle', fill: '#fff',
+          'font-size': '11', 'font-weight': '900'
+        }, p.text));
+        dom.layerPopups.appendChild(g);
+      });
+    }
+
+    function spawnPopup(worldX, worldY, text, color) {
+      state.popups.push({
+        x: worldX, y: worldY, text, color,
+        bornAt: performance.now(),
+        duration: state.speed === 'fast' ? 900 : 1450
+      });
+    }
+
+    /* =========================================================================
+       LÓGICA DE SALTOS CONTÍNUOS E AVALIAÇÃO POR FASE
+       ========================================================================= */
+    function canRunnerJumpMore(r) {
+      if (r.status === 'hit' || r.status === 'miss') return false;
+      const target = getCurrentTarget();
+      if (target !== null && state.phase !== '5') {
+        return r.pos < target && r.pos + r.step <= state.maxNum + r.step;
+      }
+      if (state.phase === '5' && target !== null && state.runners.length === 1) {
+        return r.pos < target && r.pos + r.step <= state.maxNum + r.step;
+      }
+      return r.pos + r.step <= state.maxNum;
+    }
+
+    function triggerNextJumpWave(now) {
+      const { jumpMs } = getSpeedDuration();
+      const eligible = state.runners.filter((r) => !r.anim && canRunnerJumpMore(r));
+      if (eligible.length === 0) {
+        stopAnimationLoop();
+        if (state.phase === '4' && state.p4AutoTesting) {
+          finalizePrimeAutoTest();
+        }
+        return false;
+      }
+
+      // Nas fases de MMC (Fase 2 e Fase 5 com 2+ saltadores), avança o(s) saltador(es) mais atrás para sincronizar os encontros!
+      let toJump = eligible;
+      if (isMultiRunnerMMCPhase()) {
+        const minPos = Math.min(...eligible.map((r) => r.pos));
+        toJump = eligible.filter((r) => r.pos === minPos);
+      }
+
+      toJump.forEach((r) => {
+        const nextPos = r.pos + r.step;
+        r.anim = {
+          from: r.pos,
+          to: nextPos,
+          startTime: now,
+          duration: jumpMs
+        };
+      });
+
+      // Dispara UM único som limpo por onda de salto (latência zero)
+      if (toJump.length > 0) {
+        SoundFX.playJump(toJump[0].step);
+      }
+
+      return true;
+    }
+
+    // Retorna o tipo de evento sonoro para coalescência no tick()
+    function onRunnerLanded(r, laneIdx, now) {
+      const from = r.anim.from;
+      const to = r.anim.to;
+      r.anim = null;
+      r.pos = to;
+      r.jumpCount += 1;
+
+      const { lanes } = getLaneLayout();
+      const lane = lanes[laneIdx] || lanes[0];
+      const pal = getStepPalette(r.step);
+      const target = getCurrentTarget();
+
+      const checkTargetStop = target !== null && (state.phase === '3' || state.phase === '4' || (state.phase === '5' && state.runners.length === 1));
+      const overshot = checkTargetStop && to > target;
+      r.arcs.push({ from, to: Math.min(to, state.maxNum), miss: overshot });
+      if (to <= state.maxNum) {
+        r.landings.push(to);
+      }
+
+      let soundEvent = { type: 'land', step: r.step };
+
+      if (state.phase === '1') {
+        spawnPopup(numToX(to), lane.groundY - 56, `${r.jumpCount} × ${r.step} = ${to}`, pal.main);
+        dom.ctxFeedback.textContent = `Salto ${r.jumpCount}: ${r.jumpCount} × ${r.step} = ${to} (Múltiplo de ${r.step})`;
+        if (r.jumpCount >= 5 && !state.challengeCompleted) {
+          markChallengeCompleted();
+        }
+        markPanelUpdated();
+      } else if (state.phase === '2') {
+        soundEvent = checkCommonMultiples(to) || soundEvent;
+      } else if (state.phase === '3') {
+        soundEvent = evaluatePhase3Landing(r, lane, to, target, overshot) || soundEvent;
+      } else if (state.phase === '4') {
+        soundEvent = evaluatePhase4Landing(r, lane, to, target, overshot) || soundEvent;
+      } else if (state.phase === '5') {
+        if (state.runners.length >= 2) {
+          const mcEv = checkCommonMultiples(to);
+          if (mcEv) soundEvent = mcEv;
+        } else {
+          spawnPopup(numToX(to), lane.groundY - 56, `${r.jumpCount} × ${r.step} = ${to}`, pal.main);
+        }
+        if (target !== null) {
+          if (to === target) {
+            spawnPopup(numToX(to), lane.groundY - 62, `🎯 ${r.jumpCount} × ${r.step} = ${target}!`, '#059669');
+            setContextTone('is-comp');
+            dom.ctxFeedback.textContent = `🎯 Saltador ${r.step}x acertou exatamente a bandeira ${target} (${r.jumpCount} saltos)!`;
+            if (state.runners.length === 1) {
+              r.status = 'hit';
+              stopAnimationLoop();
+              showBanner('🎯', `<strong>Chegada Exata!</strong> O saltador <strong>${r.step}x</strong> acertou a bandeira <strong>${target}</strong> em ${r.jumpCount} saltos!`, 'is-comp', false);
+            }
+            soundEvent = { type: 'mmc', step: r.step };
+          } else if (overshot) {
+            r.status = 'miss';
+            stopAnimationLoop();
+            setContextTone('is-miss');
+            spawnPopup(numToX(target), lane.groundY - 60, `Passou direto! (caiu em ${to})`, '#e11d48');
+            dom.ctxFeedback.textContent = `❌ ${r.step}x pulou por cima do ${target} e caiu no ${to}.`;
+            soundEvent = { type: 'miss', step: r.step };
+          }
+        }
+        markPanelUpdated();
+      }
+
+      renderPanel();
+      return soundEvent;
+    }
+
+    function markChallengeCompleted() {
+      state.challengeCompleted = true;
+      syncChallengeNavUI();
+    }
+
+    function checkCommonMultiples(pos) {
+      if (pos <= 0 || state.commonMultiples.includes(pos)) return null;
+      const allLandedHere = state.runners.every((r) => r.landings.includes(pos));
+      if (!allLandedHere) return null;
+
+      state.commonMultiples.push(pos);
+      state.commonMultiples.sort((a, b) => a - b);
+      markPanelUpdated();
+
+      if (state.mmcValue === null) {
+        state.mmcValue = pos;
+        const stepsTxt = state.runners.map((r) => `${r.step}x`).join(', ');
+        setContextTone('is-gold');
+        dom.ctxFeedback.textContent = `★ MMC encontrado! Primeiro encontro de ${stepsTxt} = ${pos}!`;
+        if (state.phase === '2') markChallengeCompleted();
+        showBanner('⭐', `<strong>MMC(${state.runners.map((r) => r.step).join(', ')}) = ${pos}!</strong> Todos os saltadores se encontraram na casa ${pos}!`, '', state.phase === '2');
+        return { type: 'mmc', step: pos };
+      } else {
+        dom.ctxFeedback.textContent = `Novo Múltiplo Comum: ${pos}! (Encontrados: ${state.commonMultiples.join(', ')})`;
+        return { type: 'mc', step: pos };
+      }
+    }
+
+    function evaluatePhase3Landing(r, lane, to, target, overshot) {
+      const mission = state.p3CustomTarget === null ? MISSIONS[state.p3MissionIdx] : null;
+      if (to === target) {
+        r.status = 'hit';
+        stopAnimationLoop();
+        spawnPopup(numToX(to), lane.groundY - 62, `🎯 ${r.jumpCount} × ${r.step} = ${target}!`, '#059669');
+
+        if (!state.p3FoundDivisors[target]) state.p3FoundDivisors[target] = new Set();
+        state.p3FoundDivisors[target].add(r.step);
+        markPanelUpdated();
+
+        if (mission && mission.mode === '3B') {
+          const expected = getProperDivisors(target, 12);
+          const foundCount = expected.filter((d) => state.p3FoundDivisors[target].has(d)).length;
+          setContextTone('is-comp');
+          if (foundCount >= expected.length) {
+            state.p3CompletedMissions.add(mission.id);
+            markChallengeCompleted();
+            dom.ctxFeedback.textContent = `🏆 Missão completa! Todos os ${expected.length} saltadores de ${target} descobertos!`;
+            showBanner('🏆', `<strong>Missão Completa!</strong> Você encontrou todos os saltadores (divisores) de ${target}: <strong>${expected.map((d) => d + 'x').join(', ')}</strong>!`, 'is-comp', true);
+          } else {
+            dom.ctxFeedback.textContent = `🎯 Acertou! ${r.step}x cai exato em ${target} (${foundCount}/${expected.length} descobertos).`;
+            showBanner('🎯', `<strong>Acertou!</strong> ${r.step}x chegou em ${target} com ${r.jumpCount} saltos! Faltam <strong>${expected.length - foundCount}</strong> saltador(es).`, 'is-comp', false);
+          }
+        } else {
+          if (mission) state.p3CompletedMissions.add(mission.id);
+          markChallengeCompleted();
+          setContextTone('is-comp');
+          dom.ctxFeedback.textContent = `🎯 Chegada exata! ${r.step}x fez ${r.jumpCount} saltos e cravou no ${target}!`;
+          showBanner('🎯', `<strong>Chegada Exata!</strong> O saltador <strong>${r.step}x</strong> deu ${r.jumpCount} saltos e aterrissou na bandeira <strong>${target}</strong>!`, 'is-comp', true);
+        }
+        return { type: 'mmc', step: r.step };
+      } else if (overshot) {
+        r.status = 'miss';
+        stopAnimationLoop();
+        setContextTone('is-miss');
+        spawnPopup(numToX(target), lane.groundY - 60, `Passou direto! (caiu em ${to})`, '#e11d48');
+        dom.ctxFeedback.textContent = `❌ ${r.step}x pulou por cima do ${target} e caiu no ${to}. Tente outro saltador!`;
+        showBanner('💨', `<strong>Pulou por cima!</strong> O saltador ${r.step}x foi para ${to} sem pisar em ${target}. Escolha outro escudo!`, 'is-miss', false);
+        return { type: 'miss', step: r.step };
+      } else {
+        spawnPopup(numToX(to), lane.groundY - 54, `${r.jumpCount} × ${r.step} = ${to}`, getStepPalette(r.step).main);
+        return { type: 'land', step: r.step };
+      }
+    }
+
+    function evaluatePhase4Landing(r, lane, to, target, overshot) {
+      if (to === target) {
+        r.status = 'hit';
+        state.p4TestedSteps.add(r.step);
+        state.p4HitSteps.add(r.step);
+        spawnPopup(numToX(to), lane.groundY - 56, `✓ ${r.jumpCount}×${r.step}=${target}`, '#059669');
+
+        if (r.step > 1 && r.step < target) {
+          state.p4Verdict = 'composite';
+          state.discovered100[target] = 'composite';
+          stopAnimationLoop();
+          markChallengeCompleted();
+          setContextTone('is-comp');
+          dom.ctxFeedback.textContent = `🧩 ${target} é COMPOSTO! O saltador ${r.step}x acertou com ${r.jumpCount} saltos!`;
+          showBanner('🧩', `<strong>${target} é COMPOSTO!</strong> Um único saltador <strong>${r.step}x</strong> chegou exato em ${target} (${r.jumpCount} saltos)!`, 'is-comp', true);
+          markPanelUpdated();
+          return { type: 'mmc', step: r.step };
+        }
+        return { type: 'mc', step: r.step };
+      } else if (overshot) {
+        r.status = 'miss';
+        state.p4TestedSteps.add(r.step);
+        state.p4MissSteps.add(r.step);
+        spawnPopup(numToX(target), lane.groundY - 54, `Pulou ${target}!`, '#e11d48');
+
+        if (!state.p4AutoTesting) {
+          stopAnimationLoop();
+          const provedPrime = checkIfPrimeProven(target);
+          return { type: provedPrime ? 'prime' : 'miss', step: r.step };
+        } else {
+          const anyActive = state.runners.some((rr) => rr.status === 'idle');
+          if (!anyActive) {
+            stopAnimationLoop();
+            finalizePrimeAutoTest();
+            return { type: state.p4Verdict === 'prime' ? 'prime' : 'mmc', step: r.step };
+          }
+          return { type: 'miss', step: r.step };
+        }
+      }
+      return { type: 'land', step: r.step };
+    }
+
+    function checkIfPrimeProven(target) {
+      const needed = getPrimeTestCandidates(target);
+      const allMissed = needed.every((p) => state.p4MissSteps.has(p));
+      if (allMissed && state.p4HitSteps.size === 0 && isPrimeNumber(target)) {
+        state.p4Verdict = 'prime';
+        state.discovered100[target] = 'prime';
+        markChallengeCompleted();
+        setContextTone('is-prime');
+        dom.ctxFeedback.textContent = `💎 ${target} é PRIMO! Nenhum saltador de 2x a ${target - 1}x cai em ${target}!`;
+        showBanner('💎', `<strong>${target} é PRIMO!</strong> Todos os saltadores menores pularam por cima — só o <strong>1x</strong> (${target} saltos) ou combinando saltadores chega lá!`, 'is-prime', true);
+        markPanelUpdated();
+        return true;
+      } else {
+        setContextTone('is-miss');
+        dom.ctxFeedback.textContent = `💨 ${state.p4SelectedStep}x pulou por cima de ${target}. Teste outro saltador ou clique em "Testar Saltadores"!`;
+        return false;
+      }
+    }
+
+    function finalizePrimeAutoTest() {
+      const target = state.p4Target;
+      markChallengeCompleted();
+      if (state.p4HitSteps.size > 0) {
+        const hitStep = Array.from(state.p4HitSteps)[0];
+        state.p4Verdict = 'composite';
+        state.discovered100[target] = 'composite';
+        setContextTone('is-comp');
+        dom.ctxFeedback.textContent = `🧩 ${target} é COMPOSTO! ${hitStep}x acertou em cheio (${target / hitStep} saltos)!`;
+        showBanner('🧩', `<strong>${target} é COMPOSTO!</strong> O saltador <strong>${hitStep}x</strong> deu ${target / hitStep} saltos e cravou na bandeira ${target}!`, 'is-comp', true);
+      } else {
+        state.p4Verdict = 'prime';
+        state.discovered100[target] = 'prime';
+        setContextTone('is-prime');
+        dom.ctxFeedback.textContent = `💎 ${target} é PRIMO! Todos os saltadores candidatos pularam por cima!`;
+        showBanner('💎', `<strong>${target} é PRIMO!</strong> Nenhum saltador único de 2x até ${target - 1}x acerta ${target} — apenas <strong>1x</strong> (${target} saltos) ou mais de 1 saltador!`, 'is-prime', true);
+      }
+      markPanelUpdated();
+      renderPanel();
+    }
+
+    /* =========================================================================
+       LOOP PRINCIPAL DE ANIMAÇÃO COM COALESCÊNCIA DE ÁUDIO POR FRAME
+       ========================================================================= */
+    function startAnimationLoop() {
+      if (state.rafId) return;
+      state.lastFrameTime = performance.now();
+      state.rafId = requestAnimationFrame(tick);
+    }
+
+    function playCoalescedLandingAudio(events) {
+      if (!events || events.length === 0) return;
+      // Prioridade única por janela de frame: mmc > prime > mc > miss > land
+      if (events.some((e) => e.type === 'mmc')) {
+        SoundFX.playMMC();
+      } else if (events.some((e) => e.type === 'prime')) {
+        SoundFX.playPrime();
+      } else if (events.some((e) => e.type === 'mc')) {
+        SoundFX.playMC();
+      } else if (events.some((e) => e.type === 'miss')) {
+        SoundFX.playOvershoot();
+      } else {
+        SoundFX.playLand(events[0].step);
+      }
+    }
+
+    function tick(now) {
+      const { pauseMs } = getSpeedDuration();
+      let anyAnimating = false;
+      const landingAudioEvents = [];
+
+      // Atualiza saltos em curso e coleta eventos sonoros para coalescer
+      state.runners.forEach((r, i) => {
+        if (!r.anim) return;
+        const elapsed = now - r.anim.startTime;
+        if (elapsed >= r.anim.duration) {
+          const ev = onRunnerLanded(r, i, now);
+          if (ev) landingAudioEvents.push(ev);
+        } else {
+          anyAnimating = true;
+        }
+      });
+
+      if (landingAudioEvents.length > 0) {
+        playCoalescedLandingAudio(landingAudioEvents);
+      }
+
+      // Se estiver no modo contínuo e ninguém estiver no ar, dispara próxima onda
+      if (state.running && !anyAnimating && now >= state.nextAutoJumpAt) {
+        const launched = triggerNextJumpWave(now);
+        if (launched) {
+          anyAnimating = true;
+          state.nextAutoJumpAt = now + getSpeedDuration().jumpMs + pauseMs;
+        }
+      }
+
+      // Auto-follow suave da câmera
+      if (state.autoFollow && !state.isDragging) {
+        const activeRunners = state.runners.filter((r) => r.status === 'idle' || r.anim);
+        const list = activeRunners.length ? activeRunners : state.runners;
+        if (list.length > 0) {
+          let leadX = 0;
+          list.forEach((r) => {
+            let rx = numToX(r.pos);
+            if (r.anim) {
+              const p = Math.min(1, (now - r.anim.startTime) / r.anim.duration);
+              rx = numToX(r.anim.from + (r.anim.to - r.anim.from) * p);
+            }
+            if (rx > leadX) leadX = rx;
+          });
+          const visibleW = state.viewW / state.zoom;
+          const desired = clampCamera(leadX - visibleW * 0.65);
+          state.targetCameraX = desired;
+        }
+      }
+
+      // Interpolação suave da câmera
+      const diff = state.targetCameraX - state.cameraX;
+      if (Math.abs(diff) > 0.4) {
+        state.cameraX += diff * 0.14;
+        applyCameraTransform();
+      }
+
+      renderDynamicSVG(now);
+
+      const hasPopups = state.popups.length > 0;
+      const camMoving = Math.abs(state.targetCameraX - state.cameraX) > 0.4;
+      if (state.running || anyAnimating || hasPopups || camMoving) {
+        state.rafId = requestAnimationFrame(tick);
+      } else {
+        state.rafId = null;
+      }
+    }
+
+    /* =========================================================================
+       AÇÕES DOS BOTÕES INFERIORES
+       ========================================================================= */
+    function handlePlayPause() {
+      if (state.running) {
+        state.running = false;
+        syncPlayButton();
+        return;
+      }
+      // Se todos já terminaram, reinicia automaticamente antes de correr
+      const canAny = state.runners.some((r) => canRunnerJumpMore(r));
+      if (!canAny) {
+        resetRunnersForCurrentPhase();
+      }
+      state.running = true;
+      state.autoFollow = true;
+      state.nextAutoJumpAt = performance.now();
+      syncPlayButton();
+      startAnimationLoop();
+    }
+
+    function handleStepOnce() {
+      state.running = false;
+      syncPlayButton();
+      const anyInAir = state.runners.some((r) => r.anim !== null);
+      if (anyInAir) return;
+      const canAny = state.runners.some((r) => canRunnerJumpMore(r));
+      if (!canAny) return;
+      state.autoFollow = true;
+      triggerNextJumpWave(performance.now());
+      startAnimationLoop();
+    }
+
+    function handlePrimeAutoTest() {
+      if (state.phase !== '4') return;
+      stopAnimationLoop();
+      hideBanner();
+      const target = state.p4Target;
+      const candidates = getPrimeTestCandidates(target);
+
+      state.p4TestedSteps = new Set();
+      state.p4HitSteps = new Set();
+      state.p4MissSteps = new Set();
+      state.p4Verdict = null;
+
+      if (candidates.length === 0) {
+        // Casos 2 e 3: não há primos <= sqrt(N)
+        state.runners = [makeRunner('r0', 2)];
+        buildStaticTrackAndRuler();
+        finalizePrimeAutoTest();
+        SoundFX.playPrime();
+        renderDynamicSVG(performance.now());
+        return;
+      }
+
+      state.runners = candidates.map((s, i) => makeRunner(`p${i}`, s));
+      state.p4AutoTesting = true;
+      state.running = true;
+      state.autoFollow = true;
+      state.cameraX = 0;
+      state.targetCameraX = 0;
+      if (target <= 30) {
+        state.zoom = Math.max(0.55, Math.min(1.0, state.viewW / (numToX(target + 3) + 40)));
+      } else {
+        state.zoom = 0.85;
+      }
+      buildStaticTrackAndRuler();
+      applyCameraTransform();
+      syncPlayButton();
+      dom.ctxFeedback.textContent = `⚡ Testando saltadores ${candidates.map((c) => c + 'x').join(', ')} até a bandeira ${target}...`;
+      state.nextAutoJumpAt = performance.now();
+      startAnimationLoop();
+    }
+
+    function handlePrimeGuess(guess) {
+      if (state.phase !== '4') return;
+      const target = state.p4Target;
+      const actuallyPrime = isPrimeNumber(target);
+      const correct = (guess === 'prime' && actuallyPrime) || (guess === 'composite' && !actuallyPrime);
+      state.p4Guess = guess;
+      state.discovered100[target] = actuallyPrime ? 'prime' : 'composite';
+      markPanelUpdated();
+      renderPanel();
+
+      if (correct) {
+        SoundFX.playPrime();
+        markChallengeCompleted();
+        setContextTone(actuallyPrime ? 'is-prime' : 'is-comp');
+        const extra = actuallyPrime
+          ? `Nenhum saltador de 2x até ${target - 1}x cai exato em ${target}!`
+          : `Por exemplo, o saltador ${getProperDivisors(target, target - 1)[0]}x acerta ${target} exato!`;
+        dom.ctxFeedback.textContent = `🎉 Acertou o palpite! ${target} é ${actuallyPrime ? 'PRIMO' : 'COMPOSTO'}!`;
+        showBanner('🎉', `<strong>Mandou bem!</strong> ${target} é mesmo <strong>${actuallyPrime ? 'PRIMO' : 'COMPOSTO'}</strong>! ${extra}`, actuallyPrime ? 'is-prime' : 'is-comp', true);
+      } else {
+        SoundFX.playOvershoot();
+        setContextTone('is-miss');
+        dom.ctxFeedback.textContent = `Quase! Clique em "Testar Saltadores" para ver o que acontece na casa ${target}!`;
+        showBanner('🤔', `<strong>Ops, quase!</strong> Clique em <strong>⚡ Testar Saltadores</strong> para comprovar na pista se ${target} é Primo ou Composto!`, 'is-miss', false);
+      }
+    }
+
+    /* =========================================================================
+       NAVEGAÇÃO ENTRE DESAFIOS (ANTERIOR / PRÓXIMO)
+       ========================================================================= */
+    function getChallengeProgress() {
+      if (state.phase === '1') return { idx: state.p1ChallengeIdx, total: PHASE1_STEPS.length };
+      if (state.phase === '2') return { idx: state.p2ChallengeIdx, total: PHASE2_PRESETS.length };
+      if (state.phase === '3') return { idx: state.p3MissionIdx, total: MISSIONS.length };
+      if (state.phase === '4') return { idx: state.p4ChallengeIdx, total: PRIME_PRESETS.length };
+      return null;
+    }
+
+    function syncChallengeNavUI() {
+      const prog = getChallengeProgress();
+      if (!prog) {
+        dom.challengeNav.style.display = 'none';
+        return;
+      }
+      dom.challengeNav.style.display = 'inline-flex';
+      dom.challengeCounter.textContent = `${prog.idx + 1}/${prog.total}`;
+      dom.btnPrevChallenge.disabled = prog.idx <= 0;
+      dom.btnNextChallenge.classList.toggle('is-highlight', state.challengeCompleted);
+    }
+
+    function goChallengeByDelta(delta) {
+      if (state.phase === '1') {
+        const next = (state.p1ChallengeIdx + delta + PHASE1_STEPS.length) % PHASE1_STEPS.length;
+        state.p1ChallengeIdx = next;
+        state.p1Step = PHASE1_STEPS[next];
+        resetRunnersForCurrentPhase();
+      } else if (state.phase === '2') {
+        const next = (state.p2ChallengeIdx + delta + PHASE2_PRESETS.length) % PHASE2_PRESETS.length;
+        state.p2ChallengeIdx = next;
+        const p = PHASE2_PRESETS[next];
+        state.p2Count = p.steps.length;
+        p.steps.forEach((v, i) => { state.p2Steps[i] = v; });
+        resetRunnersForCurrentPhase();
+      } else if (state.phase === '3') {
+        const next = (state.p3MissionIdx + delta + MISSIONS.length) % MISSIONS.length;
+        state.p3CustomTarget = null;
+        state.p3MissionIdx = next;
+        resetRunnersForCurrentPhase();
+      } else if (state.phase === '4') {
+        const next = (state.p4ChallengeIdx + delta + PRIME_PRESETS.length) % PRIME_PRESETS.length;
+        state.p4ChallengeIdx = next;
+        selectPhase4Target(PRIME_PRESETS[next]);
+      }
+    }
+
+    /* =========================================================================
+       UI DA FAIXA DE CONTEXTO, BOTÕES E PAINEL LATERAL
+       ========================================================================= */
+    function setContextTone(cls = '') {
+      dom.contextStrip.className = `context-strip ${cls}`.trim();
+    }
+
+    function showBanner(icon, html, toneClass = '', showNextBtn = false) {
+      dom.stageBannerIcon.textContent = icon;
+      dom.stageBannerText.innerHTML = html;
+      dom.bannerNextBtn.style.display = (showNextBtn && state.phase !== '5') ? 'inline-flex' : 'none';
+      dom.stageBanner.className = `stage-banner is-visible ${toneClass}`.trim();
+    }
+
+    function hideBanner() {
+      dom.stageBanner.classList.remove('is-visible');
+    }
+
+    function syncPlayButton() {
+      if (state.running) {
+        dom.btnPlay.className = 'act-btn btn-pause';
+        dom.playIcon.textContent = '⏸';
+        dom.playLabel.textContent = 'Pausar';
+      } else {
+        dom.btnPlay.className = 'act-btn btn-play';
+        dom.playIcon.textContent = '▶';
+        dom.playLabel.textContent = 'Correr';
+      }
+    }
+
+    function syncBottomButtons() {
+      const isP4 = state.phase === '4';
+      dom.btnTestAll.style.display = isP4 ? 'inline-flex' : 'none';
+      dom.btnGuessPrime.style.display = isP4 ? 'inline-flex' : 'none';
+      dom.btnGuessComp.style.display = isP4 ? 'inline-flex' : 'none';
+      syncPlayButton();
+      syncChallengeNavUI();
+    }
+
+    function renderContextBar() {
+      setContextTone('');
+      dom.ctxControls.innerHTML = '';
+
+      if (state.phase === '1') {
+        dom.ctxControls.innerHTML = `<span class="ctx-label">Saltador:</span>`;
+        for (let s = 1; s <= 10; s++) {
+          const btn = document.createElement('button');
+          btn.type = 'button';
+          btn.className = `mini-chip${state.p1Step === s ? ' active' : ''}`;
+          btn.textContent = `${s}x`;
+          if (state.p1Step === s) {
+            btn.style.background = getStepPalette(s).main;
+            btn.style.borderColor = getStepPalette(s).dark;
+          }
+          btn.addEventListener('click', () => {
+            state.p1Step = s;
+            const foundIdx = PHASE1_STEPS.indexOf(s);
+            if (foundIdx >= 0) state.p1ChallengeIdx = foundIdx;
+            resetRunnersForCurrentPhase();
+          });
+          dom.ctxControls.appendChild(btn);
+        }
+        dom.ctxFeedback.textContent = `Saltador ${state.p1Step}x pronto na casa 0! Aperte Correr ou +1 Salto.`;
+      }
+
+      else if (state.phase === '2') {
+        const btn2 = document.createElement('button');
+        btn2.type = 'button';
+        btn2.className = `mini-chip${state.p2Count === 2 ? ' active' : ''}`;
+        btn2.textContent = '2 Saltadores';
+        btn2.addEventListener('click', () => { state.p2Count = 2; resetRunnersForCurrentPhase(); });
+
+        const btn3 = document.createElement('button');
+        btn3.type = 'button';
+        btn3.className = `mini-chip${state.p2Count === 3 ? ' active' : ''}`;
+        btn3.textContent = '3 Saltadores';
+        btn3.addEventListener('click', () => { state.p2Count = 3; resetRunnersForCurrentPhase(); });
+
+        dom.ctxControls.appendChild(btn2);
+        dom.ctxControls.appendChild(btn3);
+
+        for (let i = 0; i < state.p2Count; i++) {
+          const sel = document.createElement('select');
+          sel.className = 'ctx-select';
+          sel.ariaLabel = `Saltador ${i + 1}`;
+          for (let s = 2; s <= 10; s++) {
+            const opt = document.createElement('option');
+            opt.value = String(s);
+            opt.textContent = `${s}x`;
+            if (state.p2Steps[i] === s) opt.selected = true;
+            sel.appendChild(opt);
+          }
+          sel.addEventListener('change', () => {
+            state.p2Steps[i] = Number(sel.value);
+            resetRunnersForCurrentPhase();
+          });
+          dom.ctxControls.appendChild(sel);
+        }
+
+        const presetSel = document.createElement('select');
+        presetSel.className = 'ctx-select';
+        presetSel.innerHTML = `<option value="">Desafios...</option>`;
+        PHASE2_PRESETS.forEach((p, idx) => {
+          const opt = document.createElement('option');
+          opt.value = String(idx);
+          opt.textContent = p.label;
+          if (state.p2ChallengeIdx === idx) opt.selected = true;
+          presetSel.appendChild(opt);
+        });
+        presetSel.addEventListener('change', () => {
+          if (presetSel.value === '') return;
+          state.p2ChallengeIdx = Number(presetSel.value);
+          const p = PHASE2_PRESETS[state.p2ChallengeIdx];
+          state.p2Count = p.steps.length;
+          p.steps.forEach((v, idx) => { state.p2Steps[idx] = v; });
+          resetRunnersForCurrentPhase();
+        });
+        dom.ctxControls.appendChild(presetSel);
+
+        // Botão discreto para abrir direto na Fase 5 Livre preenchida com os saltadores atuais
+        const customBtn = document.createElement('button');
+        customBtn.type = 'button';
+        customBtn.className = 'mini-chip';
+        customBtn.textContent = '⚙ Personalizar';
+        customBtn.title = 'Abrir na Fase Livre com saltadores de 1x até 20x';
+        customBtn.addEventListener('click', () => {
+          state.p5Count = state.p2Count;
+          state.p5Steps = [...state.p2Steps];
+          state.p5UseTarget = false;
+          switchPhase('5');
+        });
+        dom.ctxControls.appendChild(customBtn);
+
+        dom.ctxFeedback.textContent = `Compare os saltos na vertical para encontrar os MCs e o MMC!`;
+      }
+
+      else if (state.phase === '3') {
+        const mSel = document.createElement('select');
+        mSel.className = 'ctx-select';
+        MISSIONS.forEach((m, idx) => {
+          const done = state.p3CompletedMissions.has(m.id) ? '✓ ' : '';
+          const opt = document.createElement('option');
+          opt.value = String(idx);
+          opt.textContent = `${done}${m.title}`;
+          if (state.p3CustomTarget === null && state.p3MissionIdx === idx) opt.selected = true;
+          mSel.appendChild(opt);
+        });
+        mSel.addEventListener('change', () => {
+          state.p3CustomTarget = null;
+          state.p3MissionIdx = Number(mSel.value);
+          resetRunnersForCurrentPhase();
+        });
+        dom.ctxControls.appendChild(mSel);
+
+        const lbl = document.createElement('span');
+        lbl.className = 'ctx-label';
+        lbl.textContent = 'Escudo:';
+        dom.ctxControls.appendChild(lbl);
+
+        const stepSel = document.createElement('select');
+        stepSel.className = 'ctx-select';
+        for (let s = 2; s <= 12; s++) {
+          const opt = document.createElement('option');
+          opt.value = String(s);
+          opt.textContent = `${s}x`;
+          if (state.p3SelectedStep === s) opt.selected = true;
+          stepSel.appendChild(opt);
+        }
+        stepSel.addEventListener('change', () => {
+          state.p3SelectedStep = Number(stepSel.value);
+          resetRunnersForCurrentPhase();
+        });
+        dom.ctxControls.appendChild(stepSel);
+
+        // Alvo livre
+        const customLbl = document.createElement('span');
+        customLbl.className = 'ctx-label';
+        customLbl.textContent = 'Alvo:';
+        dom.ctxControls.appendChild(customLbl);
+
+        const customIn = document.createElement('input');
+        customIn.type = 'number';
+        customIn.min = '4';
+        customIn.max = '90';
+        customIn.value = String(getCurrentTarget());
+        customIn.className = 'ctx-num';
+        customIn.addEventListener('change', () => {
+          const val = Math.max(4, Math.min(90, Math.floor(Number(customIn.value) || 12)));
+          state.p3CustomTarget = val;
+          resetRunnersForCurrentPhase();
+        });
+        dom.ctxControls.appendChild(customIn);
+
+        const mission = state.p3CustomTarget === null ? MISSIONS[state.p3MissionIdx] : null;
+        dom.ctxFeedback.textContent = mission ? mission.hint : `Tente acertar exatamente a bandeira em ${state.p3CustomTarget}!`;
+      }
+
+      else if (state.phase === '4') {
+        const pSel = document.createElement('select');
+        pSel.className = 'ctx-select';
+        pSel.innerHTML = `<option value="">Desafios...</option>`;
+        PRIME_PRESETS.forEach((num, idx) => {
+          const opt = document.createElement('option');
+          opt.value = String(num);
+          opt.textContent = `Número ${num}`;
+          if (state.p4Target === num) opt.selected = true;
+          pSel.appendChild(opt);
+        });
+        pSel.addEventListener('change', () => {
+          if (!pSel.value) return;
+          const v = Number(pSel.value);
+          const idx = PRIME_PRESETS.indexOf(v);
+          if (idx >= 0) state.p4ChallengeIdx = idx;
+          selectPhase4Target(v);
+        });
+        dom.ctxControls.appendChild(pSel);
+
+        const numIn = document.createElement('input');
+        numIn.type = 'number';
+        numIn.min = '2';
+        numIn.max = '100';
+        numIn.value = String(state.p4Target);
+        numIn.className = 'ctx-num';
+        numIn.title = 'Digite qualquer número de 2 a 100';
+        numIn.addEventListener('change', () => {
+          const v = Math.max(2, Math.min(100, Math.floor(Number(numIn.value) || 13)));
+          selectPhase4Target(v);
+        });
+        dom.ctxControls.appendChild(numIn);
+
+        const lbl = document.createElement('span');
+        lbl.className = 'ctx-label';
+        lbl.textContent = 'Testar:';
+        dom.ctxControls.appendChild(lbl);
+
+        const stepSel = document.createElement('select');
+        stepSel.className = 'ctx-select';
+        for (let s = 2; s <= 10; s++) {
+          const opt = document.createElement('option');
+          opt.value = String(s);
+          opt.textContent = `${s}x`;
+          if (state.p4SelectedStep === s) opt.selected = true;
+          stepSel.appendChild(opt);
+        }
+        stepSel.addEventListener('change', () => {
+          state.p4SelectedStep = Number(stepSel.value);
+          resetRunnersForCurrentPhase();
+        });
+        dom.ctxControls.appendChild(stepSel);
+
+        dom.ctxFeedback.textContent = `Número ${state.p4Target}: existe um único saltador (de 2x a ${state.p4Target - 1}x) que cai exato nele?`;
+      }
+
+      else if (state.phase === '5') {
+        // 1, 2 ou 3 pistas livres
+        const lblPistas = document.createElement('span');
+        lblPistas.className = 'ctx-label';
+        lblPistas.textContent = 'Pistas:';
+        dom.ctxControls.appendChild(lblPistas);
+
+        [1, 2, 3].forEach((n) => {
+          const b = document.createElement('button');
+          b.type = 'button';
+          b.className = `mini-chip${state.p5Count === n ? ' active' : ''}`;
+          b.textContent = String(n);
+          b.addEventListener('click', () => {
+            state.p5Count = n;
+            resetRunnersForCurrentPhase();
+          });
+          dom.ctxControls.appendChild(b);
+        });
+
+        // Steppers (− Nx +) de 1x até 20x para cada saltador
+        for (let i = 0; i < state.p5Count; i++) {
+          const wrap = document.createElement('div');
+          wrap.className = 'step-spinner';
+          const pal = getStepPalette(state.p5Steps[i]);
+          wrap.style.borderColor = pal.main;
+
+          const bMinus = document.createElement('button');
+          bMinus.type = 'button';
+          bMinus.textContent = '−';
+          bMinus.title = `Diminuir saltador ${i + 1}`;
+          bMinus.addEventListener('click', () => {
+            state.p5Steps[i] = Math.max(1, state.p5Steps[i] - 1);
+            resetRunnersForCurrentPhase();
+          });
+
+          const valSpan = document.createElement('span');
+          valSpan.textContent = `${state.p5Steps[i]}x`;
+          valSpan.style.color = pal.dark;
+
+          const bPlus = document.createElement('button');
+          bPlus.type = 'button';
+          bPlus.textContent = '+';
+          bPlus.title = `Aumentar saltador ${i + 1}`;
+          bPlus.addEventListener('click', () => {
+            state.p5Steps[i] = Math.min(20, state.p5Steps[i] + 1);
+            resetRunnersForCurrentPhase();
+          });
+
+          wrap.appendChild(bMinus);
+          wrap.appendChild(valSpan);
+          wrap.appendChild(bPlus);
+          dom.ctxControls.appendChild(wrap);
+        }
+
+        // Controle opcional de Alvo
+        const targetBtn = document.createElement('button');
+        targetBtn.type = 'button';
+        targetBtn.className = `mini-chip${state.p5UseTarget ? ' active' : ''}`;
+        targetBtn.textContent = state.p5UseTarget ? '🎯 Alvo:' : '🎯 Sem alvo';
+        targetBtn.addEventListener('click', () => {
+          state.p5UseTarget = !state.p5UseTarget;
+          resetRunnersForCurrentPhase();
+        });
+        dom.ctxControls.appendChild(targetBtn);
+
+        if (state.p5UseTarget) {
+          const tIn = document.createElement('input');
+          tIn.type = 'number';
+          tIn.min = '2';
+          tIn.max = '240';
+          tIn.value = String(state.p5Target);
+          tIn.className = 'ctx-num';
+          tIn.addEventListener('change', () => {
+            state.p5Target = Math.max(2, Math.min(240, Math.floor(Number(tIn.value) || 24)));
+            resetRunnersForCurrentPhase();
+          });
+          dom.ctxControls.appendChild(tIn);
+        }
+
+        const activeSteps = state.p5Steps.slice(0, state.p5Count);
+        if (activeSteps.length >= 2) {
+          const expectedMMC = calcLCM(activeSteps);
+          const extMsg = state.maxNum > 100 ? ` (pista estendida até ${state.maxNum}!)` : '';
+          dom.ctxFeedback.textContent = expectedMMC <= state.maxNum
+            ? `Modo Livre: aperte Correr para descobrir os MCs e o MMC de ${activeSteps.map((s) => s + 'x').join(', ')}!${extMsg}`
+            : `Modo Livre: MMC(${activeSteps.join(', ')}) = ${expectedMMC} (além do limite de 240 da pista).`;
+        } else {
+          dom.ctxFeedback.textContent = `Modo Livre: explore os saltos de ${activeSteps[0]}x até ${state.maxNum}!`;
+        }
+      }
+    }
+
+    function selectPhase4Target(num) {
+      state.p4Target = num;
+      const idx = PRIME_PRESETS.indexOf(num);
+      if (idx >= 0) state.p4ChallengeIdx = idx;
+      state.p4TestedSteps = new Set();
+      state.p4HitSteps = new Set();
+      state.p4MissSteps = new Set();
+      state.p4Verdict = null;
+      state.p4Guess = null;
+      resetRunnersForCurrentPhase();
+    }
+
+    /* =========================================================================
+       PAINEL LATERAL / DRAWER (📊)
+       ========================================================================= */
+    function syncPanelUI() {
+      dom.sidePanel.classList.toggle('is-open', state.panelOpen);
+      dom.btnPanel.classList.toggle('active', state.panelOpen);
+      dom.drawerBackdrop.classList.toggle('is-open', state.panelOpen && window.innerWidth < 1020);
+      if (state.panelOpen) state.panelHasUpdate = false;
+      dom.panelDot.classList.toggle('is-visible', state.panelHasUpdate && !state.panelOpen);
+    }
+
+    function markPanelUpdated() {
+      if (!state.panelOpen) {
+        state.panelHasUpdate = true;
+        dom.panelDot.classList.add('is-visible');
+      }
+    }
+
+    function renderPanel() {
+      if (state.phase === '1') {
+        dom.panelTitle.textContent = `📊 Múltiplos de ${state.p1Step}`;
+        const r = state.runners[0];
+        const pal = getStepPalette(r.step);
+        const mults = r.landings.filter((n) => n > 0);
+        dom.panelBody.innerHTML = `
+          <div class="info-card">
+            <div class="info-card-title"><span>Saltador ${r.step}x</span><span>${mults.length} saltos</span></div>
+            <div class="pill-wrap">
+              ${mults.length
+                ? mults.map((m, idx) => `<span class="num-pill" style="background:${pal.main}" title="${idx + 1} × ${r.step} = ${m}">${m}</span>`).join('')
+                : `<span style="font-size:0.76rem;color:var(--ink-muted)">Aperte <strong>Correr</strong> ou <strong>+1 Salto</strong> para descobrir os múltiplos!</span>`}
+            </div>
+          </div>
+          <div class="info-card gold">
+            <div class="info-card-title"><span>Dica Pedagógica</span></div>
+            <div style="font-size:0.76rem;font-weight:700;color:var(--ink)">
+              Cada casa onde o boneco <strong>${r.step}x</strong> pisa é um <strong>múltiplo de ${r.step}</strong> (tabuada do ${r.step}!).
+            </div>
+          </div>
+        `;
+      } else if (state.phase === '2' || state.phase === '5') {
+        dom.panelTitle.textContent = state.phase === '5' ? '📊 Livre — Múltiplos & MMC' : '📊 Múltiplos Comuns & MMC';
+        const isMulti = state.runners.length >= 2;
+        const mmcHtml = isMulti
+          ? (state.mmcValue
+            ? `<div class="info-card gold">
+                 <div class="info-card-title"><span>★ Mínimo Múltiplo Comum</span></div>
+                 <div style="font-size:1.05rem;font-weight:900;color:var(--gold-dark)">MMC(${state.runners.map((r) => r.step).join(', ')}) = ${state.mmcValue}</div>
+               </div>`
+            : `<div class="info-card">
+                 <div class="info-card-title"><span>Múltiplos Comuns (MC)</span></div>
+                 <div style="font-size:0.75rem;color:var(--ink-muted)">Aperte <strong>Correr</strong> e observe os encontros verticais na pista (0 a ${state.maxNum})!</div>
+               </div>`)
+          : '';
+
+        const mcListHtml = (isMulti && state.commonMultiples.length)
+          ? `<div class="info-card">
+               <div class="info-card-title"><span>Encontros Verticais (MCs)</span><span>${state.commonMultiples.length}</span></div>
+               <div class="pill-wrap">
+                 ${state.commonMultiples.map((m) => `<span class="num-pill ${m === state.mmcValue ? 'is-mmc' : 'is-mc'}">${m === state.mmcValue ? '★ ' + m : m}</span>`).join('')}
+               </div>
+             </div>`
+          : '';
+
+        const perRunnerHtml = state.runners.map((r) => {
+          const pal = getStepPalette(r.step);
+          const list = r.landings.filter((n) => n > 0);
+          return `
+            <div class="info-card">
+              <div class="info-card-title"><span style="color:${pal.dark}">Múltiplos de ${r.step}</span><span>${list.length}</span></div>
+              <div class="pill-wrap">
+                ${list.length ? list.map((m) => `<span class="num-pill" style="background:${pal.main}">${m}</span>`).join('') : '<span style="font-size:0.72rem;color:#94a3b8">—</span>'}
+              </div>
+            </div>
+          `;
+        }).join('');
+
+        dom.panelBody.innerHTML = mmcHtml + mcListHtml + perRunnerHtml;
+      }
+
+      else if (state.phase === '3') {
+        const target = getCurrentTarget();
+        const found = state.p3FoundDivisors[target] ? Array.from(state.p3FoundDivisors[target]).sort((a, b) => a - b) : [];
+        const expected = getProperDivisors(target, 12);
+        dom.panelTitle.textContent = `📊 Missão — Alvo ${target}`;
+
+        dom.panelBody.innerHTML = `
+          <div class="info-card comp">
+            <div class="info-card-title"><span>Saltadores que acertam ${target}</span><span>${found.length}/${expected.length}</span></div>
+            <div class="pill-wrap">
+              ${found.length
+                ? found.map((s) => `<span class="num-pill" style="background:${getStepPalette(s).main}">🏅 ${s}x (${target / s} saltos)</span>`).join('')
+                : `<span style="font-size:0.75rem;color:var(--ink-muted)">Nenhum saltador acertou a bandeira ${target} ainda.</span>`}
+            </div>
+          </div>
+          <div class="info-card">
+            <div class="info-card-title"><span>Missões Concluídas</span><span>${state.p3CompletedMissions.size}/${MISSIONS.length}</span></div>
+            <div style="display:flex;flex-direction:column;gap:4px;font-size:0.74rem;font-weight:800;">
+              ${MISSIONS.map((m) => {
+                const ok = state.p3CompletedMissions.has(m.id);
+                return `<div style="color:${ok ? '#059669' : '#64748b'}">${ok ? '✅' : '⬜'} ${m.title}</div>`;
+              }).join('')}
+            </div>
+          </div>
+        `;
+      }
+
+      else if (state.phase === '4') {
+        const target = state.p4Target;
+        const primesFound = Object.values(state.discovered100).filter((v) => v === 'prime').length;
+        const compsFound = Object.values(state.discovered100).filter((v) => v === 'composite').length;
+        dom.panelTitle.textContent = '📊 Quadro de Primos (1–100)';
+
+        let gridHtml = '<div class="grid-100">';
+        for (let n = 1; n <= 100; n++) {
+          let cls = 'cell-100';
+          if (n === 1) cls += ' is-one';
+          else if (state.discovered100[n] === 'prime') cls += ' is-prime';
+          else if (state.discovered100[n] === 'composite') cls += ' is-comp';
+          if (n === target) cls += ' is-target';
+          gridHtml += `<button class="${cls}" data-num="${n}" type="button" ${n === 1 ? 'disabled' : ''}>${n}</button>`;
+        }
+        gridHtml += '</div>';
+
+        dom.panelBody.innerHTML = `
+          <div class="info-card ${state.p4Verdict === 'prime' ? 'prime' : state.p4Verdict === 'composite' ? 'comp' : ''}">
+            <div class="info-card-title"><span>Alvo Atual: ${target}</span><span>💎 ${primesFound} • 🧩 ${compsFound}</span></div>
+            <div style="font-size:0.75rem;font-weight:700;color:var(--ink)">
+              Clique em qualquer número abaixo (2 a 100) para investigá-lo na pista!
+            </div>
+          </div>
+          ${gridHtml}
+          <div style="display:flex;gap:8px;justify-content:center;font-size:0.7rem;font-weight:800;color:var(--ink-muted)">
+            <span><span style="display:inline-block;width:10px;height:10px;border-radius:3px;background:#7c3aed;vertical-align:middle"></span> Primo</span>
+            <span><span style="display:inline-block;width:10px;height:10px;border-radius:3px;background:#34d399;vertical-align:middle"></span> Composto</span>
+            <span><span style="display:inline-block;width:10px;height:10px;border-radius:3px;border:2px solid #f59e0b;vertical-align:middle"></span> Alvo</span>
+          </div>
+        `;
+
+        dom.panelBody.querySelectorAll('.cell-100[data-num]').forEach((btn) => {
+          btn.addEventListener('click', () => {
+            const num = Number(btn.dataset.num);
+            if (num >= 2) selectPhase4Target(num);
+          });
+        });
+      }
+    }
+
+    /* =========================================================================
+       EVENTOS DE INTERAÇÃO (PAN, ZOOM, SCRUBBER, ABAS, BOTÕES)
+       ========================================================================= */
+    function switchPhase(phase) {
+      state.phase = phase;
+      dom.phaseTabs.forEach((b) => b.classList.toggle('active', b.dataset.phase === phase));
+      resetRunnersForCurrentPhase();
+    }
+
+    dom.phaseTabs.forEach((tab) => {
+      tab.addEventListener('click', () => switchPhase(tab.dataset.phase));
+    });
+
+    dom.btnPlay.addEventListener('click', handlePlayPause);
+    dom.btnStep.addEventListener('click', handleStepOnce);
+    dom.btnReset.addEventListener('click', resetRunnersForCurrentPhase);
+    dom.btnTestAll.addEventListener('click', handlePrimeAutoTest);
+    dom.btnGuessPrime.addEventListener('click', () => handlePrimeGuess('prime'));
+    dom.btnGuessComp.addEventListener('click', () => handlePrimeGuess('composite'));
+    dom.btnPrevChallenge.addEventListener('click', () => goChallengeByDelta(-1));
+    dom.btnNextChallenge.addEventListener('click', () => goChallengeByDelta(1));
+    dom.bannerNextBtn.addEventListener('click', () => goChallengeByDelta(1));
+
+    dom.speedBtns.forEach((btn) => {
+      btn.addEventListener('click', () => {
+        state.speed = btn.dataset.speed;
+        dom.speedBtns.forEach((b) => b.classList.toggle('active', b === btn));
+      });
+    });
+
+    dom.btnSound.addEventListener('click', () => {
+      SoundFX.enabled = !SoundFX.enabled;
+      dom.btnSound.classList.toggle('active', SoundFX.enabled);
+      dom.soundIcon.textContent = SoundFX.enabled ? '🔊' : '🔇';
+      if (SoundFX.enabled) SoundFX.playLand(4);
+    });
+
+    dom.btnPanel.addEventListener('click', () => {
+      state.panelOpen = !state.panelOpen;
+      syncPanelUI();
+    });
+    dom.btnClosePanel.addEventListener('click', () => {
+      state.panelOpen = false;
+      syncPanelUI();
+    });
+    dom.drawerBackdrop.addEventListener('click', () => {
+      state.panelOpen = false;
+      syncPanelUI();
+    });
+    dom.stageBannerClose.addEventListener('click', hideBanner);
+
+    // Zoom e Pan
+    dom.btnZoomIn.addEventListener('click', () => setZoom(state.zoom + 0.15));
+    dom.btnZoomOut.addEventListener('click', () => setZoom(state.zoom - 0.15));
+    dom.btnZoomFit.addEventListener('click', fitCameraToContext);
+
+    dom.btnPanLeft.addEventListener('click', () => {
+      state.autoFollow = false;
+      state.targetCameraX = clampCamera(state.cameraX - (state.viewW / state.zoom) * 0.42);
+      startAnimationLoop();
+    });
+    dom.btnPanRight.addEventListener('click', () => {
+      state.autoFollow = false;
+      state.targetCameraX = clampCamera(state.cameraX + (state.viewW / state.zoom) * 0.42);
+      startAnimationLoop();
+    });
+
+    // Arraste com Mouse / Toque no palco SVG
+    dom.svgViewport.addEventListener('pointerdown', (e) => {
+      if (e.target.closest('button')) return;
+      state.isDragging = true;
+      state.autoFollow = false;
+      state.dragStartX = e.clientX;
+      state.dragStartCamX = state.cameraX;
+      dom.svgViewport.setPointerCapture(e.pointerId);
+    });
+    dom.svgViewport.addEventListener('pointermove', (e) => {
+      if (!state.isDragging) return;
+      const dx = (e.clientX - state.dragStartX) / state.zoom;
+      state.cameraX = clampCamera(state.dragStartCamX - dx);
+      state.targetCameraX = state.cameraX;
+      applyCameraTransform();
+    });
+    const endDrag = () => { state.isDragging = false; };
+    dom.svgViewport.addEventListener('pointerup', endDrag);
+    dom.svgViewport.addEventListener('pointercancel', endDrag);
+
+    // Roda do mouse: scroll horizontal ou zoom com Ctrl
+    dom.svgViewport.addEventListener('wheel', (e) => {
+      e.preventDefault();
+      if (e.ctrlKey) {
+        setZoom(state.zoom + (e.deltaY < 0 ? 0.1 : -0.1));
+      } else {
+        state.autoFollow = false;
+        const delta = Math.abs(e.deltaX) > Math.abs(e.deltaY) ? e.deltaX : e.deltaY;
+        state.cameraX = clampCamera(state.cameraX + delta / state.zoom);
+        state.targetCameraX = state.cameraX;
+        applyCameraTransform();
+      }
+    }, { passive: false });
+
+    // Scrubber interativo (0 a state.maxNum)
+    function moveCameraByScrubber(clientX) {
+      const rect = dom.scrubberTrack.getBoundingClientRect();
+      const ratio = Math.max(0, Math.min(1, (clientX - rect.left) / rect.width));
+      const visibleW = state.viewW / state.zoom;
+      state.autoFollow = false;
+      state.cameraX = clampCamera(ratio * getWorldW() - visibleW / 2);
+      state.targetCameraX = state.cameraX;
+      applyCameraTransform();
+    }
+    let scrubberDragging = false;
+    dom.scrubberTrack.addEventListener('pointerdown', (e) => {
+      scrubberDragging = true;
+      dom.scrubberTrack.setPointerCapture(e.pointerId);
+      moveCameraByScrubber(e.clientX);
+    });
+    dom.scrubberTrack.addEventListener('pointermove', (e) => {
+      if (scrubberDragging) moveCameraByScrubber(e.clientX);
+    });
+    dom.scrubberTrack.addEventListener('pointerup', () => { scrubberDragging = false; });
+
+    // Resize responsivo do palco SVG
+    function handleResize() {
+      const rect = dom.svgViewport.getBoundingClientRect();
+      if (rect.width > 0 && rect.height > 0) {
+        state.viewW = rect.width;
+        state.viewH = rect.height;
+        buildStaticTrackAndRuler();
+        state.cameraX = clampCamera(state.cameraX);
+        state.targetCameraX = state.cameraX;
+        applyCameraTransform();
+        renderDynamicSVG(performance.now());
+      }
+      syncPanelUI();
+    }
+
+    const resizeObserver = new ResizeObserver(handleResize);
+    resizeObserver.observe(dom.svgViewport);
+    window.addEventListener('resize', handleResize);
+
+    // Inicialização
+    window.addEventListener('DOMContentLoaded', () => {
+      syncPanelUI();
+      handleResize();
+      switchPhase('1');
+    });
+  </script>
+<div id="autoriaTxt" onclick="this.classList.remove('on')" style="position:fixed;top:44px;right:8px;z-index:2147483000;max-width:260px;padding:8px 10px;border-radius:8px;background:#222;color:#fff;font:12px/1.35 sans-serif;display:none">© Ygor B. F. Ferreira · A Saga dos Reinos Matemáticos · Matematkês · uso livre em sala</div><style>#autoriaTxt.on{display:block!important}</style>
+</body>
+</html>

@@ -1,0 +1,1684 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>O Artefato de Númera · Reta, plano e sistemas</title>
+<style>
+:root{--bg:#f4efe4;--card:#fffdf7;--ink:#2a2338;--muted:#6b6380;--line:#3a3250;--pos:#d96f00;--neg:#6a3bd0;--ok:#1d8a4a;--bad:#c23a3a;--pill:#e6def2;--btn:#3a3250;--btnink:#fff;--shadow:0 2px 10px rgba(40,30,60,.12);--band:#efe6d2}
+@media(prefers-color-scheme:dark){:root{--bg:#16121e;--card:#211b2d;--ink:#f0ebf9;--muted:#a79dc2;--line:#cfc6e8;--pos:#ffa733;--neg:#b196ff;--ok:#5bd68f;--bad:#ff7d7d;--pill:#382f4e;--btn:#cfc6e8;--btnink:#1b1526;--shadow:none;--band:#2a2238}}
+*{box-sizing:border-box}
+:root{--la:#1d8a4a;--lb:#c2185b;--gold:#e0a800}
+@media(prefers-color-scheme:dark){:root{--la:#5bd68f;--lb:#ff7fb0;--gold:#ffd24a}}
+.wl{font-size:1.2rem;margin:4px 0;line-height:1.5}
+.wl small{font-size:.8rem;color:var(--muted)}
+.wp{margin-top:10px;font-weight:700;font-size:1rem}
+.fz{display:inline-block;animation:fuse 1.4s ease-in forwards}
+@keyframes fuse{0%{opacity:1;transform:scale(1)}50%{opacity:1;transform:scale(1.3);background:rgba(224,168,0,.35);border-radius:6px}100%{opacity:0;transform:scale(.1)}}
+.hl{background:rgba(224,168,0,.35);border-radius:6px;padding:0 .15em}
+.rl{border-radius:8px;padding:0 .35em;font-weight:700;white-space:nowrap}
+.ra{background:rgba(29,138,74,.18);color:var(--la)}.rb{background:rgba(194,24,91,.16);color:var(--lb)}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+main{max-width:900px;margin:0 auto;padding:10px 12px 14px}
+header{display:flex;justify-content:space-between;align-items:flex-end;gap:8px;flex-wrap:wrap;margin-bottom:6px}
+.saga{font-size:.7rem;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+h1{margin:0;font-size:1.3rem}
+button{font:inherit;cursor:pointer;border:2px solid var(--btn);background:transparent;color:var(--ink);border-radius:10px;padding:7px 12px}
+button.primary{background:var(--btn);color:var(--btnink)}
+button:disabled{opacity:.4;cursor:default}
+#tabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px}
+#tabs button{padding:6px 10px;font-size:.9rem}
+#tabs button.on{background:var(--btn);color:var(--btnink)}
+.card{background:var(--card);border-radius:14px;box-shadow:var(--shadow);padding:10px 12px}
+#rule{font-size:.92rem;color:var(--muted);margin-bottom:6px}
+#expr{font-size:1.9rem;font-weight:700;text-align:center;padding:4px 0;min-height:2.6rem}
+#expr .neg{color:var(--neg)}#expr .pos{color:var(--pos)}
+#expr .op{background:var(--pill);border-radius:8px;padding:0 .3em;margin:0 .1em}
+#expr .q{color:var(--muted)}
+#legend{display:flex;justify-content:center;gap:14px;flex-wrap:wrap;font-size:.82rem;color:var(--muted);margin-bottom:4px}
+#legend .op{background:var(--pill);border-radius:6px;padding:0 .35em;color:var(--ink);font-weight:700}
+#legend .neg,.neg{color:var(--neg)}#legend .pos,.pos{color:var(--pos)}
+svg{width:100%;height:auto;display:block;background:var(--band);border-radius:10px;touch-action:manipulation}
+.axis{stroke:var(--line);stroke-width:3;fill:none}
+.tick line{stroke:var(--line);stroke-width:2}
+.tick text{font-size:20px;text-anchor:middle;fill:var(--ink)}
+.tick text.lp{fill:var(--pos)}.tick text.ln{fill:var(--neg)}
+.tick.zero text{font-weight:800;font-size:23px}
+.seg .sl{stroke:var(--c);stroke-width:6;stroke-linecap:round}
+.seg.dashed .sl{stroke-dasharray:9 8;stroke-linecap:butt;opacity:.85}
+.seg polygon,.seg circle{fill:var(--c)}
+.seg circle{stroke:var(--band);stroke-width:2}
+.seg text{fill:var(--c);font-size:22px;font-weight:800;text-anchor:middle}
+.seg .guide{stroke:var(--c);stroke-width:2;stroke-dasharray:4 5;opacity:.45}
+.c-pos{--c:var(--pos)}.c-neg{--c:var(--neg)}
+.hit{fill:transparent}
+svg.pick .hit{cursor:pointer}
+svg.pick .hit:hover{fill:rgba(120,100,180,.18)}
+.pickring{fill:none;stroke:var(--ink);stroke-width:3;stroke-dasharray:5 4}
+.okring{fill:none;stroke:var(--ok);stroke-width:5}
+.badring{fill:none;stroke:var(--bad);stroke-width:5}
+.flag line{stroke:var(--ink);stroke-width:3}.flag polygon{fill:var(--bad)}
+#cap{min-height:2.7em;font-size:.95rem;margin-top:6px;text-align:center}
+#msg{min-height:1.5em;font-weight:700;text-align:center;margin-top:2px}
+#msg.ok{color:var(--ok)}#msg.bad{color:var(--bad)}
+#opts{display:none;gap:8px;justify-content:center;flex-wrap:wrap;margin:6px 0}
+.opt{font-size:1.15rem;font-weight:700}
+.opt.sel{background:var(--pill)}
+.opt.ok{border-color:var(--ok);background:rgba(40,160,90,.18)}
+.opt.bad{border-color:var(--bad);background:rgba(200,60,60,.15)}
+.opt .neg{color:var(--neg)}.opt .pos{color:var(--pos)}
+.opt .op{background:var(--pill);border-radius:6px;padding:0 .25em}
+#controls{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-top:8px}
+#dots{display:flex;gap:7px;justify-content:center;margin-top:8px}
+.dot{width:14px;height:14px;border-radius:50%;border:2px solid var(--muted)}
+.dot.ok{background:var(--ok);border-color:var(--ok)}.dot.bad{background:var(--bad);border-color:var(--bad)}
+.dot.seen{background:var(--muted)}.dot.cur{border-color:var(--ink);box-shadow:0 0 0 2px var(--pill)}
+.tg{font-size:.74rem;color:var(--muted);flex-basis:100%;text-align:left;margin:6px 0 0}
+.grid{stroke:var(--line);stroke-width:1;opacity:.16}
+.qpos{fill:var(--pos);opacity:.09}.qneg{fill:var(--neg);opacity:.09}.qmix{fill:var(--ink);opacity:.045}
+.ql{font-size:17px;font-weight:700;fill:var(--muted);text-anchor:middle;pointer-events:none}
+.ql .lp{fill:var(--pos)}.ql .ln{fill:var(--neg)}
+.pdash{stroke:var(--c);stroke-width:2.5;stroke-dasharray:7 6;opacity:.8;fill:none}
+.pt{fill:var(--ink);stroke:var(--band);stroke-width:2}
+.axname{font-size:22px;font-weight:800;font-style:italic;fill:var(--ink);pointer-events:none}
+.ptag{font-size:20px;font-weight:800;text-anchor:middle;fill:var(--ink);pointer-events:none;paint-order:stroke;stroke:var(--band);stroke-width:4px}
+.tick.small text{font-size:15px}
+svg.plane{width:min(100%,56vh);margin:0 auto;cursor:grab;touch-action:none;user-select:none;-webkit-user-select:none}
+svg.plane:active{cursor:grabbing}
+.wout{fill:var(--ink);opacity:.16}
+.wedge{fill:none;stroke:var(--muted);stroke-width:2;stroke-dasharray:6 5}
+.opill{fill:var(--card);stroke:var(--line);stroke-width:2}
+.otxt{font-size:15px;font-weight:700;fill:var(--ink);text-anchor:middle;pointer-events:none}
+#app{display:block}
+#app>.card{margin-bottom:10px}
+#pMenu h2{margin:0 0 6px;font-size:.8rem;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+#gph{display:none;text-align:center;color:var(--muted);padding:34px 12px;border:2px dashed var(--muted);border-radius:10px;font-size:.95rem}
+#bnav{display:none}
+@media(min-width:900px){
+ main{max-width:1300px}
+ #app{display:grid;grid-template-columns:210px minmax(0,1fr) 350px;gap:12px;align-items:start}
+ #app>.card{margin-bottom:0}
+ #tabs{flex-direction:column;flex-wrap:nowrap;gap:5px;margin:0}
+ #tabs button{text-align:left;width:100%}
+ #pGraph{position:sticky;top:8px}
+ svg.plane{width:min(100%,70vh)}
+ #pAlg #expr{font-size:1.6rem}
+ #pAlg #cap{text-align:left;font-size:1rem}
+}
+@media(max-width:899px){
+ main{padding-bottom:78px}
+ #app>.card{display:none}
+ body[data-tab="menu"] #pMenu,body[data-tab="graf"] #pGraph,body[data-tab="alg"] #pAlg{display:block}
+ #tabs button{padding:6px 10px;font-size:.9rem}
+ #bnav{display:flex;position:fixed;left:0;right:0;bottom:0;gap:6px;padding:8px 10px;background:var(--card);box-shadow:0 -2px 10px rgba(0,0,0,.15);z-index:5}
+ #bnav button{flex:1;padding:10px 4px;font-weight:700}
+ #bnav button.on{background:var(--btn);color:var(--btnink)}
+ #app.pm #expr{font-size:1.3rem;min-height:0}
+ #app.pm #legend{font-size:.72rem}
+ svg.plane{width:min(100%,62vh)}
+ #cap{font-size:.9rem}
+}
+footer{margin-top:10px;font-size:.72rem;color:var(--muted);text-align:center}
+</style>
+</head>
+<body>
+<main>
+<header>
+  <div>
+    <div class="saga">A Saga dos Reinos Matemáticos</div>
+    <h1>⚔ O Artefato de Númera</h1>
+    <div class="saga" style="text-transform:none;letter-spacing:0;font-size:.82rem">Reta numerada, plano cartesiano e sistemas de equações</div>
+  </div>
+  <button id="speed" title="Velocidade da caminhada">Ritmo: lento</button>
+</header>
+<div id="app">
+<section class="card" id="pMenu"><h2>Menu</h2><nav id="tabs"></nav></section>
+<section class="card" id="pGraph">
+  <div id="legend">
+    <span><span class="op">+ −</span> fora do parêntese: operação</span>
+    <span>( <span class="pos">+</span> <span class="neg">−</span> ) dentro: direção do número</span>
+    <span><span class="pos">■ matéria (+) → direita</span> · <span class="neg">■ antimatéria (−) ← esquerda</span></span>
+  </div>
+  <svg id="svg" viewBox="0 0 840 250" role="img" aria-label="Reta numerada de -10 a 10"></svg>
+  <div id="gph">O gráfico aparece aqui quando você terminar os passos. Primeiro, resolva só com as contas.</div>
+</section>
+<section class="card" id="pAlg">
+  <div id="rule"></div>
+  <div id="expr"></div>
+  <div id="cap"></div>
+  <div id="msg"></div>
+  <div id="opts"></div>
+  <div id="controls"></div>
+  <div id="dots"></div>
+</section>
+</div>
+<nav id="bnav"><button data-t="menu">☰ Menu</button><button data-t="graf">📈 Gráfico</button><button data-t="alg">✏️ Álgebra</button></nav>
+<footer>© Ygor B. F. Ferreira · A Saga dos Reinos Matemáticos · Matematkês · Uso livre em sala de aula</footer>
+</main>
+
+<script>
+(function(){
+'use strict';
+var MIN=-10,MAX=10,X0=50,X1=790,LINEY=196;
+var U=(X1-X0)/(MAX-MIN);
+function px(v){return X0+(v-MIN)*U;}
+var NS='http://www.w3.org/2000/svg';
+function $(id){return document.getElementById(id);}
+var MINUS='\u2212';
+function fmt(n){return n<0?MINUS+(-n):String(n);}
+function sgn(n){return n<0?MINUS:'+';}
+function rnd(a,b){return a+Math.floor(Math.random()*(b-a+1));}
+function pickOne(a){return a[rnd(0,a.length-1)];}
+function shuffle(a){for(var i=a.length-1;i>0;i--){var j=rnd(0,i);var t=a[i];a[i]=a[j];a[j]=t;}return a;}
+function inR(v){return v>=MIN&&v<=MAX;}
+function nz(m){var n=0;while(n===0)n=rnd(-m,m);return n;}
+function key(ts){return ts.map(function(t){return t.op+t.n;}).join('|');}
+
+//#GEN-START
+function path(terms){var p=0;return terms.map(function(t){p+=(t.op==='+'?t.n:-t.n);return p;});}
+function allIn(ts){return path(ts).every(inR);}
+function tryGen(nTerms,cfg){
+  for(var k=0;k<3000;k++){
+    var ts=[];
+    for(var i=0;i<nTerms;i++){ts.push({op:i===0?'+':cfg.op(i),n:cfg.n(i)});}
+    if(!allIn(ts))continue;
+    if(cfg.ok&&!cfg.ok(ts))continue;
+    return ts;
+  }
+  return null;
+}
+function genWhich(){
+  for(var k=0;k<2000;k++){
+    var a=rnd(-7,7),m=nz(8),b=a+m;
+    if(!inR(b))continue;
+    var mk=function(d){return Math.random()<0.5?{op:'+',n:d}:{op:'-',n:-d};};
+    var cand=[-m,m+1,m-1,-(m+1),-(m-1),2*m].filter(function(d){return d!==0&&d!==m&&inR(a+d);});
+    var uniq=cand.filter(function(d,i){return cand.indexOf(d)===i;});
+    if(uniq.length<2)continue;
+    var ds=shuffle(uniq).slice(0,2);
+    var opts=[{terms:[{op:'+',n:a},mk(m)],ok:true}];
+    ds.forEach(function(d){opts.push({terms:[{op:'+',n:a},mk(d)],ok:false});});
+    return {type:'which',start:a,target:b,options:shuffle(opts)};
+  }
+  return null;
+}
+function makeOne(level,i){
+  if(level===1){
+    return {type:'walk',terms:tryGen(2,{op:function(){return '+';},n:function(){return nz(8);},ok:function(ts){
+      var c=ts.filter(function(t){return t.n<0;}).length;
+      if(i<2)return c===0; if(i<4)return c===1; return c>=1;}})};
+  }
+  if(level===2){
+    return {type:'walk',terms:tryGen(2,{op:function(){return '-';},n:function(){return nz(7);},ok:function(ts){
+      var f=ts[0].n,s=ts[1].n;
+      if(i===0)return f>0&&s>0; if(i===1)return f>0&&s<0; if(i===2)return f<0&&s>0; if(i===3)return f<0&&s<0;
+      if(i===4)return s<0; return true;}})};
+  }
+  if(i<2)return genWhich();
+  return {type:'walk',terms:tryGen(3,{op:function(){return pickOne(['+','-']);},n:function(){return nz(6);},ok:function(ts){
+    return ts.slice(1).some(function(t){return t.op==='-';})&&ts.some(function(t){return t.n<0;});}})};
+}
+function genLevel(level){
+  var out=[],seen={};
+  for(var i=0;i<6;i++){
+    var ch=null;
+    for(var tries=0;tries<60&&!ch;tries++){
+      var c=makeOne(level,i);
+      if(!c||(c.type==='walk'&&!c.terms))continue;
+      var k=c.type==='walk'?key(c.terms):('w'+c.start+'_'+c.target);
+      if(!seen[k]){seen[k]=1;ch=c;}
+    }
+    out.push(ch);
+  }
+  return out;
+}
+//#GEN-END
+
+var RULES={
+  1:'<b>1.1 Caminhar</b> · Somar é andar para onde o número aponta: (+) para a direita, (−) para a esquerda. O guerreiro sempre sai do 0.',
+  2:'<b>1.2 O oposto</b> · O − de fora é uma operação: inverte o sinal do número. O sinal de dentro do parêntese é a direção. −(−3) = +3 e −(+3) = −3.',
+  3:'<b>1.3 Desafios</b> · Misture tudo: escolha a conta que leva até a bandeira e resolva caminhos de três passos.',
+  4:'<b>2.1 O plano</b> · Duas retas numeradas que se cruzam formam o plano. O cruzamento é a origem (0, 0). No par (x, y), o x é o lado e o y é a altura. O plano vai de −20 a 20: arraste para deslizar a janela.',
+  5:'<b>2.2 Ir ao ponto</b> · Toque no ponto (x, y) pedido; arraste o plano para deslizar a janela e procurá-lo. O guerreiro sai da origem e vai primeiro pelo x, depois pelo y.',
+  6:'<b>2.3 Ler o ponto</b> · A bandeira marca um ponto, às vezes fora da tela. Arraste o plano, e escolha o par (x, y) certo: primeiro o lado, depois a altura.',
+  7:'<b>3.1 Pontos que somam 8</b> · A regra <b>x + y = 8</b> escolhe os pontos cujas coordenadas, somadas, dão 8. Toque em pontos e o jogo confere a soma. Procure vários, até com números negativos.',
+  8:'<b>3.2 Complete o par</b> · A regra é x + y = 8. Dado o x (ou o y), ache o outro número e toque no ponto que serve. Ele pode estar fora da tela: arraste o plano.',
+  9:'<b>3.3 Descubra a regra</b> · Os pontos marcados seguem a regra x + y = ?. Some as coordenadas de um deles e escolha a regra certa.',
+  10:'<b>4.1 Duas regras</b> · Um sistema são duas regras ao mesmo tempo: <b>x + y = 8</b> e <b>x − y = 2</b>. Teste pontos: o jogo confere as duas. Ligue cada reta e veja o que acontece onde elas se encontram.',
+  11:'<b>4.2 Ache o cruzamento</b> · Cada regra é uma reta. O ponto que serve às duas é o cruzamento. Toque nele; arraste o plano se precisar.',
+  12:'<b>4.3 Quantas soluções?</b> · Duas retas podem se cruzar, ser paralelas ou ser a mesma reta. Observe e diga quantos pontos servem às duas regras.',
+  13:'<b>5.1 Somar as equações</b> · Duas equações são como duas balanças. Somando uma com a outra, membro a membro, o +y e o −y se fundem e o y desaparece. Escolha cada passo.',
+  14:'<b>5.2 Substituir</b> · Isole uma letra numa equação e troque-a na outra. Atenção ao parêntese: o − de fora inverte o sinal de tudo que está dentro.',
+  16:'<b>5.4 Sem solução ou infinitas</b> · E quando o x e o y somem juntos? Se sobrar uma conta falsa, não há solução; se sobrar uma conta sempre verdadeira, há infinitas. Escolha cada passo.',
+  15:'<b>5.3 Desafios</b> · Resolva o sistema e escolha a solução (x, y). Depois o jogo confere nas duas regras e mostra as retas se cruzando.'
+};
+var PRAISE=['Muito bem!','Missão cumprida!','O reino agradece!','Passo firme, guerreiro!'];
+
+var st={level:1,idx:0,chs:[],res:[],token:0,slow:true,pick:null,opt:null,phase:'ask',busy:false};
+var svg=$('svg'),dyn,warrior,wflip,hits,curDir=1;
+
+function el(tag,attrs,parent){var e=document.createElementNS(NS,tag);for(var k in attrs){e.setAttribute(k,attrs[k]);}if(parent)parent.appendChild(e);return e;}
+function cur(){return st.chs[st.idx];}
+function sp(){return st.slow?1:0.5;}
+function ease(t){return t<0.5?2*t*t:1-Math.pow(-2*t+2,2)/2;}
+function tween(ms,fn,tk){return new Promise(function(res){var t0=performance.now();function f(now){if(tk!==st.token){res(false);return;}var t=Math.min(1,(now-t0)/ms);fn(ease(t),t);if(t<1)requestAnimationFrame(f);else res(true);}requestAnimationFrame(f);});}
+function wait(ms,tk){return new Promise(function(r){setTimeout(function(){r(tk===st.token);},ms);});}
+
+function drawStatic(){
+  svg.innerHTML='';
+  var g=el('g',{},svg);
+  el('line',{x1:X0-24,y1:LINEY,x2:X1+24,y2:LINEY,'class':'axis'},g);
+  el('polygon',{points:(X0-38)+','+LINEY+' '+(X0-22)+','+(LINEY-8)+' '+(X0-22)+','+(LINEY+8),fill:'var(--line)'},g);
+  el('polygon',{points:(X1+38)+','+LINEY+' '+(X1+22)+','+(LINEY-8)+' '+(X1+22)+','+(LINEY+8),fill:'var(--line)'},g);
+  for(var v=MIN;v<=MAX;v++){
+    var t=el('g',{'class':'tick'+(v===0?' zero':'')},g);
+    el('line',{x1:px(v),x2:px(v),y1:LINEY-(v===0?10:6),y2:LINEY+(v===0?10:6)},t);
+    var tx=el('text',{x:px(v),y:LINEY+30,'class':v>0?'lp':(v<0?'ln':'')},t);
+    tx.textContent=fmt(v);
+  }
+  dyn=el('g',{},svg);
+  warrior=el('g',{},svg);
+  buildWarrior();
+  hits=el('g',{},svg);
+  for(var u=MIN;u<=MAX;u++){(function(u){
+    var r=el('rect',{x:px(u)-U/2,y:LINEY-16,width:U,height:56,'class':'hit'},hits);
+    r.addEventListener('click',function(){onPick(u);});
+  })(u);}
+  svg.classList.remove('pick');
+  placeW(0,0,1);
+}
+function buildWarrior(){
+  wflip=el('g',{},warrior);
+  el('ellipse',{cx:4,cy:1,rx:20,ry:3.5,fill:'rgba(0,0,0,.25)'},wflip);
+  el('rect',{x:-8,y:-20,width:6,height:19,rx:2,fill:'#3d3d57'},wflip);
+  el('rect',{x:1,y:-20,width:6,height:19,rx:2,fill:'#4a4a64'},wflip);
+  el('rect',{x:-8,y:-4,width:11,height:4,rx:2,fill:'#2b2b3d'},wflip);
+  el('rect',{x:1,y:-4,width:12,height:4,rx:2,fill:'#2b2b3d'},wflip);
+  el('rect',{x:-8,y:-39,width:16,height:22,rx:5,fill:'#5b7fd6'},wflip);
+  el('circle',{cx:1,cy:-46,r:9,fill:'#f2c9a0'},wflip);
+  el('path',{d:'M10,-46 L14,-44 L10,-42 Z',fill:'#f2c9a0'},wflip);
+  el('circle',{cx:5,cy:-47,r:1.4,fill:'#2a2338'},wflip);
+  el('path',{d:'M-9,-47 A10,10 0 0 1 11,-47 Z',fill:'#9aa3b5'},wflip);
+  el('path',{d:'M-6,-56 Q-14,-62 -16,-50 Q-10,-54 -6,-52 Z',fill:'#d94b4b'},wflip);
+  el('circle',{cx:12,cy:-25,r:16,fill:'#d9a441',stroke:'#7a5a12','stroke-width':3},wflip);
+  el('circle',{cx:12,cy:-25,r:10.5,fill:'none',stroke:'#b0801f','stroke-width':2},wflip);
+  el('circle',{cx:12,cy:-25,r:4,fill:'#f2d27a',stroke:'#7a5a12','stroke-width':1.5},wflip);
+}
+function placeW(v,bob,dir){
+  curDir=dir||curDir;
+  warrior.setAttribute('transform','translate('+px(v)+','+(LINEY-bob)+')');
+  wflip.setAttribute('transform','scale('+curDir+',1)');
+}
+
+function makeSeg(lane){
+  var y=LINEY-74-lane*40;
+  var g=el('g',{'class':'seg c-pos'},dyn);
+  var g1=el('line',{'class':'guide',y1:y,y2:LINEY-8},g);
+  var g2=el('line',{'class':'guide',y1:y,y2:LINEY-8},g);
+  var ln=el('line',{'class':'sl',y1:y,y2:y},g);
+  var dot=el('circle',{r:7,cy:y},g);
+  var ar=el('polygon',{points:''},g);
+  var lb=el('text',{y:y-14},g);
+  return {g:g,set:function(a,b,label){
+    var d=b>a?1:(b<a?-1:0),x1=px(a),x2=px(b);
+    g1.setAttribute('x1',x1);g1.setAttribute('x2',x1);
+    g2.setAttribute('x1',x2);g2.setAttribute('x2',x2);
+    dot.setAttribute('cx',x1);
+    ln.setAttribute('x1',x1);
+    if(d===0){ln.setAttribute('x2',x1);ar.setAttribute('points','');}
+    else{var e=x2-d*9;ln.setAttribute('x2',e);
+      ar.setAttribute('points',x2+','+y+' '+(x2-d*14)+','+(y-8)+' '+(x2-d*14)+','+(y+8));}
+    lb.setAttribute('x',(x1+x2)/2);
+    if(label!==undefined)lb.textContent=label;
+  },color:function(neg){g.classList.remove('c-pos','c-neg');g.classList.add(neg?'c-neg':'c-pos');}};
+}
+
+function cs(n){return '<b class="'+(n<0?'neg':'pos')+'">('+sgn(n)+Math.abs(n)+')</b>';}
+function side(n){return n<0?'esquerda':'direita';}
+function casas(k){return k===1?'1 casa':k+' casas';}
+function cap(h){$('cap').innerHTML=h;}
+function lab(n){return sgn(n)+Math.abs(n);}
+
+async function moveW(from,to,seg,label,tk){
+  var dist=Math.abs(to-from);
+  var ms=Math.max(600,dist*430)*sp();
+  var dir=to>=from?1:-1;
+  var ok=await tween(ms,function(e,t){
+    var c=from+(to-from)*e;
+    placeW(c,Math.abs(Math.sin(t*dist*Math.PI))*4,dir);
+    seg.set(from,c,label);
+  },tk);
+  if(!ok)return false;
+  placeW(to,0,dir);seg.set(from,to,label);
+  return true;
+}
+
+async function walk(terms,startPos,skipFirst,tk){
+  var pos=startPos;
+  placeW(pos,0,1);
+  for(var i=0;i<terms.length;i++){
+    if(i===0&&skipFirst)continue;
+    var t=terms[i],n=t.n,lane=skipFirst?i-1:i;
+    var seg=makeSeg(lane),target;
+    if(t.op==='+'){
+      target=pos+n;
+      seg.color(n<0);seg.set(pos,pos,'');
+      if(i===0)cap('Ponto de partida: o 0. O número '+cs(n)+' aponta para a '+side(n)+': anda '+casas(Math.abs(n))+'.');
+      else cap('Somar '+cs(n)+': o número aponta para a '+side(n)+', então anda '+casas(Math.abs(n))+' para lá.');
+      await wait(500*sp(),tk);if(tk!==st.token)return null;
+      if(!await moveW(pos,target,seg,lab(n),tk))return null;
+    }else{
+      seg.g.classList.add('dashed');seg.color(n<0);seg.set(pos,pos+n,'('+lab(n)+')');
+      cap('Dentro do parêntese, '+cs(n)+' aponta para a '+side(n)+' (direção).');
+      if(!await wait(1500*sp(),tk))return null;
+      cap('O <b>−</b> de fora é operação: inverte. −'+cs(n)+' = <b class="'+(-n<0?'neg':'pos')+'">'+lab(-n)+'</b>, então anda '+casas(Math.abs(n))+' para a '+side(-n)+'.');
+      var flipped=false;
+      if(!await tween(1000*sp(),function(e){
+        var end=pos+n*(1-2*e);
+        if(e>=0.5&&!flipped){flipped=true;seg.color(-n<0);}
+        seg.set(pos,end,e<0.5?'('+lab(n)+')':MINUS+'('+lab(n)+')');
+      },tk))return null;
+      seg.g.classList.remove('dashed');
+      target=pos-n;seg.set(pos,target,MINUS+'('+lab(n)+') = '+lab(-n));
+      if(!await wait(800*sp(),tk))return null;
+      if(!await moveW(pos,target,seg,MINUS+'('+lab(n)+') = '+lab(-n),tk))return null;
+    }
+    pos=target;
+    if(!await wait(350*sp(),tk))return null;
+  }
+  return pos;
+}
+
+function exprHTML(terms){
+  var h='';
+  terms.forEach(function(t,i){
+    if(i===0)h+='<span class="'+(t.n<0?'neg':'pos')+'">'+fmt(t.n)+'</span>';
+    else h+=' <span class="op">'+(t.op==='+'?'+':MINUS)+'</span> (<span class="'+(t.n<0?'neg':'pos')+'">'+sgn(t.n)+'</span>'+Math.abs(t.n)+')';
+  });
+  return h;
+}
+
+function ring(v,cls){el('circle',{cx:px(v),cy:LINEY,r:17,'class':cls},dyn);}
+function flag(v){
+  var g=el('g',{'class':'flag'},dyn),x=px(v);
+  el('line',{x1:x,y1:LINEY,x2:x,y2:LINEY-48},g);
+  el('polygon',{points:x+','+(LINEY-48)+' '+(x+24)+','+(LINEY-39)+' '+x+','+(LINEY-30)},g);
+}
+
+function renderTabs(){
+  var t=$('tabs');t.innerHTML='';
+  var names={1:'1.1 Caminhar',2:'1.2 O oposto',3:'1.3 Desafios',4:'2.1 O plano',5:'2.2 Ir ao ponto',6:'2.3 Ler o ponto',7:'3.1 Pontos que somam 8',8:'3.2 Complete o par',9:'3.3 Descubra a regra',10:'4.1 Duas regras',11:'4.2 Ache o cruzamento',12:'4.3 Quantas soluções?',13:'5.1 Somar as equações',14:'5.2 Substituir',15:'5.3 Desafios',16:'5.4 Sem solução ou infinitas'};
+  [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16].forEach(function(l){
+    if(l===1||l===4||l===7||l===10||l===13){var g=document.createElement('span');g.className='tg';g.textContent=l===1?'Fase 1 · reta':(l===4?'Fase 2 · plano':(l===7?'Fase 3 · x + y = 8':(l===10?'Fase 4 · sistemas':'Fase 5 · resolver')));t.appendChild(g);}
+    var b=document.createElement('button');b.textContent=names[l];
+    if(l===st.level)b.className='on';
+    b.onclick=function(){newLevel(l);};
+    t.appendChild(b);
+  });
+}
+function renderDots(){
+  var d=$('dots');d.innerHTML='';
+  var c0=cur();if(c0&&(c0.type==='explore'||c0.type==='rule'||c0.type==='sys'))return;
+  st.chs.forEach(function(c,i){
+    var s=document.createElement('span');
+    s.className='dot'+(st.res[i]?' '+st.res[i]:'')+(i===st.idx&&st.phase!=='sum'?' cur':'');
+    d.appendChild(s);
+  });
+}
+function renderOpts(){
+  var box=$('opts');box.innerHTML='';
+  var ch=cur();
+  if(ch&&ch.type==='steps'){
+    if(st.phase!=='ask'||st.si>=ch.steps.length){box.style.display='none';return;}
+    box.style.display='flex';
+    ch.steps[st.si].options.forEach(function(o,i){
+      var b=document.createElement('button');b.className='opt';b.innerHTML=o.html;
+      b.onclick=function(){stepPick(i);};
+      box.appendChild(b);
+    });
+    return;
+  }
+  if(!ch||(ch.type!=='which'&&ch.type!=='read'&&ch.type!=='findk'&&ch.type!=='cases'&&ch.type!=='solve')){box.style.display='none';return;}
+  box.style.display='flex';
+  ch.options.forEach(function(o,i){
+    var b=document.createElement('button');b.className='opt';b.innerHTML=optHTML(ch,o);
+    b.onclick=function(){
+      if(st.phase!=='ask')return;
+      st.opt=i;
+      Array.prototype.forEach.call(box.children,function(x,j){x.classList.toggle('sel',j===i);});
+      setControls();
+    };
+    box.appendChild(b);
+  });
+}
+function setMsg(t,cls){var m=$('msg');m.textContent=t||'';m.className=cls||'';}
+function setControls(){
+  var c=$('controls');c.innerHTML='';
+  function add(txt,cls,fn,dis){var b=document.createElement('button');b.textContent=txt;b.className=cls||'';b.disabled=!!dis;if(fn)b.onclick=fn;c.appendChild(b);}
+  if(st.phase==='sum'){
+    add('Jogar este nível de novo','',function(){newLevel(st.level);});
+    if(st.level<16)add('Próximo nível →','primary',function(){newLevel(st.level+1);});
+    return;
+  }
+  var ch=cur();
+  if(ch&&ch.type==='steps'&&st.phase==='ask'){
+    add('Recomeçar','',function(){showChallengeP();});
+    return;
+  }
+  if(ch&&ch.type==='sys'){
+    add('📏 Ligar a reta 1','primary',function(){drawSysLine('A');},st.ptsA.length<2||st.drawnA);
+    add('📏 Ligar a reta 2','primary',function(){drawSysLine('B');},st.ptsB.length<2||st.drawnB);
+    add('Limpar pontos','',function(){showChallengeP();});
+    zoomBtns(add);
+    add('Próximo: Ache o cruzamento →','',function(){newLevel(11);});
+    return;
+  }
+  if(ch&&ch.type==='rule'){
+    add('📏 Ligar os pontos','primary',drawRuleLine,st.good.length<3||st.lineDrawn);
+    add('Limpar pontos','',function(){showChallengeP();});
+    zoomBtns(add);
+    add('Próximo: Complete o par →','',function(){newLevel(8);});
+    return;
+  }
+  if(ch&&ch.type==='explore'){
+    add(st.obl?'Voltar aos eixos perpendiculares':'Curiosidade: eixos oblíquos','',toggleObl);
+    if(!st.obl)zoomBtns(add);
+    add('Próximo: Ir ao ponto →','primary',function(){newLevel(5);});
+    return;
+  }
+  if(st.phase==='ask'){
+    var ready=ch.type==='walk'?st.pick!==null:((ch.type==='goto'||ch.type==='fill'||ch.type==='cross')?st.pickP!==null:st.opt!==null);
+    add('Conferir','primary',check,!ready);
+    add('Mostrar o caminho','',showPath);
+    if(st.level>=4)zoomBtns(add);
+  }else if(st.phase==='run'){
+    add('Caminhando…','',null,true);
+  }else{
+    add('Repetir','',function(){showChallenge();});
+    add(st.idx<st.chs.length-1?'Próxima →':'Ver resultado →','primary',next);
+    if(MQ.matches&&st.level>=13)add('📈 Ver o gráfico','',function(){goTab('graf');});
+    if(st.level>=4)zoomBtns(add);
+  }
+}
+
+var MQ=window.matchMedia('(max-width:899px)');
+function goTab(t){document.body.setAttribute('data-tab',t);
+  [].forEach.call(document.querySelectorAll('#bnav button'),function(b){b.classList.toggle('on',b.getAttribute('data-t')===t);});}
+function layout(){
+  var gp=$('pGraph'),ap=$('pAlg');
+  function put(host,ids){ids.forEach(function(i){host.appendChild($(i));});}
+  if(MQ.matches&&st.level<13){
+    put(gp,['expr','legend','svg','gph','opts','msg','controls','dots']);
+    put(ap,['rule','cap']);
+  }else{
+    put(gp,['legend','svg','gph']);
+    put(ap,['rule','expr','cap','msg','opts','controls','dots']);
+  }
+}
+function newLevel(l){
+  st.level=l;layout();if(MQ.matches)goTab(l<13?'graf':'alg');
+  st.level=l;st.token++;st.chs=l>=4?genLevelP(l,WORLD-1):genLevel(l);st.res=st.chs.map(function(){return null;});st.idx=0;
+  $('rule').innerHTML=RULES[l];
+  renderTabs();showChallenge();
+}
+function showChallenge(){
+  svg.style.display='';$('legend').style.display='';$('gph').style.display='';
+  st.token++;st.pick=null;st.opt=null;st.phase='ask';st.busy=false;
+  if(st.level>=4){showChallengeP();return;}
+  setMode(false);
+  var ch=cur();
+  var lanes=ch.type==='walk'?ch.terms.length:1;
+  svg.setAttribute('viewBox',lanes>=3?'0 0 840 250':(lanes===2?'0 30 840 220':'0 62 840 188'));
+  drawStatic();
+  if(ch.type==='walk'){
+    $('expr').innerHTML=exprHTML(ch.terms)+' = <span id="ans" class="q">?</span>';
+    svg.classList.add('pick');
+    cap('O guerreiro sai do 0. Pense no caminho de cada número.');
+    setMsg('Toque na reta onde ele vai parar e depois em Conferir.');
+  }else{
+    $('expr').innerHTML='Está no <span class="'+(ch.start<0?'neg':'pos')+'">'+fmt(ch.start)+'</span> · quer chegar no <span class="'+(ch.target<0?'neg':'pos')+'">'+fmt(ch.target)+'</span>';
+    placeW(ch.start,0,1);flag(ch.target);
+    cap('Qual conta leva o guerreiro até a bandeira?');
+    setMsg('Escolha uma conta e toque em Conferir.');
+  }
+  renderOpts();setControls();renderDots();
+}
+function onPick(v){
+  var ch=cur();
+  if(!ch||ch.type!=='walk'||st.phase!=='ask')return;
+  st.pick=v;
+  var old=dyn.querySelector('.pickring');if(old)dyn.removeChild(old);
+  ring(v,'pickring');
+  setControls();
+}
+function finish(fin,ok,seen){
+  st.busy=false;st.phase='done';
+  var a=$('ans');if(a){a.textContent=fmt(fin);a.className=fin<0?'neg':'pos';}
+  if(st.res[st.idx]===null)st.res[st.idx]=seen?'seen':(ok?'ok':'bad');
+  setControls();renderDots();
+}
+async function runChosen(kind){
+  if(st.busy)return;
+  var ch=cur(),tk=st.token;
+  st.busy=true;st.phase='run';
+  var old=dyn.querySelector('.pickring');if(old)dyn.removeChild(old);
+  setControls();setMsg('');
+  var terms,from=0,skip=false,optIdx=null;
+  if(ch.type==='walk'){terms=ch.terms;}
+  else{
+    optIdx=(kind==='path')?ch.options.findIndex(function(o){return o.ok;}):st.opt;
+    terms=ch.options[optIdx].terms;from=ch.start;skip=true;
+  }
+  var fin=await walk(terms,from,skip,tk);
+  if(fin===null||tk!==st.token)return;
+  var ok,seen=(kind==='path');
+  if(ch.type==='walk'){
+    ok=(fin===st.pick);
+    ring(fin,'okring');
+    if(!seen){
+      if(ok)setMsg(pickOne(PRAISE)+' O guerreiro parou no '+fmt(fin)+'.','ok');
+      else{ring(st.pick,'badring');setMsg('Você marcou '+fmt(st.pick)+', mas ele parou no '+fmt(fin)+'. Repita e observe os sinais.','bad');}
+    }else setMsg('O guerreiro parou no '+fmt(fin)+'. Agora tente você, ou siga em frente.');
+  }else{
+    ok=(fin===ch.target);
+    var kids=$('opts').children;
+    if(!seen){
+      kids[optIdx].classList.add(ok?'ok':'bad');
+      if(ok)setMsg(pickOne(PRAISE)+' Essa conta leva até a bandeira.','ok');
+      else setMsg('Essa conta leva ao '+fmt(fin)+', e a bandeira está no '+fmt(ch.target)+'.','bad');
+    }else{
+      kids[optIdx].classList.add('ok');
+      setMsg('Esta é a conta certa. Ela leva até a bandeira no '+fmt(ch.target)+'.');
+    }
+  }
+  finish(fin,ok,seen);
+}
+function check(){
+  var ch=cur();
+  if(ch.type==='goto'||ch.type==='fill'||ch.type==='cross'){if(st.pickP===null)return;runP('check');return;}
+  if(ch.type==='read'||ch.type==='findk'||ch.type==='cases'||ch.type==='solve'){if(st.opt===null)return;runP('check');return;}
+  if(ch.type==='walk'&&st.pick===null)return;
+  if(ch.type==='which'&&st.opt===null)return;
+  runChosen('check');
+}
+function showPath(){
+  var ch=cur();
+  if(ch.type==='goto'||ch.type==='read'||ch.type==='fill'||ch.type==='findk'||ch.type==='cross'||ch.type==='cases'||ch.type==='solve'){runP('path');return;}
+  runChosen('path');
+}
+function next(){
+  if(st.idx<st.chs.length-1){st.idx++;showChallenge();}
+  else summary();
+}
+function summary(){
+  st.token++;st.phase='sum';st.busy=false;
+  var ok=st.res.filter(function(r){return r==='ok';}).length;
+  if(st.level>=4){setMode(true);svg.setAttribute('viewBox','0 0 600 600');vx=0;vy=0;clampCam();drawPlane(false);svg.classList.remove('pick');}
+  else{setMode(false);drawStatic();placeW(0,0,1);}
+  $('expr').innerHTML='Trecho concluído!';
+  cap('O guerreiro venceu mais um trecho da estrada.');
+  setMsg(ok+' de '+st.chs.length+' de primeira.',ok>=5?'ok':'');
+  $('opts').style.display='none';
+  setControls();renderDots();
+}
+
+/* ===== Fase 2: plano cartesiano ===== */
+var CX=300,CY=300,PR=6,C=44,CB=44,WS=0.8,ZOOMS=[6,10],WORLD=20,vx=0,vy=0,sg=null,camG=null,drag=null;
+function visH(){return 300/C;}
+function clampN(v,a,b){return Math.max(a,Math.min(b,v));}
+function clampCam(){var L=WORLD+0.5-visH();vx=clampN(vx,-L,L);vy=clampN(vy,-L,L);}
+function applyZoom(n){PR=n;C=264/PR;WS=Math.max(0.35,Math.min(0.8,C/55));clampCam();}
+function dotR(){return Math.max(3.5,Math.min(7,CB*0.35));}
+function cycleZoom(){
+  if(st.busy)return;
+  applyZoom(PR<=8?ZOOMS[1]:ZOOMS[0]);
+  st.token++;st.obl=false;showChallengeP();
+}
+function goHome(){vx=0;vy=0;clampCam();if(sg){renderStatic();applyCam();}}
+function zoomBtns(add){
+  add('🔍 Zoom: '+(PR<=8?'casas grandes':'casas médias'),'',cycleZoom);
+  add('⌖ Voltar à origem','',goHome);
+}
+function PX(x){return x*CB;}
+function PY(y){return -y*CB;}
+function SX(x){return 300+(x-vx)*C;}
+function SY(y){return 300-(y-vy)*C;}
+function applyCam(){if(camG)camG.setAttribute('transform','translate('+(300-vx*C)+','+(300+vy*C)+') scale('+(C/CB)+')');}
+var LEG_R=$('legend').innerHTML;
+var LEG_P='<span><b>x</b> = lado: <span class="pos">→ direita (+)</span> · <span class="neg">← esquerda (−)</span></span><span><b>y</b> = altura: <span class="pos">↑ sobe (+)</span> · <span class="neg">↓ desce (−)</span></span>';
+function setMode(p){
+  svg.classList.toggle('plane',p);
+  $('app').classList.toggle('pm',p);
+  $('legend').innerHTML=p?LEG_P:LEG_R;
+}
+function cls(n){return n<0?'neg':(n>0?'pos':'');}
+function ptHTML(x,y){return '(<span class="'+cls(x)+'">'+fmt(x)+'</span>, <span class="'+cls(y)+'">'+fmt(y)+'</span>)';}
+function ptTxt(x,y){return '('+fmt(x)+', '+fmt(y)+')';}
+function arrowHead(g,x,y,dx,dy){
+  var tip=[x+dx*12,y+dy*12],bc=[x-dx*2,y-dy*2];
+  el('polygon',{points:tip[0]+','+tip[1]+' '+(bc[0]-dy*8)+','+(bc[1]+dx*8)+' '+(bc[0]+dy*8)+','+(bc[1]-dx*8),fill:'var(--line)'},g);
+}
+function quadName(x,y){
+  if(x===0&&y===0)return 'Está na origem, o cruzamento dos eixos.';
+  if(y===0)return 'Está sobre o eixo x (y = 0).';
+  if(x===0)return 'Está sobre o eixo y (x = 0).';
+  var q=x>0?(y>0?'I':'IV'):(y>0?'II':'III');
+  return 'Quadrante '+q+': x '+(x>0?'positivo':'negativo')+' e y '+(y>0?'positivo':'negativo')+'.';
+}
+function placeP(x,y,bob,dir){
+  curDir=dir||curDir;
+  warrior.setAttribute('transform','translate('+PX(x)+','+(PY(y)-bob)+') scale('+WS+')');
+  wflip.setAttribute('transform','scale('+curDir+',1)');
+}
+function drawPlane(obl){
+  CB=C;
+  if(obl){drawOblique();return;}
+  svg.innerHTML='';
+  sg=el('g',{},svg);
+  camG=el('g',{},svg);
+  dyn=el('g',{},camG);
+  warrior=el('g',{},camG);buildWarrior();
+  renderStatic();applyCam();
+  placeP(0,0,0,1);
+}
+function renderStatic(){
+  sg.innerHTML='';
+  var g=sg,i,B=4000,ox=SX(0),oy=SY(0),lo=SX(-WORLD-0.5),hi=SX(WORLD+0.5),top=SY(WORLD+0.5),bot=SY(-WORLD-0.5);
+  el('rect',{x:ox,y:oy-B,width:B,height:B,'class':'qpos'},g);
+  el('rect',{x:ox-B,y:oy-B,width:B,height:B,'class':'qmix'},g);
+  el('rect',{x:ox-B,y:oy,width:B,height:B,'class':'qneg'},g);
+  el('rect',{x:ox,y:oy,width:B,height:B,'class':'qmix'},g);
+  el('rect',{x:lo-B,y:-B,width:B,height:2*B+600,'class':'wout'},g);
+  el('rect',{x:hi,y:-B,width:B,height:2*B+600,'class':'wout'},g);
+  el('rect',{x:lo,y:top-B,width:hi-lo,height:B,'class':'wout'},g);
+  el('rect',{x:lo,y:bot,width:hi-lo,height:B,'class':'wout'},g);
+  el('rect',{x:lo,y:top,width:hi-lo,height:bot-top,'class':'wedge'},g);
+  var vis=visH(),step=C>=40?1:2;
+  var i0=Math.max(-WORLD,Math.ceil(vx-vis)),i1=Math.min(WORLD,Math.floor(vx+vis));
+  var j0=Math.max(-WORLD,Math.ceil(vy-vis)),j1=Math.min(WORLD,Math.floor(vy+vis));
+  for(i=i0;i<=i1;i++)el('line',{x1:SX(i),x2:SX(i),y1:top,y2:bot,'class':'grid'},g);
+  for(i=j0;i<=j1;i++)el('line',{x1:lo,x2:hi,y1:SY(i),y2:SY(i),'class':'grid'},g);
+  var axX=oy>=-2&&oy<=602,axY=ox>=-2&&ox<=602;
+  if(axX){
+    el('line',{x1:lo,y1:oy,x2:hi,y2:oy,'class':'axis'},g);
+    if(hi<=596)arrowHead(g,hi,oy,1,0);
+    if(lo>=4)arrowHead(g,lo,oy,-1,0);
+  }
+  if(axY){
+    el('line',{x1:ox,y1:top,x2:ox,y2:bot,'class':'axis'},g);
+    if(top>=4)arrowHead(g,ox,top,0,-1);
+    if(bot<=596)arrowHead(g,ox,bot,0,1);
+  }
+  var t=el('g',{'class':'tick small'},g);
+  var lyx=clampN(oy+22,16,592),lxy=clampN(ox-10,40,594);
+  for(i=i0;i<=i1;i++){
+    if(i===0)continue;
+    if(axX)el('line',{x1:SX(i),x2:SX(i),y1:oy-5,y2:oy+5},t);
+    if(i%step===0&&(axY||Math.abs(SX(i)-lxy)>=34)){var tx=el('text',{x:SX(i),y:lyx,'class':i>0?'lp':'ln'},t);tx.textContent=fmt(i);}
+  }
+  for(i=j0;i<=j1;i++){
+    if(i===0)continue;
+    if(axY)el('line',{x1:ox-5,x2:ox+5,y1:SY(i),y2:SY(i)},t);
+    if(i%step===0&&(axX||Math.abs(SY(i)+5-lyx)>=18)){var ty=el('text',{x:lxy,y:SY(i)+5,'class':i>0?'lp':'ln',style:'text-anchor:end'},t);ty.textContent=fmt(i);}
+  }
+  if(axX&&axY){var o=el('text',{x:ox-9,y:oy+21,style:'font-size:17px;font-weight:800;text-anchor:end;fill:var(--ink)'},g);o.textContent='0';}
+  if(axX){var xn=el('text',{x:Math.min(hi-8,578),y:oy-14,'class':'axname',style:'text-anchor:end'},g);xn.textContent='x';}
+  if(axY){var yn=el('text',{x:ox+16,y:Math.max(26,top+14),'class':'axname'},g);yn.textContent='y';}
+  [[1,1,'I','+','+'],[-1,1,'II','−','+'],[-1,-1,'III','−','−'],[1,-1,'IV','+','−']].forEach(function(q){
+    var x0=q[0]>0?Math.max(ox,10):Math.max(10,lo),x1=q[0]>0?Math.min(590,hi):Math.min(ox,590);
+    var yA=q[1]>0?Math.max(10,top):Math.max(oy,10),yB=q[1]>0?Math.min(oy,590):Math.min(590,bot);
+    if(x1-x0<90||yB-yA<60)return;
+    var tt=el('text',{x:(x0+x1)/2,y:q[1]>0?yA+24:yB-10,'class':'ql'},g);
+    tt.appendChild(document.createTextNode(q[2]+'  ('));
+    var a=el('tspan',{'class':q[3]==='+'?'lp':'ln'},tt);a.textContent=q[3];
+    tt.appendChild(document.createTextNode(', '));
+    var b=el('tspan',{'class':q[4]==='+'?'lp':'ln'},tt);b.textContent=q[4];
+    tt.appendChild(document.createTextNode(')'));
+  });
+  if(!(axX&&axY)){
+    var dxo=ox<0?-1:(ox>600?1:0),dyo=oy<0?-1:(oy>600?1:0);
+    var AR={'-1,0':'←','1,0':'→','0,-1':'↑','0,1':'↓','-1,-1':'↖','1,-1':'↗','-1,1':'↙','1,1':'↘'};
+    var arr=AR[dxo+','+dyo];
+    if(arr){
+      var px=clampN(ox,70,530),py=clampN(oy,50,540);
+      el('rect',{x:px-48,y:py-14,width:96,height:28,rx:14,'class':'opill'},g);
+      var ot=el('text',{x:px,y:py+5,'class':'otxt'},g);ot.textContent='origem '+arr;
+    }
+  }
+}
+function drawOblique(){
+  svg.innerHTML='';
+  var g=el('g',{},svg),i,P6=6;
+  var an=Math.PI/3,Co=30,ey0=Co*Math.cos(an),ey1=-Co*Math.sin(an);
+  var OP=function(a,b){return [CX+a*Co+b*ey0,CY+b*ey1];};
+  for(i=-P6;i<=P6;i++){
+    var p1=OP(i,-P6),p2=OP(i,P6),p3=OP(-P6,i),p4=OP(P6,i);
+    el('line',{x1:p1[0],y1:p1[1],x2:p2[0],y2:p2[1],'class':'grid'},g);
+    el('line',{x1:p3[0],y1:p3[1],x2:p4[0],y2:p4[1],'class':'grid'},g);
+  }
+  var a1=OP(-P6-0.5,0),a2=OP(P6+0.5,0),b1=OP(0,-P6-0.5),b2=OP(0,P6+0.5);
+  el('line',{x1:a1[0],y1:a1[1],x2:a2[0],y2:a2[1],'class':'axis'},g);
+  el('line',{x1:b1[0],y1:b1[1],x2:b2[0],y2:b2[1],'class':'axis'},g);
+  arrowHead(g,a2[0],a2[1],1,0);arrowHead(g,b2[0],b2[1],Math.cos(an),-Math.sin(an));
+  for(i=-P6;i<=P6;i++){
+    if(i===0)continue;
+    var px1=OP(i,0),py1=OP(0,i);
+    var u=el('text',{x:px1[0],y:px1[1]+20,'class':'ptick',style:'font-size:14px;text-anchor:middle;fill:'+(i>0?'var(--pos)':'var(--neg)')},g);u.textContent=fmt(i);
+    var v=el('text',{x:py1[0]-10,y:py1[1]+5,style:'font-size:14px;text-anchor:end;fill:'+(i>0?'var(--pos)':'var(--neg)')},g);v.textContent=fmt(i);
+  }
+  var xo=OP(P6+0.9,0),yo=OP(0,P6+0.9);
+  var xn2=el('text',{x:xo[0],y:xo[1]-8,'class':'axname'},g);xn2.textContent='x';
+  var yn2=el('text',{x:yo[0]+14,y:yo[1]+6,'class':'axname'},g);yn2.textContent='y';
+  var P=OP(3,2),A=OP(3,0),B=OP(0,2);
+  el('line',{x1:A[0],y1:A[1],x2:P[0],y2:P[1],'class':'pdash c-pos'},g);
+  el('line',{x1:B[0],y1:B[1],x2:P[0],y2:P[1],'class':'pdash c-pos'},g);
+  el('circle',{cx:P[0],cy:P[1],r:7,'class':'pt'},g);
+  var pt=el('text',{x:P[0],y:P[1]-14,'class':'ptag'},g);pt.textContent='(3, 2)';
+  dyn=el('g',{},svg);sg=null;camG=null;
+}
+function legSeg(neg){
+  var g=el('g',{'class':'seg c-'+(neg?'neg':'pos')},dyn);
+  var ln=el('line',{'class':'sl'},g),dot=el('circle',{r:6},g),ar=el('polygon',{points:''},g),lb=el('text',{style:'font-size:20px'},g);
+  return {set:function(x1,y1,x2,y2,label){
+    var dx=x2-x1,dy=y2-y1,len=Math.sqrt(dx*dx+dy*dy);
+    dot.setAttribute('cx',x1);dot.setAttribute('cy',y1);
+    ln.setAttribute('x1',x1);ln.setAttribute('y1',y1);
+    if(len<3){ln.setAttribute('x2',x1);ln.setAttribute('y2',y1);ar.setAttribute('points','');return;}
+    var ux=dx/len,uy=dy/len;
+    ln.setAttribute('x2',x2-ux*9);ln.setAttribute('y2',y2-uy*9);
+    var bx=x2-ux*14,by=y2-uy*14;
+    ar.setAttribute('points',x2+','+y2+' '+(bx-uy*8)+','+(by+ux*8)+' '+(bx+uy*8)+','+(by-ux*8));
+    if(label!==undefined){
+      lb.textContent=label;
+      if(Math.abs(dx)>=Math.abs(dy)){lb.setAttribute('x',(x1+x2)/2);lb.setAttribute('y',y1-16);}
+      else{lb.setAttribute('x',x1+16);lb.setAttribute('y',(y1+y2)/2+7);lb.setAttribute('style','font-size:20px;text-anchor:start');}
+    }
+  }};
+}
+function ringP(x,y,c){el('circle',{cx:PX(x),cy:PY(y),r:Math.min(19,CB*0.6),'class':c},dyn);}
+function flagP(x,y){
+  var g=el('g',{'class':'flag'},dyn),X=PX(x),Y=PY(y);
+  el('line',{x1:X,y1:Y,x2:X,y2:Y-44},g);
+  el('polygon',{points:X+','+(Y-44)+' '+(X+24)+','+(Y-35)+' '+X+','+(Y-26)},g);
+  el('circle',{cx:X,cy:Y,r:5,'class':'pt'},g);
+}
+function camFollow(wx,wy){
+  var m=visH()-2.5,nx=vx,ny=vy;
+  if(wx>vx+m)nx=wx-m;else if(wx<vx-m)nx=wx+m;
+  if(wy>vy+m)ny=wy-m;else if(wy<vy-m)ny=wy+m;
+  if(nx!==vx||ny!==vy){vx=nx;vy=ny;clampCam();renderStatic();applyCam();}
+}
+async function glideHome(tk){
+  var m=visH()-1.5;
+  if(Math.abs(vx)<m&&Math.abs(vy)<m)return true;
+  var x0=vx,y0=vy;
+  return await tween(450*sp(),function(e){vx=x0*(1-e);vy=y0*(1-e);clampCam();renderStatic();applyCam();},tk);
+}
+async function walkP(a,b,tk){
+  if(!await glideHome(tk))return null;
+  placeP(0,0,0,1);
+  var cc=function(n){return n<0?'c-neg':'c-pos';};
+  var vl=el('line',{x1:PX(0),x2:PX(0),y1:PY(WORLD),y2:PY(-WORLD),'class':'pdash '+cc(a)},dyn);
+  var s1=legSeg(a<0),dir=1,ms;
+  if(a!==0)cap('Primeiro o <b>x</b>: '+cs(a)+' → '+casas(Math.abs(a))+' para a '+side(a)+'. O tracejado vertical acompanha o guerreiro.');
+  else cap('<b>x = 0</b>: não anda de lado, fica sobre o eixo y.');
+  if(!await wait(700*sp(),tk))return null;
+  if(a!==0){
+    dir=a>0?1:-1;
+    ms=Math.min(3200,Math.max(600,Math.abs(a)*420))*sp();
+    if(!await tween(ms,function(e,t){
+      var c=a*e;vl.setAttribute('x1',PX(c));vl.setAttribute('x2',PX(c));
+      placeP(c,0,Math.abs(Math.sin(t*Math.abs(a)*Math.PI))*3,dir);camFollow(c,0);
+      s1.set(PX(0),PY(0),PX(c),PY(0),lab(a));
+    },tk))return null;
+    placeP(a,0,0,dir);
+    if(!await wait(500*sp(),tk))return null;
+  }
+  var hl=el('line',{x1:PX(-WORLD),x2:PX(WORLD),y1:PY(0),y2:PY(0),'class':'pdash '+cc(b)},dyn);
+  var s2=legSeg(b<0);
+  if(b!==0)cap('Agora o <b>y</b>: '+cs(b)+' → '+casas(Math.abs(b))+' para '+(b<0?'baixo':'cima')+'. O tracejado horizontal acompanha o guerreiro.');
+  else cap('<b>y = 0</b>: não sobe nem desce, fica sobre o eixo x.');
+  if(!await wait(700*sp(),tk))return null;
+  if(b!==0){
+    ms=Math.min(3200,Math.max(600,Math.abs(b)*420))*sp();
+    if(!await tween(ms,function(e,t){
+      var c=b*e;hl.setAttribute('y1',PY(c));hl.setAttribute('y2',PY(c));
+      placeP(a,c,Math.abs(Math.sin(t*Math.abs(b)*Math.PI))*3,dir);camFollow(a,c);
+      s2.set(PX(a),PY(0),PX(a),PY(c),lab(b));
+    },tk))return null;
+    placeP(a,b,0,dir);
+  }
+  el('circle',{cx:PX(a),cy:PY(b),r:dotR(),'class':'pt'},dyn);
+  var tg=el('text',{x:PX(a),y:PY(b)-WS*66-6,'class':'ptag'},dyn);tg.textContent=ptTxt(a,b);
+  return true;
+}
+function describeP(x,y){
+  var s='Ponto '+ptHTML(x,y)+': ';
+  s+=x===0?'x = 0 (nada de lado)':'x = '+fmt(x)+' → '+casas(Math.abs(x))+' para a '+side(x);
+  s+=' · ';
+  s+=y===0?'y = 0 (nada de altura)':'y = '+fmt(y)+' → '+casas(Math.abs(y))+' para '+(y<0?'baixo':'cima');
+  return s+'.<br>'+quadName(x,y);
+}
+function showChallengeP(){
+  svg.style.display='';$('legend').style.display='';$('gph').style.display='';
+  st.token++;st.pick=null;st.pickP=null;st.opt=null;st.phase='ask';st.busy=false;st.obl=false;st.good=[];st.lineDrawn=false;st.seenS={};st.ptsA=[];st.ptsB=[];st.drawnA=false;st.drawnB=false;
+  var ch=cur();
+  setMode(true);
+  svg.setAttribute('viewBox','0 0 600 600');
+  vx=0;vy=0;clampCam();
+  drawPlane(false);
+  svg.classList.add('pick');
+  warrior.style.display=(ch.type==='rule'||ch.type==='findk'||ch.type==='sys'||ch.type==='cases'||ch.type==='steps'||ch.type==='solve')?'none':'';
+  if(ch.type==='explore'){
+    $('expr').innerHTML='(<span class="q">x</span>, <span class="q">y</span>)';
+    cap('A origem é o (0, 0). No par (x, y), o <b>x</b> é o lado e o <b>y</b> é a altura.');
+    setMsg('Toque num ponto do plano e veja o guerreiro andar. Arraste o plano para deslizar a janela.');
+  }else if(ch.type==='goto'){
+    $('expr').innerHTML='Leve o guerreiro ao ponto '+ptHTML(ch.x,ch.y);
+    cap('Ele sai da origem (0, 0). Lembre: primeiro o lado (x), depois a altura (y). O ponto pode estar fora da tela: arraste o plano para procurá-lo.');
+    setMsg('Toque no ponto no plano e depois em Conferir.');
+  }else if(ch.type==='read'){
+    svg.classList.remove('pick');
+    $('expr').innerHTML='Qual é o par (x, y) da bandeira?';
+    flagP(ch.x,ch.y);
+    cap('A bandeira pode estar fora da tela: arraste o plano para procurá-la. Escolha o par certo: primeiro o x, depois o y.');
+    setMsg('Escolha uma opção e toque em Conferir.');
+  }else if(ch.type==='steps'){
+    svg.classList.remove('pick');svg.style.display='none';$('legend').style.display='none';$('gph').style.display='block';
+    $('expr').innerHTML=ruleHTML(ch.A,'A')+'<br>'+ruleHTML(ch.B,'B');
+    st.si=0;st.miss=0;st.lines=[];
+    renderSteps();
+  }else if(ch.type==='solve'){
+    svg.classList.remove('pick');
+    $('expr').innerHTML=ruleHTML(ch.A,'A')+' <span class="q">e</span> '+ruleHTML(ch.B,'B');
+    cap('Resolva o sistema: ache o par (x, y) que serve às duas regras. Pode fazer de cabeça ou no papel; depois o jogo confere e mostra as retas.');
+    setMsg('Escolha o par e toque em Conferir.');
+  }else if(ch.type==='sys'){
+    $('expr').innerHTML=ruleHTML(ch.A,'A')+' <span class="q">e</span> '+ruleHTML(ch.B,'B');
+    cap('Agora são duas regras ao mesmo tempo. Regra 1: a soma é 8, como (+3) + (+5) = 8. Regra 2: a diferença é 2, como (+4) − (+2) = 2. Procure pontos que servem a cada uma.');
+    setMsg('Toque em pontos: o jogo confere as duas regras de uma vez.');
+  }else if(ch.type==='cross'){
+    $('expr').innerHTML=ruleHTML(ch.A,'A')+' <span class="q">e</span> '+ruleHTML(ch.B,'B');
+    drawLineR(ch.A,'A');drawLineR(ch.B,'B');
+    cap('Cada regra é uma reta. O ponto que serve às duas é onde as retas se cruzam. Se o cruzamento estiver fora da tela, arraste o plano.');
+    setMsg('Toque no ponto de cruzamento e depois em Conferir.');
+  }else if(ch.type==='cases'){
+    svg.classList.remove('pick');
+    $('expr').innerHTML=ruleHTML(ch.A,'A')+' <span class="q">e</span> '+ruleHTML(ch.B,'B');
+    drawLineR(ch.A,'A');drawLineR(ch.B,'B',ch.kind==='inf');
+    cap('Observe as duas retas. Quantos pontos servem às duas regras ao mesmo tempo?');
+    setMsg('Escolha uma opção e toque em Conferir.');
+  }else if(ch.type==='rule'){
+    $('expr').innerHTML='<span class="op">x + y = '+ch.k+'</span>';
+    cap('A regra escolhe os pontos cuja soma das coordenadas é '+ch.k+'. Exemplo: o ponto (3, 5) serve, pois (+3) + (+5) = 8.');
+    setMsg('Toque em pontos do plano: o jogo confere a soma. Procure os que servem, inclusive com números negativos.');
+  }else if(ch.type==='fill'){
+    var gx=ch.given==='x',cl='pdash '+(ch.v<0?'c-neg':'c-pos');
+    $('expr').innerHTML='Se <b>'+(gx?'x':'y')+'</b> = <span class="'+cls(ch.v)+'">'+fmt(ch.v)+'</span>, quanto vale o <b>'+(gx?'y':'x')+'</b>?';
+    if(gx)el('line',{x1:PX(ch.v),x2:PX(ch.v),y1:PY(WORLD),y2:PY(-WORLD),'class':cl},dyn);
+    else el('line',{x1:PX(-WORLD),x2:PX(WORLD),y1:PY(ch.v),y2:PY(ch.v),'class':cl},dyn);
+    cap('Regra: x + y = '+ch.k+'. O tracejado mostra '+(gx?'a coluna x = ':'a linha y = ')+fmt(ch.v)+' (pode estar fora da tela: arraste o plano). Toque na posição do ponto que serve.');
+    setMsg('Toque no ponto e depois em Conferir.');
+  }else{
+    svg.classList.remove('pick');
+    $('expr').innerHTML='Estes pontos seguem a mesma regra <b>x + y = ?</b>';
+    ch.pts.forEach(function(q){
+      flagP(q.x,q.y);
+      var tt=el('text',{x:PX(q.x),y:PY(q.y)+20,'class':'ptag'},dyn);tt.textContent=ptTxt(q.x,q.y);
+    });
+    cap('Some as coordenadas de um ponto. Qual regra vale para todos? Alguns pontos podem estar fora da tela: arraste o plano.');
+    setMsg('Escolha a regra e toque em Conferir.');
+  }
+  renderOpts();setControls();renderDots();
+}
+function onPickP(x,y){
+  var ch=cur();
+  if(!ch)return;
+  if(ch.type==='explore'){exploreGo(x,y);return;}
+  if(ch.type==='rule'){ruleTap(x,y);return;}
+  if(ch.type==='sys'){sysTap(x,y);return;}
+  if(st.phase!=='ask')return;
+  if(ch.type==='fill'){if(ch.given==='x')x=ch.v;else y=ch.v;}
+  else if(ch.type!=='goto'&&ch.type!=='cross')return;
+  st.pickP={x:x,y:y};
+  var old=dyn.querySelector('.pickring');if(old)dyn.removeChild(old);
+  el('circle',{cx:PX(x),cy:PY(y),r:Math.min(15,CB*0.5),'class':'pickring'},dyn);
+  setMsg('Você marcou '+ptTxt(x,y)+'. Toque em Conferir, ou em outro ponto para mudar.');
+  setControls();
+}
+function exploreGo(x,y){
+  st.token++;var tk=st.token;
+  drawPlane(false);svg.classList.add('pick');
+  $('expr').innerHTML=ptHTML(x,y);
+  setMsg('');
+  walkP(x,y,tk).then(function(r){if(r===null||tk!==st.token)return;cap(describeP(x,y));setMsg('Toque em outro ponto.');});
+}
+function toggleObl(){
+  st.token++;st.obl=!st.obl;
+  if(!st.obl){showChallengeP();return;}
+  drawPlane(true);svg.classList.remove('pick');
+  $('expr').innerHTML='Eixos oblíquos';
+  cap('Também funciona: cada ponto continua tendo seu par (x, y). Mas as casas deixam de ser quadradas e fica mais difícil enxergar distâncias e direções. Com eixos perpendiculares, tudo fica mais simples.');
+  setMsg('Aqui está o ponto (3, 2) nos eixos oblíquos.');
+  setControls();
+}
+function hintGoto(a,b,pa,pb){
+  var t='O ponto pedido é '+ptTxt(a,b)+'. ';
+  if(pa===b&&pb===a)return t+'Você trocou a ordem: o primeiro número é o x (o lado).';
+  if(pa===-a&&pb===b)return t+'O sinal do x está trocado: x '+(a<0?'negativo':'positivo')+' vai para a '+side(a)+'.';
+  if(pa===a&&pb===-b)return t+'O sinal do y está trocado: y '+(b<0?'negativo desce':'positivo sobe')+'.';
+  return t+'Você marcou '+ptTxt(pa,pb)+'.';
+}
+async function runP(kind){
+  if(st.busy)return;
+  var ch=cur(),tk=st.token,seen=(kind==='path');
+  st.busy=true;st.phase='run';
+  var old=dyn.querySelector('.pickring');if(old)dyn.removeChild(old);
+  setControls();setMsg('');
+  if(ch.type==='findk'){runFindk(kind);return;}
+  if(ch.type==='cases'){runCases(kind);return;}
+  if(ch.type==='solve'){runSolve(kind);return;}
+  var r=await walkP(ch.x,ch.y,tk);
+  if(r===null||tk!==st.token)return;
+  ringP(ch.x,ch.y,'okring');
+  cap(describeP(ch.x,ch.y));
+  var tx=ptTxt(ch.x,ch.y),ok=false;
+  if(ch.type==='fill'){
+    var pf=st.pickP;ok=!!pf&&pf.x===ch.x&&pf.y===ch.y;
+    cap(sumHTML(ch.x,ch.y)+' ✓<br>'+describeP(ch.x,ch.y));
+    if(seen)setMsg('O par certo é '+tx+': a soma dá '+ch.k+'.');
+    else if(ok)setMsg(pickOne(PRAISE)+' '+tx+' soma '+ch.k+'.','ok');
+    else{ringP(pf.x,pf.y,'badring');setMsg(hintFill(ch,pf),'bad');}
+  }else if(ch.type==='cross'){
+    var pc=st.pickP;ok=!!pc&&pc.x===ch.x&&pc.y===ch.y;
+    cap(ruleChkHTML(ch.A,'A',ch.x,ch.y)+' ✓<br>'+ruleChkHTML(ch.B,'B',ch.x,ch.y)+' ✓<br>'+describeP(ch.x,ch.y));
+    if(seen)setMsg('O cruzamento é '+tx+': serve às duas regras.');
+    else if(ok)setMsg(pickOne(PRAISE)+' '+tx+' serve às duas regras.','ok');
+    else{ringP(pc.x,pc.y,'badring');setMsg(hintCross(ch,pc),'bad');}
+  }else if(ch.type==='goto'){
+    var p=st.pickP;
+    ok=!!p&&p.x===ch.x&&p.y===ch.y;
+    if(seen)setMsg('O ponto '+tx+' fica assim. Agora tente você, ou siga em frente.');
+    else if(ok)setMsg(pickOne(PRAISE)+' O guerreiro chegou ao '+tx+'.','ok');
+    else{ringP(p.x,p.y,'badring');setMsg(hintGoto(ch.x,ch.y,p.x,p.y),'bad');}
+  }else{
+    var kids=$('opts').children;
+    var ci=ch.options.findIndex(function(o){return o.ok;});
+    if(seen){
+      kids[ci].classList.add('ok');
+      setMsg('A bandeira está em '+tx+': primeiro o lado, depois a altura.');
+    }else{
+      var o=ch.options[st.opt];ok=o.ok;
+      kids[st.opt].classList.add(ok?'ok':'bad');
+      if(ok)setMsg(pickOne(PRAISE)+' A bandeira está em '+tx+'.','ok');
+      else{
+        kids[ci].classList.add('ok');
+        setMsg('A bandeira está em '+tx+'. '+((o.x===ch.y&&o.y===ch.x)?'Você trocou a ordem: primeiro o x (o lado), depois o y (a altura).':'Confira os sinais: x positivo vai para a direita e y positivo vai para cima.'),'bad');
+      }
+    }
+  }
+  finish(0,ok,seen);
+}
+/* arrastar para deslizar a janela; toque curto marca o ponto */
+function svgK(){var r=svg.getBoundingClientRect();return {r:r,k:600/r.width};}
+var ptrs={},pinch=null,PRMIN=4,PRMAX=12;
+function nPtr(){return Object.keys(ptrs).length;}
+function pinchDist(){var k=Object.keys(ptrs),a=ptrs[k[0]],b=ptrs[k[1]];return Math.sqrt((a.x-b.x)*(a.x-b.x)+(a.y-b.y)*(a.y-b.y));}
+function pinchCenter(){var k=Object.keys(ptrs),a=ptrs[k[0]],b=ptrs[k[1]],q=svgK();return {sx:((a.x+b.x)/2-q.r.left)*q.k,sy:((a.y+b.y)/2-q.r.top)*q.k};}
+function zoomAt(newPR,sx,sy){
+  newPR=clampN(newPR,PRMIN,PRMAX);
+  var wx=(sx-300)/C+vx,wy=-(sy-300)/C+vy;
+  PR=newPR;C=264/PR;
+  vx=wx-(sx-300)/C;vy=wy+(sy-300)/C;clampCam();
+  renderStatic();applyCam();
+}
+function zoomDone(){if(st.phase==='ask'&&!st.busy)setControls();}
+svg.addEventListener('pointerdown',function(e){
+  if(st.level<4||st.obl||!sg||(e.button!==undefined&&e.button>0))return;
+  ptrs[e.pointerId]={x:e.clientX,y:e.clientY};
+  try{svg.setPointerCapture(e.pointerId);}catch(err){}
+  if(nPtr()===2&&!st.busy){
+    drag=null;
+    var c=pinchCenter();
+    pinch={d0:pinchDist(),pr0:PR};
+    return;
+  }
+  if(nPtr()>2)return;
+  drag={id:e.pointerId,x:e.clientX,y:e.clientY,vx:vx,vy:vy,moved:false};
+});
+svg.addEventListener('pointermove',function(e){
+  if(ptrs[e.pointerId])ptrs[e.pointerId]={x:e.clientX,y:e.clientY};
+  if(pinch&&nPtr()>=2){
+    var d=pinchDist(),c=pinchCenter();
+    if(d>0)zoomAt(pinch.pr0*pinch.d0/d,c.sx,c.sy);
+    return;
+  }
+  if(!drag||e.pointerId!==drag.id)return;
+  var dx=e.clientX-drag.x,dy=e.clientY-drag.y;
+  if(!drag.moved&&Math.sqrt(dx*dx+dy*dy)<8)return;
+  drag.moved=true;
+  var k=svgK().k;
+  vx=drag.vx-dx*k/C;vy=drag.vy+dy*k/C;clampCam();
+  renderStatic();applyCam();
+});
+function ptrEnd(e){
+  delete ptrs[e.pointerId];
+  if(pinch&&nPtr()<2){pinch=null;zoomDone();}
+}
+svg.addEventListener('pointerup',function(e){
+  var wasPinch=!!pinch;
+  ptrEnd(e);
+  if(wasPinch||!drag||e.pointerId!==drag.id)return;
+  var d=drag;drag=null;
+  if(d.moved)return;
+  var q=svgK(),sx=(e.clientX-q.r.left)*q.k,sy=(e.clientY-q.r.top)*q.k;
+  var wx=Math.round((sx-300)/C+vx)+0,wy=Math.round(-(sy-300)/C+vy)+0;
+  if(Math.abs(wx)>WORLD||Math.abs(wy)>WORLD)return;
+  onPickP(wx,wy);
+});
+svg.addEventListener('pointercancel',function(e){ptrEnd(e);drag=null;});
+svg.addEventListener('wheel',function(e){
+  if(st.level<4||st.obl||!sg||st.busy)return;
+  e.preventDefault();
+  var q=svgK();
+  zoomAt(PR*(e.deltaY>0?1.12:1/1.12),(e.clientX-q.r.left)*q.k,(e.clientY-q.r.top)*q.k);
+  clearTimeout(zoomAt.t);zoomAt.t=setTimeout(zoomDone,250);
+},{passive:false});
+/* ===== Fase 3: pontos da regra x + y = k ===== */
+function sumHTML(x,y){return cs(x)+' + '+cs(y)+' = <b>'+fmt(x+y)+'</b>';}
+function sumTxt(x,y){return '('+sgn(x)+Math.abs(x)+') + ('+sgn(y)+Math.abs(y)+') = '+fmt(x+y);}
+function gapTxt(s,k){return s<k?'Faltam '+(k-s)+' para chegar a '+k+'.':'Passou '+(s-k)+' de '+k+'.';}
+function hintFill(ch,p){
+  return 'Você marcou '+ptTxt(p.x,p.y)+': '+sumTxt(p.x,p.y)+'. '+gapTxt(p.x+p.y,ch.k)+' O par certo é '+ptTxt(ch.x,ch.y)+'.';
+}
+function optHTML(ch,o){
+  if(ch.type==='findk')return 'x + y = <span class="'+cls(o.k)+'">'+fmt(o.k)+'</span>';
+  if(ch.type==='cases')return caseLabel(o.kind);
+  if(ch.type==='solve')return ptHTML(o.x,o.y);
+  if(ch.type==='read')return ptHTML(o.x,o.y);
+  return exprHTML(o.terms);
+}
+function drawLineK(k){
+  var x0=Math.max(-WORLD,k-WORLD),x1=Math.min(WORLD,k+WORLD);
+  var ln=el('line',{x1:PX(x0),y1:PY(k-x0),x2:PX(x1),y2:PY(k-x1),stroke:'var(--ok)','stroke-width':4,'stroke-linecap':'round',opacity:0.85});
+  dyn.insertBefore(ln,dyn.firstChild);
+}
+function ruleTap(x,y){
+  var k=cur().k,s=x+y,ok=(s===k),i;
+  for(i=0;i<st.good.length;i++){if(st.good[i].x===x&&st.good[i].y===y){setMsg('Esse ponto já está marcado.');return;}}
+  var d=el('g',{},dyn);
+  el('circle',{cx:PX(x),cy:PY(y),r:dotR()+1,fill:ok?'var(--ok)':'var(--bad)',stroke:'var(--band)','stroke-width':2},d);
+  var tg=el('text',{x:PX(x),y:PY(y)-12,'class':'ptag'},d);tg.textContent=ptTxt(x,y);
+  cap(sumHTML(x,y)+(ok?' ✓ <b>Serve!</b>':' ✗ <b>Não serve.</b> '+gapTxt(s,k)));
+  if(ok){
+    st.good.push({x:x,y:y});
+    var n=st.good.length;
+    setMsg('Pontos que servem: '+n+(n>=3&&!st.lineDrawn?'. Já dá para ligar os pontos!':''),'ok');
+  }else{
+    setMsg('Esse não serve. Tente outro ponto.','bad');
+    setTimeout(function(){if(d.parentNode)d.parentNode.removeChild(d);},2200);
+  }
+  setControls();
+}
+function drawRuleLine(){
+  if(st.lineDrawn||st.good.length<3)return;
+  st.lineDrawn=true;
+  drawLineK(cur().k);
+  $('expr').innerHTML='<span class="op">x + y = '+cur().k+'</span> é uma reta';
+  cap('Todos os pontos desta reta somam '+cur().k+', até os que têm números negativos, como (10, −2) e (−3, 11). Cada passo de +1 no x pede −1 no y: matéria e antimatéria se compensam e a soma continua '+cur().k+'.');
+  setMsg('Toque em outros pontos da reta (arraste o plano) e confira.','ok');
+  setControls();
+}
+function runFindk(kind){
+  var ch=cur(),seen=(kind==='path'),ok=false;
+  drawLineK(ch.k);
+  cap(ch.pts.map(function(q){return sumHTML(q.x,q.y);}).join('<br>'));
+  var kids=$('opts').children,ci=ch.options.findIndex(function(o){return o.ok;});
+  if(seen){
+    kids[ci].classList.add('ok');
+    setMsg('Em todos os pontos a soma é '+fmt(ch.k)+': a regra é x + y = '+fmt(ch.k)+'.');
+  }else{
+    var o=ch.options[st.opt];ok=o.ok;
+    kids[st.opt].classList.add(ok?'ok':'bad');
+    if(ok)setMsg(pickOne(PRAISE)+' A soma é sempre '+fmt(ch.k)+'.','ok');
+    else{kids[ci].classList.add('ok');setMsg('Some as coordenadas de um ponto: '+sumTxt(ch.pts[0].x,ch.pts[0].y)+'. A regra certa é x + y = '+fmt(ch.k)+'.','bad');}
+  }
+  finish(0,ok,seen);
+}
+/* ===== Fase 4: sistemas (duas regras) ===== */
+function ruleStr(R){
+  if(R.kind==='sum')return R.alt?'y = '+fmt(R.k)+' − x':'x + y = '+fmt(R.k);
+  return R.alt?'x = '+fmt(R.k)+' + y':'x − y = '+fmt(R.k);
+}
+function ruleHTML(R,w){return '<span class="rl '+(w==='A'?'ra':'rb')+'">'+ruleStr(R)+'</span>';}
+function ruleVal(R,x,y){return R.kind==='sum'?x+y:x-y;}
+function ruleOk(R,x,y){return ruleVal(R,x,y)===R.k;}
+function ruleChkHTML(R,w,x,y){
+  var op=R.kind==='sum'?' + ':' − ';
+  return '<span class="rl '+(w==='A'?'ra':'rb')+'">regra '+(w==='A'?'1':'2')+'</span> '+cs(x)+op+cs(y)+' = <b>'+fmt(ruleVal(R,x,y))+'</b>';
+}
+function ruleChkTxt(R,x,y){
+  return '('+sgn(x)+Math.abs(x)+')'+(R.kind==='sum'?' + ':' − ')+'('+sgn(y)+Math.abs(y)+') = '+fmt(ruleVal(R,x,y));
+}
+function drawLineR(R,w,dashed,under){
+  var k=R.k,x0=Math.max(-WORLD,k-WORLD),x1=Math.min(WORLD,k+WORLD);
+  var y0=R.kind==='sum'?k-x0:x0-k,y1=R.kind==='sum'?k-x1:x1-k;
+  var ln=el('line',{x1:PX(x0),y1:PY(y0),x2:PX(x1),y2:PY(y1),stroke:w==='A'?'var(--la)':'var(--lb)','stroke-width':w==='A'?6:3.5,'stroke-linecap':'round',opacity:0.9});
+  if(dashed)ln.setAttribute('stroke-dasharray','12 9');
+  if(under&&dyn.firstChild)dyn.insertBefore(ln,dyn.firstChild);else dyn.appendChild(ln);
+}
+function sysCount(){var r='Regra 1: '+st.ptsA.length+' ponto(s) · Regra 2: '+st.ptsB.length+' ponto(s).';
+  var ra=st.ptsA.length>=2&&!st.drawnA,rb=st.ptsB.length>=2&&!st.drawnB;
+  if(ra&&rb)r+=' Já dá para ligar as duas retas!';else if(ra)r+=' Já dá para ligar a reta 1.';else if(rb)r+=' Já dá para ligar a reta 2.';
+  else if(!(st.drawnA&&st.drawnB))r+=' Com 2 pontos de uma regra já dá para ligar a reta dela.';
+  return r;}
+function sysTap(x,y){
+  var ch=cur(),a=ruleOk(ch.A,x,y),b=ruleOk(ch.B,x,y),key=x+','+y;
+  if(st.seenS[key]){setMsg('Esse ponto já foi testado.');return;}
+  var d=el('g',{},dyn);
+  var both=a&&b;
+  el('circle',{cx:PX(x),cy:PY(y),r:dotR()+(both?3:1),fill:both?'var(--gold)':(a?'var(--la)':(b?'var(--lb)':'var(--bad)')),stroke:'var(--band)','stroke-width':2},d);
+  var tg=el('text',{x:PX(x),y:PY(y)-12,'class':'ptag'},d);tg.textContent=ptTxt(x,y);
+  cap(ruleChkHTML(ch.A,'A',x,y)+(a?' ✓':' ✗')+'<br>'+ruleChkHTML(ch.B,'B',x,y)+(b?' ✓':' ✗'));
+  if(a||b){
+    st.seenS[key]=1;
+    if(a)st.ptsA.push({x:x,y:y});
+    if(b)st.ptsB.push({x:x,y:y});
+    setMsg((both?'É a solução! Serve às duas regras ao mesmo tempo. ':(a?'Serve só à regra 1. ':'Serve só à regra 2. '))+sysCount(),'ok');
+  }else{
+    setMsg('Não serve a nenhuma. Tente outro ponto.','bad');
+    setTimeout(function(){if(d.parentNode)d.parentNode.removeChild(d);},2200);
+  }
+  setControls();
+}
+function showSol(){
+  var ch=cur(),g=el('g',{},dyn);
+  el('circle',{cx:PX(ch.x),cy:PY(ch.y),r:Math.min(22,CB*0.7),fill:'none',stroke:'var(--gold)','stroke-width':5},g);
+  el('circle',{cx:PX(ch.x),cy:PY(ch.y),r:dotR()+3,fill:'var(--gold)',stroke:'var(--band)','stroke-width':2},g);
+  var tg=el('text',{x:PX(ch.x),y:PY(ch.y)-20,'class':'ptag'},g);tg.textContent=ptTxt(ch.x,ch.y);
+}
+function drawSysLine(w){
+  var ch=cur();
+  if(w==='A'){if(st.drawnA||st.ptsA.length<2)return;st.drawnA=true;drawLineR(ch.A,'A',false,true);}
+  else{if(st.drawnB||st.ptsB.length<2)return;st.drawnB=true;drawLineR(ch.B,'B',false,true);}
+  if(st.drawnA&&st.drawnB){
+    showSol();
+    cap('As duas retas se cruzam em '+ptHTML(ch.x,ch.y)+'. É o único ponto que serve às duas regras:<br>'+ruleChkHTML(ch.A,'A',ch.x,ch.y)+' ✓<br>'+ruleChkHTML(ch.B,'B',ch.x,ch.y)+' ✓<br>A solução do sistema é x = '+fmt(ch.x)+' e y = '+fmt(ch.y)+'.');
+    setMsg('Esse é o ponto de cruzamento: a solução do sistema.','ok');
+  }else{
+    cap('Todos os pontos desta reta servem à regra '+(w==='A'?'1':'2')+'. Agora ligue a outra reta.');
+    setMsg('Falta ligar a reta '+(w==='A'?'2':'1')+'. Marque 2 pontos dela (dois pontos já definem uma reta).');
+  }
+  setControls();
+}
+function hintCross(ch,p){
+  var a=ruleOk(ch.A,p.x,p.y),b=ruleOk(ch.B,p.x,p.y);
+  return 'Você marcou '+ptTxt(p.x,p.y)+'. Regra 1: '+ruleChkTxt(ch.A,p.x,p.y)+(a?' ✓':' ✗')+' · Regra 2: '+ruleChkTxt(ch.B,p.x,p.y)+(b?' ✓':' ✗')+'. O cruzamento é '+ptTxt(ch.x,ch.y)+'.';
+}
+function caseLabel(kd){
+  return kd==='one'?'Uma solução (as retas se cruzam)':(kd==='none'?'Nenhuma solução (retas paralelas)':'Infinitas soluções (é a mesma reta)');
+}
+function runCases(kind){
+  var ch=cur(),seen=(kind==='path'),ok=false,ex;
+  var nm=ch.A.kind==='sum'?'x + y':'x − y';
+  if(ch.kind==='one'){
+    var g=el('g',{},dyn);
+    el('circle',{cx:PX(ch.x),cy:PY(ch.y),r:Math.min(22,CB*0.7),fill:'none',stroke:'var(--gold)','stroke-width':5},g);
+    ex='As retas se cruzam em um só ponto, '+ptHTML(ch.x,ch.y)+', que serve às duas regras:<br>'+ruleChkHTML(ch.A,'A',ch.x,ch.y)+' ✓<br>'+ruleChkHTML(ch.B,'B',ch.x,ch.y)+' ✓<br>Uma solução.';
+  }else if(ch.kind==='none'){
+    ex='As retas são paralelas e nunca se encontram. Nenhum par de números faz '+nm+' valer '+fmt(ch.A.k)+' e '+fmt(ch.B.k)+' ao mesmo tempo. Nenhuma solução.';
+  }else{
+    ex='As duas regras descrevem a mesma reta: uma é a outra escrita de outro jeito. Todo ponto dela serve às duas. Infinitas soluções.';
+  }
+  cap(ex);
+  var kids=$('opts').children,ci=ch.options.findIndex(function(o){return o.ok;});
+  if(seen){kids[ci].classList.add('ok');setMsg(caseLabel(ch.kind)+'.');}
+  else{
+    var o=ch.options[st.opt];ok=o.ok;
+    kids[st.opt].classList.add(ok?'ok':'bad');
+    if(ok)setMsg(pickOne(PRAISE)+' '+caseLabel(ch.kind)+'.','ok');
+    else{kids[ci].classList.add('ok');setMsg('Não foi essa. O certo: '+caseLabel(ch.kind)+'.','bad');}
+  }
+  finish(0,ok,seen);
+}
+/* ===== Fase 5: resolver sem desenhar ===== */
+function wkHTML(extra){
+  return st.lines.map(function(h){return '<div class="wl">'+h+'</div>';}).join('')+(extra||'');
+}
+function renderSteps(){
+  var ch=cur(),stp=ch.steps[st.si];
+  cap(wkHTML('<div class="wp">'+stp.prompt+'</div>'));
+  setMsg('Escolha o passo certo.');
+  renderOpts();setControls();
+}
+async function stepPick(i){
+  if(st.busy||st.phase!=='ask')return;
+  var ch=cur(),stp=ch.steps[st.si],o=stp.options[i],tk=st.token,box=$('opts');
+  var btn=box.children[i];
+  if(!o.ok){st.miss++;btn.classList.add('bad');btn.disabled=true;setMsg(o.hint,'bad');return;}
+  st.busy=true;
+  Array.prototype.forEach.call(box.children,function(b){b.disabled=true;});
+  btn.classList.add('ok');setMsg('');
+  cap(wkHTML('<div class="wl" id="wkcur"></div>'));
+  var host=$('wkcur'),k;
+  for(k=0;k<stp.frames.length;k++){
+    host.innerHTML=stp.frames[k].html;
+    if(!await wait(stp.frames[k].ms*sp(),tk))return;
+  }
+  host.innerHTML=stp.final;
+  if(!await wait(600*sp(),tk))return;
+  st.lines.push(stp.final);
+  st.si++;st.busy=false;
+  if(st.si>=ch.steps.length)finishSteps();else renderSteps();
+}
+function finishSteps(){
+  var ch=cur();
+  if(ch.method==='cases'){
+    var inf=ch.kd==='inf';
+    st.lines.push('<b>No gráfico:</b> '+(inf?'as duas retas coincidem (é a mesma reta).':'as retas são paralelas e nunca se cruzam.'));
+    cap(wkHTML(''));
+    drawLineR(ch.A,'A');drawLineR(ch.B,'B',inf);
+    svg.style.display='';$('legend').style.display='';$('gph').style.display='';
+    setMsg((st.miss===0?pickOne(PRAISE)+' ':'')+(inf?'Infinitas soluções: todo ponto da reta serve.':'Nenhuma solução: nenhum ponto serve às duas.')+(st.miss?' Escolhas erradas: '+st.miss+'.':''),st.miss===0?'ok':'');
+    $('opts').style.display='none';
+    finish(0,st.miss===0,false);
+    return;
+  }
+  st.lines.push('<b>Conferir:</b><br>'+ruleChkHTML(ch.A,'A',ch.x,ch.y)+' ✓<br>'+ruleChkHTML(ch.B,'B',ch.x,ch.y)+' ✓');
+  cap(wkHTML(''));
+  svg.style.display='';$('legend').style.display='';$('gph').style.display='';
+  drawLineR(ch.A,'A');drawLineR(ch.B,'B');showSol();
+  setMsg((st.miss===0?pickOne(PRAISE)+' ':'')+'x = '+fmt(ch.x)+' e y = '+fmt(ch.y)+'. As retas se cruzam exatamente aí.'+(st.miss?' Escolhas erradas: '+st.miss+'.':''),st.miss===0?'ok':'');
+  $('opts').style.display='none';
+  finish(0,st.miss===0,false);
+}
+function hintSolve(ch,o){
+  var a=ruleOk(ch.A,o.x,o.y),b=ruleOk(ch.B,o.x,o.y);
+  return 'Com '+ptTxt(o.x,o.y)+': regra 1 '+ruleChkTxt(ch.A,o.x,o.y)+(a?' ✓':' ✗')+' · regra 2 '+ruleChkTxt(ch.B,o.x,o.y)+(b?' ✓':' ✗')+'. A solução é '+ptTxt(ch.x,ch.y)+'.';
+}
+function runSolve(kind){
+  var ch=cur(),seen=(kind==='path'),ok=false;
+  drawLineR(ch.A,'A');drawLineR(ch.B,'B');showSol();
+  var m=visH()-1.5;
+  if(Math.abs(ch.x-vx)>m||Math.abs(ch.y-vy)>m){vx=ch.x;vy=ch.y;clampCam();renderStatic();applyCam();}
+  cap('Conferindo a solução '+ptHTML(ch.x,ch.y)+':<br>'+ruleChkHTML(ch.A,'A',ch.x,ch.y)+' ✓<br>'+ruleChkHTML(ch.B,'B',ch.x,ch.y)+' ✓<br>As retas se cruzam aí.');
+  var kids=$('opts').children,ci=ch.options.findIndex(function(o){return o.ok;});
+  if(seen){kids[ci].classList.add('ok');setMsg('A solução é x = '+fmt(ch.x)+' e y = '+fmt(ch.y)+'.');}
+  else{
+    var o=ch.options[st.opt];ok=o.ok;
+    kids[st.opt].classList.add(ok?'ok':'bad');
+    if(ok)setMsg(pickOne(PRAISE)+' x = '+fmt(ch.x)+' e y = '+fmt(ch.y)+'.','ok');
+    else{kids[ci].classList.add('ok');setMsg(hintSolve(ch,o),'bad');}
+  }
+  finish(0,ok,seen);
+}
+//#STEPS-START
+function sgT(n){return n>=0?' + '+n:' − '+(-n);}
+function stripTags(h){return h.replace(/<[^>]*>/g,'');}
+function stOpt(html,ok,hint){return {html:html,ok:ok,hint:hint||''};}
+function stepDivide(S,X){
+  return {
+    prompt:'Temos 2x = <b>'+fmt(S)+'</b>. Qual passo deixa o x sozinho?',
+    options:shuffle([
+      stOpt('Dividir os dois lados por 2',true),
+      stOpt('Subtrair 2 dos dois lados',false,'2x quer dizer 2 vezes x. O contrário de multiplicar é dividir. Subtrair 2 deixaria 2x − 2 = '+fmt(S-2)+'.'),
+      stOpt('Multiplicar os dois lados por 2',false,'Multiplicar por 2 deixaria 4x. Para desfazer o "vezes 2", divida por 2.')
+    ]),
+    frames:[{html:'2x ÷ 2 = '+cs(S)+' ÷ 2',ms:1100}],
+    final:'x = <b>'+fmt(X)+'</b>'
+  };
+}
+function stepsAdd(a,b,X,Y){
+  var S=a+b,steps=[];
+  steps.push({
+    prompt:'Duas equações, duas balanças. Qual operação faz o <b>y</b> desaparecer?',
+    options:shuffle([
+      stOpt('Somar as duas equações, membro a membro',true),
+      stOpt('Subtrair a equação 2 da equação 1',false,'Subtraindo, quem some é o x, não o y: (x + y) − (x − y) = 2y. Queremos eliminar o y, que aparece como +y e −y: opostos que se fundem quando somados.'),
+      stOpt('Somar só os lados esquerdos',false,'Regra da Balança: o que se faz de um lado tem de ser feito do outro. Some também os lados direitos.')
+    ]),
+    frames:[
+      {html:'(x + y) + (x − y) = '+cs(a)+' + '+cs(b),ms:1300},
+      {html:'x <span class="fz">+ y</span> + x <span class="fz">− y</span> = '+cs(a)+' + '+cs(b),ms:1700},
+      {html:'x + x = <b>'+fmt(S)+'</b>',ms:1000}
+    ],
+    final:'2x = <b>'+fmt(S)+'</b>'
+  });
+  steps.push(stepDivide(S,X));
+  steps.push({
+    prompt:'Achamos x = <b>'+fmt(X)+'</b>. Para achar o y, troque o x por '+cs(X)+' na equação 1 (x + y = '+fmt(a)+').',
+    options:shuffle([
+      stOpt(cs(X)+' + y = '+fmt(a),true),
+      stOpt('x + '+cs(X)+' = '+fmt(a),false,'O valor '+fmt(X)+' é do x, não do y. Troque só o x.'),
+      stOpt(cs(-X)+' + y = '+fmt(a),false,'O x vale '+fmt(X)+', não o seu oposto. Troque pelo próprio valor, com parênteses.')
+    ]),
+    frames:[],
+    final:cs(X)+' + y = <b>'+fmt(a)+'</b>'
+  });
+  steps.push({
+    prompt:'Agora isole o <b>y</b>. Qual passo?',
+    options:shuffle([
+      stOpt('Somar o oposto de '+cs(X)+', que é '+cs(-X)+', aos dois lados',true),
+      stOpt('Somar '+cs(X)+' aos dois lados',false,'Somando '+cs(X)+' o termo dobraria em vez de sumir. Para fazer '+cs(X)+' desaparecer, some o seu oposto '+cs(-X)+': matéria e antimatéria se anulam.'),
+      stOpt('Dividir os dois lados por '+cs(X),false,'Dividir não desfaz uma soma. O '+cs(X)+' está somando; desfaz-se somando o oposto.')
+    ]),
+    frames:[
+      {html:cs(X)+' + y + '+cs(-X)+' = '+fmt(a)+' + '+cs(-X),ms:1300},
+      {html:'<span class="fz">'+cs(X)+'</span> + y + <span class="fz">'+cs(-X)+'</span> = '+fmt(a)+' + '+cs(-X),ms:1700}
+    ],
+    final:'y = <b>'+fmt(Y)+'</b>'
+  });
+  return steps;
+}
+function stepsSub(a,b,X,Y){
+  var S=a+b,inner=fmt(a)+' − x',steps=[];
+  steps.push({
+    prompt:'Isole o <b>y</b> na equação 1 (x + y = '+fmt(a)+'). Quanto vale o y?',
+    options:shuffle([
+      stOpt('y = '+inner,true),
+      stOpt('y = '+fmt(a)+' + x',false,'Em x + y = '+fmt(a)+', o x está somando. Para tirá-lo desse lado, some o seu oposto: y = '+inner+'.'),
+      stOpt('y = x'+sgT(-a),false,'A ordem importa: o que sobra é y = '+inner+', e não x'+sgT(-a)+'.')
+    ]),
+    frames:[],
+    final:'y = '+inner
+  });
+  steps.push({
+    prompt:'Na equação 2 (x − y = '+fmt(b)+'), troque o <b>y</b> por ('+inner+'). Como fica?',
+    options:shuffle([
+      stOpt('x − ('+inner+') = '+fmt(b),true),
+      stOpt('x'+sgT(-a)+' − x = '+fmt(b),false,'O y inteiro vira ('+inner+'). Sem parênteses, o − de fora só atingiria o primeiro termo.'),
+      stOpt('x − ('+fmt(a)+' + x) = '+fmt(b),false,'No y = '+inner+' o x aparece com sinal de menos. Copie a expressão exatamente: ('+inner+').')
+    ]),
+    frames:[{html:'x − <span class="hl">y</span> = '+fmt(b),ms:900}],
+    final:'x − ('+inner+') = '+fmt(b)
+  });
+  steps.push({
+    prompt:'Abra o parêntese. O <b>−</b> de fora inverte o sinal de cada termo de dentro. Como fica?',
+    options:shuffle([
+      stOpt('x'+sgT(-a)+' + x = '+fmt(b),true),
+      stOpt('x'+sgT(a)+' + x = '+fmt(b),false,'O − de fora é operação: inverte o sinal de cada termo de dentro. O '+fmt(a)+' vira '+fmt(-a)+'.'),
+      stOpt('x'+sgT(-a)+' − x = '+fmt(b),false,'Dentro estava −x e o − de fora o inverte: −(−x) = +x. Menos com menos dá mais.')
+    ]),
+    frames:[{html:'x − ('+inner+') = '+fmt(b)+'<br><small>−'+cs(a)+' = '+cs(-a)+' · −'+cs(-1)+'x = '+cs(1)+'x</small>',ms:1900}],
+    final:'x'+sgT(-a)+' + x = '+fmt(b)
+  });
+  steps.push({
+    prompt:'Junte os x: x + x. Como fica?',
+    options:shuffle([
+      stOpt('2x'+sgT(-a)+' = '+fmt(b),true),
+      stOpt(fmt(-a)+' = '+fmt(b),false,'x + x = 2x. Os x só se anulam quando um é positivo e o outro negativo (matéria e antimatéria).'),
+      stOpt('2x'+sgT(a)+' = '+fmt(b),false,'Juntar os x não muda o termo '+fmt(-a)+'. Só os x se juntam: x + x = 2x.')
+    ]),
+    frames:[{html:'<span class="hl">x</span>'+sgT(-a)+' + <span class="hl">x</span> = '+fmt(b),ms:1000}],
+    final:'2x'+sgT(-a)+' = '+fmt(b)
+  });
+  steps.push({
+    prompt:'Para ficar só com 2x, desfaça o '+fmt(-a)+'. Qual passo?',
+    options:shuffle([
+      stOpt('Somar '+cs(a)+' aos dois lados',true),
+      stOpt('Somar '+cs(-a)+' aos dois lados',false,'Isso aumentaria o termo em vez de eliminá-lo. Para fazer '+cs(-a)+' desaparecer, some o seu oposto '+cs(a)+'.'),
+      stOpt('Dividir os dois lados por '+cs(a),false,'Dividir não desfaz uma soma. Some o oposto do termo que quer eliminar.')
+    ]),
+    frames:[
+      {html:'2x'+sgT(-a)+' + '+cs(a)+' = '+fmt(b)+' + '+cs(a),ms:1200},
+      {html:'2x<span class="fz">'+sgT(-a)+'</span><span class="fz"> + '+cs(a)+'</span> = '+fmt(b)+' + '+cs(a),ms:1700}
+    ],
+    final:'2x = <b>'+fmt(S)+'</b>'
+  });
+  steps.push(stepDivide(S,X));
+  steps.push({
+    prompt:'Volte em y = '+inner+' e troque o x por '+cs(X)+'. Como fica?',
+    options:shuffle([
+      stOpt('y = '+fmt(a)+' − '+cs(X),true),
+      stOpt('y = '+fmt(a)+' + '+cs(X),false,'Em y = '+inner+', o x entra com o menos de operação: '+fmt(a)+' − '+cs(X)+'.'),
+      stOpt('y = '+cs(X)+' − '+fmt(a),false,'A ordem importa: y = '+inner+', e não x'+sgT(-a)+'.')
+    ]),
+    frames:[
+      {html:'y = '+fmt(a)+' − '+cs(X),ms:1100},
+      {html:'y = '+fmt(a)+(X>=0?' − '+X:' + '+(-X))+(X<0?'<br><small>menos com menos: −('+fmt(X)+') = +'+(-X)+'</small>':''),ms:1500}
+    ],
+    final:'y = <b>'+fmt(Y)+'</b>'
+  });
+  return steps;
+}
+function stepsCases(kind,a,b,alt){
+  var diff=(kind==='diff'),L=diff?'x − y':'x + y',L2=diff?'2x − 2y':'2x + 2y',c=a-b,none=(c!==0),steps=[];
+  if(alt){
+    steps.push({
+      prompt:'A equação 2 está escrita '+(diff?'x = '+fmt(b)+' + y':'y = '+fmt(b)+' − x')+'. Como deixar x e y do mesmo lado, como na equação 1?',
+      options:shuffle([
+        stOpt(diff?'Subtrair y dos dois lados':'Somar x aos dois lados',true),
+        stOpt(diff?'Somar y dos dois lados':'Subtrair x dos dois lados',false,'Esse passo dobraria o termo em vez de fazê-lo sumir do lado direito. Para eliminar um termo, some o seu oposto: matéria e antimatéria se anulam.'),
+        stOpt('Dividir os dois lados por '+(diff?'x':'y'),false,'Dividir complica a conta. Aqui basta somar o oposto do termo que você quer tirar do lado direito.')
+      ]),
+      frames:[{html:diff?'x <span class="fz">− y</span> = '+fmt(b)+' + y <span class="fz">− y</span>':'y <span class="fz">+ x</span> = '+fmt(b)+' − x <span class="fz">+ x</span>',ms:1800}],
+      final:L+' = <b>'+fmt(b)+'</b>'
+    });
+  }
+  steps.push({
+    prompt:'As duas equações têm <b>'+L+'</b> do lado esquerdo. Qual operação faz o x e o y sumirem juntos?',
+    options:shuffle([
+      stOpt('Subtrair a equação 2 da equação 1',true),
+      stOpt('Somar as duas equações',false,'Somando fica '+L2+' = '+fmt(a+b)+': nada some. Para eliminar termos iguais, subtraia.'),
+      stOpt('Dividir uma equação pela outra',false,'Dividir equações não é um passo da Balança. Subtrair membro a membro elimina os termos iguais.')
+    ]),
+    frames:[
+      {html:'('+L+') − ('+L+') = '+fmt(a)+' − ('+fmt(b)+')',ms:1400},
+      {html:'<span class="fz">'+L+'</span> − <span class="fz">('+L+')</span> = '+fmt(a)+' − ('+fmt(b)+')',ms:1800}
+    ],
+    final:'0 = <b>'+fmt(c)+'</b>'
+  });
+  steps.push({
+    prompt:'Chegamos em <b>0 = '+fmt(c)+'</b>. O que isso significa?',
+    options:shuffle(none?[
+      stOpt('Nenhuma solução: 0 nunca é igual a '+fmt(c)+' (retas paralelas)',true),
+      stOpt('Infinitas soluções',false,'Só seria assim se desse 0 = 0, que é sempre verdadeiro. Mas 0 = '+fmt(c)+' é falso para qualquer x e y.'),
+      stOpt('x = 0 e y = '+fmt(c),false,'O 0 aqui é o resultado da subtração, não o valor de x. Os x e y sumiram.')
+    ]:[
+      stOpt('Infinitas soluções: 0 = 0 é sempre verdadeiro (a mesma reta)',true),
+      stOpt('Nenhuma solução',false,'0 = 0 é verdadeiro para qualquer x e y, então não há impossibilidade. É a mesma reta escrita de dois jeitos.'),
+      stOpt('x = 0 e y = 0',false,'O 0 aqui é o resultado da subtração, não o valor de x. Os x e y sumiram.')
+    ]),
+    frames:[],
+    final:none?'<b>Nenhuma solução</b> (retas paralelas)':'<b>Infinitas soluções</b> (mesma reta)'
+  });
+  return steps;
+}
+//#STEPS-END
+//#GENP-START
+function genPt(i,seen,R){
+  var lim=Math.min(R,i<2?5:(i<4?12:19));
+  for(var k=0;k<5000;k++){
+    var x=rnd(-lim,lim),y=rnd(-lim,lim),ok=false;
+    if(i<2)ok=x>0&&y>0;
+    else if(i<4)ok=x!==0&&y!==0&&((x<0)!==(y<0));
+    else if(i===4)ok=x<0&&y<0;
+    else ok=(x===0)!==(y===0);
+    if(ok&&i>=2&&Math.max(Math.abs(x),Math.abs(y))<=6)ok=false;
+    if(ok&&!seen[x+','+y]){seen[x+','+y]=1;return {x:x,y:y};}
+  }
+  return {x:i<2?3:7,y:i<2?2:-8};
+}
+function readOptions(a,b){
+  var cand=[{x:b,y:a},{x:-a,y:b},{x:a,y:-b},{x:-a,y:-b}].filter(function(c){return !(c.x===a&&c.y===b);});
+  var seenK={},uniq=[];
+  cand.forEach(function(c){var k=c.x+','+c.y;if(!seenK[k]){seenK[k]=1;uniq.push(c);}});
+  var ds=shuffle(uniq).slice(0,2);
+  var opts=[{x:a,y:b,ok:true}];
+  ds.forEach(function(d){opts.push({x:d.x+0,y:d.y+0,ok:false});});
+  return shuffle(opts);
+}
+function genFill(){
+  var seen={},out=[];
+  var spec=[['x',1,7],['y',1,7],['x',9,16],['y',9,16],['x',-11,-1],['y',-11,-1]];
+  for(var i=0;i<6;i++){
+    var sp=spec[i],v,x,y;
+    for(var t=0;t<500;t++){
+      v=rnd(sp[1],sp[2]);
+      if(sp[0]==='x'){x=v;y=8-v;}else{y=v;x=8-v;}
+      if(!seen[x+','+y]&&Math.abs(x)<=19&&Math.abs(y)<=19)break;
+    }
+    seen[x+','+y]=1;
+    out.push({type:'fill',given:sp[0],v:v,x:x,y:y,k:8});
+  }
+  return out;
+}
+function findkOptions(k){
+  var c=[];
+  if(k!==0)c.push(-k+0);
+  [k-2,k-1,k+1,k+2].forEach(function(v){c.push(v);});
+  var seenK={},u=[];
+  c.forEach(function(v){if(v!==k&&Math.abs(v)<=19&&!seenK[v]){seenK[v]=1;u.push(v);}});
+  var ds=shuffle(u).slice(0,2);
+  var opts=[{k:k,ok:true}];
+  ds.forEach(function(v){opts.push({k:v+0,ok:false});});
+  return shuffle(opts);
+}
+function genFindk(){
+  var seenK={},out=[];
+  for(var i=0;i<6;i++){
+    var res=null;
+    for(var t=0;t<3000&&!res;t++){
+      var k=i<2?rnd(2,9):rnd(-12,12);
+      if(k===0||seenK[k])continue;
+      var a=rnd(-6,6),b=k-a;
+      if(Math.abs(b)>6||(a===0&&b===0))continue;
+      var pts=[{x:a,y:b}],xs={};xs[a]=1;
+      for(var q=0;q<300&&pts.length<3;q++){
+        var lim=i<2?6:12,x2=rnd(-lim,lim),y2=k-x2;
+        if(xs[x2]||Math.abs(y2)>(i<2?6:19))continue;
+        xs[x2]=1;pts.push({x:x2,y:y2});
+      }
+      if(pts.length<3)continue;
+      seenK[k]=1;res={k:k,pts:pts};
+    }
+    if(!res)res={k:5,pts:[{x:2,y:3},{x:5,y:0},{x:-1,y:6}]};
+    out.push({type:'findk',k:res.k,pts:res.pts,options:findkOptions(res.k)});
+  }
+  return out;
+}
+function mkRule(kind,k,alt){return alt?{kind:kind,k:k,alt:true}:{kind:kind,k:k};}
+function genCross(){
+  var seen={},out=[];
+  var spec=[[1,6,1,6],[-6,-1,1,6],[7,12,-6,6],[-6,6,-12,-7],[-11,-7,-8,-1],[7,12,-7,-1]];
+  for(var i=0;i<6;i++){
+    var sp=spec[i],sx,sy,a,b;
+    for(var t=0;t<1000;t++){
+      sx=rnd(sp[0],sp[1]);sy=rnd(sp[2],sp[3]);a=sx+sy;b=sx-sy;
+      if(Math.abs(a)<=19&&Math.abs(b)<=19&&Math.abs(sx)<=19&&Math.abs(sy)<=19&&!seen[sx+','+sy])break;
+    }
+    seen[sx+','+sy]=1;
+    var A=mkRule('sum',a),B=mkRule('diff',b);
+    if(Math.random()<0.5){var tmp=A;A=B;B=tmp;}
+    out.push({type:'cross',A:A,B:B,x:sx,y:sy});
+  }
+  return out;
+}
+function caseOpts(kd){
+  return shuffle([{kind:'one',ok:kd==='one'},{kind:'none',ok:kd==='none'},{kind:'inf',ok:kd==='inf'}]);
+}
+function genCases(){
+  var kinds=shuffle(['one','one','none','none','inf','inf']),out=[],seenSig={};
+  kinds.forEach(function(kd){
+    var A,B,x,y;
+    for(var t=0;t<500;t++){
+      if(kd==='one'){
+        var sx=rnd(-8,8),sy=rnd(-8,8);
+        if((sx===0&&sy===0)||Math.abs(sx+sy)>12||Math.abs(sx-sy)>12)continue;
+        A=mkRule('sum',sx+sy);B=mkRule('diff',sx-sy);x=sx;y=sy;
+      }else if(kd==='none'){
+        var dk=pickOne(['sum','diff']),k1=rnd(-9,9),k2=rnd(-9,9);
+        if(Math.abs(k1-k2)<3)continue;
+        A=mkRule(dk,k1);B=mkRule(dk,k2);
+      }else{
+        var dk2=pickOne(['sum','diff']),k3=rnd(-9,9);
+        if(k3===0)continue;
+        A=mkRule(dk2,k3);B=mkRule(dk2,k3,true);
+      }
+      var sig=kd+JSON.stringify([A,B]);
+      if(seenSig[sig])continue;
+      seenSig[sig]=1;break;
+    }
+    if(Math.random()<0.5){var tmp=A;A=B;B=tmp;}
+    out.push({type:'cases',kind:kd,A:A,B:B,x:x,y:y,options:caseOpts(kd)});
+  });
+  return out;
+}
+function genStepsLevel(method,n){
+  var out=[],seen={};
+  var specs=[[2,6,1,4],[1,6,-6,-1],[-6,-1,1,6],[-6,-1,-6,-1]];
+  for(var i=0;i<n;i++){
+    var sp=specs[i%specs.length],sx,sy,a,b,ok=false;
+    for(var t=0;t<1000&&!ok;t++){
+      sx=rnd(sp[0],sp[1]);sy=rnd(sp[2],sp[3]);a=sx+sy;b=sx-sy;
+      ok=a!==0&&b!==0&&Math.abs(a)<=12&&Math.abs(b)<=12&&!seen[sx+','+sy];
+    }
+    seen[sx+','+sy]=1;
+    out.push({type:'steps',method:method,A:mkRule('sum',a),B:mkRule('diff',b),x:sx,y:sy,steps:method==='add'?stepsAdd(a,b,sx,sy):stepsSub(a,b,sx,sy)});
+  }
+  return out;
+}
+function genSolve(){
+  var out=[],seen={};
+  var specs=[[1,6,1,6],[1,6,-6,-1],[-8,-1,1,8],[-8,-1,-8,-1],[3,12,-12,-3],[-12,-3,3,12]];
+  for(var i=0;i<6;i++){
+    var sp=specs[i],sx,sy,a,b,ok=false;
+    for(var t=0;t<1000&&!ok;t++){
+      sx=rnd(sp[0],sp[1]);sy=rnd(sp[2],sp[3]);a=sx+sy;b=sx-sy;
+      ok=Math.abs(a)<=19&&Math.abs(b)<=19&&!seen[sx+','+sy];
+    }
+    seen[sx+','+sy]=1;
+    var A=mkRule('sum',a),B=mkRule('diff',b);
+    if(Math.random()<0.5){var tmp=A;A=B;B=tmp;}
+    out.push({type:'solve',A:A,B:B,x:sx,y:sy,options:readOptions(sx,sy)});
+  }
+  return out;
+}
+function genCasesLevel(){
+  var kinds=shuffle(['none','none','inf','inf']),out=[],seen={};
+  kinds.forEach(function(kd){
+    var kind=Math.random()<0.5?'sum':'diff',a,b,alt,t;
+    for(t=0;t<1000;t++){
+      a=rnd(-9,9);b=kd==='inf'?a:rnd(-9,9);
+      if(a===0||b===0)continue;if(kd==='none'&&a===b)continue;
+      if(!seen[kind+a+','+b])break;
+    }
+    seen[kind+a+','+b]=1;alt=Math.random()<0.5||kd==='inf';
+    out.push({type:'steps',method:'cases',kd:kd,A:mkRule(kind,a),B:mkRule(kind,b,alt),steps:stepsCases(kind,a,b,alt)});
+  });
+  return out;
+}
+function genLevelP(level,R){
+  if(level===4)return [{type:'explore'}];
+  if(level===16)return genCasesLevel();
+  if(level===13)return genStepsLevel('add',3);
+  if(level===14)return genStepsLevel('sub',2);
+  if(level===15)return genSolve();
+  if(level===10)return [{type:'sys',A:mkRule('sum',8),B:mkRule('diff',2),x:5,y:3}];
+  if(level===11)return genCross();
+  if(level===12)return genCases();
+  if(level===7)return [{type:'rule',k:8}];
+  if(level===8)return genFill();
+  if(level===9)return genFindk();
+  var seen={},out=[];
+  for(var i=0;i<6;i++){
+    var p=genPt(i,seen,R);
+    if(level===5)out.push({type:'goto',x:p.x,y:p.y});
+    else out.push({type:'read',x:p.x,y:p.y,options:readOptions(p.x,p.y)});
+  }
+  return out;
+}
+//#GENP-END
+
+$('speed').onclick=function(){
+  st.slow=!st.slow;
+  $('speed').textContent='Ritmo: '+(st.slow?'lento':'normal');
+};
+[].forEach.call(document.querySelectorAll('#bnav button'),function(b){b.onclick=function(){goTab(b.getAttribute('data-t'));};});
+if(MQ.addEventListener)MQ.addEventListener('change',function(){layout();goTab(st.level<13?'graf':'alg');});
+goTab('graf');
+newLevel(1);
+})();
+</script>
+</body>
+</html>

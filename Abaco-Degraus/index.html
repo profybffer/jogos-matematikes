@@ -1,0 +1,3368 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>Ábaco de Degraus — Matematikês v1.0</title>
+  <style>
+    /* =========================================================
+       TOKENS VISUAIS — LABORATÓRIO PEDAGÓGICO (ALTO CONTRASTE)
+       ========================================================= */
+    :root {
+      --bg-page: #f8fafc;
+      --bg-card: #ffffff;
+      --bg-subtle: #f1f5f9;
+      --border-slate: #cbd5e1;
+      --border-light: #e2e8f0;
+      --text-primary: #0f172a;
+      --text-secondary: #475569;
+      --text-muted: #64748b;
+
+      --u-color: #2563eb;
+      --u-soft: #eff6ff;
+      --d-color: #059669;
+      --d-soft: #ecfdf5;
+      --c-color: #d97706;
+      --c-soft: #fffbeb;
+      --m-color: #7c3aed;
+      --m-soft: #f5f3ff;
+
+      --green-main: #10b981;
+      --green-dark: #047857;
+      --green-soft: #ecfdf5;
+      --amber-main: #f59e0b;
+      --amber-dark: #b45309;
+      --amber-soft: #fffbeb;
+      --red-main: #ef4444;
+      --red-soft: #fef2f2;
+
+      --radius-sm: 8px;
+      --radius-md: 12px;
+      --radius-lg: 16px;
+      --shadow-sm: 0 1px 3px rgba(15, 23, 42, 0.08);
+      --shadow-lg: 0 12px 32px rgba(15, 23, 42, 0.18);
+    }
+
+    * {
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+      user-select: none;
+    }
+
+    html, body {
+      margin: 0;
+      padding: 0;
+      width: 100%;
+      height: 100dvh;
+      overflow: hidden;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background-color: var(--bg-page);
+      color: var(--text-primary);
+    }
+
+    .app-shell {
+      display: flex;
+      flex-direction: column;
+      width: 100%;
+      height: 100dvh;
+      overflow: hidden;
+    }
+
+    /* =========================================================
+       BARRA SUPERIOR COMPACTA
+       ========================================================= */
+    .topbar {
+      flex-shrink: 0;
+      background-color: var(--bg-card);
+      border-bottom: 2px solid var(--border-light);
+      padding: 8px 12px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      z-index: 20;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      min-width: 0;
+    }
+
+    .brand-badge {
+      width: 32px;
+      height: 32px;
+      border-radius: var(--radius-sm);
+      background-color: var(--u-color);
+      color: #ffffff;
+      display: grid;
+      place-items: center;
+      font-weight: 900;
+      font-size: 0.9rem;
+      flex-shrink: 0;
+    }
+
+    .brand-title {
+      margin: 0;
+      font-size: 0.96rem;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .mode-tabs {
+      display: flex;
+      gap: 3px;
+      background-color: var(--bg-subtle);
+      padding: 3px;
+      border-radius: 10px;
+      border: 1px solid var(--border-light);
+      overflow-x: auto;
+      scrollbar-width: none;
+    }
+
+    .mode-tabs::-webkit-scrollbar {
+      display: none;
+    }
+
+    .mode-tab {
+      border: none;
+      background: transparent;
+      color: var(--text-secondary);
+      font-size: 0.8rem;
+      font-weight: 700;
+      padding: 6px 10px;
+      border-radius: 7px;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: background-color 0.15s, color 0.15s;
+    }
+
+    .mode-tab:hover {
+      color: var(--text-primary);
+      background-color: rgba(255, 255, 255, 0.78);
+    }
+
+    .mode-tab.active {
+      background-color: var(--u-color);
+      color: #ffffff;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .top-actions {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      flex-shrink: 0;
+    }
+
+    .top-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 5px;
+      height: 35px;
+      padding: 0 10px;
+      border-radius: var(--radius-sm);
+      border: 1.5px solid var(--border-slate);
+      background-color: var(--bg-card);
+      color: var(--text-primary);
+      font-size: 0.8rem;
+      font-weight: 700;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: all 0.15s;
+    }
+
+    .top-btn:hover {
+      border-color: var(--u-color);
+      color: var(--u-color);
+      background-color: var(--u-soft);
+    }
+
+    .top-btn:active {
+      transform: scale(0.96);
+    }
+
+    .top-btn.btn-panel-open {
+      background-color: var(--u-color);
+      border-color: var(--u-color);
+      color: #ffffff;
+    }
+
+    .top-btn.audio-muted {
+      background-color: var(--bg-subtle);
+      color: var(--text-muted);
+      border-color: var(--border-light);
+    }
+
+    /* =========================================================
+       ÁREA CENTRAL FLUIDA (ÁBACO + PAINEL LATERAL)
+       ========================================================= */
+    .stage-wrapper {
+      flex: 1;
+      min-height: 0;
+      display: flex;
+      flex-direction: column;
+      padding: 8px 14px;
+      gap: 8px;
+      overflow: hidden;
+      max-width: 1220px;
+      width: 100%;
+      margin: 0 auto;
+    }
+
+    .quick-strip {
+      flex-shrink: 0;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+    }
+
+    .quick-strip:empty {
+      display: none;
+    }
+
+    .pill-btn {
+      border: 1.5px solid var(--border-slate);
+      background-color: var(--bg-card);
+      color: var(--text-secondary);
+      font-size: 0.8rem;
+      font-weight: 800;
+      padding: 5px 11px;
+      border-radius: 999px;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: all 0.14s;
+    }
+
+    .pill-btn:hover {
+      border-color: var(--u-color);
+      color: var(--u-color);
+    }
+
+    .pill-btn.active {
+      background-color: var(--u-color);
+      border-color: var(--u-color);
+      color: #ffffff;
+    }
+
+    .workspace {
+      flex: 1;
+      min-height: 0;
+      display: flex;
+      gap: 10px;
+      overflow: hidden;
+    }
+
+    .abacus-pane {
+      flex: 1.55;
+      min-width: 0;
+      min-height: 0;
+      background-color: var(--bg-card);
+      border: 2px solid var(--border-slate);
+      border-radius: var(--radius-lg);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      transition: border-color 0.25s, background-color 0.25s;
+    }
+
+    .abacus-pane.stage-done {
+      border-color: var(--green-main);
+      background-color: #f0fdf4;
+    }
+
+    .abacus-svg-wrap {
+      flex: 1;
+      min-height: 0;
+      width: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 4px 8px 0;
+      overflow: hidden;
+    }
+
+    .abacus-svg {
+      width: 100%;
+      height: 100%;
+      max-width: 100%;
+      max-height: 100%;
+      display: block;
+    }
+
+    /* Controles por haste abaixo do SVG */
+    .rod-controls-row {
+      flex-shrink: 0;
+      display: grid;
+      gap: 8px;
+      padding: 6px 12px 10px;
+      border-top: 1.5px solid var(--border-light);
+      background-color: #f8fafc;
+    }
+
+    .rod-ctrl-col {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 5px;
+      min-width: 0;
+    }
+
+    .rod-pm-row {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 5px;
+      width: 100%;
+    }
+
+    .rod-btn {
+      flex: 1;
+      max-width: 56px;
+      height: 34px;
+      border-radius: var(--radius-sm);
+      border: 2px solid var(--rod-color, #2563eb);
+      background-color: #ffffff;
+      color: var(--rod-color, #2563eb);
+      font-size: 1.15rem;
+      font-weight: 900;
+      cursor: pointer;
+      display: grid;
+      place-items: center;
+      transition: transform 0.1s, background-color 0.14s, color 0.14s;
+    }
+
+    .rod-btn:hover:not(:disabled) {
+      background-color: var(--rod-color, #2563eb);
+      color: #ffffff;
+    }
+
+    .rod-btn:active:not(:disabled) {
+      transform: scale(0.94);
+    }
+
+    .rod-btn:disabled {
+      opacity: 0.35;
+      cursor: not-allowed;
+    }
+
+    .rod-trade-row {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 4px;
+      width: 100%;
+      min-height: 28px;
+    }
+
+    .trade-btn {
+      border: 1.5px solid var(--border-slate);
+      background-color: #ffffff;
+      color: var(--text-secondary);
+      font-size: 0.72rem;
+      font-weight: 800;
+      padding: 4px 8px;
+      border-radius: 999px;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: all 0.15s;
+    }
+
+    .trade-btn:hover:not(:disabled) {
+      border-color: var(--u-color);
+      color: var(--u-color);
+      background-color: var(--u-soft);
+    }
+
+    .trade-btn.urgent-up {
+      border-color: var(--amber-main);
+      background-color: var(--amber-main);
+      color: #ffffff;
+      box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.28);
+      animation: pulseBtn 0.9s ease-in-out infinite;
+    }
+
+    .trade-btn.urgent-down {
+      border-color: var(--m-color);
+      background-color: var(--m-color);
+      color: #ffffff;
+      box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.25);
+      animation: pulseBtn 0.9s ease-in-out infinite;
+    }
+
+    @keyframes pulseBtn {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.05); }
+    }
+
+    /* =========================================================
+       PAINEL LATERAL (CONTA ARMADA / DESAFIO / PROVA DOS 9)
+       ========================================================= */
+    .side-pane {
+      flex: 0.95;
+      min-width: 260px;
+      max-width: 390px;
+      min-height: 0;
+      background-color: var(--bg-card);
+      border: 2px solid var(--border-slate);
+      border-radius: var(--radius-lg);
+      padding: 12px 14px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      gap: 8px;
+      overflow-y: auto;
+    }
+
+    .side-pane.hidden {
+      display: none;
+    }
+
+    .side-title {
+      margin: 0;
+      font-size: 0.78rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--text-muted);
+      text-align: center;
+    }
+
+    .target-card {
+      background-color: var(--u-soft);
+      border: 2px solid #93c5fd;
+      border-radius: var(--radius-md);
+      padding: 12px;
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .target-card.done {
+      background-color: var(--green-soft);
+      border-color: var(--green-main);
+    }
+
+    .target-big-num {
+      font-size: 2.5rem;
+      font-weight: 900;
+      color: var(--text-primary);
+      line-height: 1;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .target-words {
+      font-size: 0.92rem;
+      font-weight: 700;
+      color: var(--text-secondary);
+    }
+
+    /* Grade da Conta Armada */
+    .calc-grid {
+      display: grid;
+      gap: 2px 4px;
+      align-items: center;
+      justify-items: center;
+      font-variant-numeric: tabular-nums;
+      margin: 2px auto;
+      width: 100%;
+      max-width: 300px;
+    }
+
+    .calc-head {
+      font-size: 0.74rem;
+      font-weight: 900;
+      letter-spacing: 0.04em;
+    }
+
+    .calc-carry {
+      font-size: 0.76rem;
+      font-weight: 900;
+      min-height: 22px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      white-space: nowrap;
+    }
+
+    .calc-carry.active {
+      color: var(--amber-dark);
+      background-color: var(--amber-soft);
+      border: 1.5px solid #fcd34d;
+      padding: 1px 5px;
+      border-radius: 6px;
+    }
+
+    .calc-carry.borrow-tag {
+      color: var(--u-color);
+      background-color: var(--u-soft);
+      border: 1.5px solid #93c5fd;
+      padding: 1px 5px;
+      border-radius: 6px;
+    }
+
+    .calc-digit {
+      font-size: 1.55rem;
+      font-weight: 900;
+      line-height: 1.15;
+      color: var(--text-primary);
+    }
+
+    .calc-digit.updated {
+      color: var(--u-color);
+    }
+
+    .calc-digit.overflow-val {
+      color: var(--amber-dark);
+      background-color: var(--amber-soft);
+      border: 1.5px solid #fcd34d;
+      border-radius: 8px;
+      padding: 0 6px;
+      font-size: 1.32rem;
+    }
+
+    .calc-op {
+      font-size: 1.45rem;
+      font-weight: 900;
+      color: var(--u-color);
+    }
+
+    .calc-line {
+      grid-column: 1 / -1;
+      width: 100%;
+      height: 3px;
+      background-color: var(--text-primary);
+      border-radius: 999px;
+      margin: 4px 0;
+    }
+
+    .calc-res {
+      font-size: 1.55rem;
+      font-weight: 900;
+      color: var(--u-color);
+      line-height: 1.15;
+    }
+
+    .calc-res.done {
+      color: var(--green-dark);
+    }
+
+    .calc-res.pending {
+      color: #94a3b8;
+    }
+
+    .calc-res.overflow-val {
+      color: var(--amber-dark);
+      background-color: var(--amber-soft);
+      border: 1.5px solid #fcd34d;
+      border-radius: 8px;
+      padding: 0 6px;
+      font-size: 1.32rem;
+    }
+
+    /* Registro visual com parênteses */
+    .calc-steps-log {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      margin: 4px 0;
+    }
+
+    .calc-step-pill {
+      font-size: 0.78rem;
+      font-weight: 800;
+      color: var(--text-primary);
+      background-color: var(--bg-subtle);
+      border-left: 3.5px solid var(--u-color);
+      padding: 4px 8px;
+      border-radius: 6px;
+      font-variant-numeric: tabular-nums;
+      line-height: 1.25;
+    }
+
+    .calc-step-pill.step-amber {
+      border-left-color: var(--amber-main);
+      background-color: var(--amber-soft);
+      color: #92400e;
+    }
+
+    .calc-step-pill.step-green {
+      border-left-color: var(--green-main);
+      background-color: var(--green-soft);
+      color: var(--green-dark);
+    }
+
+    .calc-step-pill.step-purple {
+      border-left-color: var(--m-color);
+      background-color: var(--m-soft);
+      color: #5b21b6;
+    }
+
+    .side-actions {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .step-btn {
+      width: 100%;
+      border: 2px solid var(--btn-color, #2563eb);
+      background-color: var(--btn-soft, #eff6ff);
+      color: var(--btn-color, #2563eb);
+      font-size: 0.85rem;
+      font-weight: 800;
+      padding: 8px 10px;
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      transition: all 0.14s;
+      text-align: center;
+    }
+
+    .step-btn:hover:not(:disabled) {
+      background-color: var(--btn-color, #2563eb);
+      color: #ffffff;
+    }
+
+    .step-btn:disabled {
+      opacity: 0.42;
+      cursor: not-allowed;
+    }
+
+    .step-btn.done {
+      background-color: var(--green-soft);
+      border-color: var(--green-main);
+      color: var(--green-dark);
+      opacity: 1;
+    }
+
+    .side-hint {
+      margin: 0;
+      font-size: 0.79rem;
+      font-weight: 700;
+      color: var(--text-secondary);
+      text-align: center;
+      line-height: 1.3;
+    }
+
+    .dist-formula {
+      font-size: 0.82rem;
+      font-weight: 800;
+      color: var(--text-secondary);
+      background-color: var(--bg-subtle);
+      border: 1.5px solid var(--border-light);
+      border-radius: 8px;
+      padding: 6px 8px;
+      text-align: center;
+      line-height: 1.35;
+      font-variant-numeric: tabular-nums;
+    }
+
+    /* Prova dos 9 — Caça ao Erro */
+    .nines-compare {
+      display: grid;
+      grid-template-columns: 1fr auto 1fr;
+      align-items: center;
+      gap: 6px;
+      background-color: var(--bg-subtle);
+      border: 1.5px solid var(--border-light);
+      border-radius: 10px;
+      padding: 8px;
+    }
+
+    .nines-box {
+      background-color: #ffffff;
+      border: 2px solid var(--border-slate);
+      border-radius: 8px;
+      padding: 6px 4px;
+      text-align: center;
+    }
+
+    .nines-box.ready {
+      border-color: var(--m-color);
+      background-color: var(--m-soft);
+    }
+
+    .nines-box-lbl {
+      display: block;
+      font-size: 0.66rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      color: var(--text-muted);
+    }
+
+    .nines-box-val {
+      font-size: 1.4rem;
+      font-weight: 900;
+      color: var(--text-primary);
+    }
+
+    .nines-verdict-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 6px;
+    }
+
+    /* =========================================================
+       RODAPÉ COMPACTO (VALOR TOTAL + DECOMPOSIÇÃO + AÇÃO)
+       ========================================================= */
+    .footer-dock {
+      flex-shrink: 0;
+      background-color: var(--bg-card);
+      border-top: 2px solid var(--border-light);
+      padding: 8px 14px 10px;
+      box-shadow: 0 -2px 10px rgba(15, 23, 42, 0.04);
+    }
+
+    .footer-inner {
+      max-width: 1220px;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+    }
+
+    .status-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+    }
+
+    .counter-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background-color: var(--bg-subtle);
+      border: 2px solid var(--border-slate);
+      border-radius: var(--radius-md);
+      padding: 4px 14px;
+      flex-shrink: 0;
+      transition: background-color 0.2s, border-color 0.2s;
+    }
+
+    .counter-pill.done {
+      background-color: var(--green-soft);
+      border-color: var(--green-main);
+    }
+
+    .counter-caption {
+      font-size: 0.72rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--text-muted);
+    }
+
+    .counter-number {
+      font-size: 1.75rem;
+      font-weight: 900;
+      line-height: 1;
+      color: var(--u-color);
+      min-width: 44px;
+      text-align: center;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .counter-pill.done .counter-number {
+      color: var(--green-dark);
+    }
+
+    .counter-pop {
+      animation: popScale 0.22s ease;
+    }
+
+    @keyframes popScale {
+      0% { transform: scale(1); }
+      45% { transform: scale(1.22); }
+      100% { transform: scale(1); }
+    }
+
+    .status-center {
+      flex: 1;
+      min-width: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      gap: 2px;
+    }
+
+    .status-instruction {
+      font-size: 0.9rem;
+      font-weight: 700;
+      color: var(--text-secondary);
+      margin: 0;
+      line-height: 1.25;
+    }
+
+    .status-instruction.success {
+      color: var(--green-dark);
+    }
+
+    .decomp-strip {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 5px;
+      font-size: 0.82rem;
+      font-weight: 800;
+      color: var(--text-muted);
+    }
+
+    .decomp-chip {
+      padding: 2px 8px;
+      border-radius: 999px;
+      background-color: var(--bg-subtle);
+      border: 1.5px solid var(--border-light);
+      font-variant-numeric: tabular-nums;
+    }
+
+    .footer-actions {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      flex-shrink: 0;
+    }
+
+    .primary-btn {
+      border: none;
+      border-radius: var(--radius-sm);
+      background-color: var(--u-color);
+      color: #ffffff;
+      font-size: 0.88rem;
+      font-weight: 800;
+      padding: 9px 14px;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: transform 0.12s, background-color 0.15s;
+    }
+
+    .primary-btn:hover {
+      filter: brightness(0.94);
+    }
+
+    .primary-btn.ready {
+      background-color: var(--green-main);
+      box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.25);
+    }
+
+    .secondary-btn {
+      border: 1.5px solid var(--border-slate);
+      border-radius: var(--radius-sm);
+      background-color: var(--bg-card);
+      color: var(--text-primary);
+      font-size: 0.82rem;
+      font-weight: 800;
+      padding: 8px 11px;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+
+    .secondary-btn:hover {
+      border-color: var(--u-color);
+      color: var(--u-color);
+    }
+
+    /* =========================================================
+       PAINEL DO PROFESSOR (GAVETA RECOLHÍVEL)
+       ========================================================= */
+    .drawer-backdrop {
+      position: fixed;
+      inset: 0;
+      background-color: rgba(15, 23, 42, 0.38);
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.2s ease;
+      z-index: 40;
+    }
+
+    .drawer-backdrop.open {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .teacher-drawer {
+      position: fixed;
+      top: 0;
+      right: 0;
+      bottom: 0;
+      width: min(360px, 92vw);
+      background-color: var(--bg-card);
+      box-shadow: var(--shadow-lg);
+      transform: translateX(100%);
+      transition: transform 0.24s ease;
+      z-index: 50;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    .teacher-drawer.open {
+      transform: translateX(0);
+    }
+
+    .drawer-header {
+      padding: 14px 16px;
+      border-bottom: 1.5px solid var(--border-light);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .drawer-header h2 {
+      margin: 0;
+      font-size: 1rem;
+      font-weight: 800;
+    }
+
+    .drawer-close {
+      width: 34px;
+      height: 34px;
+      border-radius: var(--radius-sm);
+      border: 1.5px solid var(--border-slate);
+      background-color: var(--bg-subtle);
+      font-weight: 800;
+      cursor: pointer;
+    }
+
+    .drawer-body {
+      flex: 1;
+      overflow-y: auto;
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .drawer-section {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .drawer-label {
+      font-size: 0.78rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      color: var(--text-muted);
+    }
+
+    .drawer-grid {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+
+    .d-btn {
+      border: 1.5px solid var(--border-slate);
+      background-color: var(--bg-card);
+      color: var(--text-primary);
+      font-size: 0.84rem;
+      font-weight: 700;
+      padding: 7px 11px;
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+    }
+
+    .d-btn.active {
+      background-color: var(--u-color);
+      border-color: var(--u-color);
+      color: #ffffff;
+    }
+
+    .drawer-note {
+      font-size: 0.82rem;
+      color: var(--text-secondary);
+      background-color: var(--bg-subtle);
+      padding: 10px 12px;
+      border-radius: var(--radius-sm);
+      line-height: 1.35;
+      margin: 0;
+    }
+
+    .drawer-footer {
+      padding: 14px 16px;
+      border-top: 1.5px solid var(--border-light);
+    }
+
+    .btn-random-full {
+      width: 100%;
+      border: none;
+      border-radius: var(--radius-md);
+      background-color: var(--u-color);
+      color: #ffffff;
+      font-size: 0.95rem;
+      font-weight: 800;
+      padding: 12px 16px;
+      cursor: pointer;
+    }
+
+    /* =========================================================
+       ANIMAÇÕES SVG (PEÇAS, FUSÃO, ABERTURA E SALTO EM ARCO)
+       ========================================================= */
+    @keyframes beadSlideIn {
+      from { transform: translateY(var(--drop-dist, -120px)); opacity: 0.25; }
+      to   { transform: translateY(0); opacity: 1; }
+    }
+
+    .bead-enter {
+      animation: beadSlideIn 0.44s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+    }
+
+    @keyframes beadSlideOut {
+      from { transform: translateY(0); opacity: 1; }
+      to   { transform: translateY(var(--exit-dist, -140px)); opacity: 0; }
+    }
+
+    .bead-exit {
+      animation: beadSlideOut 0.44s cubic-bezier(0.55, 0, 1, 0.45) forwards;
+    }
+
+    @keyframes fusionPulse {
+      0%   { transform: scale(0.85); opacity: 0.3; }
+      50%  { transform: scale(1.16); opacity: 1; }
+      100% { transform: scale(1); opacity: 0.95; }
+    }
+
+    .fusion-pulse {
+      transform-box: fill-box;
+      transform-origin: center;
+      animation: fusionPulse 0.48s ease-in-out infinite alternate;
+    }
+
+    /* =========================================================
+       RESPONSIVIDADE — TELAS MÉDIAS, CELULAR E TELAS ESTREITAS
+       ========================================================= */
+    @media (max-width: 1080px) {
+      .topbar {
+        flex-wrap: wrap;
+        padding: 7px 10px;
+        gap: 6px;
+      }
+
+      .mode-tabs {
+        order: 3;
+        width: 100%;
+        justify-content: center;
+      }
+    }
+
+    @media (max-width: 820px) {
+      .topbar {
+        flex-wrap: wrap;
+        padding: 6px 8px;
+        gap: 6px;
+      }
+
+      .brand-title {
+        font-size: 0.86rem;
+      }
+
+      .mode-tabs {
+        order: 3;
+        width: 100%;
+        justify-content: flex-start;
+      }
+
+      .mode-tab {
+        flex: 1 0 auto;
+        padding: 6px 6px;
+        font-size: 0.72rem;
+        text-align: center;
+      }
+
+      .top-btn {
+        height: 32px;
+        padding: 0 8px;
+        font-size: 0.75rem;
+      }
+
+      .stage-wrapper {
+        padding: 6px 8px;
+        gap: 6px;
+      }
+
+      .workspace {
+        flex-direction: column;
+        gap: 6px;
+      }
+
+      .abacus-pane {
+        flex: 1.3;
+      }
+
+      .side-pane {
+        flex: 0.95;
+        max-width: none;
+        min-width: 0;
+        padding: 8px 10px;
+      }
+
+      .target-big-num {
+        font-size: 1.85rem;
+      }
+
+      .calc-digit, .calc-res {
+        font-size: 1.25rem;
+      }
+
+      .rod-controls-row {
+        padding: 4px 6px 6px;
+        gap: 4px;
+      }
+
+      .rod-btn {
+        height: 30px;
+        font-size: 1rem;
+      }
+
+      .trade-btn {
+        font-size: 0.66rem;
+        padding: 3px 6px;
+      }
+
+      .footer-dock {
+        padding: 6px 8px 8px;
+      }
+
+      .counter-number {
+        font-size: 1.38rem;
+        min-width: 34px;
+      }
+
+      .status-instruction {
+        font-size: 0.78rem;
+      }
+
+      .decomp-strip {
+        font-size: 0.72rem;
+      }
+    }
+
+    @media (max-width: 420px) {
+      .hide-xs {
+        display: none;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="app-shell">
+
+    <!-- =========================================================
+         BARRA SUPERIOR COMPACTA
+         ========================================================= -->
+    <header class="topbar">
+      <div class="brand">
+        <div class="brand-badge" aria-hidden="true">AD</div>
+        <h1 class="brand-title">Ábaco de Degraus</h1>
+      </div>
+
+      <nav class="mode-tabs" role="tablist" aria-label="Modos do Ábaco">
+        <button class="mode-tab active" data-mode="1" role="tab" aria-selected="true">1. Explorar</button>
+        <button class="mode-tab" data-mode="2" role="tab" aria-selected="false">2. Montar</button>
+        <button class="mode-tab" data-mode="3" role="tab" aria-selected="false">3. Somar</button>
+        <button class="mode-tab" data-mode="4" role="tab" aria-selected="false">4. Subtrair</button>
+        <button class="mode-tab" data-mode="5" role="tab" aria-selected="false">5. Multiplicar</button>
+        <button class="mode-tab" data-mode="6" role="tab" aria-selected="false">6. Prova dos 9</button>
+      </nav>
+
+      <div class="top-actions">
+        <button id="audioBtn" class="top-btn" type="button" title="Alternar modo de áudio">
+          <span id="audioIcon" aria-hidden="true">🔊</span>
+          <span id="audioLabel">Voz + Som</span>
+        </button>
+        <button id="resetBtn" class="top-btn" type="button" title="Reiniciar">
+          <span aria-hidden="true">↺</span>
+          <span class="hide-xs">Zerar</span>
+        </button>
+        <button id="panelToggleBtn" class="top-btn" type="button" aria-expanded="false" aria-controls="teacherDrawer">
+          <span aria-hidden="true">⚙️</span>
+          <span>Professor</span>
+        </button>
+      </div>
+    </header>
+
+    <!-- =========================================================
+         ÁREA CENTRAL (ÁBACO DE DEGRAUS + PAINEL LATERAL)
+         ========================================================= -->
+    <main class="stage-wrapper">
+      <div id="quickStrip" class="quick-strip"></div>
+
+      <div class="workspace">
+        <section id="abacusPane" class="abacus-pane" aria-label="Ábaco de Degraus">
+          <div id="abacusSvgWrap" class="abacus-svg-wrap"></div>
+          <div id="rodControlsRow" class="rod-controls-row"></div>
+        </section>
+
+        <aside id="sidePane" class="side-pane hidden" aria-label="Painel da Operação"></aside>
+      </div>
+    </main>
+
+    <!-- =========================================================
+         RODAPÉ COMPACTO (VALOR TOTAL + DECOMPOSIÇÃO)
+         ========================================================= -->
+    <footer class="footer-dock">
+      <div class="footer-inner">
+        <div class="status-row">
+          <div id="counterPill" class="counter-pill" aria-live="polite">
+            <span id="counterCaption" class="counter-caption">Total</span>
+            <span id="counterNumber" class="counter-number">0</span>
+          </div>
+
+          <div class="status-center">
+            <p id="statusInstruction" class="status-instruction">Adicione peças nas hastes para explorar os degraus.</p>
+          </div>
+
+          <div id="footerActions" class="footer-actions"></div>
+        </div>
+
+        <div id="decompStrip" class="decomp-strip"></div>
+      </div>
+    </footer>
+
+  </div>
+
+  <!-- =========================================================
+       PAINEL DO PROFESSOR (GAVETA RECOLHÍVEL)
+       ========================================================= -->
+  <div id="drawerBackdrop" class="drawer-backdrop"></div>
+  <aside id="teacherDrawer" class="teacher-drawer" aria-label="Painel do Professor" aria-hidden="true">
+    <div class="drawer-header">
+      <h2>Painel do Professor</h2>
+      <button id="drawerCloseBtn" class="drawer-close" type="button" aria-label="Fechar painel">✕</button>
+    </div>
+    <div id="drawerBody" class="drawer-body"></div>
+    <div class="drawer-footer">
+      <p style="margin:0 0 8px;font-size:.72rem;opacity:.7;text-align:center;line-height:1.35">© Ygor B. F. Ferreira · A Saga dos Reinos Matemáticos · Matematkês · uso livre em sala</p>
+      <button id="drawerRandomBtn" class="btn-random-full" type="button">🎲 Sortear Desafio</button>
+    </div>
+  </aside>
+
+  <script>
+    /* =========================================================
+       CONVERSOR DE NÚMEROS 0 A 9999 PARA PORTUGUÊS FALADO
+       ========================================================= */
+    function numberToPtBr(n) {
+      if (n === 0) return 'zero';
+      if (n < 0 || n > 9999) return String(n);
+
+      const units = ['', 'um', 'dois', 'três', 'quatro', 'cinco', 'seis', 'sete', 'oito', 'nove'];
+      const teens = ['dez', 'onze', 'doze', 'treze', 'catorze', 'quinze', 'dezesseis', 'dezessete', 'dezoito', 'dezenove'];
+      const tens = ['', '', 'vinte', 'trinta', 'quarenta', 'cinquenta', 'sessenta', 'setenta', 'oitenta', 'noventa'];
+      const hundreds = ['', 'cento', 'duzentos', 'trezentos', 'quatrocentos', 'quinhentos', 'seiscentos', 'setecentos', 'oitocentos', 'novecentos'];
+
+      function under1000(val) {
+        if (val === 0) return '';
+        if (val === 100) return 'cem';
+        const c = Math.floor(val / 100);
+        const rem = val % 100;
+        const parts = [];
+        if (c > 0) parts.push(hundreds[c]);
+        if (rem > 0) {
+          if (rem < 10) parts.push(units[rem]);
+          else if (rem < 20) parts.push(teens[rem - 10]);
+          else {
+            const t = Math.floor(rem / 10);
+            const u = rem % 10;
+            parts.push(u === 0 ? tens[t] : `${tens[t]} e ${units[u]}`);
+          }
+        }
+        return parts.join(' e ');
+      }
+
+      const th = Math.floor(n / 1000);
+      const rest = n % 1000;
+      if (th === 0) return under1000(rest);
+
+      const thStr = th === 1 ? 'mil' : `${units[th]} mil`;
+      if (rest === 0) return thStr;
+      const needsE = rest < 100 || rest % 100 === 0;
+      return `${thStr}${needsE ? ' e ' : ' '}${under1000(rest)}`;
+    }
+
+    /* =========================================================
+       MOTOR DE ÁUDIO: VOZ FALADA ENFILEIRADA + WEB AUDIO API
+       ========================================================= */
+    const AudioSystem = (() => {
+      let mode = 'voice'; // 'voice' | 'sfx' | 'mute'
+      let audioCtx = null;
+      let ptBrVoice = null;
+
+      function pickVoice() {
+        try {
+          if (!('speechSynthesis' in window)) return;
+          const voices = window.speechSynthesis.getVoices();
+          if (!voices || !voices.length) return;
+          ptBrVoice =
+            voices.find(v => v.lang && v.lang.toLowerCase() === 'pt-br') ||
+            voices.find(v => v.lang && v.lang.toLowerCase().startsWith('pt')) ||
+            null;
+        } catch (e) {
+          ptBrVoice = null;
+        }
+      }
+
+      if ('speechSynthesis' in window) {
+        pickVoice();
+        window.speechSynthesis.onvoiceschanged = pickVoice;
+      }
+
+      function ensureCtx() {
+        try {
+          if (!audioCtx) {
+            const Ctx = window.AudioContext || window.webkitAudioContext;
+            if (Ctx) audioCtx = new Ctx();
+          }
+          if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
+        } catch (e) {}
+      }
+
+      function playTone(freq, duration = 0.13, type = 'triangle', volume = 0.14, delay = 0) {
+        if (mode === 'mute') return;
+        ensureCtx();
+        if (!audioCtx) return;
+        try {
+          const now = audioCtx.currentTime + delay;
+          const osc = audioCtx.createOscillator();
+          const gain = audioCtx.createGain();
+          osc.type = type;
+          osc.frequency.setValueAtTime(freq, now);
+          gain.gain.setValueAtTime(0.001, now);
+          gain.gain.linearRampToValueAtTime(volume, now + 0.01);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + duration);
+          osc.connect(gain);
+          gain.connect(audioCtx.destination);
+          osc.start(now);
+          osc.stop(now + duration + 0.02);
+        } catch (e) {}
+      }
+
+      // queue = true enfileira a fala sem cortar a anterior (evita atropelo da resposta final)
+      function speakText(text, queue = false) {
+        if (mode !== 'voice') return;
+        if (!('speechSynthesis' in window)) return;
+        try {
+          if (!queue) window.speechSynthesis.cancel();
+          const utter = new SpeechSynthesisUtterance(text);
+          utter.lang = 'pt-BR';
+          utter.rate = 1.03;
+          utter.pitch = 1.04;
+          if (ptBrVoice) utter.voice = ptBrVoice;
+          window.speechSynthesis.speak(utter);
+        } catch (e) {}
+      }
+
+      return {
+        getMode: () => mode,
+        cycleMode: () => {
+          mode = mode === 'voice' ? 'sfx' : mode === 'sfx' ? 'mute' : 'voice';
+          if (mode !== 'voice' && 'speechSynthesis' in window) {
+            try { window.speechSynthesis.cancel(); } catch (e) {}
+          }
+          return mode;
+        },
+        stopSpeech: () => {
+          if ('speechSynthesis' in window) {
+            try { window.speechSynthesis.cancel(); } catch (e) {}
+          }
+        },
+        speakText,
+        playBeadAdd: (orderIdx) => {
+          const freqs = [330, 392, 493.88, 587.33];
+          playTone(freqs[orderIdx] || 392, 0.11, 'triangle', 0.14);
+        },
+        playBeadRemove: (orderIdx) => {
+          const freqs = [293.66, 349.23, 440, 523.25];
+          playTone(freqs[orderIdx] || 320, 0.10, 'sine', 0.11);
+        },
+        playCarryUp: () => {
+          playTone(392.00, 0.11, 'triangle', 0.14, 0);
+          playTone(523.25, 0.12, 'triangle', 0.15, 0.08);
+          playTone(659.25, 0.20, 'sine', 0.16, 0.16);
+        },
+        playBorrowDown: () => {
+          playTone(587.33, 0.10, 'sine', 0.13, 0);
+          playTone(440.00, 0.10, 'sine', 0.13, 0.08);
+          playTone(329.63, 0.18, 'triangle', 0.14, 0.16);
+        },
+        playSuccess: () => {
+          playTone(523.25, 0.14, 'sine', 0.14, 0.00);
+          playTone(659.25, 0.14, 'sine', 0.14, 0.08);
+          playTone(783.99, 0.26, 'sine', 0.16, 0.16);
+        },
+        playHint: () => {
+          playTone(311.13, 0.14, 'sine', 0.12, 0);
+        }
+      };
+    })();
+
+    /* =========================================================
+       DEFINIÇÃO DAS ORDENS (PEÇAS DISTINTAS + DEGRAUS)
+       ========================================================= */
+    const ORDERS = [
+      { idx: 0, key: 'U',  name: 'Unidade',  plural: 'unidades',  singFem: 'uma unidade',  tenPhrase: 'dez unidades',  value: 1,    color: '#2563eb', soft: '#eff6ff', dark: '#1d4ed8', beadW: 54, badge: '1' },
+      { idx: 1, key: 'D',  name: 'Dezena',   plural: 'dezenas',   singFem: 'uma dezena',   tenPhrase: 'dez dezenas',   value: 10,   color: '#059669', soft: '#ecfdf5', dark: '#047857', beadW: 64, badge: '10' },
+      { idx: 2, key: 'C',  name: 'Centena',  plural: 'centenas',  singFem: 'uma centena',  tenPhrase: 'dez centenas',  value: 100,  color: '#d97706', soft: '#fffbeb', dark: '#b45309', beadW: 74, badge: '100' },
+      { idx: 3, key: 'UM', name: 'Milhar',   plural: 'milhares',  singFem: 'um milhar',    tenPhrase: 'dez milhares',  value: 1000, color: '#7c3aed', soft: '#f5f3ff', dark: '#5b21b6', beadW: 84, badge: '1000' }
+    ];
+
+    /* =========================================================
+       ESTADO GLOBAL
+       ========================================================= */
+    const state = {
+      mode: 1,       // 1=Explorar, 2=Montar, 3=Somar, 4=Subtrair, 5=Multiplicar, 6=Prova dos 9
+      rodCount: 3,   // 2 (U-D), 3 (U-D-C), 4 (U-D-C-UM)
+      rods: [0, 0, 0, 0], // Índice 0 = U, 1 = D, 2 = C, 3 = UM
+      drawerOpen: false,
+      lastCounterVal: null,
+      statusOverride: '',
+      celebratedKey: '',
+
+      // Animações físicas (entradas, saídas, fusão 10->1, abertura 1->10, shift x10/÷10)
+      animTimers: [],
+      isAnimating: false,
+      animEnter: null,   // { orderIdx, fromIdx, count }
+      animExit: null,    // { orderIdx, items: [{ posIdx, color, dark, beadW, badge }] }
+      animArc: null,     // { kind: 'up'|'down'|'shift', phase: 'fuse'|'fly', ... }
+
+      // Modo 2: Montar Número
+      m2: {
+        target: 105
+      },
+
+      // Modo 3: Somar (Vai Um)
+      m3: {
+        a: 48,
+        b: 35,
+        addedOrders: [false, false, false, false],
+        carryIn: [0, 0, 0, 0], // 1 quando subiu "vai um" para esta ordem
+        stepsLog: []
+      },
+
+      // Modo 4: Subtrair (Empresta)
+      m4: {
+        a: 83,
+        b: 47,
+        removedOrders: [false, false, false, false],
+        workTop: [3, 8, 0, 0],     // Valor atual exibido na linha de cima (ex: 7 e 13)
+        topNote: ['', '', '', ''], // Parêntese acima da linha (ex: "(8−1)" e "(10+3)")
+        partialRes: [null, null, null, null],
+        stepsLog: []
+      },
+
+      // Modo 5: Multiplicar (x10/÷10, Pacotes, Distribuir 1 e 2 algarismos)
+      m5: {
+        subMode: 'x10',    // 'x10' | 'packs' | 'dist'
+        baseX10: 24,
+        shiftSteps: 0,
+        packFactor: 3,
+        packBase: 24,
+        packsAdded: 0,
+        distType: 1,       // 1 algarismo ou 2 algarismos
+        distFactor: 4,
+        distBase: 23,
+        distDone: [],
+        stepsLog: []
+      },
+
+      // Modo 6: Prova dos 9 (Noves Fora + Caça ao Erro)
+      m6: {
+        subMode: 'secret', // 'secret' | 'hunt'
+        secretNum: 248,
+        initialDigitsSum: 14,
+        ninesRemoved: 0,
+        stepsLog: [],
+        huntIdx: 0,
+        huntFocus: 'none', // 'a' | 'b' | 'res'
+        huntLeftRem: null,
+        huntRightRem: null,
+        huntARem: null,
+        huntBRem: null,
+        huntVerdict: null  // null | 'correct' | 'wrong'
+      }
+    };
+
+    /* =========================================================
+       CONTAS DA PROVA DOS 9 (CAÇA AO ERRO)
+       ========================================================= */
+    const HUNT_PROBLEMS = [
+      { op: '+', a: 48, b: 35, shown: 83, isRight: true },
+      { op: '+', a: 48, b: 35, shown: 73, isRight: false },
+      { op: '+', a: 126, b: 58, shown: 184, isRight: true },
+      { op: '+', a: 147, b: 86, shown: 223, isRight: false },
+      { op: '×', a: 4, b: 23, shown: 92, isRight: true },
+      { op: '×', a: 4, b: 23, shown: 82, isRight: false },
+      { op: '×', a: 14, b: 23, shown: 322, isRight: true },
+      { op: '×', a: 14, b: 23, shown: 312, isRight: false }
+    ];
+
+    /* =========================================================
+       REFERÊNCIAS DO DOM
+       ========================================================= */
+    const quickStripEl = document.getElementById('quickStrip');
+    const abacusPaneEl = document.getElementById('abacusPane');
+    const abacusSvgWrapEl = document.getElementById('abacusSvgWrap');
+    const rodControlsRowEl = document.getElementById('rodControlsRow');
+    const sidePaneEl = document.getElementById('sidePane');
+    const counterPillEl = document.getElementById('counterPill');
+    const counterCaptionEl = document.getElementById('counterCaption');
+    const counterNumberEl = document.getElementById('counterNumber');
+    const statusInstructionEl = document.getElementById('statusInstruction');
+    const footerActionsEl = document.getElementById('footerActions');
+    const decompStripEl = document.getElementById('decompStrip');
+    const audioBtn = document.getElementById('audioBtn');
+    const audioIconEl = document.getElementById('audioIcon');
+    const audioLabelEl = document.getElementById('audioLabel');
+    const resetBtn = document.getElementById('resetBtn');
+    const panelToggleBtn = document.getElementById('panelToggleBtn');
+    const teacherDrawerEl = document.getElementById('teacherDrawer');
+    const drawerBackdropEl = document.getElementById('drawerBackdrop');
+    const drawerCloseBtn = document.getElementById('drawerCloseBtn');
+    const drawerBodyEl = document.getElementById('drawerBody');
+    const drawerRandomBtn = document.getElementById('drawerRandomBtn');
+
+    /* =========================================================
+       FUNÇÕES AUXILIARES DE ESTADO E ANIMAÇÃO
+       ========================================================= */
+    function getDigitsOf(n) {
+      return [
+        n % 10,
+        Math.floor(n / 10) % 10,
+        Math.floor(n / 100) % 10,
+        Math.floor(n / 1000) % 10
+      ];
+    }
+
+    function setRodsFromNumber(n) {
+      const d = getDigitsOf(n);
+      state.rods = [d[0], d[1], d[2], d[3]];
+    }
+
+    function getTotalValue() {
+      let base = state.rods[0] + state.rods[1] * 10 + state.rods[2] * 100 + state.rods[3] * 1000;
+      // Mantém o valor total estável durante a animação de fusão/salto
+      if (state.animArc) {
+        if (state.animArc.kind === 'up') base += ORDERS[state.animArc.toIdx].value;
+        else if (state.animArc.kind === 'down') base += ORDERS[state.animArc.fromIdx].value;
+      }
+      return base;
+    }
+
+    function hasAnyOverflow() {
+      for (let i = 0; i < state.rodCount - 1; i++) {
+        if (state.rods[i] >= 10) return true;
+      }
+      return false;
+    }
+
+    function maxAllowedNumber() {
+      return Math.pow(10, state.rodCount) - 1;
+    }
+
+    function ensureRodsFor(val) {
+      if (val >= 1000 && state.rodCount < 4) state.rodCount = 4;
+      else if (val >= 100 && state.rodCount < 3) state.rodCount = 3;
+    }
+
+    function clearAnimations() {
+      state.animTimers.forEach(t => clearTimeout(t));
+      state.animTimers = [];
+      state.isAnimating = false;
+      state.animEnter = null;
+      state.animExit = null;
+      state.animArc = null;
+    }
+
+    function scheduleAnim(fn, ms) {
+      const id = setTimeout(() => {
+        state.animTimers = state.animTimers.filter(t => t !== id);
+        fn();
+      }, ms);
+      state.animTimers.push(id);
+      return id;
+    }
+
+    function animateCounter(displayValue) {
+      counterNumberEl.textContent = displayValue;
+      if (state.lastCounterVal !== displayValue) {
+        state.lastCounterVal = displayValue;
+        counterNumberEl.classList.remove('counter-pop');
+        void counterNumberEl.offsetWidth;
+        counterNumberEl.classList.add('counter-pop');
+      }
+    }
+
+    function ninesRem(n) {
+      if (n === 0) return 0;
+      const r = n % 9;
+      return r === 0 ? 0 : r;
+    }
+
+    function sumOfRodsBeads() {
+      let s = 0;
+      for (let i = 0; i < state.rodCount; i++) s += state.rods[i];
+      return s;
+    }
+
+    /* =========================================================
+       OPERAÇÕES FÍSICAS NAS HASTES (COM MOVIMENTO REAL)
+       ========================================================= */
+    function addBead(orderIdx, silent = false) {
+      if (state.isAnimating) return;
+      const maxCap = orderIdx === state.rodCount - 1 ? 9 : 19;
+      if (state.rods[orderIdx] >= maxCap) {
+        AudioSystem.playHint();
+        return;
+      }
+      const fromIdx = state.rods[orderIdx];
+      state.rods[orderIdx] += 1;
+      state.statusOverride = '';
+      state.animEnter = { orderIdx, fromIdx, count: 1 };
+      if (!silent) AudioSystem.playBeadAdd(orderIdx);
+      render();
+      scheduleAnim(() => {
+        state.animEnter = null;
+        render();
+      }, 450);
+    }
+
+    function removeBead(orderIdx, silent = false) {
+      if (state.isAnimating) return;
+      if (state.rods[orderIdx] <= 0) {
+        AudioSystem.playHint();
+        return;
+      }
+      const ord = ORDERS[orderIdx];
+      const posIdx = state.rods[orderIdx] - 1;
+      state.rods[orderIdx] -= 1;
+      state.statusOverride = '';
+      state.animExit = {
+        orderIdx,
+        items: [{ posIdx, color: ord.color, dark: ord.dark, beadW: ord.beadW, badge: ord.badge }]
+      };
+      if (!silent) AudioSystem.playBeadRemove(orderIdx);
+      render();
+      scheduleAnim(() => {
+        state.animExit = null;
+        render();
+      }, 440);
+    }
+
+    // Insere grupos de peças deslizando do topo da haste um grupo por vez
+    function animateAddGroups(orderIdx, groupSize, groupCount, onComplete) {
+      if (groupSize <= 0 || groupCount <= 0) {
+        if (onComplete) onComplete();
+        return;
+      }
+      state.isAnimating = true;
+      let done = 0;
+
+      function dropNextGroup() {
+        const fromIdx = state.rods[orderIdx];
+        const maxCap = orderIdx === state.rodCount - 1 ? 9 : 29;
+        const actual = Math.min(groupSize, maxCap - fromIdx);
+        if (actual > 0) {
+          state.rods[orderIdx] += actual;
+          state.animEnter = { orderIdx, fromIdx, count: actual };
+          AudioSystem.playBeadAdd(orderIdx);
+          render();
+        }
+        done++;
+        scheduleAnim(() => {
+          state.animEnter = null;
+          if (done < groupCount) {
+            dropNextGroup();
+          } else {
+            state.isAnimating = false;
+            render();
+            if (onComplete) onComplete();
+          }
+        }, groupCount > 1 ? 560 : 480);
+      }
+
+      dropNextGroup();
+    }
+
+    // Retira peças deslizando uma a uma para fora pelo topo da haste
+    function animateRemoveOneByOne(orderIdx, count, onComplete) {
+      if (count <= 0) {
+        if (onComplete) onComplete();
+        return;
+      }
+      state.isAnimating = true;
+      const ord = ORDERS[orderIdx];
+      let left = count;
+
+      function pullNext() {
+        if (state.rods[orderIdx] <= 0) {
+          state.animExit = null;
+          state.isAnimating = false;
+          render();
+          if (onComplete) onComplete();
+          return;
+        }
+        const posIdx = state.rods[orderIdx] - 1;
+        state.rods[orderIdx] -= 1;
+        state.animExit = {
+          orderIdx,
+          items: [{ posIdx, color: ord.color, dark: ord.dark, beadW: ord.beadW, badge: ord.badge }]
+        };
+        AudioSystem.playBeadRemove(orderIdx);
+        render();
+        left--;
+        scheduleAnim(() => {
+          state.animExit = null;
+          if (left > 0) {
+            pullNext();
+          } else {
+            state.isAnimating = false;
+            render();
+            if (onComplete) onComplete();
+          }
+        }, 420);
+      }
+
+      pullNext();
+    }
+
+    // TROCA 10 -> 1 (Fusão acima da haste + salto em arco até a haste superior)
+    function carryUp(orderIdx) {
+      if (state.isAnimating) return;
+      if (orderIdx >= state.rodCount - 1) return;
+      if (state.rods[orderIdx] < 10) return;
+
+      const fromOrd = ORDERS[orderIdx];
+      const toOrd = ORDERS[orderIdx + 1];
+
+      state.isAnimating = true;
+      state.rods[orderIdx] -= 10;
+      state.statusOverride = `10 ${fromOrd.plural} equivalem a 1 ${toOrd.name.toLowerCase()}!`;
+      AudioSystem.playCarryUp();
+      AudioSystem.speakText(`${fromOrd.tenPhrase} equivalem a ${toOrd.singFem}!`, false);
+
+      // Fase 1: Fusão das 10 peças logo acima da haste de origem
+      state.animArc = {
+        kind: 'up',
+        phase: 'fuse',
+        fromIdx: orderIdx,
+        toIdx: orderIdx + 1,
+        progress: 0
+      };
+      render();
+
+      // Fase 2: Salto em arco até a haste da esquerda
+      scheduleAnim(() => {
+        if (!state.animArc) return;
+        state.animArc.phase = 'fly';
+        const startTime = performance.now();
+        const duration = 760;
+
+        function tick(now) {
+          if (!state.animArc || state.animArc.kind !== 'up') return;
+          const t = Math.min(1, (now - startTime) / duration);
+          state.animArc.progress = t;
+          renderAbacusSvg();
+          if (t < 1) {
+            requestAnimationFrame(tick);
+          } else {
+            // Fase 3: Encaixe na haste destino
+            state.animArc = null;
+            const destFrom = state.rods[orderIdx + 1];
+            state.rods[orderIdx + 1] += 1;
+            state.animEnter = { orderIdx: orderIdx + 1, fromIdx: destFrom, count: 1 };
+            AudioSystem.playBeadAdd(orderIdx + 1);
+
+            // Atualiza conta armada no Modo 3 (Somar)
+            if (state.mode === 3) {
+              state.m3.carryIn[orderIdx + 1] += 1;
+              const rem = state.rods[orderIdx];
+              state.m3.stepsLog.push({
+                tone: 'step-amber',
+                text: `${fromOrd.key}: (10 + ${rem}) → sobe +1 ${toOrd.key}, ficam ${rem} ${fromOrd.key}`
+              });
+            }
+
+            render();
+            scheduleAnim(() => {
+              state.animEnter = null;
+              state.isAnimating = false;
+              render();
+              checkAndCelebrateSolved();
+            }, 420);
+          }
+        }
+        requestAnimationFrame(tick);
+      }, 620);
+    }
+
+    // DESTROCA 1 -> 10 (1 peça sobe, abre em 10 e salta em arco para a haste inferior)
+    function borrowDown(orderIdx) {
+      if (state.isAnimating) return;
+      if (orderIdx <= 0) return;
+      if (state.rods[orderIdx] < 1) return;
+      if (state.rods[orderIdx - 1] > 19) return;
+
+      const fromOrd = ORDERS[orderIdx];
+      const toOrd = ORDERS[orderIdx - 1];
+
+      state.isAnimating = true;
+      state.rods[orderIdx] -= 1;
+      state.statusOverride = `1 ${fromOrd.name.toLowerCase()} equivale a 10 ${toOrd.plural}!`;
+      AudioSystem.playBorrowDown();
+      AudioSystem.speakText(`${fromOrd.singFem} equivale a ${toOrd.tenPhrase}!`, false);
+
+      // Fase 1: 1 peça sobe e se abre em 10 acima da haste
+      state.animArc = {
+        kind: 'down',
+        phase: 'fuse',
+        fromIdx: orderIdx,
+        toIdx: orderIdx - 1,
+        progress: 0
+      };
+      render();
+
+      // Fase 2: Bloco de 10 salta em arco até a haste da direita
+      scheduleAnim(() => {
+        if (!state.animArc) return;
+        state.animArc.phase = 'fly';
+        const startTime = performance.now();
+        const duration = 760;
+
+        function tick(now) {
+          if (!state.animArc || state.animArc.kind !== 'down') return;
+          const t = Math.min(1, (now - startTime) / duration);
+          state.animArc.progress = t;
+          renderAbacusSvg();
+          if (t < 1) {
+            requestAnimationFrame(tick);
+          } else {
+            // Fase 3: Encaixe das 10 peças na haste inferior
+            state.animArc = null;
+            const prevDest = state.rods[orderIdx - 1];
+            state.rods[orderIdx - 1] += 10;
+            state.animEnter = { orderIdx: orderIdx - 1, fromIdx: prevDest, count: 10 };
+            AudioSystem.playBeadAdd(orderIdx - 1);
+
+            // Atualiza conta armada no Modo 4 exatamente como na foto do usuário:
+            // Topo mostra (8-1) e (10+3), linha de cima vira 7 e 13
+            if (state.mode === 4) {
+              const oldFrom = state.m4.workTop[orderIdx];
+              const newFrom = oldFrom - 1;
+              const oldTo = state.m4.workTop[orderIdx - 1];
+              const newTo = oldTo + 10;
+
+              state.m4.workTop[orderIdx] = newFrom;
+              state.m4.topNote[orderIdx] = `(${oldFrom}−1)`;
+
+              state.m4.workTop[orderIdx - 1] = newTo;
+              state.m4.topNote[orderIdx - 1] = `(10+${oldTo})`;
+
+              state.m4.stepsLog.push({
+                tone: 'step-amber',
+                text: `${fromOrd.key}: (${oldFrom} − 1) = ${newFrom}   |   ${toOrd.key}: (10 + ${oldTo}) = ${newTo}`
+              });
+            }
+
+            render();
+            scheduleAnim(() => {
+              state.animEnter = null;
+              state.isAnimating = false;
+              render();
+            }, 440);
+          }
+        }
+        requestAnimationFrame(tick);
+      }, 620);
+    }
+
+    /* =========================================================
+       INICIALIZADORES DOS 6 MODOS
+       ========================================================= */
+    function initMode1(startVal = 0) {
+      clearAnimations();
+      state.statusOverride = '';
+      state.celebratedKey = '';
+      setRodsFromNumber(startVal);
+      render();
+    }
+
+    function initMode2(target) {
+      clearAnimations();
+      ensureRodsFor(target);
+      state.m2.target = target;
+      state.statusOverride = '';
+      state.celebratedKey = '';
+      setRodsFromNumber(0);
+      render();
+      AudioSystem.speakText(`Monte o número ${numberToPtBr(target)}.`);
+    }
+
+    function initMode3(a, b) {
+      clearAnimations();
+      ensureRodsFor(a + b);
+      state.m3.a = a;
+      state.m3.b = b;
+      state.m3.addedOrders = [false, false, false, false];
+      state.m3.carryIn = [0, 0, 0, 0];
+      state.m3.stepsLog = [];
+      state.statusOverride = '';
+      state.celebratedKey = '';
+      setRodsFromNumber(a);
+      render();
+    }
+
+    function initMode4(a, b) {
+      clearAnimations();
+      ensureRodsFor(a);
+      state.m4.a = a;
+      state.m4.b = b;
+      state.m4.removedOrders = [false, false, false, false];
+      const da = getDigitsOf(a);
+      state.m4.workTop = [da[0], da[1], da[2], da[3]];
+      state.m4.topNote = ['', '', '', ''];
+      state.m4.partialRes = [null, null, null, null];
+      state.m4.stepsLog = [];
+      state.statusOverride = '';
+      state.celebratedKey = '';
+      setRodsFromNumber(a);
+      render();
+    }
+
+    function initMode5(subMode = state.m5.subMode) {
+      clearAnimations();
+      state.m5.subMode = subMode;
+      state.m5.stepsLog = [];
+      state.statusOverride = '';
+      state.celebratedKey = '';
+
+      if (subMode === 'x10') {
+        ensureRodsFor(state.m5.baseX10 * 10);
+        state.m5.shiftSteps = 0;
+        setRodsFromNumber(state.m5.baseX10);
+      } else if (subMode === 'packs') {
+        ensureRodsFor(state.m5.packFactor * state.m5.packBase);
+        state.m5.packsAdded = 0;
+        setRodsFromNumber(0);
+      } else {
+        ensureRodsFor(state.m5.distFactor * state.m5.distBase);
+        state.m5.distDone = state.m5.distType === 1 ? [false, false, false] : [false, false, false, false];
+        setRodsFromNumber(0);
+      }
+      render();
+    }
+
+    function initMode6(subMode = state.m6.subMode) {
+      clearAnimations();
+      state.m6.subMode = subMode;
+      state.statusOverride = '';
+      state.celebratedKey = '';
+
+      if (subMode === 'secret') {
+        ensureRodsFor(state.m6.secretNum);
+        setRodsFromNumber(state.m6.secretNum);
+        const d = getDigitsOf(state.m6.secretNum);
+        state.m6.initialDigitsSum = d[0] + d[1] + d[2] + d[3];
+        state.m6.ninesRemoved = 0;
+        state.m6.stepsLog = [];
+      } else {
+        const p = HUNT_PROBLEMS[state.m6.huntIdx % HUNT_PROBLEMS.length];
+        ensureRodsFor(Math.max(p.a, p.b, p.shown));
+        setRodsFromNumber(0);
+        state.m6.huntFocus = 'none';
+        state.m6.huntARem = null;
+        state.m6.huntBRem = null;
+        state.m6.huntLeftRem = null;
+        state.m6.huntRightRem = null;
+        state.m6.huntVerdict = null;
+        state.m6.stepsLog = [];
+      }
+      render();
+    }
+
+    /* =========================================================
+       AÇÕES DOS MODOS 3, 4, 5 E 6
+       ========================================================= */
+    function doMode3AddOrder(orderIdx) {
+      if (state.isAnimating || state.m3.addedOrders[orderIdx]) return;
+      const db = getDigitsOf(state.m3.b);
+      const toAdd = db[orderIdx];
+      const before = state.rods[orderIdx];
+      state.m3.addedOrders[orderIdx] = true;
+
+      if (toAdd === 0) {
+        render();
+        checkAndCelebrateSolved();
+        return;
+      }
+
+      const ord = ORDERS[orderIdx];
+      animateAddGroups(orderIdx, 1, toAdd, () => {
+        const after = before + toAdd;
+        const extra = after >= 10 ? ` → (10 + ${after - 10})` : '';
+        state.m3.stepsLog.push({
+          tone: after >= 10 ? 'step-amber' : 'step-green',
+          text: `${ord.key}: (${before} + ${toAdd}) = ${after >= 10 ? `(${after})` : after}${extra}`
+        });
+        render();
+        checkAndCelebrateSolved();
+      });
+    }
+
+    function doMode4RemoveOrder(orderIdx) {
+      if (state.isAnimating || state.m4.removedOrders[orderIdx]) return;
+      const db = getDigitsOf(state.m4.b);
+      const toRem = db[orderIdx];
+      const ord = ORDERS[orderIdx];
+
+      if (state.rods[orderIdx] < toRem) {
+        AudioSystem.playHint();
+        state.statusOverride = `Faltam ${ord.plural}! Desça 1 peça do degrau acima (⬇ 1→10).`;
+        AudioSystem.speakText(`Faltam ${ord.plural}. Desça um degrau!`);
+        render();
+        return;
+      }
+
+      const before = state.rods[orderIdx];
+      state.m4.removedOrders[orderIdx] = true;
+
+      if (toRem === 0) {
+        state.m4.partialRes[orderIdx] = before;
+        render();
+        checkAndCelebrateSolved();
+        return;
+      }
+
+      animateRemoveOneByOne(orderIdx, toRem, () => {
+        const res = before - toRem;
+        state.m4.partialRes[orderIdx] = res;
+        state.m4.stepsLog.push({
+          tone: 'step-green',
+          text: `${ord.key}: (${before} − ${toRem}) = ${res}`
+        });
+        render();
+        checkAndCelebrateSolved();
+      });
+    }
+
+    // Modo 5A: ×10 e ÷10 (blocos saltam em arco entre degraus)
+    function doMode5Shift(dir) {
+      if (state.isAnimating) return;
+      if (dir === 1) {
+        if (state.rods[state.rodCount - 1] > 0) {
+          AudioSystem.playHint();
+          state.statusOverride = 'Sem degrau acima! Aumente o limite de hastes no Painel do Professor.';
+          render();
+          return;
+        }
+        const prevVal = getTotalValue();
+        if (prevVal === 0) return;
+
+        state.isAnimating = true;
+        const moving = [];
+        for (let i = state.rodCount - 2; i >= 0; i--) {
+          if (state.rods[i] > 0) moving.push({ fromIdx: i, toIdx: i + 1, count: state.rods[i] });
+        }
+        state.rods = [0, 0, 0, 0];
+        AudioSystem.playCarryUp();
+        AudioSystem.speakText(`Multiplicar por dez sobe todas as peças um degrau!`, false);
+
+        state.animArc = { kind: 'shift', moving, progress: 0 };
+        const startTime = performance.now();
+        const duration = 760;
+
+        function tick(now) {
+          if (!state.animArc || state.animArc.kind !== 'shift') return;
+          const t = Math.min(1, (now - startTime) / duration);
+          state.animArc.progress = t;
+          renderAbacusSvg();
+          if (t < 1) {
+            requestAnimationFrame(tick);
+          } else {
+            state.animArc = null;
+            moving.forEach(m => { state.rods[m.toIdx] = m.count; });
+            state.m5.shiftSteps += 1;
+            const nextVal = getTotalValue();
+            const dPrev = getDigitsOf(prevVal);
+            const parts = [];
+            for (let i = state.rodCount - 2; i >= 0; i--) {
+              if (dPrev[i] > 0) parts.push(`(${dPrev[i] * ORDERS[i].value} × 10)`);
+            }
+            state.m5.stepsLog.push({
+              tone: 'step-green',
+              text: `${parts.join(' + ')} = ${nextVal}`
+            });
+            state.isAnimating = false;
+            render();
+            AudioSystem.speakText(`${numberToPtBr(nextVal)}!`, true);
+          }
+        }
+        requestAnimationFrame(tick);
+      } else {
+        if (state.rods[0] > 0) {
+          AudioSystem.playHint();
+          state.statusOverride = 'Há peças nas Unidades; não dá para dividir exato por 10.';
+          render();
+          return;
+        }
+        const prevVal = getTotalValue();
+        if (prevVal === 0) return;
+
+        state.isAnimating = true;
+        const moving = [];
+        for (let i = 1; i < state.rodCount; i++) {
+          if (state.rods[i] > 0) moving.push({ fromIdx: i, toIdx: i - 1, count: state.rods[i] });
+        }
+        state.rods = [0, 0, 0, 0];
+        AudioSystem.playBorrowDown();
+        AudioSystem.speakText(`Dividir por dez desce todas as peças um degrau!`, false);
+
+        state.animArc = { kind: 'shift', moving, progress: 0 };
+        const startTime = performance.now();
+        const duration = 760;
+
+        function tick(now) {
+          if (!state.animArc || state.animArc.kind !== 'shift') return;
+          const t = Math.min(1, (now - startTime) / duration);
+          state.animArc.progress = t;
+          renderAbacusSvg();
+          if (t < 1) {
+            requestAnimationFrame(tick);
+          } else {
+            state.animArc = null;
+            moving.forEach(m => { state.rods[m.toIdx] = m.count; });
+            state.m5.shiftSteps -= 1;
+            const nextVal = getTotalValue();
+            state.m5.stepsLog.push({
+              tone: 'step-amber',
+              text: `(${prevVal} ÷ 10) = ${nextVal}`
+            });
+            state.isAnimating = false;
+            render();
+            AudioSystem.speakText(`${numberToPtBr(nextVal)}!`, true);
+          }
+        }
+        requestAnimationFrame(tick);
+      }
+    }
+
+    // Modo 5B: Pacotes Repetidos
+    function doMode5AddPack() {
+      if (state.isAnimating) return;
+      if (state.m5.packsAdded >= state.m5.packFactor) return;
+      if (hasAnyOverflow()) {
+        AudioSystem.playHint();
+        state.statusOverride = 'Faça a troca (⬆ 10→1) antes de colocar o próximo pacote!';
+        render();
+        return;
+      }
+
+      const d = getDigitsOf(state.m5.packBase);
+      state.m5.packsAdded += 1;
+      const packNum = state.m5.packsAdded;
+
+      // Insere U, depois D, depois C em sequência suave
+      const seq = [0, 1, 2].filter(i => d[i] > 0);
+      let idx = 0;
+      function nextOrd() {
+        if (idx >= seq.length) {
+          const expr = Array(packNum).fill(state.m5.packBase).join(' + ');
+          state.m5.stepsLog.push({
+            tone: 'step-green',
+            text: `Pacote ${packNum}: (${expr}) = ${packNum * state.m5.packBase}`
+          });
+          render();
+          checkAndCelebrateSolved();
+          return;
+        }
+        const o = seq[idx++];
+        animateAddGroups(o, d[o], 1, nextOrd);
+      }
+      nextOrd();
+    }
+
+    // Modo 5C: Distribuir (1 algarismo ou 2 algarismos com 4 produtos parciais)
+    function getDistParts() {
+      const f = state.m5.distFactor;
+      const b = state.m5.distBase;
+      if (state.m5.distType === 1) {
+        const db = getDigitsOf(b);
+        const parts = [];
+        for (let o = 0; o < 3; o++) {
+          if (db[o] > 0) {
+            const ordVal = ORDERS[o].value;
+            parts.push({
+              orderIdx: o,
+              groupSize: db[o],
+              groupCount: f,
+              label: `${f} × ${db[o] * ordVal}`,
+              groupExpr: Array(f).fill(db[o]).join(' + '),
+              result: f * db[o] * ordVal
+            });
+          }
+        }
+        return parts;
+      } else {
+        // 2 algarismos: [(fD*bD) + (fD*bU)] + [(fU*bD) + (fU*bU)]
+        const df = getDigitsOf(f);
+        const db = getDigitsOf(b);
+        const fD = df[1], fU = df[0];
+        const bD = db[1], bU = db[0];
+        return [
+          {
+            orderIdx: 2,
+            groupSize: bD,
+            groupCount: fD,
+            label: `${fD * 10} × ${bD * 10}`,
+            groupExpr: Array(fD).fill(bD).join(' + ') + ' C',
+            result: (fD * 10) * (bD * 10)
+          },
+          {
+            orderIdx: 1,
+            groupSize: bU,
+            groupCount: fD,
+            label: `${fD * 10} × ${bU}`,
+            groupExpr: Array(fD).fill(bU).join(' + ') + ' D',
+            result: (fD * 10) * bU
+          },
+          {
+            orderIdx: 1,
+            groupSize: bD,
+            groupCount: fU,
+            label: `${fU} × ${bD * 10}`,
+            groupExpr: Array(fU).fill(bD).join(' + ') + ' D',
+            result: fU * (bD * 10)
+          },
+          {
+            orderIdx: 0,
+            groupSize: bU,
+            groupCount: fU,
+            label: `${fU} × ${bU}`,
+            groupExpr: Array(fU).fill(bU).join(' + ') + ' U',
+            result: fU * bU
+          }
+        ];
+      }
+    }
+
+    function doMode5DistPart(partIdx) {
+      if (state.isAnimating || state.m5.distDone[partIdx]) return;
+      if (hasAnyOverflow()) {
+        AudioSystem.playHint();
+        state.statusOverride = 'Faça a troca (⬆ 10→1) antes da próxima parcela!';
+        render();
+        return;
+      }
+      const parts = getDistParts();
+      const p = parts[partIdx];
+      if (!p) return;
+
+      state.m5.distDone[partIdx] = true;
+      animateAddGroups(p.orderIdx, p.groupSize, p.groupCount, () => {
+        state.m5.stepsLog.push({
+          tone: state.rods[p.orderIdx] >= 10 ? 'step-amber' : 'step-green',
+          text: `(${p.label}) → (${p.groupExpr}) = ${p.result}`
+        });
+        render();
+        checkAndCelebrateSolved();
+      });
+    }
+
+    // Modo 6: Prova dos 9 — Retirar 9 peças simultaneamente com animação para cima
+    function doMode6CastOutNine() {
+      if (state.isAnimating) return;
+      const totalBeads = sumOfRodsBeads();
+      if (totalBeads < 9) {
+        AudioSystem.playHint();
+        return;
+      }
+
+      state.isAnimating = true;
+      let toPick = 9;
+      const pickedByRod = [[], [], [], []];
+
+      for (let i = 0; i < state.rodCount && toPick > 0; i++) {
+        while (state.rods[i] > 0 && toPick > 0) {
+          const posIdx = state.rods[i] - 1;
+          state.rods[i] -= 1;
+          const ord = ORDERS[i];
+          pickedByRod[i].push({
+            posIdx,
+            color: '#7c3aed',
+            dark: '#4c1d95',
+            beadW: ord.beadW,
+            badge: '−9'
+          });
+          toPick--;
+        }
+      }
+
+      state.animExit = { multi: pickedByRod };
+      AudioSystem.playBorrowDown();
+      const remaining = sumOfRodsBeads();
+      state.m6.ninesRemoved += 1;
+      state.m6.stepsLog.push({
+        tone: 'step-purple',
+        text: `(${totalBeads} − 9) = ${remaining} ${remaining === 1 ? 'peça' : 'peças'}`
+      });
+
+      if (remaining < 9) {
+        AudioSystem.speakText(`Noves fora ${numberToPtBr(remaining)}!`, false);
+      } else {
+        AudioSystem.speakText(`Tirou nove, sobram ${numberToPtBr(remaining)}.`, false);
+      }
+
+      render();
+      scheduleAnim(() => {
+        state.animExit = null;
+        state.isAnimating = false;
+        if (state.m6.subMode === 'hunt' && remaining < 9) {
+          recordHuntRemainder(remaining);
+        }
+        render();
+      }, 480);
+    }
+
+    function loadHuntNumber(which) {
+      if (state.isAnimating) return;
+      const p = HUNT_PROBLEMS[state.m6.huntIdx % HUNT_PROBLEMS.length];
+      state.m6.huntFocus = which;
+      const val = which === 'a' ? p.a : which === 'b' ? p.b : p.shown;
+      setRodsFromNumber(val);
+      const rem = sumOfRodsBeads();
+      if (rem < 9) recordHuntRemainder(rem);
+      AudioSystem.playBeadAdd(0);
+      render();
+    }
+
+    function recordHuntRemainder(rem) {
+      const p = HUNT_PROBLEMS[state.m6.huntIdx % HUNT_PROBLEMS.length];
+      if (state.m6.huntFocus === 'a') state.m6.huntARem = rem;
+      else if (state.m6.huntFocus === 'b') state.m6.huntBRem = rem;
+      else if (state.m6.huntFocus === 'res') state.m6.huntRightRem = rem;
+
+      if (state.m6.huntARem !== null && state.m6.huntBRem !== null) {
+        const comb = p.op === '+' ? (state.m6.huntARem + state.m6.huntBRem) : (state.m6.huntARem * state.m6.huntBRem);
+        state.m6.huntLeftRem = ninesRem(comb);
+      }
+    }
+
+    function submitHuntVerdict(userSaysRight) {
+      const p = HUNT_PROBLEMS[state.m6.huntIdx % HUNT_PROBLEMS.length];
+      const ok = userSaysRight === p.isRight;
+      state.m6.huntVerdict = ok ? 'correct' : 'wrong';
+      if (ok) {
+        AudioSystem.playSuccess();
+        AudioSystem.speakText(p.isRight ? 'Isso mesmo! A conta bateu na prova dos nove!' : 'Boa detetive! A prova dos nove pegou o erro!', false);
+      } else {
+        AudioSystem.playHint();
+        AudioSystem.speakText('Compare os dois restos nos quadrinhos antes de decidir!', false);
+      }
+      render();
+    }
+
+    /* =========================================================
+       VERIFICAÇÃO DE CONCLUSÃO (COM FALA ENFILEIRADA)
+       ========================================================= */
+    function isCurrentSolved() {
+      if (hasAnyOverflow()) return false;
+      const total = getTotalValue();
+      if (state.mode === 2) return total === state.m2.target;
+      if (state.mode === 3) {
+        const db = getDigitsOf(state.m3.b);
+        const allAdded = [0, 1, 2, 3].every(i => db[i] === 0 || state.m3.addedOrders[i]);
+        return allAdded && total === state.m3.a + state.m3.b;
+      }
+      if (state.mode === 4) {
+        const db = getDigitsOf(state.m4.b);
+        const allRem = [0, 1, 2, 3].every(i => db[i] === 0 || state.m4.removedOrders[i]);
+        return allRem && total === state.m4.a - state.m4.b;
+      }
+      if (state.mode === 5) {
+        if (state.m5.subMode === 'packs') {
+          return state.m5.packsAdded === state.m5.packFactor && total === state.m5.packFactor * state.m5.packBase;
+        }
+        if (state.m5.subMode === 'dist') {
+          const parts = getDistParts();
+          return parts.every((_, idx) => state.m5.distDone[idx]) && total === state.m5.distFactor * state.m5.distBase;
+        }
+      }
+      return false;
+    }
+
+    function checkAndCelebrateSolved() {
+      if (!isCurrentSolved()) return;
+      const total = getTotalValue();
+      const key = `${state.mode}-${total}-${state.m5.subMode}`;
+      if (state.celebratedKey === key) return;
+      state.celebratedKey = key;
+      AudioSystem.playSuccess();
+      AudioSystem.speakText(`Muito bem! O resultado é ${numberToPtBr(total)}!`, true);
+    }
+
+    /* =========================================================
+       RENDERIZAÇÃO DO SVG DO ÁBACO DE DEGRAUS
+       ========================================================= */
+    function getRodLayout() {
+      const displayOrders = [];
+      for (let i = state.rodCount - 1; i >= 0; i--) displayOrders.push(i);
+
+      const colW = 148;
+      const padX = 48;
+      const vw = padX * 2 + state.rodCount * colW;
+      const vh = 370;
+      const baseBottomY = 342;
+      const stepRise = 26;
+      const rodH = 205;
+
+      const coords = {};
+      displayOrders.forEach((orderIdx, visIdx) => {
+        const x = padX + visIdx * colW + colW / 2;
+        const stepTopY = baseBottomY - 36 - orderIdx * stepRise;
+        const rodTopY = stepTopY - rodH;
+        coords[orderIdx] = { x, stepTopY, rodTopY, rodH };
+      });
+
+      return { displayOrders, colW, vw, vh, baseBottomY, coords };
+    }
+
+    function beadYAt(orderIdx, posIdx, totalOnRod, coords) {
+      const c = coords[orderIdx];
+      const maxVisual = Math.max(10, totalOnRod);
+      const pitch = Math.min(18, (c.rodH - 22) / maxVisual);
+      const beadH = Math.max(11, Math.min(15, pitch - 2.5));
+      const y = c.stepTopY - 8 - beadH / 2 - posIdx * pitch;
+      return { y, beadH, pitch };
+    }
+
+    function renderAbacusSvg() {
+      const { displayOrders, colW, vw, vh, baseBottomY, coords } = getRodLayout();
+      let svgParts = '';
+
+      // Degraus e hastes
+      displayOrders.forEach(orderIdx => {
+        const ord = ORDERS[orderIdx];
+        const c = coords[orderIdx];
+        const count = state.rods[orderIdx];
+        const hasOverflow = count >= 10 && orderIdx < state.rodCount - 1;
+
+        // Degrau colorido na base
+        const stepW = colW - 14;
+        const stepH = baseBottomY - c.stepTopY;
+        svgParts += `
+          <rect x="${c.x - stepW / 2}" y="${c.stepTopY}" width="${stepW}" height="${stepH}" rx="10"
+                fill="${ord.soft}" stroke="${ord.color}" stroke-width="2.5" />
+          <text x="${c.x}" y="${c.stepTopY + 19}" font-size="14" font-weight="900" fill="${ord.dark}" text-anchor="middle">${ord.key} (${ord.badge})</text>
+          <text x="${c.x}" y="${baseBottomY - 8}" font-size="11" font-weight="700" fill="#64748b" text-anchor="middle">${count} ${count === 1 ? ord.name.toLowerCase() : ord.plural}</text>
+        `;
+
+        // Haste vertical
+        svgParts += `
+          <rect x="${c.x - 5}" y="${c.rodTopY}" width="10" height="${c.rodH + 4}" rx="5"
+                fill="${hasOverflow ? '#fef3c7' : '#e2e8f0'}" stroke="${hasOverflow ? '#f59e0b' : '#94a3b8'}" stroke-width="2" />
+        `;
+
+        // Peças empilhadas: se houver >= 10, as que FICAM vão na base e o bloco de 10 em âmbar vai no TOPO
+        const keepCount = hasOverflow ? count - 10 : count;
+
+        for (let p = 0; p < count; p++) {
+          const { y, beadH } = beadYAt(orderIdx, p, count, coords);
+          const isTopTen = hasOverflow && p >= keepCount;
+          const fill = isTopTen ? '#f59e0b' : ord.color;
+          const stroke = isTopTen ? '#92400e' : ord.dark;
+
+          const isEntering = state.animEnter &&
+            state.animEnter.orderIdx === orderIdx &&
+            p >= state.animEnter.fromIdx &&
+            p < state.animEnter.fromIdx + state.animEnter.count;
+
+          const dropDist = Math.round(c.rodTopY - y - 24);
+          const cls = isEntering ? 'bead-enter' : '';
+          const styleAttr = isEntering ? `style="--drop-dist:${dropDist}px;"` : '';
+
+          svgParts += `
+            <g class="${cls}" ${styleAttr}>
+              <rect x="${c.x - ord.beadW / 2}" y="${y - beadH / 2}" width="${ord.beadW}" height="${beadH}" rx="${beadH / 2}"
+                    fill="${fill}" stroke="${stroke}" stroke-width="2" />
+              ${beadH >= 13 ? `<text x="${c.x}" y="${y + 0.5}" font-size="9.5" font-weight="900" fill="#ffffff" text-anchor="middle" dominant-baseline="central">${ord.badge}</text>` : ''}
+            </g>
+          `;
+        }
+
+        // Peças saindo deslizando pelo topo da haste
+        const exitList = state.animExit
+          ? (state.animExit.multi ? state.animExit.multi[orderIdx] : (state.animExit.orderIdx === orderIdx ? state.animExit.items : []))
+          : [];
+
+        if (exitList && exitList.length) {
+          exitList.forEach(item => {
+            const { y, beadH } = beadYAt(orderIdx, item.posIdx, Math.max(count + exitList.length, 10), coords);
+            const exitDist = Math.round(c.rodTopY - y - 34);
+            svgParts += `
+              <g class="bead-exit" style="--exit-dist:${exitDist}px;">
+                <rect x="${c.x - item.beadW / 2}" y="${y - beadH / 2}" width="${item.beadW}" height="${beadH}" rx="${beadH / 2}"
+                      fill="${item.color}" stroke="${item.dark}" stroke-width="2" />
+                <text x="${c.x}" y="${y + 0.5}" font-size="9.5" font-weight="900" fill="#ffffff" text-anchor="middle" dominant-baseline="central">${item.badge}</text>
+              </g>
+            `;
+          });
+        }
+
+        // Selo "10!" no topo da haste quando pronta para trocar
+        if (hasOverflow) {
+          svgParts += `
+            <g transform="translate(${c.x + ord.beadW / 2 + 12}, ${c.rodTopY + 14})">
+              <rect x="-18" y="-11" width="36" height="22" rx="11" fill="#f59e0b" stroke="#92400e" stroke-width="1.5" />
+              <text x="0" y="0.5" font-size="11" font-weight="900" fill="#ffffff" text-anchor="middle" dominant-baseline="central">10!</text>
+            </g>
+          `;
+        }
+      });
+
+      // Camada de animação de fusão / abertura / salto em arco
+      if (state.animArc) {
+        const a = state.animArc;
+        if (a.kind === 'up' || a.kind === 'down') {
+          const fromC = coords[a.fromIdx];
+          const toC = coords[a.toIdx];
+          const destOrd = ORDERS[a.toIdx];
+
+          const startX = fromC.x;
+          const startY = fromC.rodTopY - 18;
+          const endX = toC.x;
+          const endY = toC.rodTopY - 18;
+
+          if (a.phase === 'fuse') {
+            const label = a.kind === 'up' ? '10 → 1' : '1 → 10';
+            const glowColor = a.kind === 'up' ? '#f59e0b' : '#7c3aed';
+            svgParts += `
+              <g class="fusion-pulse">
+                <circle cx="${startX}" cy="${startY}" r="28" fill="${glowColor}" opacity="0.24" />
+                <rect x="${startX - 36}" y="${startY - 14}" width="72" height="28" rx="14" fill="${glowColor}" stroke="#0f172a" stroke-width="2" />
+                <text x="${startX}" y="${startY + 0.5}" font-size="13" font-weight="900" fill="#ffffff" text-anchor="middle" dominant-baseline="central">${label}</text>
+              </g>
+            `;
+          } else {
+            const t = a.progress;
+            const ctrlX = (startX + endX) / 2;
+            const ctrlY = Math.min(startY, endY) - 52;
+            const curX = (1 - t) * (1 - t) * startX + 2 * (1 - t) * t * ctrlX + t * t * endX;
+            const curY = (1 - t) * (1 - t) * startY + 2 * (1 - t) * t * ctrlY + t * t * endY;
+
+            svgParts += `
+              <path d="M ${startX} ${startY} Q ${ctrlX} ${ctrlY} ${endX} ${endY}" fill="none" stroke="${destOrd.color}" stroke-width="3" stroke-dasharray="6 5" opacity="0.7" />
+              <g transform="translate(${curX.toFixed(1)}, ${curY.toFixed(1)})">
+                <rect x="${-destOrd.beadW / 2}" y="-11" width="${destOrd.beadW}" height="22" rx="11" fill="${destOrd.color}" stroke="#0f172a" stroke-width="2.2" />
+                <text x="0" y="0.5" font-size="11" font-weight="900" fill="#ffffff" text-anchor="middle" dominant-baseline="central">${a.kind === 'up' ? destOrd.badge : '10×' + destOrd.badge}</text>
+              </g>
+            `;
+          }
+        } else if (a.kind === 'shift') {
+          const t = a.progress;
+          a.moving.forEach(m => {
+            const fromC = coords[m.fromIdx];
+            const toC = coords[m.toIdx];
+            const destOrd = ORDERS[m.toIdx];
+            const startX = fromC.x;
+            const startY = fromC.rodTopY + 20;
+            const endX = toC.x;
+            const endY = toC.rodTopY + 20;
+            const ctrlX = (startX + endX) / 2;
+            const ctrlY = Math.min(startY, endY) - 54;
+            const curX = (1 - t) * (1 - t) * startX + 2 * (1 - t) * t * ctrlX + t * t * endX;
+            const curY = (1 - t) * (1 - t) * startY + 2 * (1 - t) * t * ctrlY + t * t * endY;
+
+            svgParts += `
+              <path d="M ${startX} ${startY} Q ${ctrlX} ${ctrlY} ${endX} ${endY}" fill="none" stroke="${destOrd.color}" stroke-width="2.5" stroke-dasharray="5 5" opacity="0.6" />
+              <g transform="translate(${curX.toFixed(1)}, ${curY.toFixed(1)})">
+                <rect x="-32" y="-13" width="64" height="26" rx="13" fill="${destOrd.color}" stroke="#0f172a" stroke-width="2" />
+                <text x="0" y="0.5" font-size="12" font-weight="900" fill="#ffffff" text-anchor="middle" dominant-baseline="central">${m.count}×${destOrd.badge}</text>
+              </g>
+            `;
+          });
+        }
+      }
+
+      abacusSvgWrapEl.innerHTML = `
+        <svg class="abacus-svg" viewBox="0 0 ${vw} ${vh}" preserveAspectRatio="xMidYMid meet" aria-label="Ábaco de Degraus">
+          ${svgParts}
+        </svg>
+      `;
+    }
+
+    /* =========================================================
+       CONTROLES POR HASTE (+, −, ⬆ 10→1, ⬇ 1→10)
+       ========================================================= */
+    function renderRodControls() {
+      const displayOrders = [];
+      for (let i = state.rodCount - 1; i >= 0; i--) displayOrders.push(i);
+
+      const allowManualPM = state.mode === 1 || state.mode === 2 || (state.mode === 6 && state.m6.subMode === 'secret');
+      const allowTrades = state.mode !== 6;
+
+      rodControlsRowEl.style.gridTemplateColumns = `repeat(${state.rodCount}, 1fr)`;
+      rodControlsRowEl.innerHTML = displayOrders.map(orderIdx => {
+        const ord = ORDERS[orderIdx];
+        const count = state.rods[orderIdx];
+        const canUp = allowTrades && orderIdx < state.rodCount - 1 && count >= 10;
+        const canDown = allowTrades && orderIdx > 0 && count >= 1 && state.rods[orderIdx - 1] <= 19;
+
+        // Destaca o botão ⬇ 1→10 no Modo 4 quando a haste inferior precisa emprestar
+        let urgentDown = false;
+        if (state.mode === 4 && canDown) {
+          const db = getDigitsOf(state.m4.b);
+          const lower = orderIdx - 1;
+          if (!state.m4.removedOrders[lower] && state.rods[lower] < db[lower]) {
+            urgentDown = true;
+          } else if (lower > 0 && !state.m4.removedOrders[lower - 1] && state.rods[lower - 1] < db[lower - 1] && state.rods[lower] === 0) {
+            urgentDown = true;
+          }
+        }
+
+        return `
+          <div class="rod-ctrl-col" style="--rod-color:${ord.color};">
+            ${allowManualPM ? `
+              <div class="rod-pm-row">
+                <button class="rod-btn" data-rod-rem="${orderIdx}" type="button" ${count <= 0 || state.isAnimating ? 'disabled' : ''} aria-label="Tirar 1 ${ord.name}">−</button>
+                <button class="rod-btn" data-rod-add="${orderIdx}" type="button" ${state.isAnimating ? 'disabled' : ''} aria-label="Adicionar 1 ${ord.name}">+</button>
+              </div>
+            ` : ''}
+            <div class="rod-trade-row">
+              ${canUp ? `<button class="trade-btn urgent-up" data-rod-up="${orderIdx}" type="button" ${state.isAnimating ? 'disabled' : ''}>⬆ 10→1</button>` : ''}
+              ${canDown ? `<button class="trade-btn ${urgentDown ? 'urgent-down' : ''}" data-rod-down="${orderIdx}" type="button" ${state.isAnimating ? 'disabled' : ''}>⬇ 1→10</button>` : ''}
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      rodControlsRowEl.querySelectorAll('[data-rod-add]').forEach(btn => {
+        btn.addEventListener('click', () => addBead(Number(btn.dataset.rodAdd)));
+      });
+      rodControlsRowEl.querySelectorAll('[data-rod-rem]').forEach(btn => {
+        btn.addEventListener('click', () => removeBead(Number(btn.dataset.rodRem)));
+      });
+      rodControlsRowEl.querySelectorAll('[data-rod-up]').forEach(btn => {
+        btn.addEventListener('click', () => carryUp(Number(btn.dataset.rodUp)));
+      });
+      rodControlsRowEl.querySelectorAll('[data-rod-down]').forEach(btn => {
+        btn.addEventListener('click', () => borrowDown(Number(btn.dataset.rodDown)));
+      });
+    }
+
+    /* =========================================================
+       PAINEL LATERAL (MODOS 2, 3, 4, 5 E 6)
+       ========================================================= */
+    function renderSidePane() {
+      if (state.mode === 1) {
+        sidePaneEl.classList.add('hidden');
+        sidePaneEl.innerHTML = '';
+        return;
+      }
+      sidePaneEl.classList.remove('hidden');
+
+      const displayOrders = [];
+      for (let i = state.rodCount - 1; i >= 0; i--) displayOrders.push(i);
+
+      // MODO 2: MONTAR NÚMERO
+      if (state.mode === 2) {
+        const done = isCurrentSolved();
+        sidePaneEl.innerHTML = `
+          <h3 class="side-title">Desafio: Monte no Ábaco</h3>
+          <div class="target-card ${done ? 'done' : ''}">
+            <span class="target-big-num">${state.m2.target}</span>
+            <span class="target-words">${numberToPtBr(state.m2.target)}</span>
+          </div>
+          <div class="side-actions">
+            <button id="m2ListenBtn" class="step-btn" type="button">🔊 Ouvir Número</button>
+            <button id="m2NextBtn" class="step-btn ${done ? 'done' : ''}" type="button">Próximo Número →</button>
+          </div>
+          <p class="side-hint">Atenção ao zero: quando uma ordem é 0, a haste fica vazia!</p>
+        `;
+        document.getElementById('m2ListenBtn').addEventListener('click', () => {
+          AudioSystem.speakText(numberToPtBr(state.m2.target));
+        });
+        document.getElementById('m2NextBtn').addEventListener('click', () => {
+          const pool = [47, 105, 208, 320, 405, 512, 609, 800, 1024].filter(n => n <= maxAllowedNumber());
+          const idx = pool.indexOf(state.m2.target);
+          initMode2(pool[(idx + 1) % pool.length]);
+        });
+        return;
+      }
+
+      // MODO 3: SOMAR (VAI UM)
+      if (state.mode === 3) {
+        const da = getDigitsOf(state.m3.a);
+        const db = getDigitsOf(state.m3.b);
+        const solved = isCurrentSolved();
+
+        const heads = `<span></span>` + displayOrders.map(o => `<span class="calc-head" style="color:${ORDERS[o].color}">${ORDERS[o].key}</span>`).join('');
+
+        // Linha de topo: mostra (a+1) quando subiu "vai um"
+        const carryRow = `<span></span>` + displayOrders.map(o => {
+          const ci = state.m3.carryIn[o];
+          if (ci > 0) return `<span class="calc-carry active">(${da[o]}+${ci})</span>`;
+          return `<span class="calc-carry"></span>`;
+        }).join('');
+
+        // Linha 1 (atualiza algarismo quando recebe vai um)
+        const rowA = `<span></span>` + displayOrders.map(o => {
+          const ci = state.m3.carryIn[o];
+          const val = da[o] + ci;
+          return `<span class="calc-digit ${ci > 0 ? 'updated' : ''}">${val}</span>`;
+        }).join('');
+
+        const rowB = `<span class="calc-op">+</span>` + displayOrders.map(o => `<span class="calc-digit">${db[o]}</span>`).join('');
+
+        // Linha de resultado (mostra parcial entre parênteses ex.: (13) quando >= 10)
+        const resRow = `<span></span>` + displayOrders.map(o => {
+          const added = state.m3.addedOrders[o] || db[o] === 0;
+          const cur = state.rods[o];
+          if (cur >= 10) return `<span class="calc-res overflow-val">(${cur})</span>`;
+          if (solved) return `<span class="calc-res done">${cur}</span>`;
+          if (state.m3.addedOrders[o] || (db[o] === 0 && state.m3.carryIn[o] > 0)) {
+            return `<span class="calc-res">${cur}</span>`;
+          }
+          return `<span class="calc-res pending">?</span>`;
+        }).join('');
+
+        const logsHtml = state.m3.stepsLog.slice(-3).map(s => `<div class="calc-step-pill ${s.tone}">${s.text}</div>`).join('');
+
+        const btnsHtml = [0, 1, 2, 3].filter(o => o < state.rodCount && db[o] > 0).map(o => {
+          const ord = ORDERS[o];
+          const done = state.m3.addedOrders[o];
+          return `
+            <button class="step-btn ${done ? 'done' : ''}" data-m3-add="${o}" type="button"
+                    style="--btn-color:${ord.color};--btn-soft:${ord.soft};"
+                    ${done || state.isAnimating ? 'disabled' : ''}>
+              ${done ? `✓ +${db[o]} ${ord.name}` : `Somar +${db[o]} ${ord.name}`}
+            </button>
+          `;
+        }).join('');
+
+        sidePaneEl.innerHTML = `
+          <h3 class="side-title">Conta Armada — Adição</h3>
+          <div class="calc-grid" style="grid-template-columns: 24px repeat(${state.rodCount}, 1fr);">
+            ${heads}
+            ${carryRow}
+            ${rowA}
+            ${rowB}
+            <div class="calc-line"></div>
+            ${resRow}
+          </div>
+          <div class="calc-steps-log">${logsHtml}</div>
+          <div class="side-actions">${btnsHtml}</div>
+          <p class="side-hint">${hasAnyOverflow() ? 'Haste cheia! Toque em ⬆ 10→1 no ábaco.' : 'Comece somando pelas Unidades.'}</p>
+        `;
+
+        sidePaneEl.querySelectorAll('[data-m3-add]').forEach(btn => {
+          btn.addEventListener('click', () => doMode3AddOrder(Number(btn.dataset.m3Add)));
+        });
+        return;
+      }
+
+      // MODO 4: SUBTRAIR (EMPRESTA — IGUAL À FOTO DO USUÁRIO)
+      if (state.mode === 4) {
+        const db = getDigitsOf(state.m4.b);
+        const solved = isCurrentSolved();
+
+        const heads = `<span></span>` + displayOrders.map(o => `<span class="calc-head" style="color:${ORDERS[o].color}">${ORDERS[o].key}</span>`).join('');
+
+        // Topo mostra (8-1) e (10+3) exatamente acima dos novos valores 7 e 13
+        const noteRow = `<span></span>` + displayOrders.map(o => {
+          const note = state.m4.topNote[o];
+          if (!note) return `<span class="calc-carry"></span>`;
+          const isPlus = note.includes('+');
+          return `<span class="calc-carry ${isPlus ? 'active' : 'borrow-tag'}">${note}</span>`;
+        }).join('');
+
+        // Linha 1 mostra workTop atualizado (ex: 0 0 7 13)
+        const rowA = `<span></span>` + displayOrders.map(o => {
+          const val = state.m4.workTop[o];
+          const hasNote = Boolean(state.m4.topNote[o]);
+          return `<span class="calc-digit ${hasNote ? 'updated' : ''}">${val}</span>`;
+        }).join('');
+
+        const rowB = `<span class="calc-op">−</span>` + displayOrders.map(o => `<span class="calc-digit">${db[o]}</span>`).join('');
+
+        // Linha de resultado (exibe resultado parcial assim que cada ordem é retirada)
+        const resRow = `<span></span>` + displayOrders.map(o => {
+          if (solved) return `<span class="calc-res done">${state.rods[o]}</span>`;
+          if (state.m4.partialRes[o] !== null) return `<span class="calc-res">${state.m4.partialRes[o]}</span>`;
+          return `<span class="calc-res pending">?</span>`;
+        }).join('');
+
+        const logsHtml = state.m4.stepsLog.slice(-3).map(s => `<div class="calc-step-pill ${s.tone}">${s.text}</div>`).join('');
+
+        const btnsHtml = [0, 1, 2, 3].filter(o => o < state.rodCount && db[o] > 0).map(o => {
+          const ord = ORDERS[o];
+          const done = state.m4.removedOrders[o];
+          return `
+            <button class="step-btn ${done ? 'done' : ''}" data-m4-rem="${o}" type="button"
+                    style="--btn-color:${ord.color};--btn-soft:${ord.soft};"
+                    ${done || state.isAnimating ? 'disabled' : ''}>
+              ${done ? `✓ −${db[o]} ${ord.name}` : `Retirar −${db[o]} ${ord.name}`}
+            </button>
+          `;
+        }).join('');
+
+        sidePaneEl.innerHTML = `
+          <h3 class="side-title">Conta Armada — Subtração</h3>
+          <div class="calc-grid" style="grid-template-columns: 24px repeat(${state.rodCount}, 1fr);">
+            ${heads}
+            ${noteRow}
+            ${rowA}
+            ${rowB}
+            <div class="calc-line"></div>
+            ${resRow}
+          </div>
+          <div class="calc-steps-log">${logsHtml}</div>
+          <div class="side-actions">${btnsHtml}</div>
+          <p class="side-hint">Retire começando pela Unidade. Se faltar, desça 1 degrau (⬇ 1→10)!</p>
+        `;
+
+        sidePaneEl.querySelectorAll('[data-m4-rem]').forEach(btn => {
+          btn.addEventListener('click', () => doMode4RemoveOrder(Number(btn.dataset.m4Rem)));
+        });
+        return;
+      }
+
+      // MODO 5: MULTIPLICAR
+      if (state.mode === 5) {
+        const logsHtml = state.m5.stepsLog.slice(-4).map(s => `<div class="calc-step-pill ${s.tone}">${s.text}</div>`).join('');
+
+        if (state.m5.subMode === 'x10') {
+          sidePaneEl.innerHTML = `
+            <h3 class="side-title">Subir e Descer Degraus</h3>
+            <div class="target-card">
+              <span class="target-big-num">${getTotalValue()}</span>
+              <span class="target-words">Base inicial: ${state.m5.baseX10}</span>
+            </div>
+            <div class="calc-steps-log">${logsHtml}</div>
+            <div class="side-actions">
+              <button id="m5Up10Btn" class="step-btn" type="button" style="--btn-color:#059669;--btn-soft:#ecfdf5;" ${state.isAnimating ? 'disabled' : ''}>⬆ Multiplicar por 10 (×10)</button>
+              <button id="m5Down10Btn" class="step-btn" type="button" style="--btn-color:#d97706;--btn-soft:#fffbeb;" ${state.isAnimating ? 'disabled' : ''}>⬇ Dividir por 10 (÷10)</button>
+            </div>
+            <p class="side-hint">Observe: ×10 não "cola zero" — ele sobe todas as peças 1 degrau!</p>
+          `;
+          document.getElementById('m5Up10Btn').addEventListener('click', () => doMode5Shift(1));
+          document.getElementById('m5Down10Btn').addEventListener('click', () => doMode5Shift(-1));
+        } else if (state.m5.subMode === 'packs') {
+          const done = isCurrentSolved();
+          sidePaneEl.innerHTML = `
+            <h3 class="side-title">Pacotes Repetidos</h3>
+            <div class="target-card ${done ? 'done' : ''}">
+              <span class="target-big-num">${state.m5.packFactor} × ${state.m5.packBase}</span>
+              <span class="target-words">Pacotes colocados: ${state.m5.packsAdded} de ${state.m5.packFactor}</span>
+            </div>
+            <div class="calc-steps-log">${logsHtml}</div>
+            <div class="side-actions">
+              <button id="m5AddPackBtn" class="step-btn ${done ? 'done' : ''}" type="button" ${state.m5.packsAdded >= state.m5.packFactor || state.isAnimating ? 'disabled' : ''}>
+                ${state.m5.packsAdded >= state.m5.packFactor ? '✓ Todos os pacotes no ábaco' : `📦 Colocar +1 pacote (${state.m5.packBase})`}
+              </button>
+            </div>
+            <p class="side-hint">${hasAnyOverflow() ? 'Haste cheia! Toque em ⬆ 10→1 no ábaco.' : 'Cada pacote soma o mesmo número nas hastes.'}</p>
+          `;
+          document.getElementById('m5AddPackBtn').addEventListener('click', doMode5AddPack);
+        } else {
+          const done = isCurrentSolved();
+          const parts = getDistParts();
+          const f = state.m5.distFactor;
+          const b = state.m5.distBase;
+          const df = getDigitsOf(f);
+          const db = getDigitsOf(b);
+
+          const formulaText = state.m5.distType === 1
+            ? `${f} × ${b} = ${parts.map(p => `(${p.label})`).join(' + ')}`
+            : `[(${df[1] * 10}×${db[1] * 10}) + (${df[1] * 10}×${db[0]})] + [(${df[0]}×${db[1] * 10}) + (${df[0]}×${db[0]})]`;
+
+          const btnsHtml = parts.map((p, idx) => {
+            const ord = ORDERS[p.orderIdx];
+            const isDone = Boolean(state.m5.distDone[idx]);
+            return `
+              <button class="step-btn ${isDone ? 'done' : ''}" data-m5-dist="${idx}" type="button"
+                      style="--btn-color:${ord.color};--btn-soft:${ord.soft};"
+                      ${isDone || state.isAnimating ? 'disabled' : ''}>
+                ${isDone ? `✓ (${p.label}) = ${p.result}` : `Encaixar (${p.label}) na ${ord.name}`}
+              </button>
+            `;
+          }).join('');
+
+          sidePaneEl.innerHTML = `
+            <h3 class="side-title">Distributiva por Ordens</h3>
+            <div class="target-card ${done ? 'done' : ''}">
+              <span class="target-big-num">${f} × ${b}</span>
+              <div class="dist-formula">${formulaText}</div>
+            </div>
+            <div class="calc-steps-log">${logsHtml}</div>
+            <div class="side-actions">${btnsHtml}</div>
+            <p class="side-hint">${hasAnyOverflow() ? 'Haste passou de 9! Toque em ⬆ 10→1.' : 'Cada produto parcial cai em grupos na sua haste.'}</p>
+          `;
+
+          sidePaneEl.querySelectorAll('[data-m5-dist]').forEach(btn => {
+            btn.addEventListener('click', () => doMode5DistPart(Number(btn.dataset.m5Dist)));
+          });
+        }
+        return;
+      }
+
+      // MODO 6: PROVA DOS 9
+      if (state.mode === 6) {
+        const totalBeads = sumOfRodsBeads();
+        const logsHtml = state.m6.stepsLog.slice(-4).map(s => `<div class="calc-step-pill ${s.tone}">${s.text}</div>`).join('');
+
+        if (state.m6.subMode === 'secret') {
+          const canCast = totalBeads >= 9;
+          const d = getDigitsOf(state.m6.secretNum);
+          const expr = [3, 2, 1, 0].filter(i => i < state.rodCount && d[i] > 0).map(i => d[i]).join(' + ') || '0';
+
+          sidePaneEl.innerHTML = `
+            <h3 class="side-title">O Segredo dos Noves Fora</h3>
+            <div class="target-card ${!canCast ? 'done' : ''}">
+              <span class="target-big-num">${state.m6.secretNum}</span>
+              <span class="target-words">Soma das peças: (${expr}) = ${state.m6.initialDigitsSum}</span>
+            </div>
+            <div class="calc-steps-log">${logsHtml}</div>
+            <div class="side-actions">
+              <button id="m6CastBtn" class="step-btn" type="button" style="--btn-color:#7c3aed;--btn-soft:#f5f3ff;" ${!canCast || state.isAnimating ? 'disabled' : ''}>
+                ${canCast ? `✨ Tirar 9 peças (restam ${totalBeads})` : `✓ Noves fora = ${totalBeads}!`}
+              </button>
+            </div>
+            <p class="side-hint">Cada 10 é (9+1) e cada 100 é (99+1): por isso cada peça em qualquer haste sobra 1!</p>
+          `;
+          document.getElementById('m6CastBtn').addEventListener('click', doMode6CastOutNine);
+        } else {
+          const p = HUNT_PROBLEMS[state.m6.huntIdx % HUNT_PROBLEMS.length];
+          const canCast = totalBeads >= 9;
+          const leftReady = state.m6.huntLeftRem !== null;
+          const rightReady = state.m6.huntRightRem !== null;
+
+          sidePaneEl.innerHTML = `
+            <h3 class="side-title">🕵️ Caça ao Erro (Prova dos 9)</h3>
+            <div class="target-card ${state.m6.huntVerdict === 'correct' ? 'done' : ''}">
+              <span class="target-big-num" style="font-size:1.75rem;">${p.a} ${p.op} ${p.b} = ${p.shown}</span>
+              <span class="target-words">Carregue cada número no ábaco e tire os noves!</span>
+            </div>
+            <div class="side-actions">
+              <button class="step-btn ${state.m6.huntARem !== null ? 'done' : ''}" id="hLoadA" type="button">1º: Carregar ${p.a} ${state.m6.huntARem !== null ? `(resto ${state.m6.huntARem})` : ''}</button>
+              <button class="step-btn ${state.m6.huntBRem !== null ? 'done' : ''}" id="hLoadB" type="button">2º: Carregar ${p.b} ${state.m6.huntBRem !== null ? `(resto ${state.m6.huntBRem})` : ''}</button>
+              <button class="step-btn ${state.m6.huntRightRem !== null ? 'done' : ''}" id="hLoadR" type="button">3º: Carregar resultado ${p.shown} ${state.m6.huntRightRem !== null ? `(resto ${state.m6.huntRightRem})` : ''}</button>
+              <button class="step-btn" id="hCastBtn" type="button" style="--btn-color:#7c3aed;--btn-soft:#f5f3ff;" ${!canCast || state.isAnimating ? 'disabled' : ''}>
+                ✨ Tirar 9 peças no ábaco (${totalBeads})
+              </button>
+            </div>
+            <div class="nines-compare">
+              <div class="nines-box ${leftReady ? 'ready' : ''}">
+                <span class="nines-box-lbl">Conta</span>
+                <span class="nines-box-val">${leftReady ? state.m6.huntLeftRem : '?'}</span>
+              </div>
+              <span style="font-weight:900;color:var(--text-muted);">vs</span>
+              <div class="nines-box ${rightReady ? 'ready' : ''}">
+                <span class="nines-box-lbl">Resultado</span>
+                <span class="nines-box-val">${rightReady ? state.m6.huntRightRem : '?'}</span>
+              </div>
+            </div>
+            <div class="nines-verdict-row">
+              <button id="hVerdictOk" class="step-btn" type="button" style="--btn-color:#059669;--btn-soft:#ecfdf5;">✓ Bateu!</button>
+              <button id="hVerdictErr" class="step-btn" type="button" style="--btn-color:#ef4444;--btn-soft:#fef2f2;">✕ Tem erro!</button>
+            </div>
+            ${state.m6.huntVerdict === 'correct' ? `<button id="hNextProb" class="step-btn done" type="button">Próxima Conta →</button>` : ''}
+          `;
+
+          document.getElementById('hLoadA').addEventListener('click', () => loadHuntNumber('a'));
+          document.getElementById('hLoadB').addEventListener('click', () => loadHuntNumber('b'));
+          document.getElementById('hLoadR').addEventListener('click', () => loadHuntNumber('res'));
+          document.getElementById('hCastBtn').addEventListener('click', doMode6CastOutNine);
+          document.getElementById('hVerdictOk').addEventListener('click', () => submitHuntVerdict(true));
+          document.getElementById('hVerdictErr').addEventListener('click', () => submitHuntVerdict(false));
+          const nxt = document.getElementById('hNextProb');
+          if (nxt) {
+            nxt.addEventListener('click', () => {
+              state.m6.huntIdx = (state.m6.huntIdx + 1) % HUNT_PROBLEMS.length;
+              initMode6('hunt');
+            });
+          }
+        }
+      }
+    }
+
+    /* =========================================================
+       FAIXA RÁPIDA SUPERIOR E RODAPÉ
+       ========================================================= */
+    function renderQuickStripAndFooter() {
+      // Faixa rápida contextual
+      if (state.mode === 5) {
+        quickStripEl.innerHTML = `
+          <button class="pill-btn ${state.m5.subMode === 'x10' ? 'active' : ''}" data-m5-sub="x10" type="button">⬆ Subir Degrau (×10)</button>
+          <button class="pill-btn ${state.m5.subMode === 'packs' ? 'active' : ''}" data-m5-sub="packs" type="button">📦 Pacotes</button>
+          <button class="pill-btn ${state.m5.subMode === 'dist' ? 'active' : ''}" data-m5-sub="dist" type="button">⚡ Distribuir</button>
+          ${state.m5.subMode === 'dist' ? `
+            <button class="pill-btn ${state.m5.distType === 1 ? 'active' : ''}" data-m5-dt="1" type="button">1 algarismo</button>
+            <button class="pill-btn ${state.m5.distType === 2 ? 'active' : ''}" data-m5-dt="2" type="button">2 algarismos</button>
+          ` : ''}
+        `;
+        quickStripEl.querySelectorAll('[data-m5-sub]').forEach(btn => {
+          btn.addEventListener('click', () => initMode5(btn.dataset.m5Sub));
+        });
+        quickStripEl.querySelectorAll('[data-m5-dt]').forEach(btn => {
+          btn.addEventListener('click', () => {
+            const dt = Number(btn.dataset.m5Dt);
+            state.m5.distType = dt;
+            if (dt === 1) { state.m5.distFactor = 4; state.m5.distBase = 23; }
+            else { state.m5.distFactor = 14; state.m5.distBase = 23; }
+            initMode5('dist');
+          });
+        });
+      } else if (state.mode === 6) {
+        quickStripEl.innerHTML = `
+          <button class="pill-btn ${state.m6.subMode === 'secret' ? 'active' : ''}" data-m6-sub="secret" type="button">🔍 Noves Fora (Segredo)</button>
+          <button class="pill-btn ${state.m6.subMode === 'hunt' ? 'active' : ''}" data-m6-sub="hunt" type="button">🕵️ Caça ao Erro</button>
+        `;
+        quickStripEl.querySelectorAll('[data-m6-sub]').forEach(btn => {
+          btn.addEventListener('click', () => initMode6(btn.dataset.m6Sub));
+        });
+      } else {
+        quickStripEl.innerHTML = '';
+      }
+
+      // Rodapé: contador, instrução e decomposição
+      const total = getTotalValue();
+      const solved = isCurrentSolved();
+      abacusPaneEl.classList.toggle('stage-done', solved);
+      counterPillEl.classList.toggle('done', solved);
+
+      if (state.mode === 6) {
+        const beads = sumOfRodsBeads();
+        counterCaptionEl.textContent = 'Peças';
+        animateCounter(String(beads));
+      } else {
+        counterCaptionEl.textContent = 'Ábaco';
+        animateCounter(String(total));
+      }
+
+      if (solved) {
+        statusInstructionEl.textContent = `Excelente! Resultado no ábaco: ${total} (${numberToPtBr(total)}).`;
+        statusInstructionEl.className = 'status-instruction success';
+      } else if (state.statusOverride) {
+        statusInstructionEl.textContent = state.statusOverride;
+        statusInstructionEl.className = 'status-instruction';
+      } else if (hasAnyOverflow()) {
+        statusInstructionEl.textContent = 'Uma haste chegou a 10 peças! Toque em ⬆ 10→1 para subir o degrau.';
+        statusInstructionEl.className = 'status-instruction';
+      } else if (state.mode === 1) {
+        statusInstructionEl.textContent = `Número atual: ${numberToPtBr(total)}.`;
+        statusInstructionEl.className = 'status-instruction';
+      } else if (state.mode === 6) {
+        const beads = sumOfRodsBeads();
+        statusInstructionEl.textContent = beads >= 9
+          ? `Total de ${beads} peças nas hastes. Retire grupos de 9!`
+          : `Sobraram ${beads} peças (noves fora = ${beads}).`;
+        statusInstructionEl.className = beads < 9 ? 'status-instruction success' : 'status-instruction';
+      } else {
+        statusInstructionEl.textContent = 'Acompanhe os degraus do ábaco e a conta ao lado.';
+        statusInstructionEl.className = 'status-instruction';
+      }
+
+      // Botões de ação no rodapé
+      footerActionsEl.innerHTML = `
+        <button id="speakTotalBtn" class="secondary-btn" type="button">🔊 Ler ${total}</button>
+      `;
+      document.getElementById('speakTotalBtn').addEventListener('click', () => {
+        AudioSystem.speakText(numberToPtBr(getTotalValue()));
+      });
+
+      // Decomposição aditiva (ex.: 200 + 40 + 5 = 245)
+      if (state.mode === 6) {
+        const parts = [];
+        for (let i = state.rodCount - 1; i >= 0; i--) {
+          parts.push(`<span class="decomp-chip" style="color:${ORDERS[i].color};">${state.rods[i]} ${ORDERS[i].key}</span>`);
+        }
+        decompStripEl.innerHTML = `${parts.join('<span>+</span>')}<span>=</span><span class="decomp-chip">${sumOfRodsBeads()} peças</span>`;
+      } else {
+        const parts = [];
+        for (let i = state.rodCount - 1; i >= 0; i--) {
+          const val = state.rods[i] * ORDERS[i].value;
+          parts.push(`<span class="decomp-chip" style="color:${ORDERS[i].color};">${val}</span>`);
+        }
+        decompStripEl.innerHTML = `${parts.join('<span>+</span>')}<span>=</span><span class="decomp-chip">${total}</span>`;
+      }
+    }
+
+    /* =========================================================
+       PAINEL DO PROFESSOR (GAVETA RECOLHÍVEL)
+       ========================================================= */
+    function setDrawerOpen(open) {
+      state.drawerOpen = open;
+      teacherDrawerEl.classList.toggle('open', open);
+      drawerBackdropEl.classList.toggle('open', open);
+      teacherDrawerEl.setAttribute('aria-hidden', String(!open));
+      panelToggleBtn.setAttribute('aria-expanded', String(open));
+      panelToggleBtn.classList.toggle('btn-panel-open', open);
+      if (open) renderDrawer();
+    }
+
+    function renderDrawer() {
+      const rodsSection = `
+        <div class="drawer-section">
+          <span class="drawer-label">Limite de Hastes (Degraus)</span>
+          <div class="drawer-grid">
+            <button class="d-btn ${state.rodCount === 2 ? 'active' : ''}" data-rods="2" type="button">U – D (até 99)</button>
+            <button class="d-btn ${state.rodCount === 3 ? 'active' : ''}" data-rods="3" type="button">U – D – C (até 999)</button>
+            <button class="d-btn ${state.rodCount === 4 ? 'active' : ''}" data-rods="4" type="button">U – D – C – UM</button>
+          </div>
+        </div>
+      `;
+
+      let modeSection = '';
+      if (state.mode === 1) {
+        modeSection = `
+          <div class="drawer-section">
+            <span class="drawer-label">Atalhos para Explorar</span>
+            <div class="drawer-grid">
+              ${[15, 105, 240, 309, 1020].map(n => `<button class="d-btn" data-d-m1="${n}" type="button">${n}</button>`).join('')}
+            </div>
+          </div>
+          <p class="drawer-note"><strong>Dica:</strong> Compare <strong>15</strong> e <strong>105</strong> para mostrar o papel do zero como guardião do degrau vazio.</p>
+        `;
+      } else if (state.mode === 2) {
+        modeSection = `
+          <div class="drawer-section">
+            <span class="drawer-label">Números para Montar</span>
+            <div class="drawer-grid">
+              ${[47, 105, 208, 300, 450, 1024].map(n => `<button class="d-btn" data-d-m2="${n}" type="button">${n}</button>`).join('')}
+            </div>
+          </div>
+        `;
+      } else if (state.mode === 3) {
+        const presets = [[25, 14], [48, 35], [67, 58], [148, 76], [285, 147]];
+        modeSection = `
+          <div class="drawer-section">
+            <span class="drawer-label">Contas de Adição (Vai Um)</span>
+            <div class="drawer-grid">
+              ${presets.map(([a, b]) => `<button class="d-btn" data-d-m3="${a}-${b}" type="button">${a} + ${b}</button>`).join('')}
+            </div>
+          </div>
+        `;
+      } else if (state.mode === 4) {
+        const presets = [[83, 47], [52, 18], [70, 26], [204, 67], [300, 145]];
+        modeSection = `
+          <div class="drawer-section">
+            <span class="drawer-label">Contas de Subtração (Empresta)</span>
+            <div class="drawer-grid">
+              ${presets.map(([a, b]) => `<button class="d-btn" data-d-m4="${a}-${b}" type="button">${a} − ${b}</button>`).join('')}
+            </div>
+          </div>
+          <p class="drawer-note"><strong>Dica:</strong> Em <strong>204 − 67</strong>, o aluno vê o empréstimo em cascata da Centena para a Dezena e depois para a Unidade!</p>
+        `;
+      } else if (state.mode === 5) {
+        modeSection = `
+          <div class="drawer-section">
+            <span class="drawer-label">Atalhos de Multiplicação</span>
+            <div class="drawer-grid">
+              <button class="d-btn" data-d-m5="dist1-4-23" type="button">4 × 23 (1 alg.)</button>
+              <button class="d-btn" data-d-m5="dist1-3-45" type="button">3 × 45 (1 alg.)</button>
+              <button class="d-btn" data-d-m5="dist2-14-23" type="button">14 × 23 (2 alg.)</button>
+              <button class="d-btn" data-d-m5="dist2-12-34" type="button">12 × 34 (2 alg.)</button>
+              <button class="d-btn" data-d-m5="pack-3-24" type="button">Pacotes: 3 × 24</button>
+            </div>
+          </div>
+        `;
+      } else {
+        modeSection = `
+          <div class="drawer-section">
+            <span class="drawer-label">Números para Noves Fora</span>
+            <div class="drawer-grid">
+              ${[248, 357, 486, 519, 1234].map(n => `<button class="d-btn" data-d-m6="${n}" type="button">${n}</button>`).join('')}
+            </div>
+          </div>
+        `;
+      }
+
+      drawerBodyEl.innerHTML = rodsSection + modeSection;
+
+      drawerBodyEl.querySelectorAll('[data-rods]').forEach(btn => {
+        btn.addEventListener('click', () => {
+          state.rodCount = Number(btn.dataset.rods);
+          for (let i = state.rodCount; i < 4; i++) state.rods[i] = 0;
+          render();
+          renderDrawer();
+        });
+      });
+
+      drawerBodyEl.querySelectorAll('[data-d-m1]').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const v = Number(btn.dataset.dM1);
+          ensureRodsFor(v);
+          initMode1(v);
+          setDrawerOpen(false);
+        });
+      });
+      drawerBodyEl.querySelectorAll('[data-d-m2]').forEach(btn => {
+        btn.addEventListener('click', () => { initMode2(Number(btn.dataset.dM2)); setDrawerOpen(false); });
+      });
+      drawerBodyEl.querySelectorAll('[data-d-m3]').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const [a, b] = btn.dataset.dM3.split('-').map(Number);
+          initMode3(a, b);
+          setDrawerOpen(false);
+        });
+      });
+      drawerBodyEl.querySelectorAll('[data-d-m4]').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const [a, b] = btn.dataset.dM4.split('-').map(Number);
+          initMode4(a, b);
+          setDrawerOpen(false);
+        });
+      });
+      drawerBodyEl.querySelectorAll('[data-d-m5]').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const [kind, f, b] = btn.dataset.dM5.split('-');
+          if (kind === 'pack') {
+            state.m5.packFactor = Number(f);
+            state.m5.packBase = Number(b);
+            initMode5('packs');
+          } else {
+            state.m5.distType = kind === 'dist1' ? 1 : 2;
+            state.m5.distFactor = Number(f);
+            state.m5.distBase = Number(b);
+            initMode5('dist');
+          }
+          setDrawerOpen(false);
+        });
+      });
+      drawerBodyEl.querySelectorAll('[data-d-m6]').forEach(btn => {
+        btn.addEventListener('click', () => {
+          state.m6.secretNum = Number(btn.dataset.dM6);
+          initMode6('secret');
+          setDrawerOpen(false);
+        });
+      });
+    }
+
+    function randomizeCurrentMode() {
+      if (state.mode === 1) {
+        initMode1(10 + Math.floor(Math.random() * Math.min(890, maxAllowedNumber() - 10)));
+      } else if (state.mode === 2) {
+        initMode2(12 + Math.floor(Math.random() * Math.min(880, maxAllowedNumber() - 12)));
+      } else if (state.mode === 3) {
+        const a = 25 + Math.floor(Math.random() * 64);
+        const b = 17 + Math.floor(Math.random() * 52);
+        initMode3(a, b);
+      } else if (state.mode === 4) {
+        const a = 52 + Math.floor(Math.random() * 44);
+        const b = 16 + Math.floor(Math.random() * 34);
+        initMode4(a, b);
+      } else if (state.mode === 5) {
+        if (state.m5.subMode === 'dist' && state.m5.distType === 2) {
+          state.m5.distFactor = 11 + Math.floor(Math.random() * 5);
+          state.m5.distBase = 21 + Math.floor(Math.random() * 14);
+        } else {
+          state.m5.distFactor = 3 + Math.floor(Math.random() * 3);
+          state.m5.distBase = 14 + Math.floor(Math.random() * 25);
+          state.m5.packFactor = state.m5.distFactor;
+          state.m5.packBase = state.m5.distBase;
+        }
+        initMode5(state.m5.subMode);
+      } else {
+        if (state.m6.subMode === 'secret') {
+          state.m6.secretNum = 123 + Math.floor(Math.random() * 760);
+          initMode6('secret');
+        } else {
+          state.m6.huntIdx = (state.m6.huntIdx + 1) % HUNT_PROBLEMS.length;
+          initMode6('hunt');
+        }
+      }
+      if (state.drawerOpen) renderDrawer();
+    }
+
+    /* =========================================================
+       RENDERIZADOR PRINCIPAL E EVENTOS GLOBAIS
+       ========================================================= */
+    function render() {
+      document.querySelectorAll('.mode-tab').forEach(tab => {
+        const active = Number(tab.dataset.mode) === state.mode;
+        tab.classList.toggle('active', active);
+        tab.setAttribute('aria-selected', String(active));
+      });
+
+      renderAbacusSvg();
+      renderRodControls();
+      renderSidePane();
+      renderQuickStripAndFooter();
+    }
+
+    function updateAudioButtonUI() {
+      const m = AudioSystem.getMode();
+      audioBtn.classList.toggle('audio-muted', m === 'mute');
+      if (m === 'voice') {
+        audioIconEl.textContent = '🔊';
+        audioLabelEl.textContent = 'Voz + Som';
+      } else if (m === 'sfx') {
+        audioIconEl.textContent = '🎵';
+        audioLabelEl.textContent = 'Só Som';
+      } else {
+        audioIconEl.textContent = '🔇';
+        audioLabelEl.textContent = 'Mudo';
+      }
+    }
+
+    document.querySelectorAll('.mode-tab').forEach(tab => {
+      tab.addEventListener('click', () => {
+        const nextMode = Number(tab.dataset.mode);
+        clearAnimations();
+        AudioSystem.stopSpeech();
+        state.mode = nextMode;
+        if (state.drawerOpen) renderDrawer();
+
+        if (nextMode === 1) render();
+        else if (nextMode === 2) initMode2(state.m2.target);
+        else if (nextMode === 3) initMode3(state.m3.a, state.m3.b);
+        else if (nextMode === 4) initMode4(state.m4.a, state.m4.b);
+        else if (nextMode === 5) initMode5(state.m5.subMode);
+        else if (nextMode === 6) initMode6(state.m6.subMode);
+      });
+    });
+
+    audioBtn.addEventListener('click', () => {
+      AudioSystem.cycleMode();
+      updateAudioButtonUI();
+    });
+
+    resetBtn.addEventListener('click', () => {
+      if (state.mode === 1) initMode1(0);
+      else if (state.mode === 2) initMode2(state.m2.target);
+      else if (state.mode === 3) initMode3(state.m3.a, state.m3.b);
+      else if (state.mode === 4) initMode4(state.m4.a, state.m4.b);
+      else if (state.mode === 5) initMode5(state.m5.subMode);
+      else if (state.mode === 6) initMode6(state.m6.subMode);
+    });
+
+    panelToggleBtn.addEventListener('click', () => setDrawerOpen(!state.drawerOpen));
+    drawerCloseBtn.addEventListener('click', () => setDrawerOpen(false));
+    drawerBackdropEl.addEventListener('click', () => setDrawerOpen(false));
+    drawerRandomBtn.addEventListener('click', () => {
+      randomizeCurrentMode();
+      setDrawerOpen(false);
+    });
+
+    window.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && state.drawerOpen) setDrawerOpen(false);
+    });
+
+    window.onload = function () {
+      updateAudioButtonUI();
+      initMode1(0);
+    };
+  </script>
+</body>
+</html>
