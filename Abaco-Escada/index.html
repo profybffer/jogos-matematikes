@@ -1,0 +1,2659 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>Ábaco de Escada — Divisão, Decimais e Dízimas</title>
+  <style>
+    /* =========================================================================
+       DESIGN TOKENS — OFICINA PEDAGÓGICA DE MADEIRA & ENCAIXE 100dvh × 100vw
+       ========================================================================= */
+    :root {
+      --bg-cream: #f6f2ea;
+      --bg-paper: #fffdf9;
+      --bg-soft: #efe8dc;
+      --ink: #2a211b;
+      --ink-muted: #6c5e52;
+      --border: #dfd4c3;
+
+      --wood-1: #ebd0a7;
+      --wood-2: #c99961;
+      --wood-3: #926232;
+      --wood-4: #5f3c1b;
+
+      --col-C: #6c4ab6;
+      --col-D: #d94f3d;
+      --col-U: #22996a;
+      --col-d: #e09119;
+      --col-c: #1e8bc3;
+      --col-m: #c84382;
+
+      --gold-dark: #9c6406;
+      --radius-md: 10px;
+      --radius-sm: 7px;
+      --shadow-sm: 0 2px 8px rgba(64, 42, 20, 0.08);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html, body {
+      width: 100vw;
+      height: 100dvh;
+      overflow: hidden;
+      font-family: 'Nunito', 'Segoe UI', system-ui, -apple-system, sans-serif;
+      background-color: var(--bg-cream);
+      background-image: radial-gradient(rgba(146, 98, 50, 0.055) 1px, transparent 1px);
+      background-size: 18px 18px;
+      color: var(--ink);
+      line-height: 1.25;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    /* Fallback seguro apenas para telas extremamente baixas (< 420px) */
+    @media (max-height: 419px) {
+      html, body {
+        height: auto;
+        min-height: 100dvh;
+        overflow-y: auto;
+      }
+      .app-shell {
+        height: auto !important;
+        min-height: 420px;
+      }
+    }
+
+    /* =========================================================================
+       CONTAINER RAIZ — 100dvh × 100vw FLEX COLUMN SEM CORTES
+       ========================================================================= */
+    .app-shell {
+      width: 100vw;
+      height: 100dvh;
+      display: flex;
+      flex-direction: column;
+      padding: 5px 7px;
+      gap: 5px;
+      overflow: hidden;
+    }
+
+    /* =========================================================================
+       1. BARRA SUPERIOR COMPACTA (42px)
+       ========================================================================= */
+    .top-bar {
+      height: 42px;
+      min-height: 40px;
+      max-height: 46px;
+      flex-shrink: 0;
+      background: var(--bg-paper);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 0 7px;
+      box-shadow: var(--shadow-sm);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 6px;
+      overflow-x: auto;
+      overflow-y: hidden;
+      scrollbar-width: none;
+    }
+    .top-bar::-webkit-scrollbar { display: none; }
+
+    .brand-mini {
+      display: none;
+      align-items: center;
+      gap: 5px;
+      font-weight: 900;
+      font-size: 0.82rem;
+      color: var(--wood-4);
+      white-space: nowrap;
+      padding-right: 4px;
+      border-right: 1.5px solid var(--border);
+      flex-shrink: 0;
+    }
+    @media (min-width: 1120px) {
+      .brand-mini { display: flex; }
+    }
+
+    .phase-tabs {
+      display: flex;
+      align-items: center;
+      gap: 3px;
+      flex-shrink: 0;
+    }
+
+    .phase-tab {
+      appearance: none;
+      border: 1.5px solid var(--border);
+      background: var(--bg-cream);
+      color: var(--ink);
+      font-family: inherit;
+      font-weight: 800;
+      font-size: clamp(0.67rem, 1.15vw, 0.77rem);
+      padding: 4px clamp(5px, 0.85vw, 9px);
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      white-space: nowrap;
+      transition: all 0.14s ease;
+    }
+
+    .phase-tab:hover {
+      border-color: var(--wood-2);
+      background: #fff;
+    }
+
+    .phase-tab.active {
+      background: linear-gradient(180deg, #fff9ec 0%, #f3e1be 100%);
+      border-color: var(--wood-3);
+      color: var(--wood-4);
+      box-shadow: 0 1px 4px rgba(146, 98, 50, 0.2);
+    }
+
+    .challenge-controls {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      flex-shrink: 0;
+    }
+
+    .challenge-select {
+      appearance: none;
+      background: #fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='11' height='11' viewBox='0 0 24 24' fill='none' stroke='%235f3c1b' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E") no-repeat right 7px center;
+      border: 1.5px solid var(--wood-2);
+      border-radius: var(--radius-sm);
+      padding: 4px 22px 4px 8px;
+      font-family: inherit;
+      font-weight: 800;
+      font-size: clamp(0.69rem, 1.15vw, 0.79rem);
+      color: var(--ink);
+      cursor: pointer;
+      max-width: 148px;
+    }
+
+    .free-inputs {
+      display: none;
+      align-items: center;
+      gap: 3px;
+    }
+    .free-inputs.is-visible { display: flex; }
+
+    .free-num {
+      width: 44px;
+      padding: 3px 4px;
+      border: 1.5px solid var(--border);
+      border-radius: 6px;
+      font-family: inherit;
+      font-weight: 800;
+      font-size: 0.76rem;
+      text-align: center;
+      color: var(--ink);
+      background: #fff;
+    }
+    .free-num:focus { outline: none; border-color: var(--wood-3); }
+
+    .free-mode-select {
+      padding: 3px 4px;
+      border: 1.5px solid var(--border);
+      border-radius: 6px;
+      font-family: inherit;
+      font-weight: 700;
+      font-size: 0.71rem;
+      background: #fff;
+      color: var(--ink);
+    }
+
+    .utils-group {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      flex-shrink: 0;
+      margin-left: auto;
+    }
+
+    .mini-btn {
+      appearance: none;
+      border: 1.5px solid var(--border);
+      background: var(--bg-cream);
+      color: var(--ink);
+      font-family: inherit;
+      font-weight: 800;
+      font-size: clamp(0.67rem, 1.1vw, 0.76rem);
+      padding: 4px 7px;
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 3px;
+      white-space: nowrap;
+      position: relative;
+      transition: all 0.14s ease;
+    }
+    .mini-btn:hover { background: #fff; border-color: var(--wood-2); }
+    .mini-btn.active {
+      background: #fdf2d8;
+      border-color: var(--wood-3);
+      color: var(--wood-4);
+    }
+    .mini-btn.apply-btn {
+      background: var(--wood-3);
+      border-color: var(--wood-4);
+      color: #fff;
+      padding: 4px 8px;
+    }
+    .mini-btn.chave-toggle.active {
+      background: #e5f3fc;
+      border-color: var(--col-c);
+      color: #10557a;
+    }
+
+    /* Bolinha indicadora sutil quando o painel atualiza fechado */
+    .update-dot {
+      position: absolute;
+      top: -3px;
+      right: -3px;
+      width: 9px;
+      height: 9px;
+      border-radius: 50%;
+      background: var(--col-D);
+      border: 1.5px solid #fff;
+      display: none;
+      animation: dotPop 0.3s ease-out;
+    }
+    .update-dot.is-visible { display: block; }
+    @keyframes dotPop {
+      0% { transform: scale(0.2); }
+      70% { transform: scale(1.3); }
+      100% { transform: scale(1); }
+    }
+
+    /* =========================================================================
+       2. FAIXA DE STATUS / EQUAÇÃO CONTEXTUAL (34px)
+       ========================================================================= */
+    .status-strip {
+      height: 34px;
+      min-height: 32px;
+      max-height: 38px;
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      background: linear-gradient(90deg, #fff9ec 0%, #f8eed8 100%);
+      border: 1px solid #e6d7bd;
+      border-left: 4px solid var(--wood-2);
+      border-radius: 9px;
+      padding: 0 9px;
+      overflow: hidden;
+    }
+
+    .status-strip.is-success {
+      background: linear-gradient(90deg, #e9f8f1 0%, #ddf3e8 100%);
+      border-left-color: var(--col-U);
+    }
+    .status-strip.is-decimal {
+      background: linear-gradient(90deg, #eef6fc 0%, #e1effa 100%);
+      border-left-color: var(--col-c);
+    }
+    .status-strip.is-repeating {
+      background: linear-gradient(90deg, #f6eefc 0%, #eddcf9 100%);
+      border-left-color: var(--col-C);
+    }
+
+    .eq-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      background: #fff;
+      border: 1.5px solid #e0cfa9;
+      border-radius: 999px;
+      padding: 2px 10px;
+      font-size: clamp(0.74rem, 1.35vw, 0.88rem);
+      font-weight: 900;
+      color: var(--wood-4);
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+
+    .eq-badge {
+      font-size: 0.68rem;
+      font-weight: 900;
+      padding: 1px 6px;
+      border-radius: 999px;
+      color: #fff;
+      background: var(--col-D);
+    }
+    .eq-badge.is-period { background: var(--col-C); }
+    .eq-badge.is-exact  { background: var(--col-U); }
+
+    .period-bar {
+      text-decoration: overline;
+      text-decoration-thickness: 2px;
+      color: var(--col-C);
+    }
+
+    .guidance-line {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      font-size: clamp(0.71rem, 1.25vw, 0.83rem);
+      font-weight: 800;
+      color: var(--ink);
+      min-width: 0;
+      flex: 1;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .guidance-text {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    /* =========================================================================
+       3. ÁREA CENTRAL ELÁSTICA: ÁBACO SVG + CONTA NA CHAVE & OPERAÇÃO INVERSA
+       ========================================================================= */
+    .main-stage {
+      flex: 1 1 0;
+      min-height: 0;
+      display: flex;
+      gap: 6px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .abacus-pane {
+      flex: 1 1 0;
+      min-width: 0;
+      min-height: 0;
+      background: linear-gradient(180deg, #fcfaf5 0%, #f1e8d8 100%);
+      border: 1.5px solid #e3d6c0;
+      border-radius: 12px;
+      box-shadow: var(--shadow-sm);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      overflow: hidden;
+      user-select: none;
+    }
+
+    #abacus-svg {
+      width: 100%;
+      height: 100%;
+      max-height: 100%;
+      display: block;
+    }
+
+    .pin-hit-area { cursor: pointer; }
+    .pin-hit-area:hover .active-halo { stroke-opacity: 0.95; }
+
+    /* Banner flutuante educativo de Dízima Periódica */
+    .period-toast {
+      position: absolute;
+      bottom: 8px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: linear-gradient(135deg, #f8f1fe 0%, #ebd9fa 100%);
+      border: 2px solid var(--col-C);
+      border-radius: 12px;
+      padding: 6px 12px;
+      box-shadow: 0 6px 20px rgba(75, 43, 138, 0.25);
+      display: none;
+      align-items: center;
+      gap: 9px;
+      max-width: 94%;
+      z-index: 12;
+      animation: popIn 0.25s ease-out;
+    }
+    .period-toast.is-visible { display: flex; }
+
+    @keyframes popIn {
+      from { opacity: 0; transform: translate(-50%, 8px) scale(0.96); }
+      to   { opacity: 1; transform: translate(-50%, 0) scale(1); }
+    }
+
+    .period-toast-body {
+      font-size: clamp(0.71rem, 1.25vw, 0.81rem);
+      font-weight: 800;
+      color: #42227a;
+      line-height: 1.25;
+    }
+    .period-toast-close {
+      appearance: none;
+      border: none;
+      background: rgba(108, 74, 182, 0.16);
+      color: #42227a;
+      font-weight: 900;
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      cursor: pointer;
+      flex-shrink: 0;
+    }
+
+    /* =========================================================================
+       PAINEL CONTA NA CHAVE + OPERAÇÃO INVERSA (DRAWER < 1020px / LATERAL >= 1020px)
+       ========================================================================= */
+    .drawer-backdrop {
+      display: none;
+      position: absolute;
+      inset: 0;
+      background: rgba(42, 33, 27, 0.28);
+      z-index: 20;
+      border-radius: 12px;
+    }
+    .drawer-backdrop.is-open { display: block; }
+
+    .chave-panel {
+      position: absolute;
+      top: 0;
+      right: 0;
+      bottom: 0;
+      width: min(390px, 92vw);
+      background: var(--bg-paper);
+      border: 1.5px solid var(--border);
+      border-radius: 12px;
+      box-shadow: -6px 0 22px rgba(42, 33, 27, 0.18);
+      padding: 8px 9px;
+      display: flex;
+      flex-direction: column;
+      gap: 7px;
+      z-index: 25;
+      transform: translateX(106%);
+      transition: transform 0.22s cubic-bezier(0.22, 1, 0.36, 1);
+      overflow: hidden;
+    }
+
+    .chave-panel.is-open {
+      transform: translateX(0);
+    }
+
+    @media (min-width: 1020px) {
+      .drawer-backdrop { display: none !important; }
+      .chave-panel {
+        position: static;
+        width: clamp(330px, 31vw, 410px);
+        flex-shrink: 0;
+        transform: none !important;
+        box-shadow: var(--shadow-sm);
+        transition: none;
+      }
+      .chave-panel:not(.is-open) {
+        display: none;
+      }
+    }
+
+    .panel-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 0.72rem;
+      font-weight: 900;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      color: var(--ink-muted);
+      flex-shrink: 0;
+    }
+
+    .close-drawer-btn {
+      appearance: none;
+      border: 1px solid var(--border);
+      background: var(--bg-cream);
+      color: var(--ink);
+      width: 22px;
+      height: 22px;
+      border-radius: 6px;
+      font-weight: 900;
+      font-size: 0.78rem;
+      cursor: pointer;
+    }
+
+    /* Grade interna: Conta na Chave (A) + Operação Inversa (B) lado a lado */
+    .chave-split {
+      flex: 1 1 0;
+      min-height: 0;
+      display: grid;
+      grid-template-columns: 1.05fr 1fr;
+      gap: 7px;
+      overflow: hidden;
+    }
+
+    @media (max-width: 390px) {
+      .chave-split {
+        grid-template-columns: 1fr;
+        grid-template-rows: 1fr 1fr;
+      }
+    }
+
+    .sub-card {
+      background: #fcfaf5;
+      border: 1.5px solid #e6dccb;
+      border-radius: 9px;
+      padding: 7px 8px;
+      display: flex;
+      flex-direction: column;
+      min-height: 0;
+      overflow: hidden;
+    }
+
+    .sub-card-title {
+      font-size: 0.67rem;
+      font-weight: 900;
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+      color: var(--wood-4);
+      padding-bottom: 4px;
+      margin-bottom: 5px;
+      border-bottom: 1px dashed #e1d5c1;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-shrink: 0;
+    }
+
+    /* (A) Conta na Chave */
+    .chave-scroll {
+      flex: 1 1 0;
+      min-height: 0;
+      font-family: 'JetBrains Mono', 'Fira Code', 'Consolas', monospace;
+      font-size: 0.86rem;
+      font-weight: 700;
+      overflow-y: auto;
+      overflow-x: auto;
+    }
+
+    .chave-grid {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 6px;
+      align-items: start;
+    }
+
+    .chave-left { display: flex; flex-direction: column; gap: 1px; }
+    .chave-dividend {
+      font-size: 1.05rem;
+      letter-spacing: 0.08em;
+      padding-left: 6px;
+      display: inline-flex;
+      align-items: center;
+      gap: 1px;
+    }
+    .div-digit {
+      display: inline-block;
+      padding: 0 2px;
+      border-radius: 4px;
+      transition: all 0.2s ease;
+    }
+    .div-digit.is-focus {
+      background: #fff2c6;
+      box-shadow: inset 0 -2px 0 var(--wood-3);
+      font-weight: 900;
+    }
+    .div-digit.is-brought {
+      text-decoration: underline;
+      text-decoration-style: dotted;
+    }
+
+    .chave-right { border-left: 2.5px solid var(--ink); padding-left: 7px; min-width: 68px; }
+    .chave-divisor { border-bottom: 2.5px solid var(--ink); padding-bottom: 2px; margin-bottom: 4px; font-size: 1.02rem; }
+    .chave-quotient { font-size: 1.02rem; letter-spacing: 0.02em; min-height: 20px; }
+    .chave-line { font-size: 0.8rem; line-height: 1.35; white-space: pre; }
+    .chave-sub { color: #b53425; }
+    .chave-rule { display: inline-block; min-width: 32px; border-bottom: 1.5px solid #8a7b6a; margin: 1px 0 2px; }
+    .chave-zero { background: #dff1fc; color: var(--col-c); border-radius: 3px; padding: 0 2px; font-weight: 900; }
+    .chave-down {
+      display: inline-flex;
+      align-items: center;
+      gap: 1px;
+      background: #fff2cc;
+      color: var(--wood-4);
+      border: 1px solid #e3b859;
+      border-radius: 4px;
+      padding: 0 3px;
+      font-weight: 900;
+      animation: dropArrow 0.45s ease-out;
+    }
+    @keyframes dropArrow {
+      0% { opacity: 0; transform: translateY(-7px); }
+      100% { opacity: 1; transform: translateY(0); }
+    }
+
+    /* (B) Operação Inversa (Tabuada Dinâmica) */
+    .inv-context {
+      font-size: 0.72rem;
+      font-weight: 800;
+      color: var(--ink);
+      background: #f3ecdf;
+      border-radius: 6px;
+      padding: 4px 6px;
+      margin-bottom: 5px;
+      flex-shrink: 0;
+      line-height: 1.25;
+    }
+
+    .inv-list {
+      flex: 1 1 0;
+      min-height: 0;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+      font-family: 'JetBrains Mono', 'Fira Code', 'Consolas', monospace;
+    }
+
+    .inv-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 3px 6px;
+      border-radius: 6px;
+      font-size: 0.78rem;
+      font-weight: 800;
+      background: #eef8f3;
+      border: 1px solid #bce4d1;
+      color: #156243;
+      animation: fadeSlide 0.2s ease-out;
+    }
+    .inv-row.is-latest {
+      background: #d8f3e5;
+      border-color: var(--col-U);
+      box-shadow: 0 1px 3px rgba(34, 153, 106, 0.16);
+    }
+    .inv-row.is-exceeded {
+      background: #fdf0ee;
+      border: 1px dashed #e5a39b;
+      color: #b53425;
+      font-size: 0.73rem;
+    }
+    .inv-row.is-exceeded .inv-eq {
+      text-decoration: line-through;
+      opacity: 0.85;
+    }
+    .inv-tag {
+      font-family: 'Nunito', 'Segoe UI', sans-serif;
+      font-size: 0.65rem;
+      font-weight: 900;
+      padding: 1px 5px;
+      border-radius: 999px;
+      background: rgba(181, 52, 37, 0.12);
+      color: #a1291b;
+      white-space: nowrap;
+    }
+
+    .inv-stop-box {
+      margin-top: 3px;
+      padding: 5px 6px;
+      border-radius: 7px;
+      background: #fff7e2;
+      border: 1.5px solid #e6c36d;
+      font-family: 'Nunito', 'Segoe UI', sans-serif;
+      font-size: 0.72rem;
+      font-weight: 800;
+      color: var(--wood-4);
+      line-height: 1.25;
+    }
+
+    .inv-empty {
+      font-family: 'Nunito', 'Segoe UI', sans-serif;
+      font-size: 0.74rem;
+      font-weight: 700;
+      color: var(--ink-muted);
+      padding: 8px 4px;
+      text-align: center;
+    }
+
+    @keyframes fadeSlide {
+      from { opacity: 0; transform: translateX(-5px); }
+      to   { opacity: 1; transform: translateX(0); }
+    }
+
+    .summary-box {
+      background: #f5efe4;
+      border: 1px solid #e2d5bf;
+      border-radius: 8px;
+      padding: 5px 8px;
+      font-size: 0.77rem;
+      font-weight: 800;
+      color: var(--ink);
+      text-align: center;
+      display: none;
+      flex-shrink: 0;
+    }
+    .summary-box.is-visible { display: block; }
+
+    /* =========================================================================
+       4. BARRA INFERIOR DE AÇÕES FIXA E COMPACTA (50px)
+       ========================================================================= */
+    .action-bar {
+      height: 50px;
+      min-height: 46px;
+      max-height: 54px;
+      flex-shrink: 0;
+      background: var(--bg-paper);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 4px 6px;
+      box-shadow: var(--shadow-sm);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      flex-wrap: nowrap;
+    }
+
+    .act-btn {
+      appearance: none;
+      border: none;
+      border-radius: 9px;
+      height: 38px;
+      padding: 0 clamp(8px, 1.3vw, 15px);
+      font-family: inherit;
+      font-size: clamp(0.71rem, 1.38vw, 0.85rem);
+      font-weight: 800;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 5px;
+      box-shadow: 0 2.5px 0 rgba(42, 33, 27, 0.22);
+      transition: transform 0.1s ease, filter 0.14s ease, opacity 0.16s ease;
+      white-space: nowrap;
+      min-width: 0;
+    }
+
+    .act-btn:hover:not(:disabled) { filter: brightness(1.05); transform: translateY(-1px); }
+    .act-btn:active:not(:disabled) { transform: translateY(1.5px); box-shadow: 0 1px 0 rgba(42, 33, 27, 0.22); }
+    .act-btn:disabled { opacity: 0.36; cursor: not-allowed; box-shadow: none; }
+
+    .btn-group {
+      background: linear-gradient(180deg, #2cb27d 0%, #1e885e 100%);
+      color: #fff;
+      flex: 1 1 auto;
+      max-width: 245px;
+    }
+
+    .btn-exchange {
+      background: linear-gradient(180deg, #ee9f2d 0%, #cf7a0f 100%);
+      color: #fff;
+      flex: 1 1 auto;
+      max-width: 255px;
+    }
+
+    .btn-comma {
+      background: linear-gradient(180deg, #ffdb6b 0%, #e09c17 100%);
+      color: #462700;
+      border: 1.5px solid #fff3c2;
+      flex: 1 1 auto;
+      max-width: 270px;
+      animation: softPulse 1.4s ease-in-out infinite;
+    }
+
+    .btn-advance {
+      background: linear-gradient(180deg, #339ad1 0%, #1d75a6 100%);
+      color: #fff;
+      flex: 1 1 auto;
+      max-width: 215px;
+    }
+
+    .btn-secondary {
+      background: var(--bg-soft);
+      color: var(--ink);
+      border: 1.5px solid var(--border);
+      box-shadow: 0 2px 0 rgba(42, 33, 27, 0.12);
+      flex: 0 0 auto;
+    }
+
+    .is-pulsing {
+      animation: softPulse 1.4s ease-in-out infinite;
+    }
+
+    @keyframes softPulse {
+      0%, 100% { box-shadow: 0 2.5px 0 rgba(42, 33, 27, 0.22), 0 0 0 0 rgba(230, 168, 37, 0.55); }
+      50%      { box-shadow: 0 2.5px 0 rgba(42, 33, 27, 0.22), 0 0 0 7px rgba(230, 168, 37, 0); }
+    }
+
+    @media (max-width: 479px) {
+      .app-shell { padding: 4px; gap: 4px; }
+      .action-bar {
+        height: auto;
+        max-height: 88px;
+        flex-wrap: wrap;
+        gap: 4px;
+      }
+      .act-btn { height: 36px; font-size: 0.73rem; padding: 0 8px; }
+      .btn-group, .btn-exchange, .btn-comma, .btn-advance { flex: 1 1 46%; max-width: none; }
+      .btn-secondary { flex: 1 1 46%; }
+      .hide-xs { display: none; }
+    }
+  </style>
+</head>
+<body>
+  <div class="app-shell">
+    <!-- 1. BARRA SUPERIOR COMPACTA -->
+    <header class="top-bar"><button id="autoriaBtn" type="button" aria-label="Autoria" onclick="document.getElementById('autoriaTxt').classList.toggle('on')" style="flex:0 0 auto;width:20px;height:20px;margin:0 4px;border-radius:50%;border:1px solid rgba(128,128,128,.5);background:transparent;color:inherit;font:11px/18px sans-serif;text-align:center;padding:0;cursor:pointer;opacity:.5">©</button>
+      <div class="brand-mini">🪜 Ábaco de Escada</div>
+
+      <nav class="phase-tabs" aria-label="Fases pedagógicas">
+        <button class="phase-tab active" data-phase="1" type="button">1. Resto</button>
+        <button class="phase-tab" data-phase="2" type="button">2. Vírgula</button>
+        <button class="phase-tab" data-phase="3" type="button">3. Dízimas</button>
+        <button class="phase-tab" data-phase="free" type="button">Livre</button>
+      </nav>
+
+      <div class="challenge-controls">
+        <select id="challenge-select" class="challenge-select" aria-label="Escolher desafio"></select>
+
+        <div id="free-inputs" class="free-inputs">
+          <input id="input-dividend" class="free-num" type="number" min="1" max="999" value="57" title="Dividendo (1 a 999)" aria-label="Dividendo" />
+          <span style="font-weight:900;color:var(--wood-4);font-size:0.8rem;">÷</span>
+          <input id="input-divisor" class="free-num" type="number" min="2" max="9" value="4" title="Divisor (2 a 9)" aria-label="Divisor" />
+          <select id="select-free-mode" class="free-mode-select" aria-label="Modo">
+            <option value="decimals" selected>Vírgula</option>
+            <option value="remainder">Resto</option>
+          </select>
+          <button id="btn-apply-free" class="mini-btn apply-btn" type="button">Ir</button>
+        </div>
+      </div>
+
+      <div class="utils-group">
+        <button id="btn-speed" class="mini-btn" type="button" title="Alternar velocidade (Normal / Lento)">
+          <span id="speed-icon">⚡</span><span id="speed-text" class="hide-xs">Normal</span>
+        </button>
+        <button id="btn-sound" class="mini-btn active" type="button" title="Ativar/Silenciar som">
+          <span id="sound-icon">🔊</span>
+        </button>
+        <button id="btn-toggle-chave" class="mini-btn chave-toggle" type="button" title="Abrir/Fechar Conta na Chave e Tabuada">
+          <span>📝</span><span>Chave &amp; Tabuada</span>
+          <span id="chave-update-dot" class="update-dot"></span>
+        </button>
+      </div>
+    </header>
+
+    <!-- 2. FAIXA DE STATUS / EQUAÇÃO CONTEXTUAL -->
+    <div id="status-strip" class="status-strip" role="status" aria-live="polite">
+      <div id="eq-pill" class="eq-pill">57 ÷ 4 = ?</div>
+      <div class="guidance-line">
+        <span id="guidance-icon">✋</span>
+        <span id="guidance-text" class="guidance-text">Carregando ábaco...</span>
+      </div>
+    </div>
+
+    <!-- 3. ÁREA CENTRAL ELÁSTICA: ÁBACO SVG + PAINEL CHAVE & OPERAÇÃO INVERSA -->
+    <main class="main-stage">
+      <section class="abacus-pane">
+        <!-- Toast educativo de Dízima Periódica -->
+        <div id="period-toast" class="period-toast" role="region" aria-label="Dízima Periódica">
+          <span style="font-size:1.25rem;">♾️</span>
+          <div id="period-toast-body" class="period-toast-body"></div>
+          <button id="period-toast-close" class="period-toast-close" type="button" title="Fechar aviso">✕</button>
+        </div>
+
+        <!-- SVG 100% ESCALÁVEL COM ZONA DE QUOCIENTE VISUAL + GRUPOS ALINHADOS + ESCADA -->
+        <svg id="abacus-svg" viewBox="0 0 860 390" preserveAspectRatio="xMidYMid meet" role="img" aria-label="Ábaco de Escada interativo">
+          <defs>
+            <!-- Madeira da Escada -->
+            <linearGradient id="woodStepGrad" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stop-color="#e5c191" />
+              <stop offset="22%" stop-color="#c8965d" />
+              <stop offset="82%" stop-color="#a8743d" />
+              <stop offset="100%" stop-color="#7c5024" />
+            </linearGradient>
+            <linearGradient id="woodTopLip" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stop-color="#f6e0bc" />
+              <stop offset="100%" stop-color="#d8ae78" />
+            </linearGradient>
+            <!-- Pino de Madeira -->
+            <linearGradient id="woodPinGrad" x1="0" y1="0" x2="1" y2="0">
+              <stop offset="0%" stop-color="#a6743d" />
+              <stop offset="35%" stop-color="#f4dec0" />
+              <stop offset="72%" stop-color="#d4a56e" />
+              <stop offset="100%" stop-color="#8b5c2b" />
+            </linearGradient>
+            <!-- Medalhão da Vírgula -->
+            <linearGradient id="commaLockedGrad" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stop-color="#ded6c9" />
+              <stop offset="100%" stop-color="#b5aa99" />
+            </linearGradient>
+            <linearGradient id="commaGoldGrad" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stop-color="#ffeb99" />
+              <stop offset="55%" stop-color="#e6a825" />
+              <stop offset="100%" stop-color="#a86b08" />
+            </linearGradient>
+            <!-- Gradientes 3D das Peças por Ordem -->
+            <linearGradient id="beadGrad0" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stop-color="#9272dc" /><stop offset="45%" stop-color="#6c4ab6" /><stop offset="100%" stop-color="#482b87" />
+            </linearGradient>
+            <linearGradient id="beadGrad1" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stop-color="#f27463" /><stop offset="45%" stop-color="#d94f3d" /><stop offset="100%" stop-color="#9e2e20" />
+            </linearGradient>
+            <linearGradient id="beadGrad2" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stop-color="#42be8d" /><stop offset="45%" stop-color="#22996a" /><stop offset="100%" stop-color="#146b48" />
+            </linearGradient>
+            <linearGradient id="beadGrad3" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stop-color="#f7b548" /><stop offset="45%" stop-color="#e09119" /><stop offset="100%" stop-color="#a36307" />
+            </linearGradient>
+            <linearGradient id="beadGrad4" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stop-color="#4fb2e5" /><stop offset="45%" stop-color="#1e8bc3" /><stop offset="100%" stop-color="#115e87" />
+            </linearGradient>
+            <linearGradient id="beadGrad5" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stop-color="#e86da7" /><stop offset="45%" stop-color="#c84382" /><stop offset="100%" stop-color="#8c2354" />
+            </linearGradient>
+
+            <filter id="softShadow" x="-15%" y="-15%" width="130%" height="140%">
+              <feDropShadow dx="0" dy="2" stdDeviation="2" flood-color="#3c240d" flood-opacity="0.24" />
+            </filter>
+            <filter id="goldGlow" x="-30%" y="-30%" width="160%" height="160%">
+              <feDropShadow dx="0" dy="0" stdDeviation="4.5" flood-color="#e6a825" flood-opacity="0.78" />
+            </filter>
+          </defs>
+
+          <g id="svg-bg-guides"></g>
+          <g id="svg-quotient-bar"></g>
+          <g id="svg-trays"></g>
+          <g id="svg-pins"></g>
+          <g id="svg-beads"></g>
+          <g id="svg-stairs"></g>
+          <g id="svg-comma"></g>
+          <g id="svg-lock-overlay"></g>
+          <g id="svg-hit-areas"></g>
+          <g id="svg-anim-layer"></g>
+        </svg>
+      </section>
+
+      <!-- Backdrop para drawer em telas < 1020px -->
+      <div id="drawer-backdrop" class="drawer-backdrop"></div>
+
+      <!-- Painel Conta na Chave + Operação Inversa -->
+      <aside id="chave-panel" class="chave-panel" aria-label="Conta na Chave e Operação Inversa">
+        <div class="panel-head">
+          <span>📝 Conta na Chave &amp; Operação Inversa</span>
+          <button id="btn-close-chave" class="close-drawer-btn" type="button" title="Fechar painel">✕</button>
+        </div>
+
+        <div class="chave-split">
+          <!-- (A) CONTA NA CHAVE TRADICIONAL -->
+          <div class="sub-card">
+            <div class="sub-card-title">
+              <span>Conta na Chave</span>
+              <span id="chave-divisor-tag" style="color:var(--wood-3);">÷ 4</span>
+            </div>
+            <div id="chave-scroll" class="chave-scroll"></div>
+          </div>
+
+          <!-- (B) OPERAÇÃO INVERSA (TABUADA DINÂMICA) -->
+          <div class="sub-card">
+            <div class="sub-card-title">
+              <span>Operação Inversa</span>
+              <span id="inv-order-tag" style="color:var(--col-U);">× 4</span>
+            </div>
+            <div id="inv-context" class="inv-context">Dezenas: dividindo 5 por 4</div>
+            <div id="inv-list" class="inv-list"></div>
+          </div>
+        </div>
+
+        <div id="summary-box" class="summary-box"></div>
+      </aside>
+    </main>
+
+    <!-- 4. BARRA INFERIOR DE AÇÕES FIXA E COMPACTA -->
+    <footer class="action-bar">
+      <button id="btn-group" class="act-btn btn-group" type="button">
+        <span>✋</span><span id="btn-group-label">Formar Grupo de 4</span>
+      </button>
+      <button id="btn-exchange" class="act-btn btn-exchange" type="button">
+        <span>⇄</span><span id="btn-exchange-label">Destrocar (1 → 10)</span>
+      </button>
+      <button id="btn-comma" class="act-btn btn-comma" type="button" style="display:none;">
+        <span>✨</span><span>Cruzar a Vírgula (1 U → 10 d)</span>
+      </button>
+      <button id="btn-advance" class="act-btn btn-advance" type="button" style="display:none;">
+        <span>➔</span><span id="btn-advance-label">Avançar</span>
+      </button>
+      <button id="btn-undo" class="act-btn btn-secondary" type="button" title="Desfazer último passo">
+        <span>↩</span><span>Desfazer</span>
+      </button>
+      <button id="btn-reset" class="act-btn btn-secondary" type="button" title="Reiniciar divisão">
+        <span>↻</span><span>Reiniciar</span>
+      </button>
+    </footer>
+  </div>
+
+  <script>
+    /* =========================================================================
+       CONFIGURAÇÃO DAS 6 ORDENS E GEOMETRIA DO SVG (viewBox 0 0 860 390)
+       ========================================================================= */
+    const SVG_NS = 'http://www.w3.org/2000/svg';
+
+    const ORDERS = [
+      { idx: 0, sym: 'C', name: 'Centenas',   color: '#6c4ab6', dark: '#482b87', x: 92,  stepTop: 296, pinTop: 122, beadW: 84, beadH: 16.2, pitch: 250 },
+      { idx: 1, sym: 'D', name: 'Dezenas',    color: '#d94f3d', dark: '#9e2e20', x: 212, stepTop: 306, pinTop: 132, beadW: 74, beadH: 14.8, pitch: 300 },
+      { idx: 2, sym: 'U', name: 'Unidades',   color: '#22996a', dark: '#146b48', x: 332, stepTop: 316, pinTop: 142, beadW: 64, beadH: 13.6, pitch: 360 },
+      { idx: 3, sym: 'd', name: 'décimos',    color: '#e09119', dark: '#a36307', x: 528, stepTop: 326, pinTop: 152, beadW: 54, beadH: 12.4, pitch: 430 },
+      { idx: 4, sym: 'c', name: 'centésimos', color: '#1e8bc3', dark: '#115e87', x: 648, stepTop: 336, pinTop: 162, beadW: 46, beadH: 11.2, pitch: 510 },
+      { idx: 5, sym: 'm', name: 'milésimos',  color: '#c84382', dark: '#8c2354', x: 768, stepTop: 346, pinTop: 172, beadW: 38, beadH: 10.2, pitch: 600 }
+    ];
+
+    const BASE_BOTTOM_Y = 382;
+    const STEP_WIDTH = 112;
+    const MAX_COMFORTABLE_BEADS = 19;
+
+    // Geometria da Zona Superior de Grupos Alinhados (3×3 = até 9 pacotinhos)
+    const TRAY_TOP_Y = 38;
+    const TRAY_H = 72;
+    const TRAY_W = 102;
+    const PACK_W = 29;
+    const PACK_H = 19;
+    const PACK_GAP_X = 3.5;
+    const PACK_GAP_Y = 3.5;
+
+    const PHASE_CHALLENGES = {
+      '1': [
+        { dividend: 57,  divisor: 4, label: '57 ÷ 4' },
+        { dividend: 13,  divisor: 4, label: '13 ÷ 4' },
+        { dividend: 145, divisor: 4, label: '145 ÷ 4' },
+        { dividend: 83,  divisor: 3, label: '83 ÷ 3' }
+      ],
+      '2': [
+        { dividend: 5,  divisor: 2, label: '5 ÷ 2 = 2,5' },
+        { dividend: 13, divisor: 4, label: '13 ÷ 4 = 3,25' },
+        { dividend: 57, divisor: 4, label: '57 ÷ 4 = 14,25' },
+        { dividend: 11, divisor: 8, label: '11 ÷ 8 = 1,375' }
+      ],
+      '3': [
+        { dividend: 10, divisor: 3, label: '10 ÷ 3 = 3,3̄' },
+        { dividend: 7,  divisor: 9, label: '7 ÷ 9 = 0,7̄' },
+        { dividend: 5,  divisor: 6, label: '5 ÷ 6 = 0,83̄' },
+        { dividend: 23, divisor: 6, label: '23 ÷ 6 = 3,83̄' }
+      ]
+    };
+
+    /* =========================================================================
+       ÁUDIO TÁTIL DE MADEIRA VIA WEB AUDIO API
+       ========================================================================= */
+    const SoundFX = {
+      ctx: null,
+      enabled: true,
+
+      ensure() {
+        if (!this.enabled) return null;
+        if (!this.ctx) {
+          const AC = window.AudioContext || window.webkitAudioContext;
+          if (!AC) return null;
+          this.ctx = new AC();
+        }
+        if (this.ctx.state === 'suspended') this.ctx.resume().catch(() => {});
+        return this.ctx;
+      },
+
+      clack(freq = 360, vol = 0.2) {
+        const ctx = this.ensure();
+        if (!ctx) return;
+        const now = ctx.currentTime;
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.type = 'triangle';
+        osc.frequency.setValueAtTime(freq * 1.35, now);
+        osc.frequency.exponentialRampToValueAtTime(freq * 0.65, now + 0.045);
+
+        gain.gain.setValueAtTime(0.001, now);
+        gain.gain.linearRampToValueAtTime(vol, now + 0.004);
+        gain.gain.exponentialRampToValueAtTime(0.0008, now + 0.055);
+
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.start(now);
+        osc.stop(now + 0.06);
+      },
+
+      groupSettle(orderIdx) {
+        const p = ORDERS[orderIdx].pitch;
+        this.clack(p, 0.18);
+        setTimeout(() => this.clack(p * 1.26, 0.15), 55);
+      },
+
+      chime(notes = [523.25, 659.25, 783.99]) {
+        const ctx = this.ensure();
+        if (!ctx) return;
+        const now = ctx.currentTime;
+        notes.forEach((f, i) => {
+          const osc = ctx.createOscillator();
+          const gain = ctx.createGain();
+          osc.type = 'sine';
+          const t = now + i * 0.08;
+          osc.frequency.setValueAtTime(f, t);
+          gain.gain.setValueAtTime(0.001, t);
+          gain.gain.linearRampToValueAtTime(0.13, t + 0.014);
+          gain.gain.exponentialRampToValueAtTime(0.0008, t + 0.32);
+          osc.connect(gain);
+          gain.connect(ctx.destination);
+          osc.start(t);
+          osc.stop(t + 0.35);
+        });
+      }
+    };
+
+    /* =========================================================================
+       ESTADO GLOBAL + HISTÓRICO DE DESFAZER
+       ========================================================================= */
+    const state = {
+      phase: '1',
+      allowDecimals: false,
+      dividend: 57,
+      divisor: 4,
+      beads: [0, 5, 7, 0, 0, 0],
+      quotient: [null, null, null, null, null, null],
+      groupsFormed: [0, 0, 0, 0, 0, 0],
+      activeOrder: 1,
+      commaUnlocked: false,
+      finished: false,
+      isAnimating: false,
+      slowMode: false,
+      chaveOpen: window.innerWidth >= 1020,
+      chaveHasUpdate: false,
+      toastDismissed: false,
+      decimalRemainders: [],
+      repeatingInfo: null,
+      // Registro da Conta na Chave: cada item representa uma ordem trabalhada ou trazida
+      chaveSteps: [],
+      broughtOrders: [], // ordens cujo algarismo já foi "abaixado" (para seta e destaque)
+      history: []
+    };
+
+    /* =========================================================================
+       REFERÊNCIAS DE DOM
+       ========================================================================= */
+    const dom = {
+      phaseTabs: document.querySelectorAll('.phase-tab'),
+      challengeSelect: document.getElementById('challenge-select'),
+      freeInputs: document.getElementById('free-inputs'),
+      inputDividend: document.getElementById('input-dividend'),
+      inputDivisor: document.getElementById('input-divisor'),
+      selectFreeMode: document.getElementById('select-free-mode'),
+      btnApplyFree: document.getElementById('btn-apply-free'),
+
+      btnSpeed: document.getElementById('btn-speed'),
+      speedIcon: document.getElementById('speed-icon'),
+      speedText: document.getElementById('speed-text'),
+      btnSound: document.getElementById('btn-sound'),
+      soundIcon: document.getElementById('sound-icon'),
+      btnToggleChave: document.getElementById('btn-toggle-chave'),
+      chaveUpdateDot: document.getElementById('chave-update-dot'),
+      btnCloseChave: document.getElementById('btn-close-chave'),
+      chavePanel: document.getElementById('chave-panel'),
+      drawerBackdrop: document.getElementById('drawer-backdrop'),
+
+      statusStrip: document.getElementById('status-strip'),
+      eqPill: document.getElementById('eq-pill'),
+      guidanceIcon: document.getElementById('guidance-icon'),
+      guidanceText: document.getElementById('guidance-text'),
+
+      periodToast: document.getElementById('period-toast'),
+      periodToastBody: document.getElementById('period-toast-body'),
+      periodToastClose: document.getElementById('period-toast-close'),
+
+      svgBgGuides: document.getElementById('svg-bg-guides'),
+      svgQuotientBar: document.getElementById('svg-quotient-bar'),
+      svgTrays: document.getElementById('svg-trays'),
+      svgPins: document.getElementById('svg-pins'),
+      svgBeads: document.getElementById('svg-beads'),
+      svgStairs: document.getElementById('svg-stairs'),
+      svgComma: document.getElementById('svg-comma'),
+      svgLockOverlay: document.getElementById('svg-lock-overlay'),
+      svgHitAreas: document.getElementById('svg-hit-areas'),
+      svgAnimLayer: document.getElementById('svg-anim-layer'),
+
+      btnGroup: document.getElementById('btn-group'),
+      btnGroupLabel: document.getElementById('btn-group-label'),
+      btnExchange: document.getElementById('btn-exchange'),
+      btnExchangeLabel: document.getElementById('btn-exchange-label'),
+      btnComma: document.getElementById('btn-comma'),
+      btnAdvance: document.getElementById('btn-advance'),
+      btnAdvanceLabel: document.getElementById('btn-advance-label'),
+      btnUndo: document.getElementById('btn-undo'),
+      btnReset: document.getElementById('btn-reset'),
+
+      chaveDivisorTag: document.getElementById('chave-divisor-tag'),
+      chaveScroll: document.getElementById('chave-scroll'),
+      invOrderTag: document.getElementById('inv-order-tag'),
+      invContext: document.getElementById('inv-context'),
+      invList: document.getElementById('inv-list'),
+      summaryBox: document.getElementById('summary-box')
+    };
+
+    /* =========================================================================
+       CONTROLE DO PAINEL / DRAWER DA CHAVE & TABUADA
+       ========================================================================= */
+    function syncChavePanelUI() {
+      dom.chavePanel.classList.toggle('is-open', state.chaveOpen);
+      dom.btnToggleChave.classList.toggle('active', state.chaveOpen);
+      const isDrawerMode = window.innerWidth < 1020;
+      dom.drawerBackdrop.classList.toggle('is-open', state.chaveOpen && isDrawerMode);
+      if (state.chaveOpen) {
+        state.chaveHasUpdate = false;
+      }
+      dom.chaveUpdateDot.classList.toggle('is-visible', state.chaveHasUpdate && !state.chaveOpen);
+    }
+
+    function markChaveUpdated() {
+      if (!state.chaveOpen) {
+        state.chaveHasUpdate = true;
+        dom.chaveUpdateDot.classList.add('is-visible');
+      }
+    }
+
+    function setChaveOpen(open) {
+      state.chaveOpen = open;
+      syncChavePanelUI();
+    }
+
+    /* =========================================================================
+       HELPERS DE GEOMETRIA SVG
+       ========================================================================= */
+    function svgEl(tag, attrs = {}, text = null) {
+      const el = document.createElementNS(SVG_NS, tag);
+      for (const [k, v] of Object.entries(attrs)) {
+        el.setAttribute(k, String(v));
+      }
+      if (text !== null) el.textContent = text;
+      return el;
+    }
+
+    function getBeadLayout(orderIdx, totalCount) {
+      const ord = ORDERS[orderIdx];
+      const usableH = (ord.stepTop - ord.pinTop) - 8; // ~166px
+      const baseH = ord.beadH;
+      const naturalStep = baseH + 1.0;
+
+      let beadH = baseH;
+      let stepY = naturalStep;
+      if (totalCount > 1 && totalCount * naturalStep > usableH) {
+        stepY = (usableH - baseH) / (totalCount - 1);
+        beadH = Math.max(6.8, Math.min(baseH, stepY + 1.6));
+      }
+      return { beadW: ord.beadW, beadH, stepY };
+    }
+
+    function getBeadCenterY(orderIdx, beadIndex, beadH, stepY) {
+      const ord = ORDERS[orderIdx];
+      return (ord.stepTop - 2 - beadIndex * stepY) - beadH / 2;
+    }
+
+    /* Coordenadas (cx, cy) do g-ésimo pacotinho na grade 3×3 acima da haste */
+    function getPackSlotCenter(orderIdx, groupIndex) {
+      const ord = ORDERS[orderIdx];
+      const row = Math.floor(groupIndex / 3);
+      const col = groupIndex % 3;
+      const totalW = 3 * PACK_W + 2 * PACK_GAP_X;
+      const startX = ord.x - totalW / 2 + PACK_W / 2;
+      const startY = TRAY_TOP_Y + 5 + PACK_H / 2;
+      return {
+        cx: startX + col * (PACK_W + PACK_GAP_X),
+        cy: startY + row * (PACK_H + PACK_GAP_Y)
+      };
+    }
+
+    /* Desenha um "pacotinho" compacto contendo exatamente N mini-contas */
+    function buildGroupPack(orderIdx, cx, cy, divisor) {
+      const ord = ORDERS[orderIdx];
+      const g = svgEl('g', { transform: `translate(${cx}, ${cy})` });
+
+      g.appendChild(svgEl('rect', {
+        x: -PACK_W / 2, y: -PACK_H / 2,
+        width: PACK_W, height: PACK_H, rx: 5,
+        fill: ord.color, stroke: ord.dark, 'stroke-width': 1
+      }));
+
+      // Mini-bolinhas representando as N peças do grupo
+      const rows = divisor <= 4 ? 1 : 2;
+      const topCount = rows === 1 ? divisor : Math.ceil(divisor / 2);
+      const botCount = rows === 1 ? 0 : divisor - topCount;
+      const dotR = rows === 1 ? 2.4 : 1.95;
+
+      const drawRow = (count, yOffset) => {
+        const spacing = dotR * 2 + 1.4;
+        const rowW = (count - 1) * spacing;
+        for (let i = 0; i < count; i++) {
+          g.appendChild(svgEl('circle', {
+            cx: -rowW / 2 + i * spacing,
+            cy: yOffset,
+            r: dotR,
+            fill: '#fff',
+            opacity: '0.94'
+          }));
+        }
+      };
+
+      if (rows === 1) {
+        drawRow(topCount, 0);
+      } else {
+        drawRow(topCount, -3.4);
+        drawRow(botCount, 3.4);
+      }
+
+      return g;
+    }
+
+    function buildBeadGroup(orderIdx, cx, cy, w, h, extraClass = '') {
+      const g = svgEl('g', {
+        class: `svg-bead ${extraClass}`.trim(),
+        transform: `translate(${cx}, ${cy})`
+      });
+
+      const r = h / 2;
+      g.appendChild(svgEl('rect', {
+        x: -w / 2, y: -h / 2, width: w, height: h, rx: r, ry: r,
+        fill: `url(#beadGrad${orderIdx})`,
+        stroke: 'rgba(30, 18, 8, 0.25)',
+        'stroke-width': 0.9,
+        filter: 'url(#softShadow)'
+      }));
+
+      g.appendChild(svgEl('rect', {
+        x: -w * 0.36, y: -h * 0.36, width: w * 0.72, height: Math.max(1.8, h * 0.24),
+        rx: h * 0.14, fill: 'rgba(255, 255, 255, 0.46)'
+      }));
+
+      return g;
+    }
+
+    /* =========================================================================
+       CONSTRUÇÃO ESTÁTICA DA ESCADA DE MADEIRA E PINOS
+       ========================================================================= */
+    function buildStaticSVG() {
+      dom.svgStairs.innerHTML = '';
+      dom.svgPins.innerHTML = '';
+      dom.svgHitAreas.innerHTML = '';
+
+      // Sombra de apoio da escada
+      dom.svgStairs.appendChild(svgEl('rect', {
+        x: 32, y: BASE_BOTTOM_Y - 2, width: 796, height: 7, rx: 3.5,
+        fill: 'rgba(62, 38, 16, 0.22)'
+      }));
+
+      ORDERS.forEach((ord, idx) => {
+        // Pino de madeira
+        const pinH = ord.stepTop - ord.pinTop;
+        dom.svgPins.appendChild(svgEl('rect', {
+          x: ord.x - 6, y: ord.pinTop, width: 12, height: pinH + 4, rx: 5.5,
+          fill: 'url(#woodPinGrad)', stroke: '#7e5225', 'stroke-width': 0.8
+        }));
+
+        // Degrau em escada
+        const stepH = BASE_BOTTOM_Y - ord.stepTop;
+        const stepLeft = ord.x - STEP_WIDTH / 2;
+
+        const stepG = svgEl('g', { filter: 'url(#softShadow)' });
+        stepG.appendChild(svgEl('rect', {
+          x: stepLeft, y: ord.stepTop, width: STEP_WIDTH, height: stepH, rx: 5.5,
+          fill: 'url(#woodStepGrad)', stroke: '#6c441e', 'stroke-width': 1.2
+        }));
+        stepG.appendChild(svgEl('rect', {
+          x: stepLeft + 1, y: ord.stepTop, width: STEP_WIDTH - 2, height: 5, rx: 2.5,
+          fill: 'url(#woodTopLip)'
+        }));
+
+        const showName = stepH >= 46;
+        const badgeCy = showName ? ord.stepTop + 21 : ord.stepTop + stepH / 2 + 1;
+        const badgeR = showName ? 12 : 10.5;
+
+        stepG.appendChild(svgEl('circle', {
+          cx: ord.x, cy: badgeCy, r: badgeR,
+          fill: ord.color, stroke: 'rgba(255,255,255,0.75)', 'stroke-width': 1.4
+        }));
+        stepG.appendChild(svgEl('text', {
+          x: ord.x, y: badgeCy + 4.2,
+          'text-anchor': 'middle', fill: '#fff',
+          'font-size': showName ? '13' : '11.5', 'font-weight': '900'
+        }, ord.sym));
+
+        if (showName) {
+          stepG.appendChild(svgEl('text', {
+            x: ord.x, y: badgeCy + 21,
+            'text-anchor': 'middle', fill: '#fff6e6',
+            'font-size': '10', 'font-weight': '800', opacity: '0.94'
+          }, ord.name));
+        }
+
+        dom.svgStairs.appendChild(stepG);
+
+        // Área clicável sobre cada haste (inclui a zona superior)
+        const hit = svgEl('rect', {
+          class: 'pin-hit-area',
+          x: ord.x - 52, y: 4, width: 104, height: ord.stepTop - 4,
+          fill: 'transparent'
+        });
+        hit.addEventListener('click', () => {
+          if (state.isAnimating || state.finished) return;
+          if (idx !== state.activeOrder) return;
+          handleDirectPinClick();
+        });
+        dom.svgHitAreas.appendChild(hit);
+      });
+    }
+
+    /* =========================================================================
+       SNAPSHOT / DESFAZER (UNDO)
+       ========================================================================= */
+    function pushHistory() {
+      state.history.push({
+        beads: [...state.beads],
+        quotient: [...state.quotient],
+        groupsFormed: [...state.groupsFormed],
+        activeOrder: state.activeOrder,
+        commaUnlocked: state.commaUnlocked,
+        finished: state.finished,
+        toastDismissed: state.toastDismissed,
+        decimalRemainders: state.decimalRemainders.map((r) => ({ ...r })),
+        repeatingInfo: state.repeatingInfo
+          ? {
+              ...state.repeatingInfo,
+              nonRepeatingDigits: [...state.repeatingInfo.nonRepeatingDigits],
+              periodDigits: [...state.repeatingInfo.periodDigits]
+            }
+          : null,
+        chaveSteps: state.chaveSteps.map((s) => ({ ...s })),
+        broughtOrders: [...state.broughtOrders]
+      });
+      if (state.history.length > 80) state.history.shift();
+    }
+
+    function performUndo() {
+      if (state.isAnimating || state.history.length === 0) return;
+      const snap = state.history.pop();
+      state.beads = snap.beads;
+      state.quotient = snap.quotient;
+      state.groupsFormed = snap.groupsFormed;
+      state.activeOrder = snap.activeOrder;
+      state.commaUnlocked = snap.commaUnlocked;
+      state.finished = snap.finished;
+      state.toastDismissed = snap.toastDismissed;
+      state.decimalRemainders = snap.decimalRemainders;
+      state.repeatingInfo = snap.repeatingInfo;
+      state.chaveSteps = snap.chaveSteps;
+      state.broughtOrders = snap.broughtOrders;
+      dom.svgAnimLayer.innerHTML = '';
+      SoundFX.clack(280, 0.14);
+      renderAll();
+    }
+
+    /* =========================================================================
+       CARREGAR NOVA DIVISÃO (SEMPRE COMEÇA NA MAIOR ORDEM COM PEÇAS)
+       ========================================================================= */
+    function loadDivision(dividend, divisor) {
+      const cleanD = Math.max(1, Math.min(999, Math.floor(Number(dividend) || 1)));
+      const cleanV = Math.max(2, Math.min(9, Math.floor(Number(divisor) || 2)));
+
+      state.dividend = cleanD;
+      state.divisor = cleanV;
+
+      const c = Math.floor(cleanD / 100);
+      const d = Math.floor((cleanD % 100) / 10);
+      const u = cleanD % 10;
+
+      state.beads = [c, d, u, 0, 0, 0];
+      state.quotient = [null, null, null, null, null, null];
+      state.groupsFormed = [0, 0, 0, 0, 0, 0];
+      state.commaUnlocked = false;
+      state.finished = false;
+      state.isAnimating = false;
+      state.toastDismissed = false;
+      state.decimalRemainders = [];
+      state.repeatingInfo = null;
+      state.chaveSteps = [];
+      state.broughtOrders = [];
+      state.history = [];
+      state.chaveHasUpdate = false;
+
+      if (c > 0) state.activeOrder = 0;
+      else if (d > 0) state.activeOrder = 1;
+      else state.activeOrder = 2;
+
+      if (state.activeOrder === 2 && state.beads[2] < state.divisor) {
+        state.quotient[2] = 0;
+        if (!state.allowDecimals) {
+          recordChaveStep(2, 0, state.beads[2], false);
+          state.finished = true;
+        }
+      }
+
+      dom.svgAnimLayer.innerHTML = '';
+      dom.chaveDivisorTag.textContent = `÷ ${cleanV}`;
+      dom.invOrderTag.textContent = `× ${cleanV}`;
+
+      if (state.phase === 'free') {
+        dom.inputDividend.value = cleanD;
+        dom.inputDivisor.value = cleanV;
+      }
+
+      syncChavePanelUI();
+      renderAll();
+    }
+
+    /* =========================================================================
+       RENDERIZAÇÃO DO SVG DO ÁBACO (COM QUOCIENTE VISUAL E GRUPOS ALINHADOS)
+       ========================================================================= */
+    function renderSVG() {
+      dom.svgBgGuides.innerHTML = '';
+      dom.svgQuotientBar.innerHTML = '';
+      dom.svgTrays.innerHTML = '';
+      dom.svgBeads.innerHTML = '';
+      dom.svgComma.innerHTML = '';
+      dom.svgLockOverlay.innerHTML = '';
+
+      ORDERS.forEach((ord, idx) => {
+        const isActive = !state.finished && state.activeOrder === idx;
+        const count = state.beads[idx];
+        const groups = state.groupsFormed[idx];
+        const qVal = state.quotient[idx];
+        const isLockedDec = idx >= 3 && !state.commaUnlocked;
+
+        // 1. Halo de destaque vertical na haste ativa (da zona de grupos até o degrau)
+        if (isActive) {
+          dom.svgBgGuides.appendChild(svgEl('rect', {
+            class: 'active-halo',
+            x: ord.x - 53, y: 4,
+            width: 106, height: ord.stepTop - 4,
+            rx: 12,
+            fill: 'rgba(230, 168, 37, 0.11)',
+            stroke: '#d49a38', 'stroke-width': 2, 'stroke-dasharray': '6 4'
+          }));
+        }
+
+        // 2. VISOR DO QUOCIENTE VISUAL NO TOPO DA COLUNA (y = 6..32)
+        const qBoxG = svgEl('g', { opacity: isLockedDec ? '0.32' : '1' });
+        const hasDigit = qVal !== null;
+
+        qBoxG.appendChild(svgEl('rect', {
+          x: ord.x - 24, y: 6, width: 48, height: 26, rx: 8,
+          fill: hasDigit ? '#fff' : 'rgba(255,255,255,0.55)',
+          stroke: hasDigit ? ord.color : (isActive ? '#c99961' : '#dfd4c3'),
+          'stroke-width': hasDigit ? 2.2 : 1.3,
+          filter: hasDigit ? 'url(#softShadow)' : ''
+        }));
+
+        // Se for dízima periódica e este algarismo fizer parte do período, desenha barra superior
+        if (hasDigit && state.repeatingInfo && idx >= 3) {
+          const decIdx = idx - 3;
+          if (decIdx >= state.repeatingInfo.startDecPos && decIdx < state.repeatingInfo.endDecPos) {
+            qBoxG.appendChild(svgEl('line', {
+              x1: ord.x - 9, y1: 11, x2: ord.x + 9, y2: 11,
+              stroke: '#6c4ab6', 'stroke-width': 2.2, 'stroke-linecap': 'round'
+            }));
+          }
+        }
+
+        qBoxG.appendChild(svgEl('text', {
+          x: ord.x, y: 25.5,
+          'text-anchor': 'middle',
+          fill: hasDigit ? ord.dark : '#b5a898',
+          'font-size': hasDigit ? '19' : '14',
+          'font-weight': '900'
+        }, hasDigit ? String(qVal) : '·'));
+
+        if (isActive) {
+          qBoxG.appendChild(svgEl('rect', {
+            x: ord.x + 26, y: 12, width: 22, height: 14, rx: 7, fill: '#6c441e'
+          }));
+          qBoxG.appendChild(svgEl('text', {
+            x: ord.x + 37, y: 22, 'text-anchor': 'middle', fill: '#fff',
+            'font-size': '8', 'font-weight': '900'
+          }, ord.sym));
+        }
+        dom.svgQuotientBar.appendChild(qBoxG);
+
+        // 3. ZONA SUPERIOR DE GRUPOS ALINHADOS (y = 38..110) — grade 3×3
+        const trayG = svgEl('g', { opacity: isLockedDec ? '0.32' : '1' });
+        trayG.appendChild(svgEl('rect', {
+          x: ord.x - TRAY_W / 2, y: TRAY_TOP_Y,
+          width: TRAY_W, height: TRAY_H, rx: 9,
+          fill: groups > 0 ? 'rgba(255,255,255,0.92)' : 'rgba(255,255,255,0.48)',
+          stroke: groups > 0 ? ord.color : '#dfd3c0',
+          'stroke-width': groups > 0 ? 1.6 : 1
+        }));
+
+        if (groups > 0) {
+          const maxRender = Math.min(9, groups);
+          for (let g = 0; g < maxRender; g++) {
+            const { cx, cy } = getPackSlotCenter(idx, g);
+            trayG.appendChild(buildGroupPack(idx, cx, cy, state.divisor));
+          }
+        } else {
+          trayG.appendChild(svgEl('text', {
+            x: ord.x, y: TRAY_TOP_Y + 34,
+            'text-anchor': 'middle', fill: '#a69887',
+            'font-size': '9.5', 'font-weight': '800'
+          }, `Grupos de ${state.divisor}`));
+          trayG.appendChild(svgEl('text', {
+            x: ord.x, y: TRAY_TOP_Y + 48,
+            'text-anchor': 'middle', fill: '#b9ac9c',
+            'font-size': '8.5', 'font-weight': '700'
+          }, `(${ord.name})`));
+        }
+        dom.svgTrays.appendChild(trayG);
+
+        // 4. Badge numérico de peças restantes no pino
+        const badgeY = ord.pinTop + 2;
+        const badgeX = ord.x + 36;
+        dom.svgBeads.appendChild(svgEl('circle', {
+          cx: badgeX, cy: badgeY, r: 11,
+          fill: '#fff', stroke: count > 0 ? ord.color : '#d5c9b7', 'stroke-width': 1.7
+        }));
+        dom.svgBeads.appendChild(svgEl('text', {
+          x: badgeX, y: badgeY + 3.8, 'text-anchor': 'middle',
+          fill: count > 0 ? ord.dark : '#998c7c',
+          'font-size': '11', 'font-weight': '900'
+        }, String(count)));
+
+        // 5. Peças 3D empilhadas no pino
+        const { beadW, beadH, stepY } = getBeadLayout(idx, count);
+        const isFinalRemainder = state.finished && !state.allowDecimals && idx === 2 && count > 0;
+
+        for (let i = 0; i < count; i++) {
+          const cy = getBeadCenterY(idx, i, beadH, stepY);
+          const bg = buildBeadGroup(idx, ord.x, cy, beadW, beadH);
+          bg.dataset.order = idx;
+          bg.dataset.beadIndex = i;
+          if (isFinalRemainder) {
+            bg.appendChild(svgEl('rect', {
+              x: -beadW / 2 - 2.2, y: -beadH / 2 - 2.2,
+              width: beadW + 4.4, height: beadH + 4.4,
+              rx: beadH / 2 + 2, fill: 'none', stroke: '#d94f3d', 'stroke-width': 2
+            }));
+          }
+          dom.svgBeads.appendChild(bg);
+        }
+
+        // Etiqueta "RESTO: N" na Fase 1
+        if (isFinalRemainder) {
+          dom.svgBeads.appendChild(svgEl('rect', {
+            x: ord.x - 38, y: ord.pinTop + 14, width: 76, height: 20, rx: 10,
+            fill: '#d94f3d', filter: 'url(#softShadow)'
+          }));
+          dom.svgBeads.appendChild(svgEl('text', {
+            x: ord.x, y: ord.pinTop + 28, 'text-anchor': 'middle', fill: '#fff',
+            'font-size': '10.5', 'font-weight': '900'
+          }, `RESTO: ${count}`));
+        }
+      });
+
+      // 6. SEPARADOR DA VÍRGULA (no quociente visual no topo + linha + medalhão na base)
+      const unlocked = state.commaUnlocked;
+
+      // Vírgula no Quociente Visual (x = 430, y = 6..32)
+      dom.svgQuotientBar.appendChild(svgEl('text', {
+        x: 430, y: 29,
+        'text-anchor': 'middle',
+        fill: unlocked ? '#b87409' : '#d2c7b7',
+        'font-family': 'Georgia, serif',
+        'font-size': '32',
+        'font-weight': '900',
+        filter: unlocked ? 'url(#goldGlow)' : ''
+      }, ','));
+
+      dom.svgComma.appendChild(svgEl('line', {
+        x1: 430, y1: 38, x2: 430, y2: 314,
+        stroke: unlocked ? '#e09e1e' : '#c8bba8',
+        'stroke-width': unlocked ? 3 : 2, 'stroke-dasharray': '7 5'
+      }));
+
+      const medG = svgEl('g', { filter: unlocked ? 'url(#goldGlow)' : 'url(#softShadow)' });
+      medG.appendChild(svgEl('rect', {
+        x: 410, y: 314, width: 40, height: 58, rx: 11,
+        fill: unlocked ? 'url(#commaGoldGrad)' : 'url(#commaLockedGrad)',
+        stroke: unlocked ? '#fff3c4' : '#968978', 'stroke-width': 2
+      }));
+      medG.appendChild(svgEl('text', {
+        x: 430, y: 351, 'text-anchor': 'middle',
+        fill: unlocked ? '#4c2a00' : '#6c6052',
+        'font-family': 'Georgia, serif', 'font-size': '38', 'font-weight': '900'
+      }, ','));
+      medG.appendChild(svgEl('text', {
+        x: 430, y: 366, 'text-anchor': 'middle',
+        fill: unlocked ? '#5c3300' : '#6c6052',
+        'font-size': '7.6', 'font-weight': '900'
+      }, 'VÍRGULA'));
+      dom.svgComma.appendChild(medG);
+
+      // 7. Bloqueio visual das casas decimais (d, c, m) enquanto trancadas
+      if (!unlocked) {
+        const lockG = svgEl('g');
+        lockG.appendChild(svgEl('rect', {
+          x: 458, y: 36, width: 382, height: 348, rx: 13,
+          fill: 'rgba(244, 237, 225, 0.80)',
+          stroke: '#c6b69f', 'stroke-width': 2, 'stroke-dasharray': '8 6'
+        }));
+
+        lockG.appendChild(svgEl('circle', {
+          cx: 649, cy: 174, r: 24,
+          fill: '#fff', stroke: '#d4c6b2', 'stroke-width': 2, filter: 'url(#softShadow)'
+        }));
+        lockG.appendChild(svgEl('text', {
+          x: 649, y: 183, 'text-anchor': 'middle', 'font-size': '22'
+        }, '🔒'));
+
+        lockG.appendChild(svgEl('text', {
+          x: 649, y: 218, 'text-anchor': 'middle', fill: '#3c2e22',
+          'font-size': '14', 'font-weight': '900'
+        }, 'Casas Decimais (d, c, m)'));
+
+        const subMsg = state.allowDecimals
+          ? 'Clique em "Cruzar a Vírgula" quando sobrar resto em U!'
+          : 'Na Fase 1 paramos no Resto das Unidades (U).';
+        lockG.appendChild(svgEl('text', {
+          x: 649, y: 238, 'text-anchor': 'middle', fill: '#6c5e52',
+          'font-size': '11.2', 'font-weight': '700'
+        }, subMsg));
+
+        dom.svgLockOverlay.appendChild(lockG);
+      }
+    }
+
+    /* =========================================================================
+       RENDERIZAÇÃO GERAL (STATUS, BOTÕES, CHAVE E OPERAÇÃO INVERSA)
+       ========================================================================= */
+    function renderAll() {
+      renderSVG();
+      renderStatusStrip();
+      renderActionButtons();
+      renderChaveAndInverse();
+    }
+
+    function renderStatusStrip() {
+      const idx = state.activeOrder;
+      const ord = ORDERS[idx];
+      const count = state.beads[idx];
+      const div = state.divisor;
+
+      let eqHtml = `${state.dividend} ÷ ${state.divisor} = `;
+      if (state.repeatingInfo) {
+        const info = state.repeatingInfo;
+        const intPart = getIntegerQuotient();
+        const nonRep = info.nonRepeatingDigits.join('');
+        const period = info.periodDigits.join('');
+        eqHtml += `${intPart},${nonRep}<span class="period-bar">${period}</span> <span class="eq-badge is-period">Dízima</span>`;
+      } else if (hasStartedQuotient()) {
+        eqHtml += formatFullQuotient();
+        if (state.finished && !state.allowDecimals) {
+          const rem = state.beads[2];
+          eqHtml += rem > 0
+            ? ` <span class="eq-badge">Resto ${rem}</span>`
+            : ` <span class="eq-badge is-exact">Exata</span>`;
+        } else if (state.finished && state.allowDecimals && state.beads[5] === 0) {
+          eqHtml += ` <span class="eq-badge is-exact">Exata</span>`;
+        }
+      } else {
+        eqHtml += '?';
+      }
+      dom.eqPill.innerHTML = eqHtml;
+
+      // Toast educativo de Dízima Periódica
+      if (state.repeatingInfo && !state.toastDismissed) {
+        const info = state.repeatingInfo;
+        const intPart = getIntegerQuotient();
+        const nonRep = info.nonRepeatingDigits.join('');
+        const period = info.periodDigits.join('');
+        dom.periodToastBody.innerHTML =
+          `<strong>Dízima Periódica!</strong> O <strong>resto ${info.rem}</strong> se repetiu — o período <strong>${period}</strong> segue ao infinito: ` +
+          `<strong>${intPart},${nonRep}${period}${period}${period}... = ${intPart},${nonRep}<span class="period-bar">${period}</span></strong>`;
+        dom.periodToast.classList.add('is-visible');
+      } else {
+        dom.periodToast.classList.remove('is-visible');
+      }
+
+      dom.statusStrip.className = 'status-strip';
+      if (state.finished) {
+        if (state.repeatingInfo) {
+          dom.statusStrip.classList.add('is-repeating');
+          dom.guidanceIcon.textContent = '♾️';
+          dom.guidanceText.textContent = `Resto ${state.repeatingInfo.rem} repetiu! Ciclo infinito do algarismo ${state.repeatingInfo.periodDigits.join('')}.`;
+        } else if (!state.allowDecimals) {
+          dom.statusStrip.classList.add('is-success');
+          dom.guidanceIcon.textContent = '🎉';
+          const rem = state.beads[2];
+          dom.guidanceText.textContent = rem > 0
+            ? `Concluído! Quociente ${getIntegerQuotient()} e resto ${rem} em U.`
+            : `Divisão exata! Quociente ${getIntegerQuotient()} e resto 0.`;
+        } else {
+          dom.statusStrip.classList.add('is-success');
+          dom.guidanceIcon.textContent = '✨';
+          dom.guidanceText.textContent = `Perfeito! Resultado: ${formatFullQuotient()}.`;
+        }
+        return;
+      }
+
+      if (count >= div) {
+        if (idx >= 3) dom.statusStrip.classList.add('is-decimal');
+        dom.guidanceIcon.textContent = '✋';
+        dom.guidanceText.textContent = `${ord.name} (${ord.sym}): ${count} peças. Forme um grupo de ${div}!`;
+      } else if (count > 0) {
+        if (idx === 2 && state.allowDecimals && !state.commaUnlocked) {
+          dom.statusStrip.classList.add('is-decimal');
+          dom.guidanceIcon.textContent = '✨';
+          dom.guidanceText.textContent = `Restam ${count} U (< ${div}). Cruze a vírgula para trocar 1 U em 10 d!`;
+        } else if (idx < 5) {
+          dom.guidanceIcon.textContent = '⇄';
+          dom.guidanceText.textContent = `Restam ${count} ${ord.sym} (< ${div}). Destroque 1 ${ord.sym} em 10 ${ORDERS[idx + 1].sym}!`;
+        }
+      } else {
+        dom.guidanceIcon.textContent = '➔';
+        dom.guidanceText.textContent = `Haste ${ord.sym} zerada. Avance para a próxima ordem.`;
+      }
+    }
+
+    function renderActionButtons() {
+      const idx = state.activeOrder;
+      const count = state.beads[idx];
+      const div = state.divisor;
+
+      dom.btnComma.style.display = 'none';
+      dom.btnAdvance.style.display = 'none';
+      dom.btnGroup.style.display = 'inline-flex';
+      dom.btnExchange.style.display = 'inline-flex';
+      dom.btnExchange.classList.remove('is-pulsing');
+
+      dom.btnUndo.disabled = state.isAnimating || state.history.length === 0;
+      dom.btnReset.disabled = state.isAnimating;
+
+      if (state.finished) {
+        dom.btnGroup.disabled = true;
+        dom.btnExchange.disabled = true;
+        dom.btnGroupLabel.textContent = 'Concluída';
+        dom.btnExchangeLabel.textContent = 'Destrocar (1 → 10)';
+        return;
+      }
+
+      const canGroup = count >= div;
+      const isAtCommaBorder = (idx === 2 && count > 0 && count < div && !state.commaUnlocked && state.allowDecimals);
+      const canExchange = (count > 0 && count < div && idx < 5 && !isAtCommaBorder);
+      const needsAdvance = (count === 0);
+
+      dom.btnGroupLabel.textContent = `Formar Grupo de ${div}`;
+      dom.btnGroup.disabled = state.isAnimating || !canGroup;
+
+      if (isAtCommaBorder) {
+        dom.btnExchange.style.display = 'none';
+        dom.btnComma.style.display = 'inline-flex';
+        dom.btnComma.disabled = state.isAnimating;
+      } else if (needsAdvance) {
+        dom.btnExchange.disabled = true;
+        dom.btnAdvance.style.display = 'inline-flex';
+        dom.btnAdvance.disabled = state.isAnimating;
+        const next = ORDERS[idx + 1];
+        dom.btnAdvanceLabel.textContent = next ? `Avançar → ${next.sym}` : 'Concluir';
+      } else {
+        const next = ORDERS[idx + 1];
+        dom.btnExchangeLabel.textContent = next
+          ? `Destrocar (1 ${ORDERS[idx].sym} → 10 ${next.sym})`
+          : 'Fim das hastes';
+        dom.btnExchange.disabled = state.isAnimating || !canExchange;
+        if (canExchange) dom.btnExchange.classList.add('is-pulsing');
+      }
+    }
+
+    /* =========================================================================
+       PAINEL (A) CONTA NA CHAVE + (B) OPERAÇÃO INVERSA (TABUADA DINÂMICA)
+       ========================================================================= */
+    function renderChaveAndInverse() {
+      // --- (A) CONTA NA CHAVE ---
+      const dividendStr = String(state.dividend);
+      const startOrd = 3 - dividendStr.length;
+
+      const coloredDiv = dividendStr.split('').map((ch, i) => {
+        const ordIdx = startOrd + i;
+        const ord = ORDERS[ordIdx];
+        const isFocus = !state.finished && state.activeOrder === ordIdx;
+        const isBrought = state.broughtOrders.includes(ordIdx);
+        const cls = `div-digit${isFocus ? ' is-focus' : ''}${isBrought ? ' is-brought' : ''}`;
+        return `<span class="${cls}" style="color:${ord.color}">${ch}</span>`;
+      }).join('');
+
+      const qParts = [];
+      ORDERS.forEach((ord, idx) => {
+        if (idx === 3 && state.commaUnlocked) {
+          qParts.push(`<span style="color:var(--gold-dark);font-weight:900;">,</span>`);
+        }
+        if (state.quotient[idx] !== null) {
+          const isPeriodDigit =
+            state.repeatingInfo &&
+            idx >= 3 &&
+            (idx - 3) >= state.repeatingInfo.startDecPos &&
+            (idx - 3) < state.repeatingInfo.endDecPos;
+          const style = isPeriodDigit
+            ? `color:#6c4ab6;text-decoration:overline;text-decoration-thickness:2px;`
+            : `color:${ord.color};`;
+          qParts.push(`<span style="${style}">${state.quotient[idx]}</span>`);
+        }
+      });
+      const qHtml = qParts.length ? qParts.join('') : `<span style="color:#bfb4a6">?</span>`;
+
+      let stepsHtml = '';
+      state.chaveSteps.forEach((step) => {
+        const ord = ORDERS[step.orderIdx];
+        const indent = '&nbsp;'.repeat(step.indent);
+
+        // Linha de chegada/formação do parcial (abaixou algarismo ou entrou zero decimal)
+        if (step.isDecimalZero) {
+          stepsHtml += `<div class="chave-line">${indent}${step.prevRem}<span class="chave-zero">0</span> <span style="font-size:0.68rem;color:${ord.color}">(${ord.sym})</span></div>`;
+        } else if (step.broughtDigit !== null) {
+          const prefixRem = step.prevRem > 0 ? String(step.prevRem) : '';
+          stepsHtml += `<div class="chave-line">${indent}${prefixRem}<span class="chave-down">↓${step.broughtDigit}</span> <span style="font-size:0.68rem;color:${ord.color}">(${ord.sym})</span></div>`;
+        }
+
+        // Subtração (só mostra se a etapa já fechou ou já tem grupos)
+        if (step.closed || step.groups > 0) {
+          const subVal = step.groups * state.divisor;
+          stepsHtml += `<div class="chave-line chave-sub">${indent}-${subVal}</div>`;
+          if (step.closed) {
+            stepsHtml += `<div class="chave-line">${indent}<span class="chave-rule"></span></div>`;
+            const repBadge = step.isRepeatedRem ? ` <span style="color:var(--col-C);font-size:0.68rem;">↺ repete!</span>` : '';
+            stepsHtml += `<div class="chave-line">${indent}<strong>${step.rem}</strong>${repBadge}</div>`;
+          }
+        }
+      });
+
+      // Prévia ao vivo da subtração em andamento na haste atual (antes de fechar)
+      const activeIdx = state.activeOrder;
+      const activeStepExists = state.chaveSteps.some((s) => s.orderIdx === activeIdx);
+      const activeG = state.groupsFormed[activeIdx];
+      if (!activeStepExists && activeG > 0) {
+        const curOrd = ORDERS[activeIdx];
+        const indent = '&nbsp;'.repeat(Math.max(0, state.chaveSteps.length));
+        stepsHtml += `<div class="chave-line chave-sub">${indent}-${activeG * state.divisor} <span style="font-size:0.66rem;color:${curOrd.color}">(${activeG}×${state.divisor})</span></div>`;
+      }
+
+      dom.chaveScroll.innerHTML = `
+        <div class="chave-grid">
+          <div class="chave-left">
+            <div class="chave-dividend">${coloredDiv}</div>
+            ${stepsHtml}
+          </div>
+          <div class="chave-right">
+            <div class="chave-divisor">${state.divisor}</div>
+            <div class="chave-quotient">${qHtml}</div>
+          </div>
+        </div>
+      `;
+      dom.chaveScroll.scrollTop = dom.chaveScroll.scrollHeight;
+
+      // --- (B) OPERAÇÃO INVERSA (TABUADA DINÂMICA DA ORDEM ATUAL) ---
+      const ord = ORDERS[activeIdx];
+      const div = state.divisor;
+      const groups = state.groupsFormed[activeIdx];
+      const rem = state.beads[activeIdx];
+      const totalInOrder = groups * div + rem;
+
+      dom.invOrderTag.textContent = `${ord.sym} (×${div})`;
+      dom.invOrderTag.style.color = ord.dark;
+      dom.invContext.innerHTML =
+        `<span style="color:${ord.dark}">${ord.name} (${ord.sym}):</span> dividindo <strong>${totalInOrder}</strong> por <strong>${div}</strong>`;
+
+      let invHtml = '';
+      if (totalInOrder === 0) {
+        invHtml = `<div class="inv-empty">Nenhuma peça na haste ${ord.sym}.</div>`;
+      } else {
+        for (let k = 1; k <= groups; k++) {
+          const isLatest = (k === groups);
+          invHtml += `
+            <div class="inv-row${isLatest ? ' is-latest' : ''}">
+              <span>${div} × ${k} = <strong>${div * k}</strong></span>
+              <span style="font-size:0.66rem;opacity:0.85;">${k}º grupo</span>
+            </div>
+          `;
+        }
+
+        // Quando não cabe mais nenhum grupo (rem < div), mostra automaticamente o limite ("passou de X!")
+        if (rem < div) {
+          const nextK = groups + 1;
+          const nextProd = div * nextK;
+          invHtml += `
+            <div class="inv-row is-exceeded">
+              <span class="inv-eq">${div} × ${nextK} = ${nextProd}</span>
+              <span class="inv-tag">passou de ${totalInOrder}!</span>
+            </div>
+          `;
+
+          if (groups > 0) {
+            const stoppedAt = groups * div;
+            invHtml += `
+              <div class="inv-stop-box">
+                Parou em <strong>${stoppedAt}</strong> → <strong>${totalInOrder} − ${stoppedAt} = ${rem}</strong>
+                ${rem === 0 ? ' (exato!)' : ` (sobra ${rem} ${ord.sym})`}
+              </div>
+            `;
+          } else {
+            invHtml += `
+              <div class="inv-stop-box">
+                Não cabe grupo de <strong>${div}</strong> em <strong>${totalInOrder}</strong>.<br/>
+                ${activeIdx < 5 ? `Troque <strong>1 ${ord.sym} → 10 ${ORDERS[activeIdx + 1].sym}</strong>!` : `Resto ${rem}.`}
+              </div>
+            `;
+          }
+        } else if (groups === 0) {
+          invHtml = `<div class="inv-empty">Clique em <strong>Formar Grupo de ${div}</strong> para montar a tabuada!</div>`;
+        }
+      }
+
+      dom.invList.innerHTML = invHtml;
+      dom.invList.scrollTop = dom.invList.scrollHeight;
+
+      // --- RESUMO FINAL ---
+      if (state.finished) {
+        dom.summaryBox.classList.add('is-visible');
+        if (!state.allowDecimals) {
+          const intQ = getIntegerQuotient();
+          const finalRem = state.beads[2];
+          dom.summaryBox.innerHTML =
+            `<span style="color:var(--wood-4)">${state.dividend}</span> = ${state.divisor} × ` +
+            `<span style="color:var(--col-U)">${intQ}</span> + <span style="color:var(--col-D)">${finalRem} (resto)</span>`;
+        } else if (state.repeatingInfo) {
+          const info = state.repeatingInfo;
+          const nonRep = info.nonRepeatingDigits.join('');
+          const period = info.periodDigits.join('');
+          dom.summaryBox.innerHTML =
+            `<strong>${state.dividend} ÷ ${state.divisor} = ${getIntegerQuotient()},${nonRep}<span class="period-bar">${period}</span></strong>`;
+        } else {
+          const sym = state.beads[5] === 0 ? '=' : '≈';
+          dom.summaryBox.innerHTML = `<strong>${state.dividend} ÷ ${state.divisor} ${sym} ${formatFullQuotient()}</strong>`;
+        }
+      } else {
+        dom.summaryBox.classList.remove('is-visible');
+      }
+    }
+
+    /* =========================================================================
+       AUXILIARES MATEMÁTICOS, CHAVE E DETECÇÃO DE DÍZIMAS
+       ========================================================================= */
+    function getIntegerQuotient() {
+      return (state.quotient[0] || 0) * 100 + (state.quotient[1] || 0) * 10 + (state.quotient[2] || 0);
+    }
+
+    function hasStartedQuotient() {
+      return state.quotient.some((v) => v !== null);
+    }
+
+    function formatFullQuotient() {
+      const intStr = String(getIntegerQuotient());
+      if (!state.commaUnlocked) return intStr;
+      const dec = [];
+      for (let i = 3; i <= 5; i++) {
+        if (state.quotient[i] !== null) dec.push(state.quotient[i]);
+      }
+      return dec.length ? `${intStr},${dec.join('')}` : intStr;
+    }
+
+    function findHighestOrderWithBeads(maxIdx) {
+      for (let i = 0; i <= maxIdx; i++) {
+        if (state.beads[i] > 0) return i;
+      }
+      return -1;
+    }
+
+    function getDividendDigitAtOrder(orderIdx) {
+      if (orderIdx === 0) return Math.floor(state.dividend / 100);
+      if (orderIdx === 1) return Math.floor((state.dividend % 100) / 10);
+      if (orderIdx === 2) return state.dividend % 10;
+      return 0;
+    }
+
+    /* Registra ou fecha uma etapa na Conta na Chave */
+    function recordChaveStep(orderIdx, totalGroups, finalRem, isRepeatedRem = false, closed = true) {
+      const existing = state.chaveSteps.find((s) => s.orderIdx === orderIdx);
+      if (existing) {
+        existing.groups = totalGroups;
+        existing.rem = finalRem;
+        existing.isRepeatedRem = isRepeatedRem;
+        existing.closed = closed;
+        return;
+      }
+
+      const isDecimalZero = orderIdx >= 3;
+      const prevStep = state.chaveSteps[state.chaveSteps.length - 1];
+      const prevRem = prevStep ? prevStep.rem : 0;
+
+      state.chaveSteps.push({
+        orderIdx,
+        groups: totalGroups,
+        rem: finalRem,
+        prevRem,
+        broughtDigit: (!isDecimalZero && state.chaveSteps.length > 0) ? getDividendDigitAtOrder(orderIdx) : null,
+        isDecimalZero,
+        indent: Math.max(0, state.chaveSteps.length),
+        isRepeatedRem,
+        closed
+      });
+    }
+
+    /* Cria a linha de "abaixar o algarismo" (ou acrescentar zero decimal) ao trocar de haste */
+    function openNextChaveOrder(fromIdx, toIdx, remFromPrev) {
+      if (state.chaveSteps.some((s) => s.orderIdx === toIdx)) return;
+
+      const isDecimalZero = toIdx >= 3;
+      if (!isDecimalZero && !state.broughtOrders.includes(toIdx)) {
+        state.broughtOrders.push(toIdx);
+      }
+
+      state.chaveSteps.push({
+        orderIdx: toIdx,
+        groups: 0,
+        rem: 0,
+        prevRem: remFromPrev,
+        broughtDigit: isDecimalZero ? null : getDividendDigitAtOrder(toIdx),
+        isDecimalZero,
+        indent: Math.max(0, state.chaveSteps.length),
+        isRepeatedRem: false,
+        closed: false
+      });
+    }
+
+    function checkDecimalRemainder(orderIdx) {
+      if (!state.allowDecimals) return false;
+      for (let i = 0; i < orderIdx; i++) {
+        if (state.beads[i] > 0) return false;
+      }
+      const rem = state.beads[orderIdx];
+      if (rem === 0) return false;
+
+      const decPos = orderIdx - 2; // 0 = após U, 1 = após d, 2 = após c, 3 = após m
+      if (decPos < 0) return false;
+      if (state.decimalRemainders.some((r) => r.decPos === decPos)) return false;
+
+      const prevMatch = state.decimalRemainders.find((r) => r.rem === rem);
+      state.decimalRemainders.push({ decPos, rem });
+
+      if (prevMatch && !state.repeatingInfo) {
+        const nonRep = [];
+        const period = [];
+        for (let p = 0; p < decPos; p++) {
+          const digit = state.quotient[3 + p] ?? 0;
+          if (p < prevMatch.decPos) nonRep.push(digit);
+          else period.push(digit);
+        }
+        state.repeatingInfo = {
+          rem,
+          startDecPos: prevMatch.decPos,
+          endDecPos: decPos,
+          nonRepeatingDigits: nonRep,
+          periodDigits: period
+        };
+        state.toastDismissed = false;
+        SoundFX.chime([523.25, 659.25, 783.99, 1046.5]);
+        return true;
+      }
+      return false;
+    }
+
+    /* =========================================================================
+       ANIMAÇÕES FÍSICAS EM COORDENADAS SVG
+       ========================================================================= */
+    function speedFactor() {
+      return state.slowMode ? 1.85 : 1.0;
+    }
+
+    function wait(ms) {
+      return new Promise((r) => setTimeout(r, ms * speedFactor()));
+    }
+
+    function tween(durationMs, onFrame) {
+      return new Promise((resolve) => {
+        const total = durationMs * speedFactor();
+        const start = performance.now();
+        function frame(now) {
+          const t = Math.min(1, (now - start) / total);
+          const e = t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+          onFrame(e, t);
+          if (t < 1) requestAnimationFrame(frame);
+          else resolve();
+        }
+        requestAnimationFrame(frame);
+      });
+    }
+
+    function handleDirectPinClick() {
+      const idx = state.activeOrder;
+      const count = state.beads[idx];
+      const div = state.divisor;
+
+      if (count >= div) performFormGroup();
+      else if (count > 0 && idx === 2 && state.allowDecimals && !state.commaUnlocked) performCrossComma();
+      else if (count > 0 && idx < 5) performExchange(false);
+      else if (count === 0) performAdvance();
+    }
+
+    /* 1. FORMAR GRUPO DE N (COM VOO EXATO PARA O SLOT DA GRADE ALINHADA) */
+    async function performFormGroup() {
+      const idx = state.activeOrder;
+      const div = state.divisor;
+      if (state.isAnimating || state.finished || state.beads[idx] < div) return;
+
+      pushHistory();
+      state.isAnimating = true;
+      renderActionButtons();
+
+      const ord = ORDERS[idx];
+      const total = state.beads[idx];
+      const { beadW, beadH, stepY } = getBeadLayout(idx, total);
+
+      const allBeads = Array.from(dom.svgBeads.querySelectorAll(`.svg-bead[data-order="${idx}"]`));
+      const topEls = allBeads.slice(-div);
+
+      const bottomIndex = total - div;
+      const topIndex = total - 1;
+      const yBottomCenter = getBeadCenterY(idx, bottomIndex, beadH, stepY);
+      const yTopCenter = getBeadCenterY(idx, topIndex, beadH, stepY);
+      const groupCenterY = (yBottomCenter + yTopCenter) / 2;
+      const groupH = (yBottomCenter - yTopCenter) + beadH;
+
+      const flyG = svgEl('g', { transform: `translate(${ord.x}, ${groupCenterY})` });
+
+      flyG.appendChild(svgEl('rect', {
+        x: -beadW / 2 - 8, y: -groupH / 2 - 5,
+        width: beadW + 16, height: groupH + 10, rx: 9,
+        fill: 'rgba(255, 227, 142, 0.25)',
+        stroke: '#e6a825', 'stroke-width': 2.4, filter: 'url(#goldGlow)'
+      }));
+
+      flyG.appendChild(svgEl('rect', {
+        x: -36, y: -groupH / 2 - 22, width: 72, height: 16, rx: 8, fill: '#2a211b'
+      }));
+      flyG.appendChild(svgEl('text', {
+        x: 0, y: -groupH / 2 - 11, 'text-anchor': 'middle', fill: '#fff',
+        'font-size': '9.2', 'font-weight': '900'
+      }, `Grupo de ${div}`));
+
+      for (let k = 0; k < div; k++) {
+        const bIdx = bottomIndex + k;
+        const relY = getBeadCenterY(idx, bIdx, beadH, stepY) - groupCenterY;
+        flyG.appendChild(buildBeadGroup(idx, 0, relY, beadW, beadH));
+      }
+
+      topEls.forEach((el) => el.setAttribute('opacity', '0'));
+      dom.svgAnimLayer.appendChild(flyG);
+      SoundFX.clack(ord.pitch * 0.92, 0.16);
+
+      await wait(190);
+
+      // Passo 1: Sai pelo topo do pino
+      const exitY = ord.pinTop - groupH / 2 - 6;
+      await tween(210, (e) => {
+        const cy = groupCenterY + (exitY - groupCenterY) * e;
+        flyG.setAttribute('transform', `translate(${ord.x}, ${cy})`);
+      });
+
+      // Passo 2: Estaciona exatamente no próximo slot (row, col) acima da haste
+      const nextGroupIdx = Math.min(8, state.groupsFormed[idx]);
+      const targetSlot = getPackSlotCenter(idx, nextGroupIdx);
+
+      await tween(260, (e) => {
+        const cx = ord.x + (targetSlot.cx - ord.x) * e;
+        const cy = exitY + (targetSlot.cy - exitY) * e;
+        const sc = 1 - 0.62 * e;
+        flyG.setAttribute('transform', `translate(${cx}, ${cy}) scale(${sc})`);
+        flyG.setAttribute('opacity', String(1 - 0.2 * e));
+      });
+
+      flyG.remove();
+
+      state.beads[idx] -= div;
+      state.groupsFormed[idx] += 1;
+      state.quotient[idx] = (state.quotient[idx] || 0) + 1;
+      SoundFX.groupSettle(idx);
+
+      // Atualiza etapa em andamento na Chave se ela já existe
+      const existingStep = state.chaveSteps.find((s) => s.orderIdx === idx);
+      if (existingStep) {
+        existingStep.groups = state.groupsFormed[idx];
+      }
+
+      evaluatePostGroup(idx);
+      markChaveUpdated();
+      state.isAnimating = false;
+      renderAll();
+    }
+
+    /* 2. DESTROCAR (1 → 10) + ABAIXAR ALGARISMO NA CHAVE */
+    async function performExchange(skipHistory = false) {
+      const fromIdx = state.activeOrder;
+      const toIdx = fromIdx + 1;
+      if (state.isAnimating || state.finished || toIdx > 5 || state.beads[fromIdx] <= 0) return;
+
+      if (!skipHistory) pushHistory();
+      state.isAnimating = true;
+      renderActionButtons();
+
+      const remBeforeExchange = state.beads[fromIdx];
+
+      if (state.quotient[fromIdx] === null && (hasStartedQuotient() || fromIdx >= 2)) {
+        state.quotient[fromIdx] = 0;
+      }
+
+      // Fecha a etapa atual na Chave antes de descer para a próxima ordem
+      if (fromIdx >= 2) {
+        const repeated = checkDecimalRemainder(fromIdx);
+        recordChaveStep(fromIdx, state.groupsFormed[fromIdx], remBeforeExchange, repeated, true);
+      } else if (hasStartedQuotient() || state.groupsFormed[fromIdx] > 0) {
+        recordChaveStep(fromIdx, state.groupsFormed[fromIdx], remBeforeExchange, false, true);
+      }
+
+      const fromOrd = ORDERS[fromIdx];
+      const toOrd = ORDERS[toIdx];
+      const fromCount = state.beads[fromIdx];
+      const { beadW, beadH, stepY } = getBeadLayout(fromIdx, fromCount);
+      const startY = getBeadCenterY(fromIdx, fromCount - 1, beadH, stepY);
+
+      const fromEls = dom.svgBeads.querySelectorAll(`.svg-bead[data-order="${fromIdx}"]`);
+      const topEl = fromEls[fromEls.length - 1];
+      if (topEl) topEl.setAttribute('opacity', '0');
+
+      state.beads[fromIdx] -= 1;
+      const flyBead = buildBeadGroup(fromIdx, fromOrd.x, startY, beadW, beadH);
+      dom.svgAnimLayer.appendChild(flyBead);
+      SoundFX.clack(fromOrd.pitch, 0.19);
+
+      const exitY = fromOrd.pinTop - 14;
+      await tween(180, (e) => {
+        const cy = startY + (exitY - startY) * e;
+        flyBead.setAttribute('transform', `translate(${fromOrd.x}, ${cy})`);
+      });
+
+      const destTopY = toOrd.pinTop - 14;
+      await tween(280, (e) => {
+        const cx = fromOrd.x + (toOrd.x - fromOrd.x) * e;
+        const cy = exitY + (destTopY - exitY) * e - Math.sin(e * Math.PI) * 28;
+        flyBead.setAttribute('transform', `translate(${cx}, ${cy})`);
+      });
+
+      flyBead.remove();
+
+      const burstG = svgEl('g', { transform: `translate(${toOrd.x}, ${destTopY})` });
+      burstG.appendChild(svgEl('rect', {
+        x: -42, y: -12, width: 84, height: 22, rx: 11,
+        fill: 'url(#commaGoldGrad)', stroke: '#fff', 'stroke-width': 1.6, filter: 'url(#goldGlow)'
+      }));
+      burstG.appendChild(svgEl('text', {
+        x: 0, y: 2.5, 'text-anchor': 'middle', fill: '#4c2a00',
+        'font-size': '10.5', 'font-weight': '900'
+      }, `1 ${fromOrd.sym} → 10 ${toOrd.sym}`));
+      dom.svgAnimLayer.appendChild(burstG);
+      SoundFX.clack(toOrd.pitch * 1.15, 0.17);
+
+      await wait(110);
+
+      const existingCount = state.beads[toIdx];
+      const finalCount = existingCount + 10;
+      const toLayout = getBeadLayout(toIdx, finalCount);
+      renderSVG();
+
+      const dropPromises = [];
+      for (let k = 0; k < 10; k++) {
+        const targetIndex = existingCount + k;
+        const targetY = getBeadCenterY(toIdx, targetIndex, toLayout.beadH, toLayout.stepY);
+        const dropStartY = toOrd.pinTop - 8;
+
+        const p = (async () => {
+          await wait(k * 34);
+          const falling = buildBeadGroup(toIdx, toOrd.x, dropStartY, toLayout.beadW, toLayout.beadH);
+          dom.svgAnimLayer.appendChild(falling);
+
+          await tween(145, (_, t) => {
+            const g = t * t;
+            const cy = dropStartY + (targetY - dropStartY) * g;
+            falling.setAttribute('transform', `translate(${toOrd.x}, ${cy})`);
+          });
+
+          falling.remove();
+          state.beads[toIdx] += 1;
+          dom.svgBeads.appendChild(buildBeadGroup(toIdx, toOrd.x, targetY, toLayout.beadW, toLayout.beadH));
+          SoundFX.clack(toOrd.pitch + k * 14, 0.13);
+        })();
+        dropPromises.push(p);
+      }
+
+      await Promise.all(dropPromises);
+      setTimeout(() => burstG.remove(), 190);
+
+      // Se zerou a haste anterior (ou a próxima já ficou cheia), muda o foco e "abaixa" o algarismo na Chave
+      if (state.beads[fromIdx] === 0 || state.beads[toIdx] + 10 > MAX_COMFORTABLE_BEADS) {
+        state.activeOrder = toIdx;
+        if (hasStartedQuotient() || toIdx >= 3) {
+          openNextChaveOrder(fromIdx, toIdx, remBeforeExchange);
+        } else if (toIdx <= 2 && !state.broughtOrders.includes(toIdx)) {
+          // Ex.: em 13 ÷ 4, 1 D não deu grupo e juntou com 3 U formando 13 U
+          state.broughtOrders.push(toIdx);
+        }
+      }
+
+      markChaveUpdated();
+      state.isAnimating = false;
+      renderAll();
+    }
+
+    /* 3. CRUZAR A VÍRGULA (1 U → 10 d) */
+    async function performCrossComma() {
+      if (state.isAnimating || state.commaUnlocked) return;
+      pushHistory();
+      state.isAnimating = true;
+      renderActionButtons();
+
+      if (state.quotient[2] === null) {
+        state.quotient[2] = state.groupsFormed[2];
+      }
+
+      state.commaUnlocked = true;
+      SoundFX.chime([440, 554.37, 659.25]);
+      renderSVG();
+      renderChaveAndInverse();
+
+      await wait(300);
+      state.isAnimating = false;
+      await performExchange(true);
+    }
+
+    /* 4. AVANÇAR HASTE ZERADA */
+    function performAdvance() {
+      if (state.isAnimating || state.finished) return;
+      pushHistory();
+      const idx = state.activeOrder;
+
+      if (state.quotient[idx] === null && (hasStartedQuotient() || idx >= 2)) {
+        state.quotient[idx] = 0;
+      }
+      if (idx >= 2 && state.beads[idx] === 0) {
+        recordChaveStep(idx, state.groupsFormed[idx], 0, false, true);
+      } else if (idx < 2 && state.beads[idx] === 0 && hasStartedQuotient()) {
+        recordChaveStep(idx, state.groupsFormed[idx], 0, false, true);
+      }
+
+      const prevWithBeads = findHighestOrderWithBeads(idx - 1);
+      if (prevWithBeads !== -1) {
+        state.activeOrder = prevWithBeads;
+        markChaveUpdated();
+        renderAll();
+        return;
+      }
+
+      const hasMoreAhead = state.beads.slice(idx + 1).some((b) => b > 0);
+      if (idx < 2) {
+        const nextIdx = idx + 1;
+        state.activeOrder = nextIdx;
+        if (hasStartedQuotient()) {
+          openNextChaveOrder(idx, nextIdx, 0);
+        }
+        if (nextIdx === 2 && state.beads[2] === 0 && !hasMoreAhead) {
+          state.quotient[2] = 0;
+          recordChaveStep(2, 0, 0, false, true);
+          state.finished = true;
+          SoundFX.chime();
+        }
+      } else {
+        state.finished = true;
+        SoundFX.chime();
+      }
+      markChaveUpdated();
+      renderAll();
+    }
+
+    function evaluatePostGroup(idx) {
+      const rem = state.beads[idx];
+      const div = state.divisor;
+
+      if (rem >= div) return;
+
+      // Fecha a etapa atual na Chave com a subtração e o resto
+      const prevWithBeads = findHighestOrderWithBeads(idx - 1);
+      if (prevWithBeads !== -1) {
+        state.activeOrder = prevWithBeads;
+        return;
+      }
+
+      // Fase 1 (sem decimais): encerra em U
+      if (idx === 2 && !state.allowDecimals) {
+        recordChaveStep(2, state.groupsFormed[2], rem, false, true);
+        state.finished = true;
+        SoundFX.chime();
+        return;
+      }
+
+      // Divisão exata
+      if (idx >= 2 && rem === 0) {
+        recordChaveStep(idx, state.groupsFormed[idx], 0, false, true);
+        state.finished = true;
+        SoundFX.chime();
+        return;
+      }
+
+      // Casas decimais com resto > 0: detecta dízima periódica
+      if (idx >= 3 && rem > 0) {
+        const repeated = checkDecimalRemainder(idx);
+        recordChaveStep(idx, state.groupsFormed[idx], rem, repeated, true);
+        if (repeated || idx === 5) {
+          state.finished = true;
+          if (!repeated) SoundFX.chime();
+        }
+        return;
+      }
+
+      // C ou D com resto > 0 (< div): fecha a subtração na Chave e aguarda destroca
+      if (idx < 2 && rem > 0) {
+        recordChaveStep(idx, state.groupsFormed[idx], rem, false, true);
+        return;
+      }
+
+      // C ou D zerados: fecha na Chave e avança para a próxima ordem
+      if (idx < 2 && rem === 0) {
+        recordChaveStep(idx, state.groupsFormed[idx], 0, false, true);
+        const nextIdx = idx + 1;
+        state.activeOrder = nextIdx;
+        openNextChaveOrder(idx, nextIdx, 0);
+
+        if (nextIdx === 2 && state.beads[2] === 0) {
+          state.quotient[2] = 0;
+          recordChaveStep(2, 0, 0, false, true);
+          state.finished = true;
+          SoundFX.chime();
+        } else if (nextIdx === 2 && state.beads[2] < div && !state.allowDecimals) {
+          state.quotient[2] = 0;
+          recordChaveStep(2, 0, state.beads[2], false, true);
+          state.finished = true;
+          SoundFX.chime();
+        }
+      }
+    }
+
+    /* =========================================================================
+       NAVEGAÇÃO, FASES E EVENTOS
+       ========================================================================= */
+    function selectPhase(phaseKey) {
+      state.phase = phaseKey;
+      dom.phaseTabs.forEach((btn) => {
+        btn.classList.toggle('active', btn.dataset.phase === phaseKey);
+      });
+
+      if (phaseKey === 'free') {
+        dom.challengeSelect.style.display = 'none';
+        dom.freeInputs.classList.add('is-visible');
+        state.allowDecimals = dom.selectFreeMode.value === 'decimals';
+        loadDivision(dom.inputDividend.value, dom.inputDivisor.value);
+      } else {
+        dom.challengeSelect.style.display = 'block';
+        dom.freeInputs.classList.remove('is-visible');
+        state.allowDecimals = (phaseKey === '2' || phaseKey === '3');
+
+        const list = PHASE_CHALLENGES[phaseKey];
+        dom.challengeSelect.innerHTML = '';
+        list.forEach((item, i) => {
+          const opt = document.createElement('option');
+          opt.value = String(i);
+          opt.textContent = item.label;
+          dom.challengeSelect.appendChild(opt);
+        });
+        loadDivision(list[0].dividend, list[0].divisor);
+      }
+    }
+
+    dom.phaseTabs.forEach((tab) => {
+      tab.addEventListener('click', () => selectPhase(tab.dataset.phase));
+    });
+
+    dom.challengeSelect.addEventListener('change', () => {
+      const list = PHASE_CHALLENGES[state.phase];
+      const item = list[Number(dom.challengeSelect.value)] || list[0];
+      loadDivision(item.dividend, item.divisor);
+    });
+
+    dom.btnApplyFree.addEventListener('click', () => {
+      state.allowDecimals = dom.selectFreeMode.value === 'decimals';
+      loadDivision(dom.inputDividend.value, dom.inputDivisor.value);
+    });
+
+    dom.selectFreeMode.addEventListener('change', () => {
+      state.allowDecimals = dom.selectFreeMode.value === 'decimals';
+      loadDivision(dom.inputDividend.value, dom.inputDivisor.value);
+    });
+
+    dom.btnGroup.addEventListener('click', performFormGroup);
+    dom.btnExchange.addEventListener('click', () => performExchange(false));
+    dom.btnComma.addEventListener('click', performCrossComma);
+    dom.btnAdvance.addEventListener('click', performAdvance);
+    dom.btnUndo.addEventListener('click', performUndo);
+    dom.btnReset.addEventListener('click', () => loadDivision(state.dividend, state.divisor));
+
+    dom.btnSpeed.addEventListener('click', () => {
+      state.slowMode = !state.slowMode;
+      dom.btnSpeed.classList.toggle('active', state.slowMode);
+      dom.speedIcon.textContent = state.slowMode ? '🐢' : '⚡';
+      dom.speedText.textContent = state.slowMode ? 'Lento' : 'Normal';
+    });
+
+    dom.btnSound.addEventListener('click', () => {
+      SoundFX.enabled = !SoundFX.enabled;
+      dom.btnSound.classList.toggle('active', SoundFX.enabled);
+      dom.soundIcon.textContent = SoundFX.enabled ? '🔊' : '🔇';
+      if (SoundFX.enabled) SoundFX.clack(420, 0.16);
+    });
+
+    dom.btnToggleChave.addEventListener('click', () => setChaveOpen(!state.chaveOpen));
+    dom.btnCloseChave.addEventListener('click', () => setChaveOpen(false));
+    dom.drawerBackdrop.addEventListener('click', () => setChaveOpen(false));
+    dom.periodToastClose.addEventListener('click', () => {
+      state.toastDismissed = true;
+      dom.periodToast.classList.remove('is-visible');
+    });
+
+    window.addEventListener('resize', () => {
+      syncChavePanelUI();
+    });
+
+    window.addEventListener('DOMContentLoaded', () => {
+      buildStaticSVG();
+      syncChavePanelUI();
+      selectPhase('1');
+    });
+  </script>
+<div id="autoriaTxt" onclick="this.classList.remove('on')" style="position:fixed;top:44px;right:8px;z-index:2147483000;max-width:260px;padding:8px 10px;border-radius:8px;background:#222;color:#fff;font:12px/1.35 sans-serif;display:none">© Ygor B. F. Ferreira · A Saga dos Reinos Matemáticos · Matematkês · uso livre em sala</div><style>#autoriaTxt.on{display:block!important}</style>
+</body>
+</html>

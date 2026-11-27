@@ -1,0 +1,3357 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>Oficina de Retângulos — Divisores, Critérios e MDC</title>
+  <style>
+    /* =========================================================================
+       DESIGN TOKENS — OFICINA GEOMÉTRICA DE SALA DE AULA (100dvh × 100vw)
+       ========================================================================= */
+    :root {
+      --bg-page: #f4f1ea;
+      --bg-paper: #ffffff;
+      --bg-soft: #f8f6f1;
+      --ink: #1e293b;
+      --ink-muted: #526072;
+      --border: #d6cfc2;
+
+      --wood-accent: #8c5a2b;
+      --wood-soft: #f3e8d8;
+
+      --blue: #2563eb;
+      --blue-dark: #1d4ed8;
+      --blue-bg: #eff6ff;
+
+      --exact: #059669;
+      --exact-light: #34d399;
+      --exact-bg: #ecfdf5;
+      --exact-border: #6ee7b7;
+
+      --square: #7c3aed;
+      --square-bg: #f5f3ff;
+
+      --gold: #d97706;
+      --gold-bright: #f59e0b;
+      --gold-bg: #fffbeb;
+      --gold-border: #fcd34d;
+
+      --rem: #e11d48;
+      --rem-light: #fb7185;
+      --rem-bg: #fff1f2;
+      --rem-border: #fda4af;
+
+      --radius-md: 11px;
+      --radius-sm: 7px;
+      --shadow-sm: 0 2px 8px rgba(30, 41, 59, 0.08);
+      --shadow-md: 0 8px 24px rgba(30, 41, 59, 0.16);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html, body {
+      width: 100vw;
+      height: 100dvh;
+      overflow: hidden;
+      font-family: 'Nunito', 'Segoe UI', system-ui, -apple-system, sans-serif;
+      background-color: var(--bg-page);
+      color: var(--ink);
+      line-height: 1.25;
+      -webkit-tap-highlight-color: transparent;
+      user-select: none;
+    }
+
+    /* Fallback seguro para telas extremamente baixas (< 380px) */
+    @media (max-height: 379px) {
+      html, body {
+        height: auto;
+        min-height: 100dvh;
+        overflow-y: auto;
+      }
+      .app-shell {
+        height: auto !important;
+        min-height: 400px;
+      }
+    }
+
+    .app-shell {
+      width: 100vw;
+      height: 100dvh;
+      display: flex;
+      flex-direction: column;
+      padding: 5px 7px;
+      gap: 5px;
+      overflow: hidden;
+    }
+
+    /* =========================================================================
+       1. BARRA SUPERIOR COMPACTA (~42px) — ABAS + UTILITÁRIOS FIXOS À DIREITA
+       ========================================================================= */
+    .top-bar {
+      height: 42px;
+      min-height: 40px;
+      flex-shrink: 0;
+      background: var(--bg-paper);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 0 7px;
+      box-shadow: var(--shadow-sm);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 6px;
+      overflow: hidden;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      font-weight: 900;
+      font-size: clamp(0.75rem, 1.2vw, 0.9rem);
+      color: var(--wood-accent);
+      white-space: nowrap;
+      flex-shrink: 0;
+      padding-right: 6px;
+      border-right: 1.5px solid var(--border);
+    }
+    @media (max-width: 620px) {
+      .brand-text { display: none; }
+      .brand { border-right: none; padding-right: 2px; }
+    }
+
+    .phase-tabs {
+      flex: 1 1 0;
+      min-width: 0;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      overflow-x: auto;
+      scrollbar-width: none;
+    }
+    .phase-tabs::-webkit-scrollbar { display: none; }
+
+    .phase-tab {
+      appearance: none;
+      border: 1.5px solid var(--border);
+      background: var(--bg-soft);
+      color: var(--ink);
+      font-family: inherit;
+      font-weight: 800;
+      font-size: clamp(0.67rem, 1.1vw, 0.78rem);
+      padding: 4px clamp(6px, 0.85vw, 10px);
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      white-space: nowrap;
+      flex-shrink: 0;
+      transition: all 0.14s ease;
+    }
+    .phase-tab:hover { background: #fff; border-color: #93c5fd; }
+    .phase-tab.active {
+      background: linear-gradient(180deg, #eff6ff 0%, #dbeafe 100%);
+      border-color: var(--blue);
+      color: var(--blue-dark);
+      box-shadow: 0 1px 4px rgba(37, 99, 235, 0.18);
+    }
+    .phase-tab.bonus-tab.active {
+      background: linear-gradient(180deg, #fffbeb 0%, #fef3c7 100%);
+      border-color: var(--gold-bright);
+      color: #92400e;
+    }
+
+    .top-utils {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      flex-shrink: 0;
+    }
+
+    .icon-btn {
+      appearance: none;
+      border: 1.5px solid var(--border);
+      background: var(--bg-soft);
+      color: var(--ink);
+      font-family: inherit;
+      font-weight: 800;
+      font-size: clamp(0.68rem, 1.1vw, 0.77rem);
+      padding: 4px 8px;
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      white-space: nowrap;
+      position: relative;
+      transition: all 0.14s ease;
+    }
+    .icon-btn:hover { background: #fff; border-color: #93c5fd; }
+    .icon-btn.active {
+      background: #dbeafe;
+      border-color: var(--blue);
+      color: var(--blue-dark);
+    }
+
+    .badge-dot {
+      position: absolute;
+      top: -3px;
+      right: -3px;
+      width: 9px;
+      height: 9px;
+      border-radius: 50%;
+      background: var(--gold-bright);
+      border: 1.5px solid #fff;
+      display: none;
+    }
+    .badge-dot.is-visible { display: block; }
+
+    /* =========================================================================
+       2. FAIXA DE CONTEXTO / CONTROLES DIRETOS (LIVRE & BÔNUS 100% VISÍVEIS)
+       ========================================================================= */
+    .context-bar {
+      flex-shrink: 0;
+      background: linear-gradient(90deg, #ffffff 0%, #faf8f4 100%);
+      border: 1px solid var(--border);
+      border-left: 4px solid var(--blue);
+      border-radius: 9px;
+      padding: 4px 9px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 6px 8px;
+    }
+    .context-bar.tone-exact  { border-left-color: var(--exact); background: linear-gradient(90deg, #ecfdf5 0%, #f0fdf4 100%); }
+    .context-bar.tone-square { border-left-color: var(--square); background: linear-gradient(90deg, #f5f3ff 0%, #faf5ff 100%); }
+    .context-bar.tone-gold   { border-left-color: var(--gold-bright); background: linear-gradient(90deg, #fffbeb 0%, #fef3c7 100%); }
+    .context-bar.tone-rem    { border-left-color: var(--rem); background: linear-gradient(90deg, #fff1f2 0%, #ffe4e6 100%); }
+
+    .ctx-left {
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 5px;
+    }
+
+    .status-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      background: #fff;
+      border: 1.5px solid var(--border);
+      border-radius: 999px;
+      padding: 2px 9px;
+      font-size: clamp(0.73rem, 1.2vw, 0.84rem);
+      font-weight: 900;
+      color: var(--ink);
+      white-space: nowrap;
+    }
+
+    .badge-count {
+      display: inline-flex;
+      align-items: center;
+      padding: 2px 7px;
+      border-radius: 999px;
+      font-size: 0.68rem;
+      font-weight: 900;
+      background: var(--blue-bg);
+      color: var(--blue-dark);
+      border: 1px solid #bfdbfe;
+      white-space: nowrap;
+    }
+    .badge-count.is-three {
+      background: var(--square-bg);
+      color: var(--square);
+      border-color: #c4b5fd;
+    }
+    .ctx-chip:hover { border-color: var(--blue); }
+    .ctx-chip.active { background: var(--blue); border-color: var(--blue-dark); color: #fff; }
+    .ctx-chip.gold-active { background: var(--gold); border-color: #92400e; color: #fff; }
+
+    /* Campo numérico compacto com botões − / + embutidos (Fase Livre e Bônus) */
+    .num-field {
+      display: inline-flex;
+      align-items: center;
+      background: #fff;
+      border: 1.5px solid var(--border);
+      border-radius: 8px;
+      overflow: hidden;
+      height: 28px;
+    }
+    .num-field-label {
+      font-size: 0.72rem;
+      font-weight: 900;
+      color: var(--ink-muted);
+      padding: 0 6px;
+      background: var(--bg-soft);
+      border-right: 1px solid var(--border);
+      height: 100%;
+      display: inline-flex;
+      align-items: center;
+    }
+    .num-mini-btn {
+      appearance: none;
+      border: none;
+      background: transparent;
+      color: var(--ink);
+      font-weight: 900;
+      font-size: 0.86rem;
+      width: 22px;
+      height: 100%;
+      cursor: pointer;
+    }
+    .num-mini-btn:hover { background: #e2e8f0; }
+    .num-input {
+      width: 44px;
+      height: 100%;
+      border: none;
+      border-left: 1px solid #e2e8f0;
+      border-right: 1px solid #e2e8f0;
+      font-family: inherit;
+      font-weight: 900;
+      font-size: 0.78rem;
+      text-align: center;
+      color: var(--blue-dark);
+      background: #fff;
+    }
+    .num-input.wide { width: 56px; }
+    .num-input:focus { outline: none; background: var(--blue-bg); }
+
+    .ctx-apply-btn {
+      appearance: none;
+      border: none;
+      border-radius: 7px;
+      height: 28px;
+      padding: 0 9px;
+      background: linear-gradient(180deg, #10b981 0%, #059669 100%);
+      color: #fff;
+      font-family: inherit;
+      font-weight: 900;
+      font-size: 0.73rem;
+      cursor: pointer;
+      white-space: nowrap;
+      box-shadow: 0 1.5px 0 rgba(15, 23, 42, 0.2);
+    }
+    .ctx-apply-btn:hover { filter: brightness(1.06); }
+
+    .ctx-rand-btn {
+      appearance: none;
+      border: 1.5px solid var(--border);
+      border-radius: 7px;
+      height: 28px;
+      padding: 0 8px;
+      background: #fff;
+      color: var(--ink);
+      font-family: inherit;
+      font-weight: 800;
+      font-size: 0.73rem;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+    .ctx-rand-btn:hover { border-color: var(--blue); background: var(--blue-bg); }
+
+    .status-msg {
+      font-size: clamp(0.71rem, 1.2vw, 0.83rem);
+      font-weight: 800;
+      color: var(--ink);
+      margin-left: auto;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: 100%;
+    }
+
+    /* =========================================================================
+       3. ÁREA CENTRAL: PALCO SVG FLUIDO + PAINEL LATERAL / DRAWER
+       ========================================================================= */
+    .main-stage {
+      flex: 1 1 0;
+      min-height: 0;
+      display: flex;
+      gap: 6px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .canvas-pane {
+      flex: 1 1 0;
+      min-width: 0;
+      min-height: 0;
+      background-color: #fdfcfa;
+      background-image:
+        linear-gradient(to right, rgba(140, 90, 43, 0.08) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(140, 90, 43, 0.08) 1px, transparent 1px);
+      background-size: 22px 22px;
+      border: 1.5px solid var(--border);
+      border-radius: 12px;
+      box-shadow: var(--shadow-sm);
+      position: relative;
+      overflow: hidden;
+      display: flex;
+    }
+
+    .svg-viewport {
+      width: 100%;
+      height: 100%;
+      position: relative;
+      cursor: grab;
+      touch-action: none;
+    }
+    .svg-viewport:active { cursor: grabbing; }
+
+    #stage-svg {
+      width: 100%;
+      height: 100%;
+      display: block;
+    }
+
+    /* Controles flutuantes de Zoom */
+    .zoom-bar {
+      position: absolute;
+      top: 7px;
+      right: 8px;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      background: rgba(255, 255, 255, 0.94);
+      backdrop-filter: blur(4px);
+      border: 1px solid var(--border);
+      border-radius: 9px;
+      padding: 3px 5px;
+      box-shadow: var(--shadow-sm);
+      z-index: 8;
+    }
+
+    .zoom-btn {
+      appearance: none;
+      border: 1px solid var(--border);
+      background: var(--bg-soft);
+      color: var(--ink);
+      font-family: inherit;
+      font-weight: 900;
+      font-size: 0.72rem;
+      min-width: 24px;
+      height: 24px;
+      padding: 0 6px;
+      border-radius: 6px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .zoom-btn:hover { background: var(--blue-bg); border-color: var(--blue); color: var(--blue-dark); }
+    .zoom-label {
+      font-size: 0.7rem;
+      font-weight: 900;
+      color: var(--ink-muted);
+      min-width: 36px;
+      text-align: center;
+    }
+
+    /* Toast / Banner flutuante de conquista com botão direto "Próximo Desafio ▶" */
+    .stage-toast {
+      position: absolute;
+      bottom: 10px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(255, 255, 255, 0.98);
+      border: 2px solid var(--exact);
+      border-radius: 12px;
+      padding: 7px 12px;
+      box-shadow: var(--shadow-md);
+      display: none;
+      align-items: center;
+      gap: 9px;
+      max-width: 95%;
+      z-index: 14;
+      animation: popUp 0.2s ease-out;
+    }
+    .stage-toast.is-visible { display: flex; }
+    .stage-toast.tone-gold   { border-color: var(--gold-bright); background: #fffbeb; }
+    .stage-toast.tone-square { border-color: var(--square); background: #f5f3ff; }
+    .stage-toast.tone-rem    { border-color: var(--rem); background: #fff1f2; }
+
+    @keyframes popUp {
+      from { opacity: 0; transform: translate(-50%, 8px) scale(0.96); }
+      to   { opacity: 1; transform: translate(-50%, 0) scale(1); }
+    }
+
+    .toast-body {
+      font-size: clamp(0.72rem, 1.2vw, 0.83rem);
+      font-weight: 800;
+      color: var(--ink);
+      line-height: 1.3;
+    }
+
+    .toast-next-btn {
+      appearance: none;
+      border: none;
+      border-radius: 8px;
+      padding: 6px 10px;
+      background: linear-gradient(180deg, #fde047 0%, #f59e0b 100%);
+      color: #451a03;
+      font-family: inherit;
+      font-weight: 900;
+      font-size: 0.74rem;
+      cursor: pointer;
+      white-space: nowrap;
+      box-shadow: 0 2px 0 rgba(120, 53, 15, 0.28);
+      display: none;
+      flex-shrink: 0;
+    }
+    .toast-next-btn.is-visible { display: inline-flex; align-items: center; gap: 4px; }
+    .toast-next-btn:hover { filter: brightness(1.06); }
+
+    .toast-close {
+      appearance: none;
+      border: none;
+      background: rgba(15, 23, 42, 0.1);
+      color: var(--ink);
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      font-weight: 900;
+      cursor: pointer;
+      flex-shrink: 0;
+    }
+
+    /* Modal educativo "Por que funciona?" (Segredo do 7) */
+    .info-modal-backdrop {
+      position: absolute;
+      inset: 0;
+      background: rgba(15, 23, 42, 0.44);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 12px;
+      z-index: 30;
+      border-radius: 12px;
+    }
+    .info-modal-backdrop.is-open { display: flex; }
+
+    .info-modal {
+      background: #fff;
+      border: 2px solid var(--gold-bright);
+      border-radius: 14px;
+      padding: 14px 16px;
+      max-width: 440px;
+      width: 100%;
+      box-shadow: var(--shadow-md);
+      display: flex;
+      flex-direction: column;
+      gap: 9px;
+    }
+    .info-modal h3 {
+      font-size: 0.95rem;
+      font-weight: 900;
+      color: #92400e;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .info-modal p {
+      font-size: 0.81rem;
+      font-weight: 700;
+      color: var(--ink);
+      line-height: 1.4;
+    }
+    .formula-box {
+      background: var(--gold-bg);
+      border: 1.5px solid var(--gold-border);
+      border-radius: 9px;
+      padding: 8px 10px;
+      font-family: 'JetBrains Mono', 'Consolas', monospace;
+      font-size: 0.79rem;
+      font-weight: 800;
+      color: #78350f;
+      line-height: 1.45;
+    }
+
+    /* =========================================================================
+       PAINEL LATERAL / DRAWER RETRÁTIL (ABERTO AUTO >= 1080px)
+       ========================================================================= */
+    .drawer-backdrop {
+      display: none;
+      position: absolute;
+      inset: 0;
+      background: rgba(15, 23, 42, 0.28);
+      z-index: 20;
+      border-radius: 12px;
+    }
+    .drawer-backdrop.is-open { display: block; }
+
+    .side-panel {
+      position: absolute;
+      top: 0;
+      right: 0;
+      bottom: 0;
+      width: min(305px, 88vw);
+      background: var(--bg-paper);
+      border: 1.5px solid var(--border);
+      border-radius: 12px;
+      box-shadow: -6px 0 22px rgba(15, 23, 42, 0.16);
+      padding: 9px 10px;
+      display: flex;
+      flex-direction: column;
+      gap: 7px;
+      z-index: 25;
+      transform: translateX(106%);
+      transition: transform 0.22s cubic-bezier(0.22, 1, 0.36, 1);
+      overflow: hidden;
+    }
+    .side-panel.is-open { transform: translateX(0); }
+
+    @media (min-width: 1020px) {
+      .drawer-backdrop { display: none !important; }
+      .side-panel {
+        position: static;
+        width: 280px;
+        flex-shrink: 0;
+        transform: none !important;
+        box-shadow: var(--shadow-sm);
+        transition: none;
+      }
+      .side-panel:not(.is-open) { display: none; }
+    }
+
+    .panel-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 0.74rem;
+      font-weight: 900;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      color: var(--ink-muted);
+      padding-bottom: 5px;
+      border-bottom: 1.5px solid var(--border);
+      flex-shrink: 0;
+    }
+
+    .close-btn {
+      appearance: none;
+      border: 1px solid var(--border);
+      background: var(--bg-soft);
+      color: var(--ink);
+      width: 22px;
+      height: 22px;
+      border-radius: 6px;
+      font-weight: 900;
+      cursor: pointer;
+    }
+
+    .panel-body {
+      flex: 1 1 0;
+      min-height: 0;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      padding-right: 2px;
+    }
+
+    .p-card {
+      background: var(--bg-soft);
+      border: 1.5px solid #e2ddd4;
+      border-radius: 9px;
+      padding: 7px 9px;
+    }
+    .p-card.exact  { background: var(--exact-bg); border-color: var(--exact-border); }
+    .p-card.gold   { background: var(--gold-bg); border-color: var(--gold-border); }
+    .p-card.square { background: var(--square-bg); border-color: #c4b5fd; }
+
+    .p-card-title {
+      font-size: 0.69rem;
+      font-weight: 900;
+      text-transform: uppercase;
+      color: var(--ink-muted);
+      margin-bottom: 5px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .pill-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 4px;
+    }
+
+    .div-pill {
+      font-size: 0.76rem;
+      font-weight: 900;
+      padding: 2px 8px;
+      border-radius: 999px;
+      background: var(--exact);
+      color: #fff;
+      cursor: pointer;
+      border: 1.5px solid transparent;
+      font-family: inherit;
+      transition: transform 0.1s ease, filter 0.12s ease;
+    }
+    .div-pill:hover { transform: translateY(-1px); filter: brightness(1.05); }
+    .div-pill.is-plain {
+      background: #ffffff;
+      color: var(--ink-muted);
+      border-color: #cbd5e1;
+    }
+    .div-pill.is-plain:hover {
+      border-color: var(--blue);
+      color: var(--blue-dark);
+    }
+    .div-pill.is-common {
+      background: #d1fae5;
+      color: #065f46;
+      border-color: #34d399;
+    }
+    .div-pill.is-square { background: var(--square); color: #fff; }
+    .div-pill.is-mdc {
+      background: linear-gradient(135deg, #fbbf24, #d97706);
+      color: #451a03;
+      border-color: #fef08a;
+      box-shadow: 0 2px 6px rgba(217, 119, 6, 0.38);
+    }
+    .div-pill.is-mdc-pulse {
+      background: linear-gradient(135deg, #fde047, #f59e0b);
+      color: #451a03;
+      border-color: #b45309;
+      box-shadow: 0 0 0 0 rgba(245, 158, 11, 0.7);
+      animation: mdcPillPulse 1.4s ease-in-out infinite;
+    }
+    @keyframes mdcPillPulse {
+      0%, 100% { box-shadow: 0 2px 6px rgba(217, 119, 6, 0.4), 0 0 0 0 rgba(245, 158, 11, 0.65); }
+      50%      { box-shadow: 0 2px 8px rgba(217, 119, 6, 0.55), 0 0 0 5px rgba(245, 158, 11, 0); }
+    }
+
+    .legend-row {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 4px 6px;
+      background: #ffffff;
+      border: 1px solid #e2ddd4;
+      border-radius: 8px;
+      font-size: 0.7rem;
+      font-weight: 900;
+      color: var(--ink-muted);
+    }
+    .legend-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 3px;
+      padding: 1px 7px;
+      border-radius: 999px;
+      font-size: 0.68rem;
+      font-weight: 900;
+    }
+    .legend-badge.common {
+      background: #d1fae5;
+      color: #065f46;
+      border: 1px solid #34d399;
+    }
+    .legend-badge.mdc {
+      background: linear-gradient(135deg, #fde047, #f59e0b);
+      color: #451a03;
+      border: 1px solid #b45309;
+    }
+    .div-pill.is-square { background: var(--square); }
+    .div-pill.is-mdc {
+      background: linear-gradient(135deg, #f59e0b, #d97706);
+      color: #fff;
+      box-shadow: 0 2px 6px rgba(217, 119, 6, 0.35);
+    }
+
+    .eq-list {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      font-family: 'JetBrains Mono', 'Consolas', monospace;
+      font-size: 0.75rem;
+      font-weight: 800;
+    }
+    .eq-row {
+      background: #fff;
+      border: 1px solid #e2e8f0;
+      border-radius: 6px;
+      padding: 4px 7px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    /* =========================================================================
+       4. BARRA INFERIOR — AÇÕES ROLÁVEIS À ESQUERDA + "◀ 1/N Próximo ▶" FIXO À DIREITA
+       ========================================================================= */
+    .bottom-bar {
+      height: 50px;
+      min-height: 46px;
+      flex-shrink: 0;
+      background: var(--bg-paper);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 4px 7px;
+      box-shadow: var(--shadow-sm);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 6px;
+      overflow: hidden;
+    }
+
+    /* Área de ações da fase: encolhe e rola internamente SEM nunca empurrar o botão Próximo */
+    .phase-actions {
+      flex: 1 1 0;
+      min-width: 0;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      overflow-x: auto;
+      overflow-y: hidden;
+      scrollbar-width: none;
+      padding: 1px 0;
+    }
+    .phase-actions::-webkit-scrollbar { display: none; }
+
+    /* Bloco de navegação "◀ 1/N Próximo ▶": SEMPRE VISÍVEL, NUNCA CORTADO */
+    .challenge-nav {
+      flex: 0 0 auto;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      padding-left: 7px;
+      border-left: 2px solid var(--border);
+      background: var(--bg-paper);
+    }
+
+    .nav-counter {
+      font-size: 0.75rem;
+      font-weight: 900;
+      color: var(--ink-muted);
+      min-width: 32px;
+      text-align: center;
+      white-space: nowrap;
+    }
+
+    .act-btn {
+      appearance: none;
+      border: none;
+      border-radius: 8px;
+      height: 36px;
+      padding: 0 clamp(8px, 1.1vw, 13px);
+      font-family: inherit;
+      font-size: clamp(0.71rem, 1.18vw, 0.82rem);
+      font-weight: 800;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 4px;
+      white-space: nowrap;
+      flex-shrink: 0;
+      box-shadow: 0 2px 0 rgba(15, 23, 42, 0.2);
+      transition: transform 0.1s ease, filter 0.14s ease, opacity 0.14s ease;
+    }
+    .act-btn:hover:not(:disabled) { filter: brightness(1.06); transform: translateY(-1px); }
+    .act-btn:active:not(:disabled) { transform: translateY(1px); box-shadow: 0 1px 0 rgba(15, 23, 42, 0.2); }
+    .act-btn:disabled { opacity: 0.38; cursor: not-allowed; box-shadow: none; }
+
+    .btn-primary { background: linear-gradient(180deg, #3b82f6 0%, #2563eb 100%); color: #fff; }
+    .btn-exact   { background: linear-gradient(180deg, #10b981 0%, #059669 100%); color: #fff; }
+    .btn-gold    { background: linear-gradient(180deg, #fbbf24 0%, #d97706 100%); color: #451a03; }
+    .btn-purple  { background: linear-gradient(180deg, #8b5cf6 0%, #7c3aed 100%); color: #fff; }
+    .btn-soft    {
+      background: var(--bg-soft);
+      color: var(--ink);
+      border: 1.5px solid var(--border);
+      box-shadow: 0 2px 0 rgba(15, 23, 42, 0.1);
+    }
+
+    .btn-next-ready {
+      background: linear-gradient(180deg, #fde047 0%, #f59e0b 100%) !important;
+      color: #451a03 !important;
+      border: 1.5px solid #fef08a !important;
+      animation: goldPulse 1.25s ease-in-out infinite;
+    }
+    @keyframes goldPulse {
+      0%, 100% { box-shadow: 0 2px 0 rgba(15, 23, 42, 0.2), 0 0 0 0 rgba(245, 158, 11, 0.7); }
+      50%      { box-shadow: 0 2px 0 rgba(15, 23, 42, 0.2), 0 0 0 7px rgba(245, 158, 11, 0); }
+    }
+
+    .stepper-group {
+      display: inline-flex;
+      align-items: center;
+      background: var(--bg-soft);
+      border: 1.5px solid var(--border);
+      border-radius: 8px;
+      height: 36px;
+      overflow: hidden;
+      flex-shrink: 0;
+    }
+    .stepper-btn {
+      appearance: none;
+      border: none;
+      background: transparent;
+      color: var(--ink);
+      font-weight: 900;
+      font-size: 0.95rem;
+      width: 28px;
+      height: 100%;
+      cursor: pointer;
+    }
+    .stepper-btn:hover { background: #e2e8f0; }
+    .stepper-val {
+      font-size: 0.78rem;
+      font-weight: 900;
+      color: var(--blue-dark);
+      padding: 0 6px;
+      min-width: 54px;
+      text-align: center;
+      border-left: 1px solid var(--border);
+      border-right: 1px solid var(--border);
+    }
+
+    .height-slider {
+      width: 78px;
+      accent-color: var(--blue);
+      cursor: pointer;
+      flex-shrink: 0;
+    }
+
+    .quiz-chip {
+      appearance: none;
+      border: 1.5px solid var(--border);
+      background: #fff;
+      color: var(--ink);
+      font-family: inherit;
+      font-weight: 900;
+      font-size: 0.75rem;
+      height: 32px;
+      min-width: 30px;
+      padding: 0 7px;
+      border-radius: 8px;
+      cursor: pointer;
+      flex-shrink: 0;
+      transition: all 0.12s ease;
+    }
+    .quiz-chip.selected { background: var(--blue); border-color: var(--blue-dark); color: #fff; }
+    .quiz-chip.correct  { background: var(--exact); border-color: #047857; color: #fff; }
+    .quiz-chip.wrong    { background: var(--rem); border-color: #be123c; color: #fff; }
+
+    @media (max-width: 520px) {
+      .app-shell { padding: 4px; gap: 4px; }
+      .hide-xs { display: none; }
+      .act-btn { height: 34px; padding: 0 8px; font-size: 0.71rem; }
+      .height-slider { width: 58px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="app-shell">
+    <!-- 1. BARRA SUPERIOR COMPACTA -->
+    <header class="top-bar">
+      <div class="brand">
+        <span>🧱</span>
+        <span class="brand-text">Oficina MDC</span>
+      </div>
+
+      <nav class="phase-tabs" aria-label="Abas pedagógicas">
+        <button class="phase-tab active" data-tab="rect" type="button">1. Retângulos</button>
+        <button class="phase-tab" data-tab="lupa" type="button">2. Lupa</button>
+        <button class="phase-tab" data-tab="duel" type="button">3. Duelo MDC</button>
+        <button class="phase-tab" data-tab="free" type="button">4. Livre</button>
+        <button class="phase-tab bonus-tab" data-tab="bonus" type="button">★ Bônus</button>
+      </nav>
+
+      <div class="top-utils">
+        <button id="btn-sound" class="icon-btn active" type="button" title="Ativar/Silenciar som">
+          <span id="sound-icon">🔊</span>
+        </button>
+        <button id="btn-panel" class="icon-btn" type="button" title="Abrir/Fechar Painel">
+          <span>📊</span><span class="hide-xs">Painel</span>
+          <span id="panel-dot" class="badge-dot"></span>
+        </button>
+      </div>
+    <button id="autoriaBtn" type="button" aria-label="Autoria" onclick="document.getElementById('autoriaTxt').classList.toggle('on')" style="flex:0 0 auto;width:20px;height:20px;margin:0 4px;border-radius:50%;border:1px solid rgba(128,128,128,.5);background:transparent;color:inherit;font:11px/18px sans-serif;text-align:center;padding:0;cursor:pointer;opacity:.5">©</button></header>
+
+    <!-- 2. FAIXA DEDICADA DE CONTEXTO / CONTROLES DIRETOS (LIVRE & BÔNUS SEMPRE VISÍVEIS) -->
+    <div id="context-bar" class="context-bar" role="status" aria-live="polite">
+      <div id="ctx-left" class="ctx-left"></div>
+      <div id="status-msg" class="status-msg">Organize os quadradinhos em retângulos perfeitos!</div>
+    </div>
+
+    <!-- 3. ÁREA CENTRAL: PALCO SVG + PAINEL LATERAL -->
+    <main class="main-stage">
+      <section class="canvas-pane">
+        <div id="svg-viewport" class="svg-viewport">
+          <!-- Controles de Zoom -->
+          <div class="zoom-bar" aria-label="Controles de zoom">
+            <button id="btn-zoom-out" class="zoom-btn" type="button" title="Diminuir zoom">−</button>
+            <span id="zoom-label" class="zoom-label">100%</span>
+            <button id="btn-zoom-in" class="zoom-btn" type="button" title="Aumentar zoom">+</button>
+            <button id="btn-zoom-fit" class="zoom-btn" type="button" title="Ajustar à tela">⊞ Ajustar</button>
+          </div>
+
+          <!-- Toast flutuante de conquista com botão direto para Próximo Desafio / Próxima Fase -->
+          <div id="stage-toast" class="stage-toast">
+            <span id="toast-icon" style="font-size:1.2rem;">✨</span>
+            <div id="toast-body" class="toast-body"></div>
+            <button id="btn-toast-next" class="toast-next-btn" type="button">Próximo Desafio ▶</button>
+            <button id="toast-close" class="toast-close" type="button" title="Fechar">✕</button>
+          </div>
+
+          <!-- Palco SVG 100% fluido -->
+          <svg id="stage-svg" role="img" aria-label="Palco interativo da Oficina de Retângulos">
+            <defs>
+              <linearGradient id="tileExact" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stop-color="#34d399" />
+                <stop offset="100%" stop-color="#059669" />
+              </linearGradient>
+              <linearGradient id="tileBlue" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stop-color="#60a5fa" />
+                <stop offset="100%" stop-color="#2563eb" />
+              </linearGradient>
+              <linearGradient id="tileSquare" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stop-color="#a78bfa" />
+                <stop offset="100%" stop-color="#7c3aed" />
+              </linearGradient>
+              <linearGradient id="tileGold" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stop-color="#fcd34d" />
+                <stop offset="100%" stop-color="#d97706" />
+              </linearGradient>
+              <linearGradient id="tileRem" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stop-color="#fb7185" />
+                <stop offset="100%" stop-color="#e11d48" />
+              </linearGradient>
+              <filter id="tileShadow" x="-15%" y="-15%" width="130%" height="130%">
+                <feDropShadow dx="0" dy="2" stdDeviation="2" flood-color="#0f172a" flood-opacity="0.16" />
+              </filter>
+              <filter id="goldHalo" x="-25%" y="-25%" width="150%" height="150%">
+                <feDropShadow dx="0" dy="0" stdDeviation="4" flood-color="#f59e0b" flood-opacity="0.72" />
+              </filter>
+            </defs>
+            <g id="svg-world"></g>
+          </svg>
+        </div>
+
+        <!-- Modal educativo "Por que funciona?" (Segredo do 7) -->
+        <div id="info-modal-backdrop" class="info-modal-backdrop">
+          <div class="info-modal" role="dialog" aria-modal="true" aria-label="Por que o critério do 7 funciona?">
+            <h3>
+              <span>💡 Por que o Segredo do 7 funciona?</span>
+              <button id="btn-close-modal" class="close-btn" type="button">✕</button>
+            </h3>
+            <p>
+              Todo número pode ser escrito como <strong>10 × (restante) + (último algarismo)</strong>.
+              Por exemplo: <strong>161 = 10 × 16 + 1</strong>.
+            </p>
+            <div class="formula-box">
+              Se retiramos 21 × u do número:<br/>
+              (10 × d + u) − 21 × u = 10 × d − 20 × u<br/>
+              = 10 × (d − 2 × u)
+            </div>
+            <p>
+              Como <strong>21 = 3 × 7</strong> já é múltiplo de 7, retirar <strong>21 × u</strong> nunca muda o resto da divisão por 7!
+              E como 10 não divide por 7, basta conferir <strong>(d − 2 × u)</strong> — exatamente cortar o último algarismo, dobrar e subtrair!
+            </p>
+            <div style="text-align:right;">
+              <button id="btn-ok-modal" class="act-btn btn-gold" type="button">Entendi! ✨</button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Backdrop para drawer em telas < 1080px -->
+      <div id="drawer-backdrop" class="drawer-backdrop"></div>
+
+      <!-- Painel Lateral / Drawer -->
+      <aside id="side-panel" class="side-panel" aria-label="Painel de Descobertas">
+        <div class="panel-head">
+          <span id="panel-title">📊 Divisores Descobertos</span>
+          <button id="btn-close-panel" class="close-btn" type="button" title="Fechar painel">✕</button>
+        </div>
+        <div id="panel-body" class="panel-body"></div>
+      </aside>
+    </main>
+
+    <!-- 4. BARRA INFERIOR: AÇÕES À ESQUERDA + NAVEGAÇÃO "◀ 1/N Próximo ▶" SEMPRE FIXA À DIREITA -->
+    <footer class="bottom-bar">
+      <div id="phase-actions" class="phase-actions"></div>
+
+      <div id="challenge-nav" class="challenge-nav">
+        <button id="btn-prev" class="act-btn btn-soft" type="button" title="Desafio anterior">◀</button>
+        <span id="nav-counter" class="nav-counter">1/8</span>
+        <button id="btn-next" class="act-btn btn-primary" type="button" title="Próximo desafio">
+          <span>Próximo</span><span>▶</span>
+        </button>
+      </div>
+    </footer>
+  </div>
+
+  <script>
+    /* =========================================================================
+       DESAFIOS PEDAGÓGICOS DE CADA ABA
+       ========================================================================= */
+    const SVG_NS = 'http://www.w3.org/2000/svg';
+
+    const RECT_CHALLENGES   = [12, 16, 18, 24, 25, 29, 36, 48];
+    const LUPA_CHALLENGES   = [24, 35, 45, 51, 60, 72, 85, 90];
+    const DUEL_CHALLENGES   = [
+      [12, 18],
+      [16, 24],
+      [20, 30],
+      [24, 36],
+      [15, 28],
+      [12, 18, 24],
+      [18, 27, 45],
+      [24, 36, 60]
+    ];
+    const EUCLID_CHALLENGES = [
+      [38, 10],
+      [48, 18],
+      [42, 16],
+      [60, 24],
+      [55, 21]
+    ];
+    const SEVEN_CHALLENGES  = [84, 91, 119, 161, 203, 259, 371, 412];
+
+    const EUCLID_PALETTE = [
+      { fill: '#3b82f6', stroke: '#1d4ed8' },
+      { fill: '#10b981', stroke: '#047857' },
+      { fill: '#f59e0b', stroke: '#b45309' },
+      { fill: '#8b5cf6', stroke: '#5b21b6' },
+      { fill: '#ec4899', stroke: '#9d174d' },
+      { fill: '#06b6d4', stroke: '#0e7490' }
+    ];
+
+    /* =========================================================================
+       MOTOR DE ÁUDIO WEB AUDIO API — MODO INTERACTIVE (LATÊNCIA ZERO)
+       ========================================================================= */
+    const SoundFX = {
+      ctx: null,
+      enabled: true,
+      lastPlayed: {},
+
+      unlock() {
+        if (!this.enabled) return null;
+        if (!this.ctx) {
+          const AC = window.AudioContext || window.webkitAudioContext;
+          if (!AC) return null;
+          try {
+            this.ctx = new AC({ latencyHint: 'interactive' });
+          } catch {
+            this.ctx = new AC();
+          }
+        }
+        if (this.ctx.state === 'suspended') {
+          this.ctx.resume().catch(() => {});
+        }
+        return this.ctx;
+      },
+
+      canPlay(key, minGapMs = 28) {
+        const now = performance.now();
+        if (this.lastPlayed[key] && now - this.lastPlayed[key] < minGapMs) return false;
+        this.lastPlayed[key] = now;
+        return true;
+      },
+
+      tone(freq, type, offset, dur, gainPeak, endFreq = null) {
+        const ctx = this.unlock();
+        if (!ctx) return;
+        const t0 = ctx.currentTime + offset;
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.type = type;
+        osc.frequency.setValueAtTime(freq, t0);
+        if (endFreq !== null) osc.frequency.exponentialRampToValueAtTime(endFreq, t0 + dur);
+        gain.gain.setValueAtTime(0.0001, t0);
+        gain.gain.linearRampToValueAtTime(gainPeak, t0 + 0.006);
+        gain.gain.exponentialRampToValueAtTime(0.0001, t0 + dur);
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.start(t0);
+        osc.stop(t0 + dur + 0.015);
+      },
+
+      woodClick() {
+        if (!this.canPlay('click', 28)) return;
+        this.tone(480, 'triangle', 0, 0.042, 0.13, 300);
+      },
+
+      exactChord() {
+        if (!this.canPlay('exact', 35)) return;
+        this.tone(523.25, 'triangle', 0, 0.16, 0.12);
+        this.tone(659.25, 'triangle', 0.04, 0.2, 0.12);
+        this.tone(783.99, 'triangle', 0.08, 0.24, 0.11);
+      },
+
+      squareSparkle() {
+        if (!this.canPlay('square', 40)) return;
+        [523.25, 659.25, 783.99, 1046.5].forEach((f, i) => {
+          this.tone(f, 'sine', i * 0.045, 0.25, 0.12);
+        });
+      },
+
+      remainderTone() {
+        if (!this.canPlay('rem', 35)) return;
+        this.tone(265, 'triangle', 0, 0.11, 0.08, 190);
+      },
+
+      victoryFanfare() {
+        if (!this.canPlay('win', 80)) return;
+        [523.25, 659.25, 783.99, 1046.5, 1318.5].forEach((f, i) => {
+          this.tone(f, 'triangle', i * 0.055, 0.28, 0.13);
+        });
+      }
+    };
+
+    window.addEventListener('pointerdown', () => SoundFX.unlock(), { once: true });
+    window.addEventListener('keydown', () => SoundFX.unlock(), { once: true });
+
+    /* =========================================================================
+       HELPERS MATEMÁTICOS E SVG
+       ========================================================================= */
+    function getDivisors(n) {
+      const res = [];
+      for (let i = 1; i * i <= n; i++) {
+        if (n % i === 0) {
+          res.push(i);
+          if (i !== n / i) res.push(n / i);
+        }
+      }
+      return res.sort((a, b) => a - b);
+    }
+
+    function gcd2(a, b) {
+      let x = Math.abs(a), y = Math.abs(b);
+      while (y !== 0) { const t = x % y; x = y; y = t; }
+      return x;
+    }
+
+    function gcdList(arr) {
+      return arr.reduce((acc, v) => gcd2(acc, v));
+    }
+
+    function isPrime(n) {
+      if (n < 2) return false;
+      for (let i = 2; i * i <= n; i++) {
+        if (n % i === 0) return false;
+      }
+      return true;
+    }
+
+    function svgEl(tag, attrs = {}, text = null) {
+      const el = document.createElementNS(SVG_NS, tag);
+      for (const [k, v] of Object.entries(attrs)) {
+        el.setAttribute(k, String(v));
+      }
+      if (text !== null) el.textContent = text;
+      return el;
+    }
+
+    /* =========================================================================
+       ESTADO GLOBAL DA APLICAÇÃO
+       ========================================================================= */
+    const state = {
+      tab: 'rect', // 'rect' | 'lupa' | 'duel' | 'free' | 'bonus'
+      panelOpen: window.innerWidth >= 1020,
+      panelHasUpdate: false,
+
+      // Câmera SVG (Pan & Zoom)
+      viewW: 800,
+      viewH: 420,
+      zoom: 1.0,
+      panX: 0,
+      panY: 0,
+      isDragging: false,
+      dragStartX: 0,
+      dragStartY: 0,
+      dragOrigPanX: 0,
+      dragOrigPanY: 0,
+
+      // Aba 1: Retângulos
+      rectIdx: 0,
+      rectHeight: 2,
+      rectFound: {},
+      rectCompleted: new Set(),
+
+      // Aba 2: Lupa
+      lupaIdx: 0,
+      lupaCriterion: 2,
+      lupaShowBlock: false,
+      lupaQuizSelected: new Set(),
+      lupaQuizChecked: false,
+      lupaCompleted: new Set(),
+
+      // Aba 3: Duelo MDC
+      duelIdx: 0,
+      duelHeight: 2,
+      duelFoundCommon: {},
+      duelCompleted: new Set(),
+
+      // Aba 4: Livre (Divisores 1 nº | MDC 2 nºs | MDC 3 nºs)
+      freeMode: 'divisors', // 'divisors' | 'mdc2' | 'mdc3'
+      freeN: 36,
+      freeHeight: 4,
+      freeFound: new Set(),
+      freeA: 24,
+      freeB: 36,
+      freeC: 48,
+      freeMdcHeight: 4,
+      freeMdcFound: new Set(),
+      freeMdcRevealed: false,
+
+      // Aba 5: Bônus (Euclides + Segredo do 7)
+      bonusSub: 'euclid', // 'euclid' | 'seven'
+      euclidIdx: 0,
+      euclidCustom: null,
+      euclidSteps: [],
+      euclidTimer: null,
+      euclidCompleted: new Set(),
+
+      sevenIdx: 0,
+      sevenCustom: null,
+      sevenRounds: [],
+      sevenPhase: 0,
+      sevenDone: false,
+      sevenShowBlock: false,
+      sevenTimer: null,
+      sevenCompleted: new Set(),
+
+      // Ação do botão do toast
+      toastNextAction: null
+    };
+
+    /* =========================================================================
+       REFERÊNCIAS DE DOM
+       ========================================================================= */
+    const dom = {
+      phaseTabs: document.querySelectorAll('.phase-tab'),
+      btnSound: document.getElementById('btn-sound'),
+      soundIcon: document.getElementById('sound-icon'),
+      btnPanel: document.getElementById('btn-panel'),
+      panelDot: document.getElementById('panel-dot'),
+      btnClosePanel: document.getElementById('btn-close-panel'),
+      sidePanel: document.getElementById('side-panel'),
+      drawerBackdrop: document.getElementById('drawer-backdrop'),
+      panelTitle: document.getElementById('panel-title'),
+      panelBody: document.getElementById('panel-body'),
+
+      contextBar: document.getElementById('context-bar'),
+      ctxLeft: document.getElementById('ctx-left'),
+      statusMsg: document.getElementById('status-msg'),
+
+      svgViewport: document.getElementById('svg-viewport'),
+      svg: document.getElementById('stage-svg'),
+      svgWorld: document.getElementById('svg-world'),
+
+      btnZoomOut: document.getElementById('btn-zoom-out'),
+      btnZoomIn: document.getElementById('btn-zoom-in'),
+      btnZoomFit: document.getElementById('btn-zoom-fit'),
+      zoomLabel: document.getElementById('zoom-label'),
+
+      stageToast: document.getElementById('stage-toast'),
+      toastIcon: document.getElementById('toast-icon'),
+      toastBody: document.getElementById('toast-body'),
+      btnToastNext: document.getElementById('btn-toast-next'),
+      toastClose: document.getElementById('toast-close'),
+
+      infoModalBackdrop: document.getElementById('info-modal-backdrop'),
+      btnCloseModal: document.getElementById('btn-close-modal'),
+      btnOkModal: document.getElementById('btn-ok-modal'),
+
+      phaseActions: document.getElementById('phase-actions'),
+      challengeNav: document.getElementById('challenge-nav'),
+      btnPrev: document.getElementById('btn-prev'),
+      navCounter: document.getElementById('nav-counter'),
+      btnNext: document.getElementById('btn-next')
+    };
+
+    /* =========================================================================
+       CÂMERA, PAINEL LATERAL E TOAST COM BOTÃO PRÓXIMO
+       ========================================================================= */
+    function resetCamera() {
+      state.zoom = 1.0;
+      state.panX = 0;
+      state.panY = 0;
+      applyCamera();
+    }
+
+    function applyCamera() {
+      const vw = state.viewW / state.zoom;
+      const vh = state.viewH / state.zoom;
+      const vx = (state.viewW - vw) / 2 - state.panX;
+      const vy = (state.viewH - vh) / 2 - state.panY;
+      dom.svg.setAttribute('viewBox', `${vx.toFixed(1)} ${vy.toFixed(1)} ${vw.toFixed(1)} ${vh.toFixed(1)}`);
+      dom.zoomLabel.textContent = `${Math.round(state.zoom * 100)}%`;
+    }
+
+    function changeZoom(delta) {
+      state.zoom = Math.max(0.55, Math.min(2.6, state.zoom + delta));
+      applyCamera();
+    }
+
+    function syncPanelUI() {
+      dom.sidePanel.classList.toggle('is-open', state.panelOpen);
+      dom.btnPanel.classList.toggle('active', state.panelOpen);
+      dom.drawerBackdrop.classList.toggle('is-open', state.panelOpen && window.innerWidth < 1020);
+      if (state.panelOpen) state.panelHasUpdate = false;
+      dom.panelDot.classList.toggle('is-visible', state.panelHasUpdate && !state.panelOpen);
+    }
+
+    function markPanelUpdate() {
+      if (!state.panelOpen) {
+        state.panelHasUpdate = true;
+        dom.panelDot.classList.add('is-visible');
+      }
+    }
+
+    function setContextTone(tone = '') {
+      dom.contextBar.className = `context-bar ${tone}`.trim();
+    }
+
+    function showToast(icon, html, tone = '', showNext = false) {
+      dom.toastIcon.textContent = icon;
+      dom.toastBody.innerHTML = html;
+      dom.stageToast.className = `stage-toast is-visible ${tone}`.trim();
+
+      if (showNext) {
+        const nav = getCurrentNavInfo();
+        if (nav.total > 0) {
+          const isLast = nav.curIdx >= nav.total - 1;
+          dom.btnToastNext.textContent = isLast ? 'Ir para Próxima Fase ▶▶' : 'Próximo Desafio ▶';
+          dom.btnToastNext.classList.add('is-visible');
+          state.toastNextAction = isLast ? goNextPhase : () => navigateChallenge(1);
+        } else {
+          dom.btnToastNext.classList.remove('is-visible');
+          state.toastNextAction = null;
+        }
+      } else {
+        dom.btnToastNext.classList.remove('is-visible');
+        state.toastNextAction = null;
+      }
+    }
+
+    function hideToast() {
+      dom.stageToast.classList.remove('is-visible');
+      dom.btnToastNext.classList.remove('is-visible');
+      state.toastNextAction = null;
+    }
+
+    function stopBonusTimers() {
+      if (state.euclidTimer) { clearInterval(state.euclidTimer); state.euclidTimer = null; }
+      if (state.sevenTimer)  { clearInterval(state.sevenTimer);  state.sevenTimer = null; }
+    }
+
+    /* =========================================================================
+       HELPER DE CAMPO NUMÉRICO COMPACTO COM − / + E DIGITAÇÃO DIRETA
+       ========================================================================= */
+    function createNumField(label, value, min, max, onApply, isWide = false) {
+      const wrap = document.createElement('div');
+      wrap.className = 'num-field';
+
+      const lbl = document.createElement('span');
+      lbl.className = 'num-field-label';
+      lbl.textContent = label;
+
+      const btnM = document.createElement('button');
+      btnM.type = 'button';
+      btnM.className = 'num-mini-btn';
+      btnM.textContent = '−';
+
+      const inp = document.createElement('input');
+      inp.type = 'number';
+      inp.min = String(min);
+      inp.max = String(max);
+      inp.value = String(value);
+      inp.className = `num-input${isWide ? ' wide' : ''}`;
+
+      const btnP = document.createElement('button');
+      btnP.type = 'button';
+      btnP.className = 'num-mini-btn';
+      btnP.textContent = '+';
+
+      const commit = (raw) => {
+        const v = Math.max(min, Math.min(max, Math.floor(Number(raw) || min)));
+        inp.value = String(v);
+        onApply(v);
+      };
+
+      btnM.addEventListener('click', () => commit(Number(inp.value) - 1));
+      btnP.addEventListener('click', () => commit(Number(inp.value) + 1));
+      inp.addEventListener('change', () => commit(inp.value));
+      inp.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') {
+          e.preventDefault();
+          commit(inp.value);
+        }
+      });
+
+      wrap.appendChild(lbl);
+      wrap.appendChild(btnM);
+      wrap.appendChild(inp);
+      wrap.appendChild(btnP);
+      return { wrap, input: inp };
+    }
+
+    /* =========================================================================
+       COMPONENTE REUTILIZÁVEL: BLOCO RETANGULAR 2D DE N QUADRADINHOS (SVG)
+       ========================================================================= */
+    function drawUnitBlockGroup(opts) {
+      const {
+        n, height, x, baselineY, cellSize, gap = 2,
+        showLabels = true, labelTop = null, isMdcWinner = false
+      } = opts;
+
+      const g = svgEl('g');
+      const d = Math.max(1, height);
+      const q = Math.floor(n / d);
+      const rem = n % d;
+      const isExact = rem === 0;
+      const isSquare = isExact && d === q;
+      const cols = q + (rem > 0 ? 1 : 0);
+
+      const blockW = cols * (cellSize + gap) - gap;
+      const blockH = d * (cellSize + gap) - gap;
+      const topY = baselineY - blockH;
+
+      // Fundo do retângulo completo
+      if (q > 0) {
+        const fullW = q * (cellSize + gap) - gap;
+        g.appendChild(svgEl('rect', {
+          x: x - 4, y: topY - 4,
+          width: fullW + 8, height: blockH + 8, rx: 7,
+          fill: isMdcWinner ? 'rgba(245, 158, 11, 0.15)'
+              : isSquare ? 'rgba(124, 58, 237, 0.12)'
+              : isExact ? 'rgba(5, 150, 105, 0.11)'
+              : 'rgba(37, 99, 235, 0.06)',
+          stroke: isMdcWinner ? '#f59e0b'
+                : isSquare ? '#7c3aed'
+                : isExact ? '#059669'
+                : '#94a3b8',
+          'stroke-width': isExact ? 2.2 : 1.3,
+          'stroke-dasharray': isExact ? '' : '4 3',
+          filter: isMdcWinner ? 'url(#goldHalo)' : ''
+        }));
+      }
+
+      const tileFill = isMdcWinner ? 'url(#tileGold)'
+                     : isSquare ? 'url(#tileSquare)'
+                     : isExact ? 'url(#tileExact)'
+                     : 'url(#tileBlue)';
+      const tileStroke = isMdcWinner ? '#b45309'
+                       : isSquare ? '#5b21b6'
+                       : isExact ? '#047857'
+                       : '#1d4ed8';
+
+      const rx = Math.max(1.5, Math.min(5, cellSize * 0.18));
+
+      for (let c = 0; c < q; c++) {
+        for (let r = 0; r < d; r++) {
+          const cx = x + c * (cellSize + gap);
+          const cy = baselineY - (r + 1) * cellSize - r * gap;
+          g.appendChild(svgEl('rect', {
+            x: cx, y: cy, width: cellSize, height: cellSize, rx,
+            fill: tileFill, stroke: tileStroke, 'stroke-width': cellSize >= 14 ? 1 : 0.6
+          }));
+          if (cellSize >= 14) {
+            g.appendChild(svgEl('rect', {
+              x: cx + 2, y: cy + 2,
+              width: cellSize - 4, height: Math.max(2, cellSize * 0.22),
+              rx: 1.5, fill: 'rgba(255,255,255,0.34)'
+            }));
+          }
+        }
+      }
+
+      // Quadradinhos excedentes (resto) em vermelho na borda direita
+      if (rem > 0) {
+        const remX = x + q * (cellSize + gap) + 4;
+        g.appendChild(svgEl('rect', {
+          x: remX - 2, y: topY - 2,
+          width: cellSize + 4, height: blockH + 4, rx: 5,
+          fill: 'rgba(225, 29, 72, 0.08)',
+          stroke: '#fb7185', 'stroke-width': 1.4, 'stroke-dasharray': '4 3'
+        }));
+
+        for (let r = 0; r < rem; r++) {
+          const cy = baselineY - (r + 1) * cellSize - r * gap;
+          g.appendChild(svgEl('rect', {
+            x: remX, y: cy, width: cellSize, height: cellSize, rx,
+            fill: 'url(#tileRem)', stroke: '#be123c', 'stroke-width': cellSize >= 14 ? 1 : 0.6
+          }));
+        }
+
+        const tagY = baselineY - rem * (cellSize + gap) - 10;
+        const tagText = `Sobrou ${rem}!`;
+        const tagW = Math.max(66, tagText.length * 6.8 + 12);
+        const tagCx = remX + cellSize / 2;
+        g.appendChild(svgEl('rect', {
+          x: tagCx - tagW / 2, y: Math.max(topY - 24, tagY - 12),
+          width: tagW, height: 19, rx: 9.5,
+          fill: '#e11d48', stroke: '#fff', 'stroke-width': 1.4, filter: 'url(#tileShadow)'
+        }));
+        g.appendChild(svgEl('text', {
+          x: tagCx, y: Math.max(topY - 11, tagY + 1),
+          'text-anchor': 'middle', fill: '#fff',
+          'font-size': '10.5', 'font-weight': '900'
+        }, tagText));
+      }
+
+      if (labelTop) {
+        const centerW = (rem > 0 ? blockW + 4 : blockW) / 2;
+        g.appendChild(svgEl('text', {
+          x: x + centerW, y: topY - 14,
+          'text-anchor': 'middle', fill: '#0f172a',
+          'font-size': '14', 'font-weight': '900'
+        }, labelTop));
+      }
+
+      if (showLabels) {
+        g.appendChild(svgEl('text', {
+          x: x - 14, y: topY + blockH / 2 + 4,
+          'text-anchor': 'end',
+          fill: isExact ? (isMdcWinner ? '#b45309' : isSquare ? '#6d28d9' : '#047857') : '#334155',
+          'font-size': '13.5', 'font-weight': '900'
+        }, String(d)));
+
+        const fullW = Math.max(cellSize, q * (cellSize + gap) - gap);
+        const dimTxt = isExact ? `${d} × ${q} = ${n}` : `${d} × ${q} + ${rem} = ${n}`;
+        g.appendChild(svgEl('text', {
+          x: x + fullW / 2, y: baselineY + 22,
+          'text-anchor': 'middle',
+          fill: isExact ? (isMdcWinner ? '#b45309' : isSquare ? '#6d28d9' : '#047857') : '#be123c',
+          'font-size': '13', 'font-weight': '900'
+        }, dimTxt));
+
+        if (isSquare && !isMdcWinner) {
+          g.appendChild(svgEl('rect', {
+            x: x + fullW / 2 - 68, y: topY - 34, width: 136, height: 22, rx: 11,
+            fill: '#7c3aed', stroke: '#fff', 'stroke-width': 1.5, filter: 'url(#tileShadow)'
+          }));
+          g.appendChild(svgEl('text', {
+            x: x + fullW / 2, y: topY - 19, 'text-anchor': 'middle', fill: '#fff',
+            'font-size': '11', 'font-weight': '900'
+          }, '★ Quadrado Perfeito!'));
+        }
+      }
+
+      return { group: g, width: blockW + (rem > 0 ? 4 : 0), height: blockH, topY };
+    }
+
+    /* Diagrama SVG de Arcos Espelho conectando pares de divisores */
+    function buildDivisorArcsSVG(n, foundSet) {
+      const all = getDivisors(n);
+      const w = 244;
+      const h = 76;
+      const padX = 16;
+      const stepX = all.length > 1 ? (w - padX * 2) / (all.length - 1) : 0;
+      const baseY = 58;
+
+      let arcs = '';
+      let nodes = '';
+      const pairsCount = Math.ceil(all.length / 2);
+
+      for (let i = 0; i < pairsCount; i++) {
+        const a = all[i];
+        const b = all[all.length - 1 - i];
+        const x1 = padX + i * stepX;
+        const x2 = padX + (all.length - 1 - i) * stepX;
+        const bothFound = foundSet.has(a) && foundSet.has(b);
+
+        if (a !== b) {
+          const arcH = 14 + (pairsCount - i) * 7.2;
+          const color = bothFound ? '#059669' : '#cbd5e1';
+          arcs += `<path d="M ${x1} ${baseY - 9} Q ${(x1 + x2) / 2} ${baseY - 9 - arcH} ${x2} ${baseY - 9}" fill="none" stroke="${color}" stroke-width="${bothFound ? 2 : 1.2}" stroke-dasharray="${bothFound ? '' : '3 3'}" />`;
+        } else {
+          const color = bothFound ? '#7c3aed' : '#cbd5e1';
+          arcs += `<circle cx="${x1}" cy="${baseY - 22}" r="6" fill="none" stroke="${color}" stroke-width="1.8" />`;
+        }
+      }
+
+      all.forEach((d, idx) => {
+        const cx = all.length === 1 ? w / 2 : padX + idx * stepX;
+        const found = foundSet.has(d);
+        const isSq = d * d === n;
+        const fill = found ? (isSq ? '#7c3aed' : '#059669') : '#e2e8f0';
+        const txtCol = found ? '#ffffff' : '#64748b';
+        nodes += `
+          <g style="cursor:pointer" data-quick-d="${d}">
+            <circle cx="${cx}" cy="${baseY}" r="10.5" fill="${fill}" />
+            <text x="${cx}" y="${baseY + 3.5}" text-anchor="middle" fill="${txtCol}" font-size="${d >= 10 ? 8.5 : 9.5}" font-weight="900">${found ? d : '?'}</text>
+          </g>
+        `;
+      });
+
+      return `<svg viewBox="0 0 ${w} ${h}" style="width:100%;height:auto;display:block;">${arcs}${nodes}</svg>`;
+    }
+
+    /* =========================================================================
+       ABA 1: 1. RETÂNGULOS (DIVISORES, PARES E QUADRADOS PERFEITOS)
+       ========================================================================= */
+    function getRectFoundSet() {
+      if (!state.rectFound[state.rectIdx]) state.rectFound[state.rectIdx] = new Set();
+      return state.rectFound[state.rectIdx];
+    }
+
+    function testRectHeight(d, playAudio = true) {
+      const n = RECT_CHALLENGES[state.rectIdx];
+      state.rectHeight = Math.max(1, Math.min(n, d));
+      const rem = n % state.rectHeight;
+      const q = Math.floor(n / state.rectHeight);
+      const foundSet = getRectFoundSet();
+
+      if (rem === 0) {
+        const isNew = !foundSet.has(state.rectHeight) || !foundSet.has(q);
+        foundSet.add(state.rectHeight);
+        foundSet.add(q);
+        if (isNew) markPanelUpdate();
+
+        const allDivs = getDivisors(n);
+        const finishedNow = allDivs.every((v) => foundSet.has(v));
+
+        if (finishedNow) {
+          if (!state.rectCompleted.has(state.rectIdx)) {
+            state.rectCompleted.add(state.rectIdx);
+            if (playAudio) SoundFX.victoryFanfare();
+          } else if (playAudio) {
+            SoundFX.exactChord();
+          }
+          if (isPrime(n)) {
+            showToast('💎', `<strong>Número Primo!</strong> ${n} só forma a tira de altura 1 e ${n}. Desafio concluído!`, 'tone-gold', true);
+          } else if (state.rectHeight === q) {
+            showToast('★', `<strong>Quadrado Perfeito (${q}×${q})!</strong> Todos os ${allDivs.length} divisores de ${n} descobertos!`, 'tone-square', true);
+          } else {
+            showToast('🏆', `<strong>Parabéns!</strong> Você encontrou todos os ${allDivs.length} divisores de ${n}!`, 'tone-gold', true);
+          }
+        } else if (state.rectHeight === q) {
+          if (playAudio) SoundFX.squareSparkle();
+          showToast('★', `<strong>Quadrado Perfeito!</strong> ${state.rectHeight} × ${q} = ${n} — altura e largura são iguais!`, 'tone-square', false);
+        } else {
+          if (playAudio) SoundFX.exactChord();
+          showToast('✅', `<strong>Retângulo perfeito!</strong> ${state.rectHeight} × ${q} = ${n}. Par espelho: <strong>${state.rectHeight} e ${q}</strong>!`, '', false);
+        }
+      } else {
+        if (playAudio) SoundFX.remainderTone();
+        hideToast();
+      }
+      renderAll();
+    }
+
+    function renderRectStage(n, d) {
+      const q = Math.floor(n / d);
+      const rem = n % d;
+      const cols = q + (rem > 0 ? 1 : 0);
+
+      const maxW = state.viewW - 140;
+      const maxH = state.viewH - 115;
+      const cellSize = Math.max(7, Math.min(34, Math.floor(Math.min(maxW / Math.max(cols, 1), maxH / Math.max(d, 1))) - 2));
+      const gap = cellSize >= 14 ? 2.5 : 1.4;
+
+      const blockW = cols * (cellSize + gap) - gap + (rem > 0 ? 4 : 0);
+      const blockH = d * (cellSize + gap) - gap;
+      const startX = (state.viewW - blockW) / 2;
+      const baselineY = (state.viewH + blockH) / 2 + 8;
+
+      const res = drawUnitBlockGroup({ n, height: d, x: startX, baselineY, cellSize, gap, showLabels: true });
+      dom.svgWorld.appendChild(res.group);
+    }
+
+    /* =========================================================================
+       ABA 2: 2. LUPA (PARES, ÍMPARES E CRITÉRIOS 2, 3, 5, 9, 10)
+       ========================================================================= */
+    function renderLupaStage() {
+      const n = LUPA_CHALLENGES[state.lupaIdx];
+      const c = state.lupaCriterion;
+      const cx = state.viewW / 2;
+      const cy = state.viewH / 2;
+
+      if (state.lupaShowBlock && n <= 144) {
+        dom.svgWorld.appendChild(svgEl('text', {
+          x: cx, y: 26, 'text-anchor': 'middle', fill: '#1d4ed8',
+          'font-size': '14', 'font-weight': '900'
+        }, `Prova Geométrica: ${n} organizado em altura ${c}`));
+        renderRectStage(n, c);
+        return;
+      }
+
+      const digits = String(n).split('');
+      const lastDigit = Number(digits[digits.length - 1]);
+      const divisible = (n % c === 0);
+
+      const cardW = Math.min(state.viewW - 36, 560);
+      const cardH = Math.min(state.viewH - 32, 286);
+      const left = cx - cardW / 2;
+      const top = cy - cardH / 2;
+
+      dom.svgWorld.appendChild(svgEl('rect', {
+        x: left, y: top, width: cardW, height: cardH, rx: 18,
+        fill: '#ffffff', stroke: divisible ? '#10b981' : '#fb7185', 'stroke-width': 2.5,
+        filter: 'url(#tileShadow)'
+      }));
+
+      dom.svgWorld.appendChild(svgEl('text', {
+        x: cx, y: top + 27, 'text-anchor': 'middle', fill: '#475569',
+        'font-size': '12.5', 'font-weight': '900'
+      }, `🔍 LUPA RAIO-X — CRITÉRIO DO ${c}${c === 2 ? ' (PAR OU ÍMPAR)' : ''}`));
+
+      const digSpacing = 54;
+      const digStartX = cx - ((digits.length - 1) * digSpacing) / 2;
+      const digY = top + 76;
+
+      if (c === 2 || c === 5 || c === 10) {
+        digits.forEach((ch, idx) => {
+          const isLast = idx === digits.length - 1;
+          const dx = digStartX + idx * digSpacing;
+          if (isLast) {
+            dom.svgWorld.appendChild(svgEl('circle', {
+              cx: dx, cy: digY - 12, r: 27,
+              fill: divisible ? '#d1fae5' : '#ffe4e6',
+              stroke: divisible ? '#059669' : '#e11d48', 'stroke-width': 3
+            }));
+          }
+          dom.svgWorld.appendChild(svgEl('text', {
+            x: dx, y: digY, 'text-anchor': 'middle',
+            fill: isLast ? (divisible ? '#065f46' : '#be123c') : '#334155',
+            'font-size': '37', 'font-weight': '900'
+          }, ch));
+        });
+
+        if (c === 2) {
+          const pairs = Math.floor(lastDigit / 2);
+          const rem = lastDigit % 2;
+          const boxSize = 18;
+          const colGap = 8;
+          const totalCols = Math.max(1, pairs + rem);
+          const visW = totalCols * (boxSize + colGap) - colGap;
+          const visStartX = cx - visW / 2;
+          const visY = top + 124;
+
+          if (lastDigit === 0) {
+            dom.svgWorld.appendChild(svgEl('text', {
+              x: cx, y: visY + 22, 'text-anchor': 'middle', fill: '#059669',
+              'font-size': '14', 'font-weight': '900'
+            }, 'Termina em 0 → Sempre forma duplas exatas (PAR)!'));
+          } else {
+            for (let p = 0; p < pairs; p++) {
+              const bx = visStartX + p * (boxSize + colGap);
+              dom.svgWorld.appendChild(svgEl('rect', { x: bx, y: visY, width: boxSize, height: boxSize, rx: 4, fill: 'url(#tileExact)' }));
+              dom.svgWorld.appendChild(svgEl('rect', { x: bx, y: visY + boxSize + 3, width: boxSize, height: boxSize, rx: 4, fill: 'url(#tileExact)' }));
+            }
+            if (rem === 1) {
+              const bx = visStartX + pairs * (boxSize + colGap) + 4;
+              dom.svgWorld.appendChild(svgEl('rect', { x: bx, y: visY + boxSize + 3, width: boxSize, height: boxSize, rx: 4, fill: 'url(#tileRem)' }));
+              dom.svgWorld.appendChild(svgEl('text', { x: bx + boxSize / 2, y: visY + 13, 'text-anchor': 'middle', fill: '#e11d48', 'font-size': '11', 'font-weight': '900' }, '+1'));
+            }
+          }
+
+          const ruleY = top + cardH - 50;
+          dom.svgWorld.appendChild(svgEl('rect', {
+            x: left + 16, y: ruleY, width: cardW - 32, height: 36, rx: 10,
+            fill: divisible ? '#ecfdf5' : '#fff1f2',
+            stroke: divisible ? '#6ee7b7' : '#fda4af', 'stroke-width': 1.5
+          }));
+          const msg = divisible
+            ? `✓ ${n} é PAR (termina em ${lastDigit}) → Divide exato por 2!`
+            : `✕ ${n} é ÍMPAR (sobra 1)! Regra: ímpares descartam 2, 4, 6, 8, 10...`;
+          dom.svgWorld.appendChild(svgEl('text', {
+            x: cx, y: ruleY + 22, 'text-anchor': 'middle',
+            fill: divisible ? '#065f46' : '#9f1239',
+            'font-size': '11.8', 'font-weight': '900'
+          }, msg));
+        } else {
+          const condTxt = c === 5 ? 'Precisa terminar em 0 ou 5' : 'Precisa terminar em 0';
+          dom.svgWorld.appendChild(svgEl('text', {
+            x: cx, y: top + 144, 'text-anchor': 'middle', fill: '#475569',
+            'font-size': '14', 'font-weight': '800'
+          }, `Último algarismo: ${lastDigit} (${condTxt})`));
+
+          const badgeY = top + 174;
+          dom.svgWorld.appendChild(svgEl('rect', {
+            x: cx - 140, y: badgeY, width: 280, height: 42, rx: 12,
+            fill: divisible ? '#059669' : '#e11d48', filter: 'url(#tileShadow)'
+          }));
+          dom.svgWorld.appendChild(svgEl('text', {
+            x: cx, y: badgeY + 26, 'text-anchor': 'middle', fill: '#fff',
+            'font-size': '14.5', 'font-weight': '900'
+          }, divisible ? `✓ SIM! ${n} é divisível por ${c}` : `✕ NÃO! ${n} não divide por ${c}`));
+        }
+      } else {
+        const sum = digits.reduce((acc, ch) => acc + Number(ch), 0);
+        const expr = digits.join(' + ') + ' = ' + sum;
+
+        digits.forEach((ch, idx) => {
+          const dx = digStartX + idx * digSpacing;
+          dom.svgWorld.appendChild(svgEl('rect', {
+            x: dx - 21, y: digY - 34, width: 42, height: 44, rx: 10,
+            fill: '#eff6ff', stroke: '#3b82f6', 'stroke-width': 2
+          }));
+          dom.svgWorld.appendChild(svgEl('text', {
+            x: dx, y: digY - 3, 'text-anchor': 'middle', fill: '#1e3a8a',
+            'font-size': '28', 'font-weight': '900'
+          }, ch));
+          if (idx < digits.length - 1) {
+            dom.svgWorld.appendChild(svgEl('text', {
+              x: dx + digSpacing / 2, y: digY - 5, 'text-anchor': 'middle', fill: '#64748b',
+              'font-size': '20', 'font-weight': '900'
+            }, '+'));
+          }
+        });
+
+        dom.svgWorld.appendChild(svgEl('text', {
+          x: cx, y: top + 130, 'text-anchor': 'middle', fill: '#0f172a',
+          'font-size': '18', 'font-weight': '900'
+        }, `Soma dos algarismos: ${expr}`));
+
+        dom.svgWorld.appendChild(svgEl('text', {
+          x: cx, y: top + 155, 'text-anchor': 'middle', fill: '#475569',
+          'font-size': '13', 'font-weight': '800'
+        }, divisible
+          ? `${sum} está na tabuada do ${c}! (${sum} ÷ ${c} = ${sum / c})`
+          : `${sum} NÃO está na tabuada do ${c} (sobra ${sum % c}).`));
+
+        const badgeY = top + 178;
+        dom.svgWorld.appendChild(svgEl('rect', {
+          x: cx - 150, y: badgeY, width: 300, height: 42, rx: 12,
+          fill: divisible ? '#059669' : '#e11d48', filter: 'url(#tileShadow)'
+        }));
+        dom.svgWorld.appendChild(svgEl('text', {
+          x: cx, y: badgeY + 26, 'text-anchor': 'middle', fill: '#fff',
+          'font-size': '14', 'font-weight': '900'
+        }, divisible ? `✓ SIM! ${n} divide exato por ${c}` : `✕ NÃO! ${n} não divide por ${c}`));
+      }
+    }
+
+    function checkLupaQuiz() {
+      const n = LUPA_CHALLENGES[state.lupaIdx];
+      const crits = [2, 3, 5, 9, 10];
+      const expected = crits.filter((c) => n % c === 0);
+      const selected = Array.from(state.lupaQuizSelected).sort((a, b) => a - b);
+      state.lupaQuizChecked = true;
+
+      const isPerfect = expected.length === selected.length && expected.every((v, i) => v === selected[i]);
+      if (isPerfect) {
+        state.lupaCompleted.add(state.lupaIdx);
+        SoundFX.victoryFanfare();
+        const txt = expected.length
+          ? `<strong>Perfeito!</strong> ${n} é divisível por <strong>${expected.join(', ')}</strong>!`
+          : `<strong>Mandou bem!</strong> Nenhum desses critérios (2, 3, 5, 9, 10) divide ${n}!`;
+        showToast('🏆', txt, 'tone-gold', true);
+      } else {
+        SoundFX.remainderTone();
+        const expTxt = expected.length ? expected.join(', ') : 'nenhum deles';
+        showToast('🔍', `Quase! Os corretos para ${n} são: <strong>${expTxt}</strong>. Teste com a Lupa!`, 'tone-rem', false);
+      }
+      renderAll();
+    }
+
+    /* =========================================================================
+       ABA 3 & 4 (MDC): DUELO DE RETÂNGULOS COM ALTURA COMUM d
+       ========================================================================= */
+    function getDuelFoundSet() {
+      if (!state.duelFoundCommon[state.duelIdx]) state.duelFoundCommon[state.duelIdx] = new Set();
+      return state.duelFoundCommon[state.duelIdx];
+    }
+
+    function getFreeMdcNums() {
+      return state.freeMode === 'mdc3' ? [state.freeA, state.freeB, state.freeC] : [state.freeA, state.freeB];
+    }
+
+    function testMdcHeight(d, playAudio = true, isFree = false) {
+      const nums = isFree ? getFreeMdcNums() : DUEL_CHALLENGES[state.duelIdx];
+      const minVal = Math.min(...nums);
+      const clamped = Math.max(1, Math.min(minVal, d));
+
+      if (isFree) state.freeMdcHeight = clamped;
+      else state.duelHeight = clamped;
+
+      const allExact = nums.every((n) => n % clamped === 0);
+      const realMdc = gcdList(nums);
+
+      if (allExact) {
+        const set = isFree ? state.freeMdcFound : getDuelFoundSet();
+        if (!set.has(clamped)) {
+          set.add(clamped);
+          markPanelUpdate();
+        }
+        if (clamped === realMdc) {
+          if (!isFree) {
+            state.duelCompleted.add(state.duelIdx);
+            getDivisors(realMdc).forEach((v) => set.add(v));
+          }
+          if (playAudio) SoundFX.victoryFanfare();
+          const eqs = nums.map((n) => `${n} = ${clamped}×${n / clamped}`).join(' • ');
+          const extra = realMdc === 1 ? ' (Primos entre si!)' : ' Maior altura comum!';
+          showToast('👑', `<strong>★ MDC(${nums.join(', ')}) = ${clamped}!</strong>${extra} (${eqs})`, 'tone-gold', !isFree);
+        } else {
+          if (playAudio) SoundFX.exactChord();
+          showToast('✅', `<strong>Divisor Comum (${clamped})!</strong> Todos fecharam sem sobra. Tente uma altura ainda maior!`, '', false);
+        }
+      } else {
+        if (playAudio) SoundFX.remainderTone();
+        hideToast();
+      }
+      renderAll();
+    }
+
+    function renderMdcStage(nums, d, forceGold = false) {
+      const realMdc = gcdList(nums);
+      const allExact = nums.every((n) => n % d === 0);
+      const isWinner = allExact && d === realMdc;
+
+      const totalCols = nums.reduce((acc, n) => acc + Math.floor(n / d) + (n % d > 0 ? 1 : 0), 0);
+      const blockGap = nums.length === 3 ? (totalCols > 40 ? 28 : 38) : 52;
+      const sidePad = nums.length === 3 ? 76 : 104;
+      const availW = Math.max(180, state.viewW - sidePad - (nums.length - 1) * blockGap);
+      const availH = Math.max(120, state.viewH - 130);
+
+      const rawCell = Math.min(availW / Math.max(totalCols, 1), availH / Math.max(d, 1));
+      const gap = rawCell >= 14 ? 2 : rawCell >= 8 ? 1.2 : 0.6;
+      const cellSize = Math.max(3.5, Math.min(30, rawCell - gap));
+
+      const widths = nums.map((n) => {
+        const cols = Math.floor(n / d) + (n % d > 0 ? 1 : 0);
+        return cols * (cellSize + gap) - gap + (n % d > 0 ? 4 : 0);
+      });
+      const totalW = widths.reduce((a, b) => a + b, 0) + (nums.length - 1) * blockGap;
+      const blockH = d * (cellSize + gap) - gap;
+
+      let curX = (state.viewW - totalW) / 2;
+      const baselineY = (state.viewH + blockH) / 2 + 12;
+      const topY = baselineY - blockH;
+
+      // Faixa dourada/verde de alinhamento horizontal
+      dom.svgWorld.appendChild(svgEl('rect', {
+        x: Math.max(14, curX - 24), y: topY - 6,
+        width: Math.min(state.viewW - 28, totalW + 48), height: blockH + 12, rx: 12,
+        fill: isWinner ? 'rgba(245, 158, 11, 0.16)' : allExact ? 'rgba(245, 158, 11, 0.10)' : 'rgba(148, 163, 184, 0.08)',
+        stroke: isWinner ? '#f59e0b' : allExact ? '#f59e0b' : '#cbd5e1',
+        'stroke-width': isWinner ? 2.6 : 1.7,
+        'stroke-dasharray': allExact ? '' : '6 5'
+      }));
+
+      const bandLabel = isWinner
+        ? `★ MDC = ${d} (Maior Altura Comum!)`
+        : allExact
+          ? `✓ Divisor Comum! Altura d = ${d} fecha todos sem sobra`
+          : `Testando altura comum d = ${d}`;
+      const bW = Math.max(185, bandLabel.length * 6.8 + 22);
+      dom.svgWorld.appendChild(svgEl('rect', {
+        x: state.viewW / 2 - bW / 2, y: Math.max(8, topY - 46),
+        width: bW, height: 24, rx: 12,
+        fill: isWinner ? '#d97706' : allExact ? '#059669' : '#475569',
+        filter: isWinner ? 'url(#goldHalo)' : ''
+      }));
+      dom.svgWorld.appendChild(svgEl('text', {
+        x: state.viewW / 2, y: Math.max(24, topY - 30),
+        'text-anchor': 'middle', fill: '#fff',
+        'font-size': '11.5', 'font-weight': '900'
+      }, bandLabel));
+
+      const labels = ['A', 'B', 'C'];
+      nums.forEach((n, idx) => {
+        const res = drawUnitBlockGroup({
+          n, height: d, x: curX, baselineY, cellSize, gap,
+          showLabels: true,
+          labelTop: `${labels[idx]} = ${n}`,
+          isMdcWinner: isWinner || forceGold
+        });
+        dom.svgWorld.appendChild(res.group);
+        curX += widths[idx] + blockGap;
+      });
+    }
+
+    /* =========================================================================
+       ABA 5 — BÔNUS A: ALGORITMO DE EUCLIDES (MDC GEOMÉTRICO)
+       ========================================================================= */
+    function getEuclidPair() {
+      return state.euclidCustom || EUCLID_CHALLENGES[state.euclidIdx];
+    }
+
+    function resetEuclid() {
+      stopBonusTimers();
+      state.euclidSteps = [];
+      hideToast();
+      renderAll();
+    }
+
+    function stepEuclid(playAudio = true) {
+      const [A, B] = getEuclidPair();
+      const big = Math.max(A, B);
+      const small = Math.min(A, B);
+
+      let remX = 0, remY = 0, remW = big, remH = small;
+      state.euclidSteps.forEach((st) => {
+        if (st.dir === 'horizontal') { remX += st.side * st.count; remW -= st.side * st.count; }
+        else { remY += st.side * st.count; remH -= st.side * st.count; }
+      });
+
+      if (remW <= 0 || remH <= 0) {
+        stopBonusTimers();
+        return false;
+      }
+
+      const roundIdx = state.euclidSteps.length;
+      if (remW >= remH) {
+        const side = remH;
+        const count = Math.floor(remW / side);
+        const leftover = remW % side;
+        state.euclidSteps.push({ roundIdx, dir: 'horizontal', x: remX, y: remY, side, count, dividend: remW, divisor: side, remainder: leftover });
+        if (leftover === 0) { finishEuclid(side, playAudio); return false; }
+      } else {
+        const side = remW;
+        const count = Math.floor(remH / side);
+        const leftover = remH % side;
+        state.euclidSteps.push({ roundIdx, dir: 'vertical', x: remX, y: remY, side, count, dividend: remH, divisor: side, remainder: leftover });
+        if (leftover === 0) { finishEuclid(side, playAudio); return false; }
+      }
+
+      if (playAudio) SoundFX.woodClick();
+      markPanelUpdate();
+      renderAll();
+      return true;
+    }
+
+    function finishEuclid(mdcSide, playAudio) {
+      stopBonusTimers();
+      if (!state.euclidCustom) state.euclidCompleted.add(state.euclidIdx);
+      if (playAudio) SoundFX.victoryFanfare();
+      const [A, B] = getEuclidPair();
+      showToast('👑', `<strong>★ MDC(${A}, ${B}) = ${mdcSide}!</strong> O último quadrado (lado ${mdcSide}) fechou perfeitamente o retângulo!`, 'tone-gold', !state.euclidCustom);
+      markPanelUpdate();
+      renderAll();
+    }
+
+    function renderEuclidStage() {
+      const [A, B] = getEuclidPair();
+      const big = Math.max(A, B);
+      const small = Math.min(A, B);
+
+      const maxW = state.viewW - 120;
+      const maxH = state.viewH - 110;
+      const scale = Math.min(maxW / big, maxH / small);
+      const rectW = big * scale;
+      const rectH = small * scale;
+      const ox = (state.viewW - rectW) / 2;
+      const oy = (state.viewH - rectH) / 2 + 8;
+
+      dom.svgWorld.appendChild(svgEl('rect', {
+        x: ox, y: oy, width: rectW, height: rectH, rx: 4,
+        fill: '#ffffff', stroke: '#334155', 'stroke-width': 2.5, filter: 'url(#tileShadow)'
+      }));
+
+      if (scale >= 7) {
+        for (let i = 1; i < big; i++) {
+          dom.svgWorld.appendChild(svgEl('line', { x1: ox + i * scale, y1: oy, x2: ox + i * scale, y2: oy + rectH, stroke: '#e2e8f0', 'stroke-width': 0.8 }));
+        }
+        for (let j = 1; j < small; j++) {
+          dom.svgWorld.appendChild(svgEl('line', { x1: ox, y1: oy + j * scale, x2: ox + rectW, y2: oy + j * scale, stroke: '#e2e8f0', 'stroke-width': 0.8 }));
+        }
+      }
+
+      const lastStep = state.euclidSteps[state.euclidSteps.length - 1];
+      const isFinished = lastStep && lastStep.remainder === 0;
+
+      state.euclidSteps.forEach((st, idx) => {
+        const pal = EUCLID_PALETTE[idx % EUCLID_PALETTE.length];
+        const isFinalWin = isFinished && idx === state.euclidSteps.length - 1;
+        const fillCol = isFinalWin ? '#f59e0b' : pal.fill;
+        const strokeCol = isFinalWin ? '#92400e' : pal.stroke;
+
+        for (let k = 0; k < st.count; k++) {
+          const sx = ox + (st.dir === 'horizontal' ? st.x + k * st.side : st.x) * scale;
+          const sy = oy + (st.dir === 'vertical' ? st.y + k * st.side : st.y) * scale;
+          const sSize = st.side * scale;
+
+          dom.svgWorld.appendChild(svgEl('rect', {
+            x: sx + 1, y: sy + 1, width: Math.max(2, sSize - 2), height: Math.max(2, sSize - 2), rx: 3,
+            fill: fillCol, 'fill-opacity': isFinalWin ? '0.9' : '0.75',
+            stroke: strokeCol, 'stroke-width': 2
+          }));
+
+          if (sSize >= 20) {
+            dom.svgWorld.appendChild(svgEl('text', {
+              x: sx + sSize / 2, y: sy + sSize / 2 + 4.5,
+              'text-anchor': 'middle', fill: '#fff',
+              'font-size': Math.min(16, Math.max(10, sSize * 0.34)), 'font-weight': '900'
+            }, `${st.side}×${st.side}`));
+          }
+        }
+      });
+
+      dom.svgWorld.appendChild(svgEl('text', {
+        x: ox + rectW / 2, y: oy - 12, 'text-anchor': 'middle', fill: '#0f172a',
+        'font-size': '14', 'font-weight': '900'
+      }, `Largura = ${big}`));
+
+      dom.svgWorld.appendChild(svgEl('text', {
+        x: ox - 14, y: oy + rectH / 2 + 4, 'text-anchor': 'end', fill: '#0f172a',
+        'font-size': '14', 'font-weight': '900'
+      }, `${small}`));
+    }
+
+    /* =========================================================================
+       ABA 5 — BÔNUS B: O SEGREDO DO 7 (PASSO A PASSO)
+       ========================================================================= */
+    function getSevenNumber() {
+      return state.sevenCustom !== null ? state.sevenCustom : SEVEN_CHALLENGES[state.sevenIdx];
+    }
+
+    function resetSeven() {
+      stopBonusTimers();
+      const num = getSevenNumber();
+      state.sevenRounds = [{ current: num, rest: null, last: null, doubled: null, next: null }];
+      state.sevenPhase = 0;
+      state.sevenDone = false;
+      state.sevenShowBlock = false;
+      hideToast();
+      renderAll();
+    }
+
+    function stepSeven(playAudio = true) {
+      if (state.sevenDone) return false;
+      state.sevenShowBlock = false;
+      const round = state.sevenRounds[state.sevenRounds.length - 1];
+
+      if (state.sevenPhase === 0) {
+        const absVal = Math.abs(round.current);
+        round.last = absVal % 10;
+        round.rest = Math.floor(absVal / 10);
+        state.sevenPhase = 1;
+        if (playAudio) SoundFX.woodClick();
+      } else if (state.sevenPhase === 1) {
+        round.doubled = round.last * 2;
+        state.sevenPhase = 2;
+        if (playAudio) SoundFX.woodClick();
+      } else if (state.sevenPhase === 2) {
+        round.next = round.rest - round.doubled;
+        state.sevenPhase = 3;
+
+        if (Math.abs(round.next) <= 70) {
+          state.sevenDone = true;
+          stopBonusTimers();
+          const orig = getSevenNumber();
+          const isDiv = (orig % 7 === 0);
+          if (state.sevenCustom === null) state.sevenCompleted.add(state.sevenIdx);
+          if (isDiv) {
+            if (playAudio) SoundFX.victoryFanfare();
+            showToast('✨', `<strong>${orig} É divisível por 7!</strong> Chegamos em <strong>${round.next}</strong> (${orig} ÷ 7 = ${orig / 7})!`, 'tone-gold', state.sevenCustom === null);
+          } else {
+            if (playAudio) SoundFX.remainderTone();
+            showToast('✕', `<strong>${orig} NÃO é divisível por 7!</strong> Chegamos em <strong>${round.next}</strong> (não está na tabuada do 7).`, 'tone-rem', state.sevenCustom === null);
+          }
+        } else if (playAudio) {
+          SoundFX.exactChord();
+        }
+        markPanelUpdate();
+      } else if (state.sevenPhase === 3 && !state.sevenDone) {
+        state.sevenRounds.push({ current: Math.abs(round.next), rest: null, last: null, doubled: null, next: null });
+        state.sevenPhase = 0;
+        if (playAudio) SoundFX.woodClick();
+      }
+
+      renderAll();
+      return !state.sevenDone;
+    }
+
+    function renderSevenStage() {
+      const orig = getSevenNumber();
+      const cx = state.viewW / 2;
+
+      if (state.sevenShowBlock && orig <= 140) {
+        dom.svgWorld.appendChild(svgEl('text', {
+          x: cx, y: 26, 'text-anchor': 'middle', fill: '#92400e',
+          'font-size': '14', 'font-weight': '900'
+        }, `Prova Geométrica no Bloco: ${orig} com altura 7`));
+        renderRectStage(orig, 7);
+        return;
+      }
+
+      const round = state.sevenRounds[state.sevenRounds.length - 1];
+      const cardW = Math.min(state.viewW - 36, 560);
+      const cardH = Math.min(state.viewH - 32, 286);
+      const left = cx - cardW / 2;
+      const top = (state.viewH - cardH) / 2;
+
+      const origDiv = orig % 7 === 0;
+      const borderCol = state.sevenDone ? (origDiv ? '#059669' : '#e11d48') : '#f59e0b';
+
+      dom.svgWorld.appendChild(svgEl('rect', {
+        x: left, y: top, width: cardW, height: cardH, rx: 18,
+        fill: '#ffffff', stroke: borderCol, 'stroke-width': 2.5, filter: 'url(#tileShadow)'
+      }));
+
+      dom.svgWorld.appendChild(svgEl('text', {
+        x: cx, y: top + 27, 'text-anchor': 'middle', fill: '#92400e',
+        'font-size': '12.5', 'font-weight': '900'
+      }, `🎩 O SEGREDO DO 7 — RODADA ${state.sevenRounds.length} (Original: ${orig})`));
+
+      const yNum = top + 90;
+
+      if (state.sevenPhase === 0) {
+        dom.svgWorld.appendChild(svgEl('rect', {
+          x: cx - 90, y: yNum - 42, width: 180, height: 58, rx: 14,
+          fill: '#fffbeb', stroke: '#fcd34d', 'stroke-width': 2
+        }));
+        dom.svgWorld.appendChild(svgEl('text', {
+          x: cx, y: yNum + 2, 'text-anchor': 'middle', fill: '#0f172a',
+          'font-size': '38', 'font-weight': '900'
+        }, String(round.current)));
+
+        dom.svgWorld.appendChild(svgEl('text', {
+          x: cx, y: top + 158, 'text-anchor': 'middle', fill: '#475569',
+          'font-size': '13.5', 'font-weight': '800'
+        }, 'Clique em "✂ Próximo Passo" para destacar e cortar o último algarismo!'));
+      } else {
+        const restX = cx - 64;
+        const lastX = cx + 72;
+
+        dom.svgWorld.appendChild(svgEl('rect', {
+          x: restX - 58, y: yNum - 40, width: 116, height: 54, rx: 12,
+          fill: '#eff6ff', stroke: '#3b82f6', 'stroke-width': 2.2
+        }));
+        dom.svgWorld.appendChild(svgEl('text', {
+          x: restX, y: yNum + 2, 'text-anchor': 'middle', fill: '#1e3a8a',
+          'font-size': '34', 'font-weight': '900'
+        }, String(round.rest)));
+
+        dom.svgWorld.appendChild(svgEl('line', {
+          x1: cx + 10, y1: yNum - 44, x2: cx + 10, y2: yNum + 18,
+          stroke: '#f59e0b', 'stroke-width': 2.5, 'stroke-dasharray': '5 4'
+        }));
+        dom.svgWorld.appendChild(svgEl('text', {
+          x: cx + 10, y: yNum - 48, 'text-anchor': 'middle', 'font-size': '15'
+        }, '✂️'));
+
+        dom.svgWorld.appendChild(svgEl('rect', {
+          x: lastX - 32, y: yNum - 40, width: 64, height: 54, rx: 12,
+          fill: '#fef3c7', stroke: '#d97706', 'stroke-width': 2.2
+        }));
+        dom.svgWorld.appendChild(svgEl('text', {
+          x: lastX, y: yNum + 2, 'text-anchor': 'middle', fill: '#92400e',
+          'font-size': '34', 'font-weight': '900'
+        }, String(round.last)));
+
+        if (state.sevenPhase >= 2) {
+          dom.svgWorld.appendChild(svgEl('rect', {
+            x: cx - 125, y: top + 126, width: 250, height: 34, rx: 10,
+            fill: '#fffbeb', stroke: '#fcd34d', 'stroke-width': 1.6
+          }));
+          dom.svgWorld.appendChild(svgEl('text', {
+            x: cx, y: top + 148, 'text-anchor': 'middle', fill: '#92400e',
+            'font-size': '15', 'font-weight': '900'
+          }, `Dobro do último: ${round.last} × 2 = ${round.doubled}`));
+        }
+
+        if (state.sevenPhase >= 3) {
+          const isFinalDiv = round.next % 7 === 0;
+          const boxFill = state.sevenDone ? (isFinalDiv ? '#059669' : '#e11d48') : '#2563eb';
+          dom.svgWorld.appendChild(svgEl('rect', {
+            x: cx - 155, y: top + 172, width: 310, height: 46, rx: 12,
+            fill: boxFill, filter: 'url(#tileShadow)'
+          }));
+          dom.svgWorld.appendChild(svgEl('text', {
+            x: cx, y: top + 200, 'text-anchor': 'middle', fill: '#fff',
+            'font-size': '18', 'font-weight': '900'
+          }, `${round.rest} − ${round.doubled} = ${round.next}`));
+
+          const subTxt = state.sevenDone
+            ? (isFinalDiv ? `✓ ${round.next} é múltiplo de 7 → ${orig} DIVIDE por 7!` : `✕ ${round.next} não está na tabuada do 7 → NÃO divide!`)
+            : `Ainda é grande! Clique em "✂ Próximo Passo" para repetir com ${Math.abs(round.next)}.`;
+          dom.svgWorld.appendChild(svgEl('text', {
+            x: cx, y: top + 242, 'text-anchor': 'middle',
+            fill: state.sevenDone ? (isFinalDiv ? '#065f46' : '#9f1239') : '#475569',
+            'font-size': '12.5', 'font-weight': '900'
+          }, subTxt));
+        }
+      }
+    }
+
+    /* =========================================================================
+       RENDERIZAÇÃO UNIFICADA (FAIXA DE CONTEXTO, PALCO, PAINEL E RODAPÉ)
+       ========================================================================= */
+    function renderAll() {
+      dom.svgWorld.innerHTML = '';
+      renderContextBar();
+
+      if (state.tab === 'rect') {
+        renderRectStage(RECT_CHALLENGES[state.rectIdx], state.rectHeight);
+      } else if (state.tab === 'lupa') {
+        renderLupaStage();
+      } else if (state.tab === 'duel') {
+        renderMdcStage(DUEL_CHALLENGES[state.duelIdx], state.duelHeight, false);
+      } else if (state.tab === 'free') {
+        if (state.freeMode === 'divisors') {
+          renderRectStage(state.freeN, state.freeHeight);
+        } else {
+          renderMdcStage(getFreeMdcNums(), state.freeMdcHeight, state.freeMdcRevealed);
+        }
+      } else if (state.tab === 'bonus') {
+        if (state.bonusSub === 'euclid') renderEuclidStage();
+        else renderSevenStage();
+      }
+
+      renderPanel();
+      renderBottomBar();
+      applyCamera();
+    }
+
+    function renderContextBar() {
+      dom.ctxLeft.innerHTML = '';
+      setContextTone('');
+
+      if (state.tab === 'rect') {
+        const n = RECT_CHALLENGES[state.rectIdx];
+        const d = state.rectHeight;
+        const rem = n % d;
+        const found = getRectFoundSet().size;
+        const total = getDivisors(n).length;
+
+        dom.ctxLeft.innerHTML = `
+          <span class="status-pill">N = ${n}</span>
+          <span class="status-pill" style="color:var(--exact)">Divisores: ${found}/${total}</span>
+        `;
+        if (rem === 0) {
+          setContextTone(d * d === n ? 'tone-square' : 'tone-exact');
+          dom.statusMsg.textContent = d * d === n
+            ? `★ ${d} × ${d} = ${n} — Quadrado Perfeito!`
+            : `✓ Altura ${d} fecha retângulo perfeito (${d} × ${n / d} = ${n})!`;
+        } else {
+          setContextTone('tone-rem');
+          dom.statusMsg.textContent = `Altura ${d}: sobrou ${rem} quadradinho(s). Tente outra altura!`;
+        }
+      }
+
+      else if (state.tab === 'lupa') {
+        const n = LUPA_CHALLENGES[state.lupaIdx];
+        dom.ctxLeft.innerHTML = `<span class="status-pill">Alvo: ${n}</span>`;
+        [2, 3, 5, 9, 10].forEach((c) => {
+          const btn = document.createElement('button');
+          btn.type = 'button';
+          btn.className = `ctx-chip${state.lupaCriterion === c ? ' active' : ''}`;
+          btn.textContent = `÷ ${c}`;
+          btn.addEventListener('click', () => {
+            state.lupaCriterion = c;
+            SoundFX.woodClick();
+            renderAll();
+          });
+          dom.ctxLeft.appendChild(btn);
+        });
+        dom.statusMsg.textContent = `Use a Lupa e marque abaixo por quais números ${n} é divisível!`;
+      }
+
+      else if (state.tab === 'duel') {
+        const nums = DUEL_CHALLENGES[state.duelIdx];
+        const d = state.duelHeight;
+        const allExact = nums.every((n) => n % d === 0);
+        const isMdc = allExact && d === gcdList(nums);
+        const isThree = nums.length === 3;
+
+        dom.ctxLeft.innerHTML = `
+          <span class="status-pill">MDC(${nums.join(', ')})</span>
+          <span class="badge-count${isThree ? ' is-three' : ''}">${nums.length} nºs</span>
+        `;
+        if (isMdc) {
+          setContextTone('tone-gold');
+          dom.statusMsg.textContent = gcdList(nums) === 1
+            ? `★ MDC = 1! São primos entre si (único divisor comum é 1)!`
+            : `★ Você encontrou o MDC = ${d}!`;
+        } else if (allExact) {
+          setContextTone('tone-exact');
+          dom.statusMsg.textContent = `✓ Altura ${d} é Divisor Comum! Existe uma altura maior?`;
+        } else {
+          setContextTone('tone-rem');
+          dom.statusMsg.textContent = `Altura ${d} deixa sobra. Ajuste para alinhar todos sem resto!`;
+        }
+      }
+
+      /* =====================================================================
+         FASE 4. LIVRE — CONTROLES 100% VISÍVEIS LOGO ABAIXO DO CABEÇALHO
+         ===================================================================== */
+      else if (state.tab === 'free') {
+        const modes = [
+          { key: 'divisors', label: 'Divisores (1 nº)' },
+          { key: 'mdc2',     label: 'MDC (2 nºs)' },
+          { key: 'mdc3',     label: 'MDC (3 nºs)' }
+        ];
+        modes.forEach((m) => {
+          const b = document.createElement('button');
+          b.type = 'button';
+          b.className = `ctx-chip${state.freeMode === m.key ? ' active' : ''}`;
+          b.textContent = m.label;
+          b.addEventListener('click', () => {
+            state.freeMode = m.key;
+            state.freeMdcRevealed = false;
+            state.freeMdcFound = new Set();
+            state.freeMdcHeight = Math.min(state.freeMdcHeight, Math.min(...getFreeMdcNums()));
+            hideToast();
+            resetCamera();
+            SoundFX.woodClick();
+            renderAll();
+          });
+          dom.ctxLeft.appendChild(b);
+        });
+
+        if (state.freeMode === 'divisors') {
+          const nf = createNumField('Número N:', state.freeN, 2, 144, (val) => {
+            state.freeN = val;
+            state.freeHeight = Math.min(state.freeHeight, val);
+            state.freeFound = new Set();
+            hideToast();
+            SoundFX.woodClick();
+            renderAll();
+          });
+          dom.ctxLeft.appendChild(nf.wrap);
+
+          const btnApply = document.createElement('button');
+          btnApply.type = 'button';
+          btnApply.className = 'ctx-apply-btn';
+          btnApply.textContent = 'Aplicar ✓';
+          btnApply.addEventListener('click', () => {
+            const val = Math.max(2, Math.min(144, Math.floor(Number(nf.input.value) || 36)));
+            state.freeN = val;
+            state.freeHeight = Math.min(state.freeHeight, val);
+            state.freeFound = new Set();
+            hideToast();
+            SoundFX.exactChord();
+            renderAll();
+          });
+          dom.ctxLeft.appendChild(btnApply);
+
+          const btnRand = document.createElement('button');
+          btnRand.type = 'button';
+          btnRand.className = 'ctx-rand-btn';
+          btnRand.textContent = '🎲 Aleatório';
+          btnRand.addEventListener('click', () => {
+            const pool = [12, 15, 16, 18, 20, 24, 28, 30, 32, 36, 40, 42, 45, 48, 54, 60, 64, 72, 23, 31];
+            state.freeN = pool[Math.floor(Math.random() * pool.length)];
+            state.freeHeight = 2;
+            state.freeFound = new Set();
+            hideToast();
+            SoundFX.woodClick();
+            renderAll();
+          });
+          dom.ctxLeft.appendChild(btnRand);
+
+          dom.statusMsg.textContent = `Divisores de ${state.freeN}`;
+        } else {
+          const applyFreeMdc = (a, b, c) => {
+            state.freeA = Math.max(2, Math.min(120, Math.floor(Number(a) || 24)));
+            state.freeB = Math.max(2, Math.min(120, Math.floor(Number(b) || 36)));
+            if (c !== undefined) state.freeC = Math.max(2, Math.min(120, Math.floor(Number(c) || 48)));
+            state.freeMdcFound = new Set();
+            state.freeMdcRevealed = false;
+            state.freeMdcHeight = Math.min(state.freeMdcHeight, Math.min(...getFreeMdcNums()));
+            hideToast();
+            SoundFX.woodClick();
+            renderAll();
+          };
+
+          const fA = createNumField('A:', state.freeA, 2, 120, (v) => applyFreeMdc(v, state.freeB, state.freeC));
+          const fB = createNumField('B:', state.freeB, 2, 120, (v) => applyFreeMdc(state.freeA, v, state.freeC));
+          dom.ctxLeft.appendChild(fA.wrap);
+          dom.ctxLeft.appendChild(fB.wrap);
+
+          let fC = null;
+          if (state.freeMode === 'mdc3') {
+            fC = createNumField('C:', state.freeC, 2, 120, (v) => applyFreeMdc(state.freeA, state.freeB, v));
+            dom.ctxLeft.appendChild(fC.wrap);
+          }
+
+          const btnApply = document.createElement('button');
+          btnApply.type = 'button';
+          btnApply.className = 'ctx-apply-btn';
+          btnApply.textContent = 'Aplicar ✓';
+          btnApply.addEventListener('click', () => {
+            applyFreeMdc(fA.input.value, fB.input.value, fC ? fC.input.value : state.freeC);
+          });
+          dom.ctxLeft.appendChild(btnApply);
+
+          const btnRand = document.createElement('button');
+          btnRand.type = 'button';
+          btnRand.className = 'ctx-rand-btn';
+          btnRand.textContent = '🎲 Aleatório';
+          btnRand.addEventListener('click', () => {
+            const base = [3, 4, 5, 6, 8, 9, 10, 12][Math.floor(Math.random() * 8)];
+            const m1 = 2 + Math.floor(Math.random() * 4);
+            const m2 = m1 + 1 + Math.floor(Math.random() * 3);
+            const m3 = m2 + 1 + Math.floor(Math.random() * 2);
+            applyFreeMdc(Math.min(120, base * m1), Math.min(120, base * m2), Math.min(120, base * m3));
+          });
+          dom.ctxLeft.appendChild(btnRand);
+
+          dom.statusMsg.textContent = `MDC(${getFreeMdcNums().join(', ')})`;
+        }
+      }
+
+      /* =====================================================================
+         FASE ★ BÔNUS — SELETOR A/B + CAMPOS LIVRES DIRETOS NA BARRA SUPERIOR
+         ===================================================================== */
+      else if (state.tab === 'bonus') {
+        const bA = document.createElement('button');
+        bA.type = 'button';
+        bA.className = `ctx-chip${state.bonusSub === 'euclid' ? ' gold-active' : ''}`;
+        bA.textContent = 'A • Algoritmo de Euclides';
+        bA.addEventListener('click', () => { stopBonusTimers(); state.bonusSub = 'euclid'; hideToast(); resetCamera(); renderAll(); });
+
+        const bB = document.createElement('button');
+        bB.type = 'button';
+        bB.className = `ctx-chip${state.bonusSub === 'seven' ? ' gold-active' : ''}`;
+        bB.textContent = 'B • O Segredo do 7';
+        bB.addEventListener('click', () => { stopBonusTimers(); state.bonusSub = 'seven'; resetSeven(); resetCamera(); });
+
+        dom.ctxLeft.appendChild(bA);
+        dom.ctxLeft.appendChild(bB);
+
+        if (state.bonusSub === 'euclid') {
+          const [A, B] = getEuclidPair();
+          const applyEuc = (va, vb) => {
+            state.euclidCustom = [
+              Math.max(2, Math.min(120, Math.floor(Number(va) || 38))),
+              Math.max(2, Math.min(120, Math.floor(Number(vb) || 10)))
+            ];
+            resetEuclid();
+          };
+          const fA = createNumField('A:', A, 2, 120, (v) => applyEuc(v, B));
+          const fB = createNumField('B:', B, 2, 120, (v) => applyEuc(A, v));
+          dom.ctxLeft.appendChild(fA.wrap);
+          dom.ctxLeft.appendChild(fB.wrap);
+
+          const btnAp = document.createElement('button');
+          btnAp.type = 'button';
+          btnAp.className = 'ctx-apply-btn';
+          btnAp.textContent = 'Aplicar ✓';
+          btnAp.addEventListener('click', () => applyEuc(fA.input.value, fB.input.value));
+          dom.ctxLeft.appendChild(btnAp);
+
+          dom.statusMsg.textContent = `Retângulo ${A} × ${B}`;
+        } else {
+          const num = getSevenNumber();
+          const apply7 = (v) => {
+            state.sevenCustom = Math.max(14, Math.min(9999, Math.floor(Number(v) || 161)));
+            resetSeven();
+          };
+          const fN = createNumField('Nº:', num, 14, 9999, (v) => apply7(v), true);
+          dom.ctxLeft.appendChild(fN.wrap);
+
+          const btnAp = document.createElement('button');
+          btnAp.type = 'button';
+          btnAp.className = 'ctx-apply-btn';
+          btnAp.textContent = 'Aplicar ✓';
+          btnAp.addEventListener('click', () => apply7(fN.input.value));
+          dom.ctxLeft.appendChild(btnAp);
+
+          dom.statusMsg.textContent = `Corte → Dobre → Subtraia`;
+        }
+      }
+    }
+
+    /* =========================================================================
+       PAINEL LATERAL (📊)
+       ========================================================================= */
+    function renderPanel() {
+      if (state.tab === 'rect' || (state.tab === 'free' && state.freeMode === 'divisors')) {
+        const isFree = state.tab === 'free';
+        const n = isFree ? state.freeN : RECT_CHALLENGES[state.rectIdx];
+        const foundSet = isFree ? state.freeFound : getRectFoundSet();
+        const allDivs = getDivisors(n);
+
+        dom.panelTitle.textContent = `📊 Divisores de ${n}`;
+        const arcsHtml = buildDivisorArcsSVG(n, foundSet);
+        const foundArr = Array.from(foundSet).sort((a, b) => a - b);
+
+        const pillsHtml = foundArr.length
+          ? foundArr.map((d) => `<button class="div-pill ${d * d === n ? 'is-square' : ''}" data-pick-d="${d}" type="button">${d}</button>`).join('')
+          : `<span style="font-size:0.75rem;color:var(--ink-muted)">Teste alturas para descobrir os pares de divisores!</span>`;
+
+        const primeNote = isPrime(n) && foundArr.length === 2
+          ? `<div class="p-card gold"><div class="p-card-title"><span>💎 Número Primo</span></div><div style="font-size:0.75rem;font-weight:800">${n} só tem 2 divisores (1 e ${n}), formando apenas a tira reta!</div></div>`
+          : '';
+
+        dom.panelBody.innerHTML = `
+          <div class="p-card exact">
+            <div class="p-card-title"><span>Pares Espelho</span><span>${foundArr.length}/${allDivs.length}</span></div>
+            ${arcsHtml}
+          </div>
+          <div class="p-card">
+            <div class="p-card-title"><span>Divisores Encontrados</span></div>
+            <div class="pill-list">${pillsHtml}</div>
+          </div>
+          ${primeNote}
+        `;
+
+        dom.panelBody.querySelectorAll('[data-pick-d], [data-quick-d]').forEach((el) => {
+          el.addEventListener('click', () => {
+            const val = Number(el.dataset.pickD || el.dataset.quickD);
+            if (isFree) {
+              state.freeHeight = val;
+              if (n % val === 0) { state.freeFound.add(val); state.freeFound.add(n / val); SoundFX.exactChord(); }
+              renderAll();
+            } else {
+              testRectHeight(val, true);
+            }
+          });
+        });
+      }
+
+      else if (state.tab === 'lupa') {
+        const n = LUPA_CHALLENGES[state.lupaIdx];
+        dom.panelTitle.textContent = `🔍 Guia da Lupa (${n})`;
+        dom.panelBody.innerHTML = `
+          <div class="p-card">
+            <div class="p-card-title"><span>Critérios Rápidos</span></div>
+            <div style="display:flex;flex-direction:column;gap:5px;font-size:0.76rem;font-weight:700;">
+              <div><strong>÷ 2 (Par):</strong> termina em 0, 2, 4, 6 ou 8.</div>
+              <div><strong>÷ 3:</strong> soma dos algarismos divide por 3.</div>
+              <div><strong>÷ 5:</strong> termina em 0 ou 5.</div>
+              <div><strong>÷ 9:</strong> soma dos algarismos divide por 9.</div>
+              <div><strong>÷ 10:</strong> termina em 0.</div>
+            </div>
+          </div>
+          <div class="p-card gold">
+            <div class="p-card-title"><span>Regra de Ouro</span></div>
+            <div style="font-size:0.75rem;font-weight:800;color:#78350f">
+              Se o número for <strong>ÍMPAR</strong>, não divide por 2 — e você já descarta 4, 6, 8, 10... de cara!
+            </div>
+          </div>
+        `;
+      }
+
+      else if (state.tab === 'duel' || (state.tab === 'free' && state.freeMode !== 'divisors')) {
+        const isFree = state.tab === 'free';
+        const nums = isFree ? getFreeMdcNums() : DUEL_CHALLENGES[state.duelIdx];
+        const realMdc = gcdList(nums);
+        const allCommonDivs = getDivisors(realMdc);
+        const allCommonSet = new Set(allCommonDivs);
+
+        const foundSet = isFree ? state.freeMdcFound : getDuelFoundSet();
+        const isMdcRevealed = isFree || state.duelCompleted.has(state.duelIdx) || foundSet.has(realMdc);
+
+        // Na aba Livre (exploração), destaca imediatamente todos os divisores comuns e o MDC.
+        // Na aba Duelo MDC, destaca os comuns testados e, ao achar/revelar o MDC, evidencia todos + ★ MDC.
+        const highlightedCommon = isMdcRevealed ? allCommonSet : foundSet;
+        const displayCommonArr = isMdcRevealed
+          ? allCommonDivs
+          : Array.from(foundSet).sort((a, b) => a - b);
+
+        dom.panelTitle.textContent = `📊 Divisores & MDC (${nums.length} nºs)`;
+
+        const legendHtml = `
+          <div class="legend-row">
+            <span>Legenda:</span>
+            <span class="legend-badge common">Comum</span>
+            <span class="legend-badge mdc">★ MDC</span>
+          </div>
+        `;
+
+        const commonPillsHtml = displayCommonArr.length
+          ? displayCommonArr.map((d) => {
+              const isMdcPill = isMdcRevealed && d === realMdc;
+              const cls = isMdcPill ? 'is-mdc-pulse' : 'is-common';
+              return `<button class="div-pill ${cls}" data-pick-mdc="${d}" type="button" title="Testar altura ${d}">${isMdcPill ? '★ ' + d : d}</button>`;
+            }).join('')
+          : `<span style="font-size:0.74rem;color:var(--ink-muted)">Teste alturas comuns para encontrar os divisores de ${nums.join(', ')}.</span>`;
+
+        const labels = ['A', 'B', 'C'];
+        const eachList = nums.map((n, idx) => {
+          const divs = getDivisors(n);
+          const pills = divs.map((d) => {
+            const isMdcPill = isMdcRevealed && d === realMdc;
+            const isComPill = highlightedCommon.has(d);
+            const cls = isMdcPill ? 'is-mdc-pulse' : (isComPill ? 'is-common' : 'is-plain');
+            const label = isMdcPill ? `★ ${d}` : String(d);
+            return `<button class="div-pill ${cls}" data-pick-mdc="${d}" type="button" title="Testar altura ${d} no palco">${label}</button>`;
+          }).join('');
+
+          return `
+            <div class="p-card">
+              <div class="p-card-title">
+                <span>D(${n}) — Bloco ${labels[idx]}</span>
+                <span>${divs.length} div.</span>
+              </div>
+              <div class="pill-list">${pills}</div>
+            </div>
+          `;
+        }).join('');
+
+        dom.panelBody.innerHTML = `
+          ${legendHtml}
+          <div class="p-card gold">
+            <div class="p-card-title">
+              <span>Divisores Comuns</span>
+              <span>${isMdcRevealed ? `★ MDC = ${realMdc}` : `${displayCommonArr.length} achado(s)`}</span>
+            </div>
+            <div class="pill-list">${commonPillsHtml}</div>
+          </div>
+          ${eachList}
+        `;
+
+        const minVal = Math.min(...nums);
+        dom.panelBody.querySelectorAll('[data-pick-mdc]').forEach((el) => {
+          el.addEventListener('click', () => {
+            const val = Number(el.dataset.pickMdc);
+            if (val > minVal) {
+              SoundFX.remainderTone();
+              showToast('📏', `A altura <strong>${val}</strong> é maior que o menor bloco (${minVal}) — ajustando para o máximo possível (${minVal}).`, 'tone-rem', false);
+              testMdcHeight(minVal, false, isFree);
+            } else {
+              testMdcHeight(val, true, isFree);
+            }
+          });
+        });
+      }
+
+      else if (state.tab === 'bonus' && state.bonusSub === 'euclid') {
+        const [A, B] = getEuclidPair();
+        dom.panelTitle.textContent = `📊 Passos de Euclides`;
+        const rows = state.euclidSteps.length
+          ? state.euclidSteps.map((st, i) => {
+              const pal = EUCLID_PALETTE[i % EUCLID_PALETTE.length];
+              const isWin = st.remainder === 0;
+              return `
+                <div class="eq-row" style="border-left:4px solid ${isWin ? '#f59e0b' : pal.fill}">
+                  <span>${st.dividend} = ${st.count} × ${st.divisor} + ${st.remainder}</span>
+                  <span style="color:${isWin ? '#b45309' : pal.stroke}">${isWin ? '★ MDC!' : `lado ${st.side}`}</span>
+                </div>
+              `;
+            }).join('')
+          : `<div style="font-size:0.75rem;color:var(--ink-muted)">Clique em <strong>Próximo Quadrado</strong> para começar!</div>`;
+
+        dom.panelBody.innerHTML = `
+          <div class="p-card">
+            <div class="p-card-title"><span>Retângulo ${A} × ${B}</span></div>
+            <div class="eq-list">${rows}</div>
+          </div>
+          <div class="p-card gold">
+            <div class="p-card-title"><span>Ideia Geométrica</span></div>
+            <div style="font-size:0.75rem;font-weight:700;color:#78350f">
+              O lado do <strong>último quadrado</strong> que fecha o retângulo sem sobra é sempre o <strong>MDC(${A}, ${B})</strong>!
+            </div>
+          </div>
+        `;
+      }
+
+      else if (state.tab === 'bonus' && state.bonusSub === 'seven') {
+        const orig = getSevenNumber();
+        dom.panelTitle.textContent = `🎩 Histórico do 7`;
+        const rows = state.sevenRounds.map((r, i) => {
+          if (r.next === null) {
+            return `<div class="eq-row"><span>Rodada ${i + 1}: ${r.current}</span><span>em andamento</span></div>`;
+          }
+          return `<div class="eq-row"><span>${r.rest} − 2×${r.last} = <strong>${r.next}</strong></span><span>R${i + 1}</span></div>`;
+        }).join('');
+
+        dom.panelBody.innerHTML = `
+          <div class="p-card gold">
+            <div class="p-card-title"><span>Número: ${orig}</span></div>
+            <div class="eq-list">${rows}</div>
+          </div>
+          <div class="p-card">
+            <div class="p-card-title"><span>Regra em 3 Passos</span></div>
+            <div style="font-size:0.75rem;font-weight:700;color:var(--ink-muted);line-height:1.4">
+              1. Corte o último algarismo.<br/>
+              2. Dobre esse algarismo.<br/>
+              3. Subtraia do restante até reconhecer múltiplo de 7!
+            </div>
+          </div>
+        `;
+      }
+    }
+
+    /* =========================================================================
+       NAVEGAÇÃO DE DESAFIOS ("◀ 1/N Próximo ▶" SEMPRE VISÍVEL)
+       ========================================================================= */
+    function getCurrentNavInfo() {
+      if (state.tab === 'rect') {
+        return { curIdx: state.rectIdx, total: RECT_CHALLENGES.length, isDone: state.rectCompleted.has(state.rectIdx) };
+      }
+      if (state.tab === 'lupa') {
+        return { curIdx: state.lupaIdx, total: LUPA_CHALLENGES.length, isDone: state.lupaCompleted.has(state.lupaIdx) };
+      }
+      if (state.tab === 'duel') {
+        return { curIdx: state.duelIdx, total: DUEL_CHALLENGES.length, isDone: state.duelCompleted.has(state.duelIdx) };
+      }
+      if (state.tab === 'bonus' && state.bonusSub === 'euclid') {
+        return { curIdx: state.euclidIdx, total: EUCLID_CHALLENGES.length, isDone: state.euclidCompleted.has(state.euclidIdx) };
+      }
+      if (state.tab === 'bonus' && state.bonusSub === 'seven') {
+        return { curIdx: state.sevenIdx, total: SEVEN_CHALLENGES.length, isDone: state.sevenCompleted.has(state.sevenIdx) };
+      }
+      return { curIdx: 0, total: 0, isDone: false };
+    }
+
+    function switchTab(tabKey, bonusSub = null) {
+      stopBonusTimers();
+      hideToast();
+      state.tab = tabKey;
+      if (bonusSub) state.bonusSub = bonusSub;
+      dom.phaseTabs.forEach((t) => t.classList.toggle('active', t.dataset.tab === tabKey));
+      resetCamera();
+      if (state.tab === 'bonus' && state.bonusSub === 'seven' && state.sevenRounds.length === 0) {
+        resetSeven();
+      } else {
+        renderAll();
+      }
+    }
+
+    function goNextPhase() {
+      if (state.tab === 'rect') switchTab('lupa');
+      else if (state.tab === 'lupa') switchTab('duel');
+      else if (state.tab === 'duel') switchTab('bonus', 'euclid');
+      else if (state.tab === 'bonus' && state.bonusSub === 'euclid') switchTab('bonus', 'seven');
+      else if (state.tab === 'bonus' && state.bonusSub === 'seven') switchTab('free');
+    }
+
+    function navigateChallenge(delta) {
+      stopBonusTimers();
+      hideToast();
+      resetCamera();
+
+      if (state.tab === 'rect') {
+        state.rectIdx = Math.max(0, Math.min(RECT_CHALLENGES.length - 1, state.rectIdx + delta));
+        state.rectHeight = 2;
+      } else if (state.tab === 'lupa') {
+        state.lupaIdx = Math.max(0, Math.min(LUPA_CHALLENGES.length - 1, state.lupaIdx + delta));
+        state.lupaQuizSelected = new Set();
+        state.lupaQuizChecked = false;
+        state.lupaShowBlock = false;
+      } else if (state.tab === 'duel') {
+        state.duelIdx = Math.max(0, Math.min(DUEL_CHALLENGES.length - 1, state.duelIdx + delta));
+        state.duelHeight = 2;
+      } else if (state.tab === 'bonus' && state.bonusSub === 'euclid') {
+        state.euclidCustom = null;
+        state.euclidIdx = Math.max(0, Math.min(EUCLID_CHALLENGES.length - 1, state.euclidIdx + delta));
+        state.euclidSteps = [];
+      } else if (state.tab === 'bonus' && state.bonusSub === 'seven') {
+        state.sevenCustom = null;
+        state.sevenIdx = Math.max(0, Math.min(SEVEN_CHALLENGES.length - 1, state.sevenIdx + delta));
+        resetSeven();
+        return;
+      }
+      SoundFX.woodClick();
+      renderAll();
+    }
+
+    /* =========================================================================
+       BARRA INFERIOR DE AÇÕES
+       ========================================================================= */
+    function appendHeightControls(currentVal, minVal, maxVal, onChange, includeSlider = true) {
+      const wrap = document.createElement('div');
+      wrap.className = 'stepper-group';
+
+      const bMinus = document.createElement('button');
+      bMinus.type = 'button'; bMinus.className = 'stepper-btn'; bMinus.textContent = '−';
+      bMinus.disabled = currentVal <= minVal;
+      bMinus.addEventListener('click', () => onChange(Math.max(minVal, currentVal - 1)));
+
+      const valEl = document.createElement('span');
+      valEl.className = 'stepper-val';
+      valEl.textContent = `Alt: ${currentVal}`;
+
+      const bPlus = document.createElement('button');
+      bPlus.type = 'button'; bPlus.className = 'stepper-btn'; bPlus.textContent = '+';
+      bPlus.disabled = currentVal >= maxVal;
+      bPlus.addEventListener('click', () => onChange(Math.min(maxVal, currentVal + 1)));
+
+      wrap.appendChild(bMinus);
+      wrap.appendChild(valEl);
+      wrap.appendChild(bPlus);
+      dom.phaseActions.appendChild(wrap);
+
+      if (includeSlider) {
+        const slider = document.createElement('input');
+        slider.type = 'range';
+        slider.className = 'height-slider';
+        slider.min = String(minVal);
+        slider.max = String(maxVal);
+        slider.value = String(currentVal);
+        slider.title = 'Arraste para mudar a altura';
+        slider.addEventListener('input', () => onChange(Number(slider.value)));
+        dom.phaseActions.appendChild(slider);
+      }
+    }
+
+    function renderBottomBar() {
+      dom.phaseActions.innerHTML = '';
+
+      if (state.tab === 'rect') {
+        const n = RECT_CHALLENGES[state.rectIdx];
+        appendHeightControls(state.rectHeight, 1, n, (val) => testRectHeight(val, true), true);
+
+        [1, 2, 3, 4, 6].filter((v) => v <= n).forEach((v) => {
+          const chip = document.createElement('button');
+          chip.type = 'button';
+          chip.className = `quiz-chip${state.rectHeight === v ? ' selected' : ''}`;
+          chip.textContent = `h=${v}`;
+          chip.addEventListener('click', () => testRectHeight(v, true));
+          dom.phaseActions.appendChild(chip);
+        });
+
+        const btnHint = document.createElement('button');
+        btnHint.type = 'button';
+        btnHint.className = 'act-btn btn-soft';
+        btnHint.innerHTML = '💡 <span class="hide-xs">Dica</span>';
+        btnHint.addEventListener('click', () => {
+          const found = getRectFoundSet();
+          const missing = getDivisors(n).find((v) => !found.has(v));
+          if (missing) testRectHeight(missing, true);
+        });
+        dom.phaseActions.appendChild(btnHint);
+      }
+
+      else if (state.tab === 'lupa') {
+        const n = LUPA_CHALLENGES[state.lupaIdx];
+        const lbl = document.createElement('span');
+        lbl.style.cssText = 'font-size:0.73rem;font-weight:900;color:var(--ink-muted);white-space:nowrap;flex-shrink:0;';
+        lbl.textContent = 'Divide por:';
+        dom.phaseActions.appendChild(lbl);
+
+        [2, 3, 5, 9, 10].forEach((c) => {
+          const chip = document.createElement('button');
+          chip.type = 'button';
+          let cls = 'quiz-chip';
+          if (state.lupaQuizChecked) {
+            const isDiv = n % c === 0;
+            const isSel = state.lupaQuizSelected.has(c);
+            if (isSel && isDiv) cls += ' correct';
+            else if (isSel && !isDiv) cls += ' wrong';
+            else if (!isSel && isDiv) cls += ' selected';
+          } else if (state.lupaQuizSelected.has(c)) {
+            cls += ' selected';
+          }
+          chip.className = cls;
+          chip.textContent = String(c);
+          chip.addEventListener('click', () => {
+            state.lupaQuizChecked = false;
+            if (state.lupaQuizSelected.has(c)) state.lupaQuizSelected.delete(c);
+            else state.lupaQuizSelected.add(c);
+            SoundFX.woodClick();
+            renderBottomBar();
+          });
+          dom.phaseActions.appendChild(chip);
+        });
+
+        const btnCheck = document.createElement('button');
+        btnCheck.type = 'button';
+        btnCheck.className = 'act-btn btn-exact';
+        btnCheck.textContent = 'Conferir ✓';
+        btnCheck.addEventListener('click', checkLupaQuiz);
+        dom.phaseActions.appendChild(btnCheck);
+
+        if (n <= 144) {
+          const btnBlk = document.createElement('button');
+          btnBlk.type = 'button';
+          btnBlk.className = 'act-btn btn-soft';
+          btnBlk.textContent = state.lupaShowBlock ? '🔍 Voltar' : '🧱 Ver Bloco';
+          btnBlk.addEventListener('click', () => {
+            state.lupaShowBlock = !state.lupaShowBlock;
+            SoundFX.woodClick();
+            renderAll();
+          });
+          dom.phaseActions.appendChild(btnBlk);
+        }
+      }
+
+      else if (state.tab === 'duel') {
+        const nums = DUEL_CHALLENGES[state.duelIdx];
+        appendHeightControls(state.duelHeight, 1, Math.min(...nums), (val) => testMdcHeight(val, true, false), true);
+
+        const btnDeclare = document.createElement('button');
+        btnDeclare.type = 'button';
+        btnDeclare.className = 'act-btn btn-gold';
+        btnDeclare.textContent = '★ Declarar MDC!';
+        btnDeclare.addEventListener('click', () => {
+          const real = gcdList(nums);
+          if (state.duelHeight === real) {
+            testMdcHeight(real, true, false);
+          } else if (nums.every((n) => n % state.duelHeight === 0)) {
+            SoundFX.remainderTone();
+            showToast('🤔', `Altura <strong>${state.duelHeight}</strong> é divisor comum, mas ainda existe uma altura <strong>maior</strong>!`, 'tone-rem', false);
+          } else {
+            SoundFX.remainderTone();
+            showToast('✕', `Altura <strong>${state.duelHeight}</strong> deixou sobra! Ajuste até todos fecharem sem resto.`, 'tone-rem', false);
+          }
+        });
+        dom.phaseActions.appendChild(btnDeclare);
+
+        const btnReveal = document.createElement('button');
+        btnReveal.type = 'button';
+        btnReveal.className = 'act-btn btn-soft';
+        btnReveal.textContent = '✨ Revelar MDC';
+        btnReveal.addEventListener('click', () => {
+          const real = gcdList(nums);
+          const set = getDuelFoundSet();
+          getDivisors(real).forEach((v) => set.add(v));
+          state.duelCompleted.add(state.duelIdx);
+          testMdcHeight(real, true, false);
+        });
+        dom.phaseActions.appendChild(btnReveal);
+      }
+
+      else if (state.tab === 'free') {
+        if (state.freeMode === 'divisors') {
+          appendHeightControls(state.freeHeight, 1, state.freeN, (val) => {
+            state.freeHeight = val;
+            if (state.freeN % val === 0) {
+              state.freeFound.add(val);
+              state.freeFound.add(state.freeN / val);
+              SoundFX.exactChord();
+              markPanelUpdate();
+            } else {
+              SoundFX.remainderTone();
+            }
+            renderAll();
+          }, true);
+
+          const btnAll = document.createElement('button');
+          btnAll.type = 'button';
+          btnAll.className = 'act-btn btn-exact';
+          btnAll.textContent = '✨ Revelar Todos';
+          btnAll.addEventListener('click', () => {
+            const divs = getDivisors(state.freeN);
+            divs.forEach((v) => state.freeFound.add(v));
+            SoundFX.squareSparkle();
+            markPanelUpdate();
+            showToast('✨', `Divisores de ${state.freeN}: <strong>${divs.join(', ')}</strong>`, '', false);
+            renderAll();
+          });
+          dom.phaseActions.appendChild(btnAll);
+        } else {
+          const nums = getFreeMdcNums();
+          appendHeightControls(state.freeMdcHeight, 1, Math.min(...nums), (val) => testMdcHeight(val, true, true), true);
+
+          const btnRev = document.createElement('button');
+          btnRev.type = 'button';
+          btnRev.className = 'act-btn btn-gold';
+          btnRev.textContent = '✨ Revelar Todos / MDC';
+          btnRev.addEventListener('click', () => {
+            const real = gcdList(nums);
+            getDivisors(real).forEach((d) => state.freeMdcFound.add(d));
+            state.freeMdcRevealed = true;
+            testMdcHeight(real, true, true);
+          });
+          dom.phaseActions.appendChild(btnRev);
+        }
+      }
+
+      else if (state.tab === 'bonus' && state.bonusSub === 'euclid') {
+        const last = state.euclidSteps[state.euclidSteps.length - 1];
+        const done = last && last.remainder === 0;
+
+        const btnStep = document.createElement('button');
+        btnStep.type = 'button';
+        btnStep.className = 'act-btn btn-primary';
+        btnStep.disabled = done;
+        btnStep.textContent = '✂ Próximo Quadrado';
+        btnStep.addEventListener('click', () => stepEuclid(true));
+        dom.phaseActions.appendChild(btnStep);
+
+        const btnAuto = document.createElement('button');
+        btnAuto.type = 'button';
+        btnAuto.className = 'act-btn btn-exact';
+        btnAuto.disabled = done;
+        btnAuto.textContent = state.euclidTimer ? '⏸ Pausar' : '▶ Auto';
+        btnAuto.addEventListener('click', () => {
+          if (state.euclidTimer) {
+            stopBonusTimers();
+            renderBottomBar();
+          } else {
+            stepEuclid(true);
+            state.euclidTimer = setInterval(() => {
+              if (!stepEuclid(true)) stopBonusTimers();
+            }, 620);
+            renderBottomBar();
+          }
+        });
+        dom.phaseActions.appendChild(btnAuto);
+
+        const btnRes = document.createElement('button');
+        btnRes.type = 'button';
+        btnRes.className = 'act-btn btn-soft';
+        btnRes.textContent = '↺';
+        btnRes.title = 'Reiniciar retângulo';
+        btnRes.addEventListener('click', resetEuclid);
+        dom.phaseActions.appendChild(btnRes);
+      }
+
+      else if (state.tab === 'bonus' && state.bonusSub === 'seven') {
+        const orig = getSevenNumber();
+
+        const btnStep = document.createElement('button');
+        btnStep.type = 'button';
+        btnStep.className = 'act-btn btn-primary';
+        btnStep.disabled = state.sevenDone;
+        btnStep.textContent = '✂ Próximo Passo';
+        btnStep.addEventListener('click', () => stepSeven(true));
+        dom.phaseActions.appendChild(btnStep);
+
+        const btnRun = document.createElement('button');
+        btnRun.type = 'button';
+        btnRun.className = 'act-btn btn-exact';
+        btnRun.disabled = state.sevenDone;
+        btnRun.textContent = state.sevenTimer ? '⏸ Pausar' : '▶ Auto';
+        btnRun.addEventListener('click', () => {
+          if (state.sevenTimer) {
+            stopBonusTimers();
+            renderBottomBar();
+          } else {
+            stepSeven(true);
+            state.sevenTimer = setInterval(() => {
+              if (!stepSeven(true)) stopBonusTimers();
+            }, 620);
+            renderBottomBar();
+          }
+        });
+        dom.phaseActions.appendChild(btnRun);
+
+        const btnWhy = document.createElement('button');
+        btnWhy.type = 'button';
+        btnWhy.className = 'act-btn btn-gold';
+        btnWhy.textContent = '💡 Por que funciona?';
+        btnWhy.addEventListener('click', () => dom.infoModalBackdrop.classList.add('is-open'));
+        dom.phaseActions.appendChild(btnWhy);
+
+        if (orig <= 140) {
+          const btnBlk = document.createElement('button');
+          btnBlk.type = 'button';
+          btnBlk.className = 'act-btn btn-purple';
+          btnBlk.textContent = state.sevenShowBlock ? '🎩 Voltar' : '🧱 Provar no Bloco';
+          btnBlk.addEventListener('click', () => {
+            state.sevenShowBlock = !state.sevenShowBlock;
+            SoundFX.woodClick();
+            renderAll();
+          });
+          dom.phaseActions.appendChild(btnBlk);
+        }
+
+        const btnRes = document.createElement('button');
+        btnRes.type = 'button';
+        btnRes.className = 'act-btn btn-soft';
+        btnRes.textContent = '↺';
+        btnRes.title = 'Reiniciar';
+        btnRes.addEventListener('click', resetSeven);
+        dom.phaseActions.appendChild(btnRes);
+      }
+
+      // Bloco de navegação FIXO à direita ("◀ 1/N Próximo ▶")
+      const nav = getCurrentNavInfo();
+      if (nav.total > 0) {
+        dom.challengeNav.style.display = 'flex';
+        dom.navCounter.textContent = `${nav.curIdx + 1}/${nav.total}`;
+        dom.btnPrev.disabled = nav.curIdx <= 0;
+
+        const isLast = nav.curIdx >= nav.total - 1;
+        dom.btnNext.disabled = false;
+        dom.btnNext.innerHTML = isLast
+          ? `<span>Próx. Fase</span><span>▶▶</span>`
+          : `<span>Próximo</span><span>▶</span>`;
+        dom.btnNext.classList.toggle('btn-next-ready', nav.isDone);
+      } else {
+        dom.challengeNav.style.display = 'none';
+      }
+    }
+
+    /* =========================================================================
+       EVENTOS GLOBAIS
+       ========================================================================= */
+    dom.phaseTabs.forEach((btn) => {
+      btn.addEventListener('click', () => switchTab(btn.dataset.tab));
+    });
+
+    dom.btnPrev.addEventListener('click', () => navigateChallenge(-1));
+    dom.btnNext.addEventListener('click', () => {
+      const nav = getCurrentNavInfo();
+      if (nav.curIdx >= nav.total - 1) goNextPhase();
+      else navigateChallenge(1);
+    });
+
+    dom.btnToastNext.addEventListener('click', () => {
+      if (typeof state.toastNextAction === 'function') state.toastNextAction();
+    });
+
+    dom.btnSound.addEventListener('click', () => {
+      SoundFX.enabled = !SoundFX.enabled;
+      dom.btnSound.classList.toggle('active', SoundFX.enabled);
+      dom.soundIcon.textContent = SoundFX.enabled ? '🔊' : '🔇';
+      if (SoundFX.enabled) SoundFX.woodClick();
+    });
+
+    dom.btnPanel.addEventListener('click', () => {
+      state.panelOpen = !state.panelOpen;
+      syncPanelUI();
+    });
+    dom.btnClosePanel.addEventListener('click', () => {
+      state.panelOpen = false;
+      syncPanelUI();
+    });
+    dom.drawerBackdrop.addEventListener('click', () => {
+      state.panelOpen = false;
+      syncPanelUI();
+    });
+
+    dom.toastClose.addEventListener('click', hideToast);
+    dom.btnCloseModal.addEventListener('click', () => dom.infoModalBackdrop.classList.remove('is-open'));
+    dom.btnOkModal.addEventListener('click', () => dom.infoModalBackdrop.classList.remove('is-open'));
+    dom.infoModalBackdrop.addEventListener('click', (e) => {
+      if (e.target === dom.infoModalBackdrop) dom.infoModalBackdrop.classList.remove('is-open');
+    });
+
+    // Zoom e Pan no palco SVG
+    dom.btnZoomIn.addEventListener('click', () => changeZoom(0.2));
+    dom.btnZoomOut.addEventListener('click', () => changeZoom(-0.2));
+    dom.btnZoomFit.addEventListener('click', resetCamera);
+
+    dom.svgViewport.addEventListener('pointerdown', (e) => {
+      if (e.target.closest('button')) return;
+      state.isDragging = true;
+      state.dragStartX = e.clientX;
+      state.dragStartY = e.clientY;
+      state.dragOrigPanX = state.panX;
+      state.dragOrigPanY = state.panY;
+      dom.svgViewport.setPointerCapture(e.pointerId);
+    });
+    dom.svgViewport.addEventListener('pointermove', (e) => {
+      if (!state.isDragging) return;
+      state.panX = state.dragOrigPanX + (e.clientX - state.dragStartX) / state.zoom;
+      state.panY = state.dragOrigPanY + (e.clientY - state.dragStartY) / state.zoom;
+      applyCamera();
+    });
+    const endPan = () => { state.isDragging = false; };
+    dom.svgViewport.addEventListener('pointerup', endPan);
+    dom.svgViewport.addEventListener('pointercancel', endPan);
+
+    dom.svgViewport.addEventListener('wheel', (e) => {
+      e.preventDefault();
+      changeZoom(e.deltaY < 0 ? 0.12 : -0.12);
+    }, { passive: false });
+
+    // Resize responsivo do palco SVG
+    function handleResize() {
+      const rect = dom.svgViewport.getBoundingClientRect();
+      if (rect.width > 0 && rect.height > 0) {
+        state.viewW = rect.width;
+        state.viewH = rect.height;
+        renderAll();
+      }
+      syncPanelUI();
+    }
+
+    const ro = new ResizeObserver(handleResize);
+    ro.observe(dom.svgViewport);
+    window.addEventListener('resize', handleResize);
+
+    // Inicialização
+    window.addEventListener('DOMContentLoaded', () => {
+      syncPanelUI();
+      resetSeven();
+      handleResize();
+      testRectHeight(2, false);
+    });
+  </script>
+<div id="autoriaTxt" onclick="this.classList.remove('on')" style="position:fixed;top:44px;right:8px;z-index:2147483000;max-width:260px;padding:8px 10px;border-radius:8px;background:#222;color:#fff;font:12px/1.35 sans-serif;display:none">© Ygor B. F. Ferreira · A Saga dos Reinos Matemáticos · Matematkês · uso livre em sala</div><style>#autoriaTxt.on{display:block!important}</style>
+</body>
+</html>

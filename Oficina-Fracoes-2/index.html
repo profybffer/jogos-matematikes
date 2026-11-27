@@ -1,0 +1,3392 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>Oficina de Frações — Parte 2 (Operações)</title>
+  <style>
+    /* =========================================================================
+       1. DESIGN TOKENS E RESET GLOBAL
+       Paleta acolhedora de alto contraste para projetor, PC, chat e celular
+       ========================================================================= */
+    :root {
+      --bg-app: #f6f8fc;
+      --bg-card: #ffffff;
+      --bg-soft: #f1f5f9;
+      --border: #e2e8f0;
+      --border-strong: #cbd5e1;
+      --text-main: #0f172a;
+      --text-muted: #475569;
+      --text-light: #64748b;
+
+      --a-color: #2563eb;       /* Fração A: Azul */
+      --a-soft: #eff6ff;
+      --a-border: #93c5fd;
+
+      --b-color: #f97316;       /* Fração B: Laranja vibrante */
+      --b-soft: #fff7ed;
+      --b-border: #fdba74;
+
+      --res-color: #10b981;     /* Resultado / Equivalência: Esmeralda */
+      --res-dark: #047857;
+      --res-soft: #ecfdf5;
+      --res-border: #6ee7b7;
+
+      --unit-color: #7c3aed;    /* Destaque de Unidade: Roxo */
+      --unit-soft: #f5f3ff;
+      --unit-border: #c4b5fd;
+
+      --gold-color: #d97706;    /* Medalha MMC: Âmbar */
+      --gold-soft: #fffbeb;
+      --gold-border: #fcd34d;
+
+      --err-color: #dc2626;     /* Alerta suave */
+      --err-soft: #fef2f2;
+      --err-border: #fca5a5;
+
+      --radius-sm: 8px;
+      --radius-md: 12px;
+      --radius-lg: 16px;
+      --shadow-sm: 0 1px 3px rgba(15, 23, 42, 0.06);
+      --shadow-md: 0 4px 14px rgba(15, 23, 42, 0.08);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    html, body {
+      height: 100dvh;
+      width: 100vw;
+      overflow: hidden;
+      font-family: system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+      background-color: var(--bg-app);
+      color: var(--text-main);
+      user-select: none;
+    }
+
+    .app-shell {
+      height: 100dvh;
+      width: 100vw;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    /* =========================================================================
+       2. CABEÇALHO COMPACTO E BARRA DE ABAS
+       ========================================================================= */
+    .app-header {
+      flex-shrink: 0;
+      background: var(--bg-card);
+      border-bottom: 2px solid var(--border);
+      padding: 6px 12px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      box-shadow: var(--shadow-sm);
+      z-index: 10;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-shrink: 0;
+    }
+
+    .brand-icon {
+      width: 32px;
+      height: 32px;
+      border-radius: 9px;
+      background: linear-gradient(135deg, var(--a-color), var(--unit-color));
+      color: #fff;
+      display: grid;
+      place-items: center;
+      font-weight: 900;
+      font-size: 13.5px;
+      flex-shrink: 0;
+      letter-spacing: -0.04em;
+    }
+
+    .brand-title {
+      font-size: 14px;
+      font-weight: 800;
+      color: var(--text-main);
+      line-height: 1.1;
+      white-space: nowrap;
+    }
+
+    .brand-sub {
+      font-size: 10.5px;
+      font-weight: 700;
+      color: var(--text-light);
+      white-space: nowrap;
+    }
+
+    .tabs-nav {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      background: var(--bg-soft);
+      padding: 3px;
+      border-radius: var(--radius-md);
+      border: 1.5px solid var(--border);
+      overflow-x: auto;
+      scrollbar-width: none;
+      -webkit-overflow-scrolling: touch;
+      min-width: 0;
+    }
+    .tabs-nav::-webkit-scrollbar { display: none; }
+
+    .tab-btn {
+      border: none;
+      background: transparent;
+      color: var(--text-muted);
+      font-weight: 700;
+      font-size: 12.5px;
+      padding: 6px 10px;
+      border-radius: 9px;
+      cursor: pointer;
+      white-space: nowrap;
+      flex-shrink: 0;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      transition: all 0.14s ease;
+    }
+    .tab-btn:hover { background: rgba(255, 255, 255, 0.75); color: var(--text-main); }
+    .tab-btn.active {
+      background: var(--bg-card);
+      color: var(--a-color);
+      box-shadow: 0 1px 4px rgba(15, 23, 42, 0.12);
+    }
+
+    .tab-num {
+      display: inline-grid;
+      place-items: center;
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      background: var(--border);
+      color: var(--text-muted);
+      font-size: 11px;
+      font-weight: 800;
+    }
+    .tab-btn.active .tab-num {
+      background: var(--a-color);
+      color: #fff;
+    }
+
+    .sound-btn {
+      border: 1.5px solid var(--border-strong);
+      background: var(--bg-card);
+      color: var(--text-main);
+      width: 36px;
+      height: 34px;
+      border-radius: 10px;
+      cursor: pointer;
+      font-size: 16px;
+      display: grid;
+      place-items: center;
+      flex-shrink: 0;
+      transition: transform 0.1s, background 0.14s;
+    }
+    .sound-btn:hover { background: var(--bg-soft); }
+    .sound-btn:active { transform: scale(0.93); }
+    .sound-btn.muted { opacity: 0.55; background: var(--bg-soft); }
+
+    /* =========================================================================
+       3. ÁREA PRINCIPAL E BANNER PEDAGÓGICO
+       ========================================================================= */
+    .app-main {
+      flex: 1;
+      min-height: 0;
+      display: flex;
+      flex-direction: column;
+      padding: 8px 12px;
+      gap: 7px;
+      overflow: hidden;
+    }
+
+    .guide-banner {
+      flex-shrink: 0;
+      background: var(--bg-card);
+      border: 1.5px solid var(--border);
+      border-left: 5px solid var(--unit-color);
+      border-radius: var(--radius-md);
+      padding: 6px 12px;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .guide-text {
+      font-size: 12.8px;
+      line-height: 1.32;
+      color: var(--text-main);
+    }
+    .guide-text strong { color: var(--unit-color); }
+
+    .tab-stage {
+      flex: 1;
+      min-height: 0;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    /* =========================================================================
+       4. COMPONENTES REUTILIZÁVEIS
+       ========================================================================= */
+    .card {
+      background: var(--bg-card);
+      border: 1.5px solid var(--border);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-sm);
+      padding: 10px 12px;
+      display: flex;
+      flex-direction: column;
+      min-height: 0;
+      min-width: 0;
+    }
+
+    .card-scroll { overflow-y: auto; }
+
+    .card-title {
+      font-size: 11.5px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      color: var(--text-light);
+      margin-bottom: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 6px;
+      flex-shrink: 0;
+      flex-wrap: wrap;
+    }
+
+    .svg-box {
+      flex: 1;
+      min-height: 0;
+      width: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      overflow: hidden;
+    }
+    .svg-box svg {
+      width: 100%;
+      height: 100%;
+      max-height: 100%;
+      display: block;
+    }
+
+    /* Frações empilhadas reais */
+    .frac {
+      display: inline-flex;
+      flex-direction: column;
+      align-items: center;
+      vertical-align: middle;
+      line-height: 1.05;
+      font-weight: 900;
+      margin: 0 2px;
+    }
+    .frac .f-num {
+      padding: 0 4px 2px;
+      border-bottom: 2.5px solid currentColor;
+    }
+    .frac .f-den {
+      padding: 2px 4px 0;
+    }
+    .frac-lg .f-num, .frac-lg .f-den { font-size: 19px; padding-left: 5px; padding-right: 5px; }
+    .frac-lg .f-num { border-bottom-width: 2.5px; }
+    .frac-md .f-num, .frac-md .f-den { font-size: 15.5px; }
+    .frac-md .f-num { border-bottom-width: 2px; }
+    .frac-sm .f-num, .frac-sm .f-den { font-size: 13px; }
+    .frac-sm .f-num { border-bottom-width: 1.6px; }
+
+    /* Botões */
+    .btn {
+      border: 1.5px solid var(--border-strong);
+      background: var(--bg-card);
+      color: var(--text-main);
+      font-weight: 700;
+      font-size: 12.8px;
+      padding: 6px 12px;
+      border-radius: 10px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 5px;
+      transition: all 0.12s ease;
+      white-space: nowrap;
+      min-height: 34px;
+    }
+    .btn:hover:not(:disabled) { background: var(--bg-soft); border-color: #94a3b8; }
+    .btn:active:not(:disabled) { transform: scale(0.96); }
+    .btn:disabled { opacity: 0.42; cursor: not-allowed; }
+    .btn-sm { padding: 4px 8px; font-size: 11.8px; border-radius: 8px; min-height: 28px; }
+
+    .btn-a    { background: var(--a-color); border-color: var(--a-color); color: #fff; }
+    .btn-a:hover:not(:disabled) { background: #1d4ed8; border-color: #1d4ed8; }
+    .btn-b    { background: var(--b-color); border-color: var(--b-color); color: #fff; }
+    .btn-b:hover:not(:disabled) { background: #ea580c; border-color: #ea580c; }
+    .btn-res  { background: var(--res-color); border-color: var(--res-color); color: #fff; }
+    .btn-res:hover:not(:disabled) { background: var(--res-dark); border-color: var(--res-dark); }
+    .btn-unit { background: var(--unit-color); border-color: var(--unit-color); color: #fff; }
+    .btn-unit:hover:not(:disabled) { background: #6d28d9; border-color: #6d28d9; }
+
+    .segmented {
+      display: inline-flex;
+      background: var(--bg-soft);
+      border: 1.5px solid var(--border);
+      border-radius: 10px;
+      padding: 2px;
+      gap: 2px;
+      flex-wrap: wrap;
+    }
+    .segmented button {
+      border: none;
+      background: transparent;
+      color: var(--text-muted);
+      font-weight: 700;
+      font-size: 12px;
+      padding: 4px 10px;
+      border-radius: 7px;
+      cursor: pointer;
+      transition: all 0.14s;
+      min-height: 26px;
+    }
+    .segmented button.active {
+      background: var(--bg-card);
+      color: var(--a-color);
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    }
+
+    /* Selos / Badges */
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 3px 9px;
+      border-radius: 999px;
+      font-size: 11.5px;
+      font-weight: 800;
+      border: 1.5px solid transparent;
+      white-space: nowrap;
+    }
+    .badge-a    { background: var(--a-soft);    color: var(--a-color);    border-color: var(--a-border); }
+    .badge-b    { background: var(--b-soft);    color: var(--b-color);    border-color: var(--b-border); }
+    .badge-res  { background: var(--res-soft);  color: var(--res-dark);   border-color: var(--res-border); }
+    .badge-unit { background: var(--unit-soft); color: var(--unit-color); border-color: var(--unit-border); }
+    .badge-gold { background: var(--gold-soft); color: var(--gold-color); border-color: var(--gold-border); }
+    .badge-err  { background: var(--err-soft);  color: var(--err-color);  border-color: var(--err-border); }
+
+    /* Steppers */
+    .stepper {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      padding: 5px 9px;
+      border-radius: var(--radius-md);
+      border: 1.5px solid var(--border);
+      background: var(--bg-soft);
+    }
+    .stepper.is-a    { background: var(--a-soft);    border-color: var(--a-border); }
+    .stepper.is-b    { background: var(--b-soft);    border-color: var(--b-border); }
+    .stepper.is-unit { background: var(--unit-soft); border-color: var(--unit-border); }
+
+    .stepper-info { display: flex; flex-direction: column; line-height: 1.15; }
+    .stepper-info strong { font-size: 12.2px; }
+    .stepper-info span { font-size: 10.5px; color: var(--text-muted); }
+    .stepper.is-a .stepper-info strong    { color: var(--a-color); }
+    .stepper.is-b .stepper-info strong    { color: var(--b-color); }
+    .stepper.is-unit .stepper-info strong { color: var(--unit-color); }
+
+    .stepper-btns { display: flex; align-items: center; gap: 5px; }
+    .step-btn {
+      width: 30px;
+      height: 30px;
+      border-radius: 8px;
+      border: 1.5px solid rgba(15, 23, 42, 0.16);
+      background: #fff;
+      color: var(--text-main);
+      font-size: 17px;
+      font-weight: 900;
+      cursor: pointer;
+      display: grid;
+      place-items: center;
+      transition: transform 0.1s, background 0.12s;
+    }
+    .step-btn:hover:not(:disabled) { background: #f8fafc; }
+    .step-btn:active:not(:disabled) { transform: scale(0.92); }
+    .step-btn:disabled { opacity: 0.35; cursor: not-allowed; }
+    .step-val { min-width: 22px; text-align: center; font-size: 17px; font-weight: 900; }
+
+    /* Caixa de equação */
+    .eq-box {
+      padding: 7px 10px;
+      border-radius: var(--radius-md);
+      background: var(--bg-soft);
+      border: 1.5px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 3px;
+      text-align: center;
+    }
+    .eq-line {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 6px;
+      font-size: 17px;
+      font-weight: 900;
+    }
+    .eq-reading {
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--text-muted);
+    }
+
+    /* Cadeia de Unidades Fracionárias (Abas 1, 2 e 3) */
+    .unit-chain-box {
+      padding: 8px 10px;
+      border-radius: var(--radius-md);
+      background: var(--bg-soft);
+      border: 1.5px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 5px;
+      text-align: center;
+    }
+    .unit-chain-title {
+      font-size: 10.5px;
+      font-weight: 900;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      color: var(--unit-color);
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+    .unit-chain-row {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 5px;
+      font-size: 15px;
+      font-weight: 900;
+      line-height: 1.3;
+    }
+    .unit-pill {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      background: var(--unit-soft);
+      border: 1.5px solid var(--unit-border);
+      color: var(--unit-color);
+      border-radius: 9px;
+      padding: 2px 6px;
+      margin: 0 1px;
+    }
+    .unit-chain-divider {
+      width: 100%;
+      border-top: 1px dashed var(--border-strong);
+      margin: 1px 0;
+    }
+
+    /* =========================================================================
+       5. ANIMAÇÕES FÍSICAS SVG (ENCAIXE, SUBIR-E-DESAPARECER E CORTES)
+       ========================================================================= */
+    .piece-mover {
+      transition: transform 0.52s cubic-bezier(0.22, 1, 0.36, 1);
+    }
+    .piece-scaler {
+      transform-box: fill-box;
+      transform-origin: center;
+      transition: transform 0.32s cubic-bezier(0.55, 0.06, 0.68, 0.19), opacity 0.30s ease-in;
+    }
+    .piece-scaler.vanished {
+      transform: scale(0);
+      opacity: 0;
+    }
+
+    @keyframes ringBurst {
+      0%   { r: 4;  opacity: 0.95; stroke-width: 4; }
+      100% { r: 30; opacity: 0;    stroke-width: 1; }
+    }
+    @keyframes starFlash {
+      0%   { transform: scale(0.3) rotate(0deg);   opacity: 1; }
+      60%  { transform: scale(1.25) rotate(28deg); opacity: 0.95; }
+      100% { transform: scale(0.1) rotate(55deg);  opacity: 0; }
+    }
+    .spark-ring {
+      animation: ringBurst 0.44s ease-out forwards;
+    }
+    .spark-star {
+      transform-box: fill-box;
+      transform-origin: center;
+      animation: starFlash 0.42s ease-out forwards;
+    }
+
+    /* Animações dos 4 Movimentos na Multiplicação (Fração × Fração) */
+    @keyframes drawCut {
+      from { stroke-dashoffset: 400; }
+      to   { stroke-dashoffset: 0; }
+    }
+    @keyframes paintCol {
+      from { opacity: 0; transform: scaleY(0.15); }
+      to   { opacity: 1; transform: scaleY(1); }
+    }
+    @keyframes paintBand {
+      from { opacity: 0; transform: scaleX(0.15); }
+      to   { opacity: 1; transform: scaleX(1); }
+    }
+    @keyframes cellGlowPop {
+      0%   { transform: scale(0.4); opacity: 0; }
+      65%  { transform: scale(1.08); opacity: 1; }
+      100% { transform: scale(1); opacity: 1; }
+    }
+    .anim-cut {
+      stroke-dasharray: 400;
+      stroke-dashoffset: 0;
+      animation: drawCut 0.48s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+    }
+    .anim-col {
+      transform-box: fill-box;
+      transform-origin: top center;
+      animation: paintCol 0.38s cubic-bezier(0.22, 1, 0.36, 1) both;
+    }
+    .anim-band {
+      transform-box: fill-box;
+      transform-origin: left center;
+      animation: paintBand 0.38s cubic-bezier(0.22, 1, 0.36, 1) both;
+    }
+    .anim-cell {
+      transform-box: fill-box;
+      transform-origin: center;
+      animation: cellGlowPop 0.34s cubic-bezier(0.22, 1, 0.36, 1) both;
+    }
+
+    .mul-legend {
+      padding: 8px 10px;
+      border-radius: var(--radius-md);
+      background: var(--unit-soft);
+      border: 1.5px solid var(--unit-border);
+      font-size: 12.2px;
+      line-height: 1.35;
+      color: var(--text-main);
+    }
+    .mul-legend strong { color: var(--unit-color); }
+
+    .pulse-pop {
+      animation: popAnim 0.32s cubic-bezier(0.22, 1, 0.36, 1);
+    }
+    @keyframes popAnim {
+      0% { transform: scale(0.92); }
+      55% { transform: scale(1.04); }
+      100% { transform: scale(1); }
+    }
+
+    @keyframes pulseGlow {
+      0%, 100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.5); }
+      50%      { box-shadow: 0 0 0 8px rgba(16, 185, 129, 0); }
+    }
+    .btn-pulse {
+      animation: pulseGlow 1.5s infinite;
+    }
+
+    /* =========================================================================
+       6. LAYOUTS ESPECÍFICOS DAS 4 ABAS
+       ========================================================================= */
+    .two-col {
+      flex: 1;
+      min-height: 0;
+      display: grid;
+      grid-template-columns: 1.44fr 1fr;
+      gap: 10px;
+    }
+
+    .col-stack {
+      display: flex;
+      flex-direction: column;
+      gap: 7px;
+      min-height: 0;
+      overflow-y: auto;
+    }
+
+    .stage-footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 6px;
+      padding-top: 6px;
+      border-top: 1.5px dashed var(--border);
+      flex-shrink: 0;
+    }
+
+    .stage-hint {
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--text-muted);
+    }
+
+    /* Aviso B > A na subtração */
+    .warn-box {
+      padding: 8px 10px;
+      border-radius: var(--radius-md);
+      background: var(--gold-soft);
+      border: 1.5px solid var(--gold-border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      flex-wrap: wrap;
+      font-size: 12px;
+      font-weight: 700;
+      color: #92400e;
+    }
+
+    /* Pegadinha Desmascarada (Aba 1) */
+    .trap-card {
+      padding: 7px 10px;
+      border-radius: var(--radius-md);
+      background: var(--err-soft);
+      border: 1.5px solid var(--err-border);
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+    }
+    .trap-title {
+      font-size: 11px;
+      font-weight: 900;
+      color: var(--err-color);
+      text-transform: uppercase;
+    }
+    .trap-body {
+      font-size: 11.8px;
+      line-height: 1.3;
+      color: var(--text-main);
+    }
+
+    /* Toolbar de submodos */
+    .sub-shell {
+      flex: 1;
+      min-height: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 7px;
+    }
+    .sub-toolbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 6px;
+      flex-shrink: 0;
+    }
+
+    /* Cartão de multiplicadores (Aba 2 - Igualar na Mão) */
+    .mult-card {
+      padding: 7px 9px;
+      border-radius: var(--radius-md);
+      border: 1.5px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+    }
+    .mult-card.is-a { background: var(--a-soft); border-color: var(--a-border); }
+    .mult-card.is-b { background: var(--b-soft); border-color: var(--b-border); }
+
+    .mult-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 6px;
+      font-size: 13px;
+      font-weight: 900;
+    }
+
+    .mult-row {
+      display: grid;
+      grid-template-columns: repeat(6, 1fr);
+      gap: 4px;
+    }
+    .mult-btn {
+      border: 1.5px solid rgba(15, 23, 42, 0.16);
+      background: #fff;
+      color: var(--text-main);
+      font-size: 12.5px;
+      font-weight: 800;
+      padding: 5px 2px;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.12s;
+    }
+    .mult-btn:hover { background: var(--bg-soft); }
+    .mult-card.is-a .mult-btn.active {
+      background: var(--a-color);
+      border-color: var(--a-color);
+      color: #fff;
+    }
+    .mult-card.is-b .mult-btn.active {
+      background: var(--b-color);
+      border-color: var(--b-color);
+      color: #fff;
+    }
+
+    .match-banner {
+      padding: 7px 10px;
+      border-radius: var(--radius-md);
+      font-size: 12.2px;
+      font-weight: 800;
+      text-align: center;
+      line-height: 1.3;
+    }
+    .match-banner.mmc {
+      background: var(--gold-soft);
+      border: 2px solid var(--gold-color);
+      color: #92400e;
+    }
+    .match-banner.ok {
+      background: var(--res-soft);
+      border: 2px solid var(--res-color);
+      color: #065f46;
+    }
+
+    /* Pílulas de passo (Aba 2 - Máquina 3 Passos) */
+    .step-pills { display: flex; gap: 4px; flex-wrap: wrap; }
+    .m-pill {
+      border: 1.5px solid var(--border-strong);
+      background: var(--bg-card);
+      color: var(--text-muted);
+      font-size: 11.8px;
+      font-weight: 800;
+      padding: 4px 10px;
+      border-radius: 999px;
+      cursor: pointer;
+    }
+    .m-pill.active {
+      background: var(--unit-color);
+      border-color: var(--unit-color);
+      color: #fff;
+    }
+    .m-pill.done {
+      background: var(--res-soft);
+      border-color: var(--res-border);
+      color: var(--res-dark);
+    }
+
+    .mini-frac-ctrl {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 6px;
+      padding: 5px 8px;
+      border-radius: var(--radius-md);
+      border: 1.5px solid var(--border);
+    }
+    .mini-frac-ctrl.is-a { background: var(--a-soft); border-color: var(--a-border); }
+    .mini-frac-ctrl.is-b { background: var(--b-soft); border-color: var(--b-border); }
+
+    .mini-pair {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 12px;
+      font-weight: 800;
+    }
+    .mini-pair button {
+      width: 26px;
+      height: 26px;
+      border-radius: 7px;
+      border: 1px solid rgba(15, 23, 42, 0.16);
+      background: #fff;
+      font-weight: 900;
+      font-size: 15px;
+      cursor: pointer;
+      display: grid;
+      place-items: center;
+    }
+    .mini-pair button:disabled { opacity: 0.35; cursor: not-allowed; }
+    .mini-pair span { min-width: 18px; text-align: center; font-size: 14.5px; font-weight: 900; }
+
+    .preset-grid { display: flex; flex-wrap: wrap; gap: 4px; }
+
+    /* Quiz Relâmpago */
+    .quiz-opts {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+    }
+    .quiz-opt-btn {
+      border: 2px solid var(--border-strong);
+      background: #fff;
+      color: var(--text-main);
+      font-size: 15.5px;
+      font-weight: 900;
+      padding: 8px;
+      border-radius: var(--radius-md);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      min-height: 52px;
+      transition: all 0.14s ease;
+    }
+    .quiz-opt-btn:hover:not(:disabled) {
+      border-color: var(--unit-color);
+      background: var(--unit-soft);
+      transform: translateY(-1px);
+    }
+    .quiz-opt-btn.is-correct {
+      background: var(--res-soft);
+      border-color: var(--res-color);
+      color: var(--res-dark);
+    }
+    .quiz-opt-btn.is-wrong {
+      background: var(--err-soft);
+      border-color: var(--err-color);
+      color: var(--err-color);
+      opacity: 0.72;
+    }
+
+    .feedback-box {
+      padding: 7px 10px;
+      border-radius: var(--radius-md);
+      font-size: 12.2px;
+      font-weight: 700;
+      text-align: center;
+      line-height: 1.32;
+    }
+    .feedback-box.ok  { background: var(--res-soft); border: 1.5px solid var(--res-color); color: #065f46; }
+    .feedback-box.err { background: var(--err-soft); border: 1.5px solid var(--err-border); color: var(--err-color); }
+
+    .progress-track {
+      height: 8px;
+      background: var(--border);
+      border-radius: 999px;
+      overflow: hidden;
+      width: 100px;
+    }
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--a-color), var(--res-color));
+      transition: width 0.25s ease;
+    }
+
+    /* =========================================================================
+       7. RODAPÉ FIXO DE NAVEGAÇÃO GUIADA
+       ========================================================================= */
+    .app-footer {
+      flex-shrink: 0;
+      background: var(--bg-card);
+      border-top: 2px solid var(--border);
+      padding: 6px 12px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      z-index: 10;
+    }
+
+    .step-indicator {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 12.8px;
+      font-weight: 800;
+      color: var(--text-main);
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .step-pill {
+      background: var(--unit-soft);
+      color: var(--unit-color);
+      border: 1.5px solid var(--unit-border);
+      padding: 2px 9px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 800;
+      flex-shrink: 0;
+    }
+
+    /* =========================================================================
+       8. RESPONSIVIDADE (CELULAR / CHAT / IFRAME ESTREITO)
+       ========================================================================= */
+    @media (max-width: 860px) {
+      .app-header { padding: 5px 8px; gap: 6px; }
+      .brand-sub { display: none; }
+      .brand-title { font-size: 13px; }
+      .tab-btn { padding: 5px 8px; font-size: 12px; }
+      .app-main { padding: 6px 8px; gap: 6px; }
+      .guide-banner { padding: 5px 9px; }
+      .guide-text { font-size: 11.8px; }
+
+      .two-col {
+        grid-template-columns: 1fr;
+        grid-template-rows: 1.15fr 1fr;
+        gap: 6px;
+      }
+
+      .card { padding: 8px 10px; }
+      .eq-line { font-size: 14.5px; }
+      .quiz-opt-btn { min-height: 44px; padding: 6px; font-size: 13.5px; }
+    }
+
+    @media (max-width: 540px) {
+      .brand { display: none; }
+      .tab-btn .tab-num { display: none; }
+      .step-title-text { display: none; }
+      .app-footer .btn { padding: 5px 9px; font-size: 12px; min-height: 30px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="app-shell">
+    <!-- CABEÇALHO COMPACTO -->
+    <header class="app-header">
+      <div class="brand">
+        <div class="brand-icon">+×÷</div>
+        <div>
+          <div class="brand-title">Oficina de Frações — Parte 2</div>
+          <div class="brand-sub">Operações · 3º ao 5º ano</div>
+        </div>
+      </div>
+
+      <nav class="tabs-nav" role="tablist" aria-label="Abas da Oficina">
+        <button class="tab-btn active" data-tab="0" role="tab" aria-selected="true">
+          <span class="tab-num">1</span> Mesmo Denom.
+        </button>
+        <button class="tab-btn" data-tab="1" role="tab" aria-selected="false">
+          <span class="tab-num">2</span> Denom. Diferentes
+        </button>
+        <button class="tab-btn" data-tab="2" role="tab" aria-selected="false">
+          <span class="tab-num">3</span> Multiplicação
+        </button>
+        <button class="tab-btn" data-tab="3" role="tab" aria-selected="false">
+          <span class="tab-num">4</span> Divisão &amp; Desafio
+        </button>
+      </nav>
+
+      <button id="soundToggle" class="sound-btn" title="Ligar/Desligar som" aria-label="Ligar ou desligar som">🔊</button>
+    <button id="autoriaBtn" type="button" aria-label="Autoria" onclick="document.getElementById('autoriaTxt').classList.toggle('on')" style="flex:0 0 auto;width:20px;height:20px;margin:0 4px;border-radius:50%;border:1px solid rgba(128,128,128,.5);background:transparent;color:inherit;font:11px/18px sans-serif;text-align:center;padding:0;cursor:pointer;opacity:.5">©</button></header>
+
+    <!-- ÁREA PRINCIPAL -->
+    <main class="app-main">
+      <div class="guide-banner">
+        <div class="guide-text" id="guideText"></div>
+      </div>
+
+      <section class="tab-stage" id="tabStage" aria-live="polite"></section>
+    </main>
+
+    <!-- RODAPÉ FIXO DE NAVEGAÇÃO GUIADA -->
+    <footer class="app-footer">
+      <button id="btnPrev" class="btn">◀ Anterior</button>
+      <div class="step-indicator">
+        <span class="step-pill" id="stepCounter">1 / 4</span>
+        <span class="step-title-text" id="stepTitle">Somando na mesma unidade</span>
+      </div>
+      <button id="btnNext" class="btn btn-a">Próximo ▶</button>
+    </footer>
+  </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      /* =======================================================================
+         1. MOTOR DE ÁUDIO DE LATÊNCIA ZERO (WEB AUDIO API SOB DEMANDA)
+         ======================================================================= */
+      const SoundFX = (() => {
+        let ctx = null;
+        let enabled = true;
+
+        function getCtx() {
+          if (!enabled) return null;
+          try {
+            if (!ctx) {
+              const AudioCtx = window.AudioContext || window.webkitAudioContext;
+              if (AudioCtx) ctx = new AudioCtx();
+            }
+            if (ctx && ctx.state === 'suspended') {
+              ctx.resume().catch(() => {});
+            }
+            return ctx;
+          } catch (_) {
+            return null;
+          }
+        }
+
+        function tone(freq, dur = 0.08, type = 'sine', gainVal = 0.11, delay = 0) {
+          const c = getCtx();
+          if (!c) return;
+          try {
+            const now = c.currentTime + delay;
+            const osc = c.createOscillator();
+            const gain = c.createGain();
+            osc.type = type;
+            osc.frequency.setValueAtTime(freq, now);
+            gain.gain.setValueAtTime(0.0001, now);
+            gain.gain.exponentialRampToValueAtTime(gainVal, now + 0.01);
+            gain.gain.exponentialRampToValueAtTime(0.0001, now + dur);
+            osc.connect(gain);
+            gain.connect(c.destination);
+            osc.start(now);
+            osc.stop(now + dur + 0.015);
+          } catch (_) {}
+        }
+
+        return {
+          toggle() {
+            enabled = !enabled;
+            if (enabled) this.click();
+            return enabled;
+          },
+          click() { tone(520, 0.05, 'triangle', 0.09); },
+          snap(idx = 0) {
+            const notes = [440, 493.9, 523.25, 587.3, 659.25, 739.9, 783.99, 880, 987.7, 1046.5];
+            tone(notes[idx % notes.length], 0.095, 'sine', 0.12);
+          },
+          poof() {
+            // Som cristalino suave de desaparecimento ("poof")
+            const c = getCtx();
+            if (!c) return;
+            try {
+              const now = c.currentTime;
+              const osc = c.createOscillator();
+              const gain = c.createGain();
+              osc.type = 'sine';
+              osc.frequency.setValueAtTime(880, now);
+              osc.frequency.exponentialRampToValueAtTime(340, now + 0.14);
+              gain.gain.setValueAtTime(0.0001, now);
+              gain.gain.exponentialRampToValueAtTime(0.11, now + 0.015);
+              gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.16);
+              osc.connect(gain);
+              gain.connect(c.destination);
+              osc.start(now);
+              osc.stop(now + 0.18);
+              tone(1318.5, 0.07, 'triangle', 0.06, 0.02);
+            } catch (_) {}
+          },
+          match() {
+            // Acorde de encaixe quando denominadores se igualam
+            tone(523.25, 0.10, 'sine', 0.10, 0);
+            tone(659.25, 0.12, 'sine', 0.10, 0.06);
+            tone(783.99, 0.18, 'triangle', 0.11, 0.12);
+          },
+          cut() {
+            // Som suave de corte/divisão na grade de multiplicação
+            const c = getCtx();
+            if (!c) return;
+            try {
+              const now = c.currentTime;
+              const osc = c.createOscillator();
+              const gain = c.createGain();
+              osc.type = 'triangle';
+              osc.frequency.setValueAtTime(720, now);
+              osc.frequency.exponentialRampToValueAtTime(420, now + 0.09);
+              gain.gain.setValueAtTime(0.0001, now);
+              gain.gain.exponentialRampToValueAtTime(0.09, now + 0.01);
+              gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.10);
+              osc.connect(gain);
+              gain.connect(c.destination);
+              osc.start(now);
+              osc.stop(now + 0.11);
+            } catch (_) {}
+          },
+          tab() {
+            tone(440, 0.05, 'sine', 0.08, 0);
+            tone(587.3, 0.07, 'sine', 0.08, 0.045);
+          },
+          step() {
+            tone(493.9, 0.055, 'sine', 0.08, 0);
+            tone(659.3, 0.07, 'sine', 0.08, 0.045);
+          },
+          softErr() {
+            tone(290, 0.085, 'triangle', 0.09, 0);
+            tone(240, 0.11, 'triangle', 0.08, 0.075);
+          },
+          success() {
+            tone(523.25, 0.09, 'sine', 0.10, 0);
+            tone(659.25, 0.09, 'sine', 0.10, 0.065);
+            tone(783.99, 0.11, 'sine', 0.10, 0.13);
+            tone(1046.5, 0.22, 'triangle', 0.12, 0.20);
+          }
+        };
+      })();
+
+      /* Gerenciador seguro de timeouts para evitar animações fantasma */
+      const TimerBag = (() => {
+        let ids = [];
+        return {
+          set(fn, ms) {
+            const id = setTimeout(fn, ms);
+            ids.push(id);
+            return id;
+          },
+          clearAll() {
+            ids.forEach(clearTimeout);
+            ids = [];
+          }
+        };
+      })();
+
+      /* =======================================================================
+         2. UTILITÁRIOS MATEMÁTICOS E LEITURA POR EXTENSO (PT-BR)
+         ======================================================================= */
+      function gcd(a, b) {
+        a = Math.abs(a); b = Math.abs(b);
+        while (b !== 0) { const t = b; b = a % b; a = t; }
+        return a || 1;
+      }
+
+      function lcm(a, b) {
+        return Math.abs(a * b) / gcd(a, b);
+      }
+
+      const NUM_WORDS = {
+        0: 'zero', 1: 'um', 2: 'dois', 3: 'três', 4: 'quatro', 5: 'cinco',
+        6: 'seis', 7: 'sete', 8: 'oito', 9: 'nove', 10: 'dez',
+        11: 'onze', 12: 'doze', 13: 'treze', 14: 'catorze', 15: 'quinze',
+        16: 'dezesseis', 17: 'dezessete', 18: 'dezoito', 19: 'dezenove', 20: 'vinte'
+      };
+
+      function numWord(n) {
+        if (NUM_WORDS[n] !== undefined) return NUM_WORDS[n];
+        const tens = ['', '', 'vinte', 'trinta', 'quarenta', 'cinquenta', 'sessenta'];
+        const units = ['', 'um', 'dois', 'três', 'quatro', 'cinco', 'seis', 'sete', 'oito', 'nove'];
+        if (n > 20 && n < 70) {
+          const t = Math.floor(n / 10), u = n % 10;
+          return u === 0 ? tens[t] : `${tens[t]} e ${units[u]}`;
+        }
+        return String(n);
+      }
+
+      function denWord(d, singular) {
+        const spec = {
+          1: singular ? 'inteiro' : 'inteiros',
+          2: singular ? 'meio' : 'meios',
+          3: singular ? 'terço' : 'terços',
+          4: singular ? 'quarto' : 'quartos',
+          5: singular ? 'quinto' : 'quintos',
+          6: singular ? 'sexto' : 'sextos',
+          7: singular ? 'sétimo' : 'sétimos',
+          8: singular ? 'oitavo' : 'oitavos',
+          9: singular ? 'nono' : 'nonos',
+          10: singular ? 'décimo' : 'décimos'
+        };
+        if (spec[d]) return spec[d];
+        return `${numWord(d)} ${singular ? 'avo' : 'avos'}`;
+      }
+
+      function leituraFracao(n, d) {
+        if (n === 0) return 'zero';
+        if (d === 1) return `${numWord(n)} ${n === 1 ? 'inteiro' : 'inteiros'}`;
+        return `${numWord(n)} ${denWord(d, n === 1)}`;
+      }
+
+      function leituraCompleta(n, d) {
+        if (n === 0) return 'zero';
+        const base = leituraFracao(n, d);
+        if (n % d === 0) {
+          const w = n / d;
+          return `${base} (${numWord(w)} ${w === 1 ? 'inteiro' : 'inteiros'})`;
+        }
+        if (n > d) {
+          const w = Math.floor(n / d);
+          const r = n % d;
+          return `${base} (${numWord(w)} ${w === 1 ? 'inteiro' : 'inteiros'} e ${leituraFracao(r, d)})`;
+        }
+        return base;
+      }
+
+      function fracHTML(n, d, size = 'frac-md', color = '') {
+        const st = color ? `style="color:${color};"` : '';
+        return `<span class="frac ${size}" ${st}><span class="f-num">${n}</span><span class="f-den">${d}</span></span>`;
+      }
+
+      function unitPillHTML(d, size = 'frac-sm') {
+        return `<span class="unit-pill">${fracHTML(1, d, size, 'var(--unit-color)')}</span>`;
+      }
+
+      /**
+       * Constrói o quadro pedagógico da Cadeia de Unidades Fracionárias (Abas 1 e 2).
+       * Ex: 1/2 + 1/4 = 2 × [1/4] + 1 × [1/4] = 3 × [1/4] = 3/4
+       */
+      function buildUnitChainHTML(opts) {
+        const {
+          op, aN, aD, bN, bD,
+          eqAN = aN, eqBN = bN, commonD = null,
+          invalidSub = false
+        } = opts;
+        const opSign = op === '+' ? '+' : '−';
+
+        // Caso ainda não tenham a mesma unidade (Aba 2 antes de igualar)
+        if (!commonD) {
+          return `
+            <div class="unit-chain-box">
+              <div class="unit-chain-title">
+                <span>🧱 Cadeia de Unidades</span>
+                <span class="badge badge-err" style="font-size:10px;padding:1px 7px;">Unidades diferentes — iguale primeiro!</span>
+              </div>
+              <div class="unit-chain-row">
+                ${fracHTML(aN, aD, 'frac-md', 'var(--a-color)')}
+                <span>${opSign}</span>
+                ${fracHTML(bN, bD, 'frac-md', 'var(--b-color)')}
+                <span>=</span>
+                <strong style="color:var(--a-color);">${aN} ×</strong>${unitPillHTML(aD)}
+                <span>${opSign}</span>
+                <strong style="color:var(--b-color);">${bN} ×</strong>${unitPillHTML(bD)}
+              </div>
+              <div class="eq-reading">As peças <strong>1/${aD}</strong> e <strong>1/${bD}</strong> têm tamanhos diferentes.</div>
+            </div>`;
+        }
+
+        const resN = op === '+' ? eqAN + eqBN : Math.max(0, eqAN - eqBN);
+        const simpExtra = !invalidSub ? mixedOrSimpHTML(resN, commonD, 'frac-sm', 'var(--res-dark)') : '';
+
+        return `
+          <div class="unit-chain-box">
+            <div class="unit-chain-title">
+              <span>🧱 Cadeia de Unidades (peça 1/${commonD})</span>
+            </div>
+            <div class="unit-chain-row">
+              ${fracHTML(aN, aD, 'frac-md', 'var(--a-color)')}
+              <span>${opSign}</span>
+              ${fracHTML(bN, bD, 'frac-md', 'var(--b-color)')}
+              <span>=</span>
+              <strong style="color:var(--a-color);">${eqAN} ×</strong>${unitPillHTML(commonD)}
+              <span>${opSign}</span>
+              <strong style="color:var(--b-color);">${eqBN} ×</strong>${unitPillHTML(commonD)}
+            </div>
+            <div class="unit-chain-divider"></div>
+            <div class="unit-chain-row">
+              ${invalidSub
+                ? `<span style="color:var(--gold-color); font-size:13px;">Troque A ↔ B para retirar!</span>`
+                : `<span>=</span>
+                   <strong style="color:var(--res-dark);">${resN} ×</strong>${unitPillHTML(commonD)}
+                   <span>=</span>
+                   ${fracHTML(resN, commonD, 'frac-lg', 'var(--res-dark)')}
+                   ${simpExtra}`}
+            </div>
+            <div class="eq-reading">
+              ${invalidSub ? 'A primeira fração precisa ser maior ou igual à segunda.' : `“${leituraCompleta(resN, commonD)}”`}
+            </div>
+          </div>`;
+      }
+
+      function mixedOrSimpHTML(n, d, size = 'frac-md', color = 'var(--res-dark)') {
+        if (n === 0) return '';
+        const g = gcd(n, d);
+        const sn = n / g;
+        const sd = d / g;
+        let parts = [];
+        if (g > 1) {
+          parts.push(sd === 1 ? `<strong style="color:${color};">${sn}</strong>` : fracHTML(sn, sd, size, color));
+        }
+        if (sn > sd && sd > 1) {
+          const w = Math.floor(sn / sd);
+          const r = sn % sd;
+          parts.push(`<span style="display:inline-flex;align-items:center;gap:2px;color:${color};"><strong>${w}</strong>${fracHTML(r, sd, size, color)}</span>`);
+        } else if (g === 1 && sn === sd) {
+          parts.push(`<strong style="color:${color};">1</strong>`);
+        }
+        return parts.length ? parts.map(p => `<span>=</span> ${p}`).join(' ') : '';
+      }
+
+      /* =======================================================================
+         3. PALCO SVG UNIFICADO COM ANIMAÇÃO FÍSICA (SOMA E SUBTRAÇÃO)
+         Usado na Aba 1 (Mesmo Denom.) e na Aba 2 (Igualar na Mão & Máquina 3P)
+         ======================================================================= */
+      function buildPhysicalStageSVG(cfg) {
+        const {
+          stageId, op,
+          aN, aD, bN, bD,
+          origAD = null, origBD = null,
+          showAlignGuides = false,
+          animated = false
+        } = cfg;
+
+        const sameDen = aD === bD;
+        const canAddTwo = sameDen && op === '+' && (aN + bN > aD);
+        const wholes = canAddTwo ? 2 : 1;
+
+        const W = 640;
+        const H = 224;
+        const padL = 70;
+        const totalW = 544;
+        const gap = 16;
+        const wholeW = wholes === 2 ? (totalW - gap) / 2 : totalW;
+        const barH = 54;
+        const yA = 34;
+        const yB = 138;
+
+        const slotPosA = (idx) => {
+          const sw = wholeW / aD;
+          const wIdx = Math.floor(idx / aD);
+          const sIdx = idx % aD;
+          return { x: padL + wIdx * (wholeW + gap) + sIdx * sw, y: yA, w: sw, h: barH };
+        };
+        const slotPosB = (idx) => {
+          const sw = wholeW / bD;
+          return { x: padL + idx * sw, y: yB, w: sw, h: barH };
+        };
+
+        let svg = '';
+
+        // Rótulos à esquerda
+        const labelA = animated && sameDen
+          ? (op === '+' ? `${aN + bN}/${aD}` : `${Math.max(0, aN - bN)}/${aD}`)
+          : `${aN}/${aD}`;
+        svg += `<text id="${stageId}_lblA" x="${padL - 10}" y="${yA + barH / 2 + 6}" text-anchor="end" font-size="16" font-weight="900" fill="${animated && sameDen ? '#047857' : '#2563eb'}">${labelA}</text>`;
+        svg += `<text x="${padL}" y="${yA - 8}" font-size="11.5" font-weight="800" fill="#475569">Barra A ${wholes === 2 ? '(2 inteiros — soma passa de 1!)' : `(unidade 1/${aD})`}</text>`;
+
+        svg += `<text id="${stageId}_lblB" x="${padL - 10}" y="${yB + barH / 2 + 6}" text-anchor="end" font-size="16" font-weight="900" fill="${animated && sameDen ? '#94a3b8' : '#f97316'}">${bN}/${bD}</text>`;
+        svg += `<text id="${stageId}_subB" x="${padL}" y="${yB - 8}" font-size="11.5" font-weight="800" fill="${animated && sameDen ? '#059669' : '#475569'}">${animated && sameDen ? (op === '+' ? '✓ Peças encaixadas na Barra A!' : '✓ Peças subiram e sumiram juntas!') : `Barra B (unidade 1/${bD})`}</text>`;
+
+        // 1) Fundos / contornos vazios das barras (slots receptores)
+        for (let w = 0; w < wholes; w++) {
+          const bx = padL + w * (wholeW + gap);
+          const sw = wholeW / aD;
+          for (let i = 0; i < aD; i++) {
+            svg += `<rect x="${(bx + i * sw).toFixed(2)}" y="${yA}" width="${sw.toFixed(2)}" height="${barH}" fill="#ffffff" stroke="#cbd5e1" stroke-width="${aD > 16 ? 1 : 1.5}" />`;
+          }
+          svg += `<rect x="${bx.toFixed(2)}" y="${yA}" width="${wholeW.toFixed(2)}" height="${barH}" rx="6" fill="none" stroke="#334155" stroke-width="2.6" />`;
+          if (wholes === 2) {
+            svg += `<text x="${(bx + wholeW / 2).toFixed(1)}" y="${yA + barH + 15}" text-anchor="middle" font-size="10.5" font-weight="800" fill="#64748b">${w === 0 ? '1º Inteiro' : '2º Inteiro'}</text>`;
+          }
+        }
+
+        // Fundo da Barra B (sempre 1 inteiro alinhado sob o 1º inteiro de A)
+        const swB = wholeW / bD;
+        for (let j = 0; j < bD; j++) {
+          svg += `<rect x="${(padL + j * swB).toFixed(2)}" y="${yB}" width="${swB.toFixed(2)}" height="${barH}" fill="#ffffff" stroke="${animated && sameDen ? '#cbd5e1' : '#cbd5e1'}" stroke-width="${bD > 16 ? 1 : 1.5}" ${animated && sameDen ? 'stroke-dasharray="4,3"' : ''} />`;
+        }
+        svg += `<rect x="${padL}" y="${yB}" width="${wholeW.toFixed(2)}" height="${barH}" rx="6" fill="none" stroke="${animated && sameDen ? '#94a3b8' : '#334155'}" stroke-width="2.4" ${animated && sameDen ? 'stroke-dasharray="5,4"' : ''} />`;
+
+        // 2) Linhas verticais verdes de alinhamento (quando denominadores se igualam no modo Equivalentes)
+        if (showAlignGuides && sameDen) {
+          const step = aD <= 12 ? 1 : Math.ceil(aD / 12);
+          for (let k = 1; k < aD; k += step) {
+            const gx = padL + k * (wholeW / aD);
+            svg += `<line x1="${gx.toFixed(2)}" y1="${yA + barH + 2}" x2="${gx.toFixed(2)}" y2="${yB - 2}" stroke="#10b981" stroke-width="2" stroke-dasharray="4,4" opacity="0.85" />`;
+          }
+        }
+
+        // 3) Peças Azuis na Barra A (posições 0 .. aN - 1)
+        const showTxtA = aD <= 10 && wholes === 1;
+        for (let i = 0; i < aN; i++) {
+          const p = slotPosA(i);
+          const vanishedInit = animated && sameDen && op === '-' && aN >= bN && i >= (aN - bN);
+          svg += `
+            <g class="piece-scaler ${vanishedInit ? 'vanished' : ''}" id="${stageId}_a_${i}">
+              <rect x="${(p.x + 1).toFixed(2)}" y="${p.y + 1}" width="${Math.max(2, p.w - 2).toFixed(2)}" height="${p.h - 2}" rx="4"
+                fill="#2563eb" stroke="#1e3a8a" stroke-width="${aD > 16 ? 0.9 : 1.6}" />
+              ${showTxtA ? `<text x="${(p.x + p.w / 2).toFixed(2)}" y="${p.y + p.h / 2 + 4}" text-anchor="middle" font-size="${aD > 8 ? 10.5 : 12}" font-weight="800" fill="#ffffff" pointer-events="none">1/${aD}</text>` : ''}
+            </g>`;
+        }
+
+        // Cortes originais mais fortes na Barra A (se ampliada)
+        if (origAD && origAD < aD && aD % origAD === 0) {
+          const oW = wholeW / origAD;
+          for (let c = 1; c < origAD; c++) {
+            const cx = padL + c * oW;
+            svg += `<line x1="${cx.toFixed(2)}" y1="${yA}" x2="${cx.toFixed(2)}" y2="${yA + barH}" stroke="#0f172a" stroke-width="2.8" pointer-events="none" />`;
+          }
+        }
+
+        // 4) Peças Laranjas na Barra B (posições 0 .. bN - 1) — ficam POR CIMA no z-order SVG!
+        const showTxtB = bD <= 10 && wholes === 1;
+        for (let j = 0; j < bN; j++) {
+          const p = slotPosB(j);
+          let initTx = 0, initTy = 0;
+          let vanishedInit = false;
+
+          if (animated && sameDen) {
+            if (op === '+') {
+              const target = slotPosA(aN + j);
+              initTx = target.x - p.x;
+              initTy = target.y - p.y;
+            } else if (op === '-' && aN >= bN) {
+              const stepIdx = (bN - 1) - j;
+              const targetBlue = (aN - 1) - stepIdx;
+              const target = slotPosA(targetBlue);
+              initTx = target.x - p.x;
+              initTy = target.y - p.y;
+              vanishedInit = true;
+            }
+          }
+
+          svg += `
+            <g class="piece-mover" id="${stageId}_bm_${j}" style="transform: translate(${initTx.toFixed(2)}px, ${initTy.toFixed(2)}px);">
+              <g class="piece-scaler ${vanishedInit ? 'vanished' : ''}" id="${stageId}_bs_${j}">
+                <rect x="${(p.x + 1).toFixed(2)}" y="${p.y + 1}" width="${Math.max(2, p.w - 2).toFixed(2)}" height="${p.h - 2}" rx="4"
+                  fill="#f97316" stroke="#9a3412" stroke-width="${bD > 16 ? 0.9 : 1.6}" />
+                ${showTxtB ? `<text x="${(p.x + p.w / 2).toFixed(2)}" y="${p.y + p.h / 2 + 4}" text-anchor="middle" font-size="${bD > 8 ? 10.5 : 12}" font-weight="800" fill="#ffffff" pointer-events="none">1/${bD}</text>` : ''}
+              </g>
+            </g>`;
+        }
+
+        // Cortes originais mais fortes na Barra B (se ampliada e não animada)
+        if (!animated && origBD && origBD < bD && bD % origBD === 0) {
+          const oW = wholeW / origBD;
+          for (let c = 1; c < origBD; c++) {
+            const cx = padL + c * oW;
+            svg += `<line x1="${cx.toFixed(2)}" y1="${yB}" x2="${cx.toFixed(2)}" y2="${yB + barH}" stroke="#0f172a" stroke-width="2.8" pointer-events="none" />`;
+          }
+        }
+
+        // Camada de brilhos / faíscas para a subtração
+        svg += `<g id="${stageId}_sparks" pointer-events="none"></g>`;
+
+        // Texto de status inferior no SVG
+        let bottomMsg = '';
+        if (sameDen && animated) {
+          bottomMsg = op === '+'
+            ? `Soma pronta: ${aN} azuis + ${bN} laranjas = ${aN + bN}/${aD}`
+            : `As peças subiram, encostaram em cima e sumiram juntas — sobraram ${aN - bN}/${aD}!`;
+        } else if (sameDen && !animated) {
+          bottomMsg = op === '+'
+            ? `Clique em “▶ Encaixar Peças!” para ver as ${bN} peças laranjas subirem e encaixarem na Barra A.`
+            : (aN >= bN ? `Clique em “▶ Retirar Peças!” para ver as peças subirem, encostarem em cima e sumirem juntas.` : '');
+        }
+        if (bottomMsg) {
+          svg += `<text id="${stageId}_msg" x="${padL + totalW / 2}" y="212" text-anchor="middle" font-size="12.2" font-weight="800" fill="${animated ? '#047857' : '#64748b'}">${bottomMsg}</text>`;
+        }
+
+        return `<svg id="${stageId}" viewBox="0 0 ${W} ${H}" preserveAspectRatio="xMidYMid meet">${svg}</svg>`;
+      }
+
+      /**
+       * Executa a animação física diretamente nos elementos SVG do palco unificado.
+       */
+      function runPhysicalAnimation(cfg, onComplete) {
+        TimerBag.clearAll();
+        const { stageId, op, aN, aD, bN, bD } = cfg;
+        if (aD !== bD) return;
+        if (op === '-' && aN < bN) return;
+
+        const svgEl = document.getElementById(stageId);
+        if (!svgEl) return;
+
+        const wholes = (op === '+' && aN + bN > aD) ? 2 : 1;
+        const padL = 70, totalW = 544, gap = 16;
+        const wholeW = wholes === 2 ? (totalW - gap) / 2 : totalW;
+        const barH = 54, yA = 34, yB = 138;
+        const sw = wholeW / aD;
+
+        const slotPosA = (idx) => {
+          const wIdx = Math.floor(idx / aD);
+          const sIdx = idx % aD;
+          return { x: padL + wIdx * (wholeW + gap) + sIdx * sw, y: yA };
+        };
+        const slotPosB = (idx) => ({ x: padL + idx * sw, y: yB });
+
+        // Garante reset imediato para posição inicial antes de animar
+        for (let i = 0; i < aN; i++) {
+          const aSc = document.getElementById(`${stageId}_a_${i}`);
+          if (aSc) aSc.classList.remove('vanished');
+        }
+        for (let j = 0; j < bN; j++) {
+          const bm = document.getElementById(`${stageId}_bm_${j}`);
+          const bs = document.getElementById(`${stageId}_bs_${j}`);
+          if (bm) bm.style.transform = 'translate(0px, 0px)';
+          if (bs) bs.classList.remove('vanished');
+        }
+        const sparkLayer = document.getElementById(`${stageId}_sparks`);
+        if (sparkLayer) sparkLayer.innerHTML = '';
+
+        // Força reflow para CSS transition disparar limpa
+        svgEl.getBoundingClientRect();
+
+        if (op === '+') {
+          for (let j = 0; j < bN; j++) {
+            const pB = slotPosB(j);
+            const pA = slotPosA(aN + j);
+            const dx = pA.x - pB.x;
+            const dy = pA.y - pB.y;
+            TimerBag.set(() => {
+              const bm = document.getElementById(`${stageId}_bm_${j}`);
+              if (bm) bm.style.transform = `translate(${dx.toFixed(2)}px, ${dy.toFixed(2)}px)`;
+              SoundFX.snap(j);
+            }, 40 + j * 125);
+          }
+
+          TimerBag.set(() => {
+            if (aN + bN === aD || (aN + bN) % aD === 0) SoundFX.success();
+            if (onComplete) onComplete();
+          }, 40 + bN * 125 + 480);
+        } else {
+          // Subtração: cada peça laranja sobe para cima da última peça azul (da direita para a esquerda)
+          for (let stepIdx = 0; stepIdx < bN; stepIdx++) {
+            const j = (bN - 1) - stepIdx;
+            const blueIdx = (aN - 1) - stepIdx;
+            const pB = slotPosB(j);
+            const pA = slotPosA(blueIdx);
+            const dx = pA.x - pB.x;
+            const dy = pA.y - pB.y;
+
+            const startT = 40 + stepIdx * 230;
+            // 1) Sobe e pousa em cima da peça azul
+            TimerBag.set(() => {
+              const bm = document.getElementById(`${stageId}_bm_${j}`);
+              if (bm) bm.style.transform = `translate(${dx.toFixed(2)}px, ${dy.toFixed(2)}px)`;
+              SoundFX.click();
+            }, startT);
+
+            // 2) Ao pousar, brilho rápido + som suave + ambas desaparecem juntas
+            TimerBag.set(() => {
+              const bs = document.getElementById(`${stageId}_bs_${j}`);
+              const as = document.getElementById(`${stageId}_a_${blueIdx}`);
+              if (bs) bs.classList.add('vanished');
+              if (as) as.classList.add('vanished');
+              SoundFX.poof();
+
+              if (sparkLayer) {
+                const cx = (pA.x + sw / 2).toFixed(1);
+                const cy = (pA.y + barH / 2).toFixed(1);
+                const g = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+                g.innerHTML = `
+                  <circle cx="${cx}" cy="${cy}" r="6" fill="none" stroke="#f59e0b" class="spark-ring" />
+                  <path d="M ${cx} ${Number(cy) - 16} L ${Number(cx) + 4} ${Number(cy) - 4} L ${Number(cx) + 16} ${cy} L ${Number(cx) + 4} ${Number(cy) + 4} L ${cx} ${Number(cy) + 16} L ${Number(cx) - 4} ${Number(cy) + 4} L ${Number(cx) - 16} ${cy} L ${Number(cx) - 4} ${Number(cy) - 4} Z"
+                    fill="#fbbf24" class="spark-star" />`;
+                sparkLayer.appendChild(g);
+              }
+            }, startT + 440);
+          }
+
+          TimerBag.set(() => {
+            if (onComplete) onComplete();
+          }, 40 + bN * 230 + 760);
+        }
+      }
+
+      /* =======================================================================
+         4. DADOS PEDAGÓGICOS DAS ABAS 2, 4 E QUIZ
+         ======================================================================= */
+      const EQ_LEVELS = {
+        1: [
+          { op: '+', aN: 1, aD: 2, bN: 1, bD: 4 },
+          { op: '-', aN: 2, aD: 3, bN: 1, bD: 6 },
+          { op: '+', aN: 3, aD: 5, bN: 1, bD: 10 },
+          { op: '-', aN: 3, aD: 4, bN: 1, bD: 8 }
+        ],
+        2: [
+          { op: '+', aN: 1, aD: 2, bN: 1, bD: 3 },
+          { op: '-', aN: 2, aD: 3, bN: 1, bD: 4 },
+          { op: '+', aN: 1, aD: 3, bN: 1, bD: 5 },
+          { op: '-', aN: 3, aD: 4, bN: 1, bD: 5 }
+        ],
+        3: [
+          { op: '+', aN: 1, aD: 4, bN: 1, bD: 6 },
+          { op: '-', aN: 5, aD: 6, bN: 1, bD: 4 },
+          { op: '+', aN: 1, aD: 6, bN: 1, bD: 8 },
+          { op: '-', aN: 3, aD: 4, bN: 1, bD: 6 }
+        ]
+      };
+
+      const MACHINE_PRESETS = [
+        { label: '1/2 + 1/3', op: '+', aN: 1, aD: 2, bN: 1, bD: 3 },
+        { label: '1/2 + 1/4', op: '+', aN: 1, aD: 2, bN: 1, bD: 4 },
+        { label: '2/3 − 1/6', op: '-', aN: 2, aD: 3, bN: 1, bD: 6 },
+        { label: '3/4 − 1/6', op: '-', aN: 3, aD: 4, bN: 1, bD: 6 },
+        { label: '1/4 + 1/6', op: '+', aN: 1, aD: 4, bN: 1, bD: 6 }
+      ];
+
+      const T1_PRESETS = [
+        { label: '2/5 + 1/5', op: '+', den: 5, a: 2, b: 1 },
+        { label: '3/4 + 2/4', op: '+', den: 4, a: 3, b: 2 },
+        { label: '4/5 − 1/5', op: '-', den: 5, a: 4, b: 1 },
+        { label: '5/8 − 2/8', op: '-', den: 8, a: 5, b: 2 }
+      ];
+
+      const MUL_PRESETS = [
+        { label: '2/3 × 1/2', a: 2, b: 3, c: 1, d: 2 },
+        { label: '3/4 × 1/3', a: 3, b: 4, c: 1, d: 3 },
+        { label: '2/5 × 1/2', a: 2, b: 5, c: 1, d: 2 },
+        { label: '3/5 × 2/3', a: 3, b: 5, c: 2, d: 3 }
+      ];
+
+      const DIV_PRESETS = [
+        { group: 'int', label: '2 ÷ 1/3',   aN: 2, aD: 1, bN: 1, bD: 3, q: 6, text: 'Quantos terços (1/3) cabem em 2 inteiros?' },
+        { group: 'int', label: '2 ÷ 1/4',   aN: 2, aD: 1, bN: 1, bD: 4, q: 8, text: 'Quantos quartos (1/4) cabem em 2 inteiros?' },
+        { group: 'int', label: '2 ÷ 2/3',   aN: 2, aD: 1, bN: 2, bD: 3, q: 3, text: 'Quantos blocos de 2/3 cabem em 2 inteiros?' },
+        { group: 'fra', label: '3/4 ÷ 1/4', aN: 3, aD: 4, bN: 1, bD: 4, q: 3, text: 'Quantos quartos (1/4) cabem em 3/4?' },
+        { group: 'fra', label: '1/2 ÷ 1/6', aN: 1, aD: 2, bN: 1, bD: 6, q: 3, text: 'Quantos sextos (1/6) cabem em 1/2?' },
+        { group: 'fra', label: '2/3 ÷ 1/6', aN: 2, aD: 3, bN: 1, bD: 6, q: 4, text: 'Quantos sextos (1/6) cabem em 2/3?' }
+      ];
+
+      const QUIZ_POOL = [
+        {
+          tag: 'Mesmo Denominador',
+          prompt: 'Quanto é 2/5 + 1/5?',
+          visual: 'same-add',
+          opts: [
+            { html: fracHTML(3, 10, 'frac-md'), ok: false, why: 'Atenção! O denominador 5 é o nome da peça (quintos) e não muda ao somar.' },
+            { html: fracHTML(3, 5, 'frac-md'),  ok: true,  why: '2 quintos + 1 quinto = 3 quintos (3/5)!' },
+            { html: fracHTML(2, 5, 'frac-md'),  ok: false, why: 'Faltou encaixar o 1/5 laranja junto dos 2/5 azuis.' },
+            { html: fracHTML(5, 3, 'frac-md'),  ok: false, why: 'O denominador 5 continua embaixo!' }
+          ]
+        },
+        {
+          tag: 'Equivalência para Somar',
+          prompt: 'Qual troca iguala as unidades para somar 1/2 + 1/3?',
+          visual: 'diff-eq',
+          opts: [
+            { html: `${fracHTML(2, 6, 'frac-sm')} + ${fracHTML(3, 6, 'frac-sm')}`, ok: false, why: 'Quase! 1/2 é metade de 6 (3/6), e 1/3 vale 2/6.' },
+            { html: `${fracHTML(3, 6, 'frac-sm')} + ${fracHTML(2, 6, 'frac-sm')}`, ok: true,  why: 'Perfeito! 1/2 = 3/6 e 1/3 = 2/6. Somando dá 5/6!' },
+            { html: `${fracHTML(1, 5, 'frac-sm')} + ${fracHTML(1, 5, 'frac-sm')}`, ok: false, why: 'Não somamos 2 + 3 para achar o denominador comum.' },
+            { html: `${fracHTML(2, 4, 'frac-sm')} + ${fracHTML(1, 4, 'frac-sm')}`, ok: false, why: '1/3 não pode virar quartos inteiros.' }
+          ]
+        },
+        {
+          tag: 'Subtração Visual',
+          prompt: 'De 5/8 retiramos 2/8 (2 peças sobem e somem juntas). Quanto sobra?',
+          visual: 'same-sub',
+          opts: [
+            { html: fracHTML(3, 8, 'frac-md'), ok: true,  why: 'Exato! 5 oitavos menos 2 oitavos = 3/8.' },
+            { html: fracHTML(7, 8, 'frac-md'), ok: false, why: 'Atenção ao sinal de menos (−): estamos retirando peças!' },
+            { html: fracHTML(3, 0, 'frac-md'), ok: false, why: 'Nunca subtraímos o denominador! A unidade continua 1/8.' },
+            { html: fracHTML(2, 8, 'frac-md'), ok: false, why: '5 − 2 = 3 peças restantes.' }
+          ]
+        },
+        {
+          tag: 'Natural × Fração',
+          prompt: 'Quanto é 3 × 2/5 (3 grupos de 2 quintos)?',
+          visual: 'nat-mul',
+          opts: [
+            { html: fracHTML(6, 15, 'frac-md'), ok: false, why: 'A unidade 1/5 não se multiplica por 3! Só contamos quantas peças temos.' },
+            { html: fracHTML(5, 5, 'frac-md'),  ok: false, why: '3 grupos de 2 peças dão 3 × 2 = 6 peças de 1/5.' },
+            { html: `${fracHTML(6, 5, 'frac-md')} <span style="font-size:11px;">(1 1/5)</span>`, ok: true, why: 'Isso! 3 × 2 quintos = 6/5 = 1 inteiro e 1/5.' },
+            { html: fracHTML(2, 15, 'frac-md'), ok: false, why: 'Multiplicamos o numerador: 3 × 2 = 6.' }
+          ]
+        },
+        {
+          tag: 'Fração de Fração',
+          prompt: 'Na Grade Mágica, quanto é 1/2 × 2/3?',
+          visual: 'grid-mul',
+          opts: [
+            { html: `${fracHTML(2, 6, 'frac-md')} <span style="font-size:11px;">(1/3)</span>`, ok: true, why: 'Brilhante! 2 quadradinhos verdes de 6 no total = 2/6 = 1/3.' },
+            { html: fracHTML(3, 5, 'frac-md'), ok: false, why: 'Multiplicamos colunas × linhas (2 × 3 = 6 partes).' },
+            { html: fracHTML(1, 6, 'frac-md'), ok: false, why: 'Conte os quadradinhos verdes: são 1 × 2 = 2 quadradinhos!' },
+            { html: fracHTML(2, 5, 'frac-md'), ok: false, why: '2 colunas × 3 linhas formam 6 partes iguais.' }
+          ]
+        },
+        {
+          tag: 'Quantas Cabem?',
+          prompt: 'Quantas peças de 1/6 cabem dentro de 1/2? (1/2 ÷ 1/6)',
+          visual: 'div-fit',
+          opts: [
+            { html: '<strong>2</strong>', ok: false, why: '2 peças de 1/6 dão 2/6 = 1/3 — ainda falta espaço!' },
+            { html: '<strong>3</strong>', ok: true,  why: 'Exato! 1/2 = 3/6, então cabem exatamente 3 peças de 1/6!' },
+            { html: '<strong>6</strong>', ok: false, why: '6 peças de 1/6 completam 1 inteiro todo.' },
+            { html: fracHTML(1, 12, 'frac-md'), ok: false, why: 'Pergunte “quantas peças de 1/6 cabem dentro de 1/2?”.' }
+          ]
+        }
+      ];
+
+      /* =======================================================================
+         5. ESTADO GLOBAL E 4 ETAPAS GUIADAS POR ABA
+         ======================================================================= */
+      const state = {
+        activeTab: 0,
+        steps: [0, 0, 0, 0],
+
+        // Aba 1: Mesmo Denom.
+        t1: { op: '+', den: 5, a: 2, b: 1, animated: false },
+
+        // Aba 2: Denom. Diferentes
+        t2: {
+          mode: 'hand', // 'hand' | 'machine'
+          // Modo A: Igualar na Mão
+          level: 1, // 1 | 2 | 3 | 'free'
+          idx: 0,
+          op: '+',
+          aN: 1, aD: 2, bN: 1, bD: 4,
+          mA: 1, mB: 1,
+          animated: false,
+          // Modo B: Máquina 3 Passos
+          mOp: '+', mAN: 1, mAD: 2, mBN: 1, mBD: 3, mStep: 0
+        },
+
+        // Aba 3: Multiplicação
+        t3: {
+          submode: 'grid', // 'grid' (padrão) | 'nat'
+          n: 3, a: 2, b: 5,
+          natShown: 6, // quantas peças já montadas (para animar contagem)
+          gA: 2, gB: 3, gC: 1, gD: 2,
+          gStep: 4,       // 0: Inteiro, 1: Dividir b, 2: Pintar a, 3: Cortar d, 4: Pegar c/d
+          gShownCells: 2  // quantas células verdes numeradas estão visíveis no passo 4
+        },
+
+        // Aba 4: Divisão & Desafio
+        t4: {
+          submode: 'div', // 'div' | 'quiz'
+          presetIdx: 0,
+          fitted: 0,
+          quizOrder: [0, 1, 2, 3, 4, 5],
+          quizIdx: 0,
+          quizScore: 0,
+          quizStreak: 0,
+          quizSolved: false,
+          quizWrongIdxs: [],
+          quizFeedback: null,
+          quizDone: false
+        }
+      };
+
+      function loadHandChallenge(level, idx) {
+        const list = EQ_LEVELS[level] || EQ_LEVELS[1];
+        const ch = list[idx % list.length];
+        state.t2.level = level;
+        state.t2.idx = idx % list.length;
+        state.t2.op = ch.op;
+        state.t2.aN = ch.aN; state.t2.aD = ch.aD;
+        state.t2.bN = ch.bN; state.t2.bD = ch.bD;
+        state.t2.mA = 1; state.t2.mB = 1;
+        state.t2.animated = false;
+      }
+
+      function resetQuiz(shuffle = false) {
+        const order = [0, 1, 2, 3, 4, 5];
+        if (shuffle) {
+          for (let i = order.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [order[i], order[j]] = [order[j], order[i]];
+          }
+        }
+        state.t4.quizOrder = order;
+        state.t4.quizIdx = 0;
+        state.t4.quizScore = 0;
+        state.t4.quizStreak = 0;
+        state.t4.quizSolved = false;
+        state.t4.quizWrongIdxs = [];
+        state.t4.quizFeedback = null;
+        state.t4.quizDone = false;
+      }
+
+      const TAB_STEPS = [
+        // ABA 1 (4 etapas)
+        [
+          {
+            title: 'Encaixando na mesma unidade (2/5 + 1/5)',
+            guide: '<strong>Etapa 1:</strong> As duas barras usam a <strong>mesma unidade (1/5)</strong>! Clique em <strong>▶ Encaixar Peças!</strong> para ver a peça laranja subir e encaixar na barra azul.',
+            apply() { state.t1 = { op: '+', den: 5, a: 2, b: 1, animated: false }; }
+          },
+          {
+            title: 'Passando de 1 inteiro (3/4 + 2/4)',
+            guide: '<strong>Etapa 2:</strong> Quando a soma passa de 1 inteiro, surge um <strong>2º inteiro</strong> ao lado! Clique em <strong>▶ Encaixar Peças!</strong> e veja 3/4 + 2/4 = 5/4 (1 e 1/4).',
+            apply() { state.t1 = { op: '+', den: 4, a: 3, b: 2, animated: false }; }
+          },
+          {
+            title: 'Retirando peças na subtração (5/8 − 2/8)',
+            guide: '<strong>Etapa 3:</strong> Na subtração, clique em <strong>▶ Retirar Peças!</strong>: cada peça laranja sobe, encosta em cima de uma azul e <strong>ambas somem juntas</strong> — sobra só a diferença!',
+            apply() { state.t1 = { op: '-', den: 8, a: 5, b: 2, animated: false }; }
+          },
+          {
+            title: 'Explore livremente na mesma unidade',
+            guide: '<strong>Etapa 4:</strong> Teste qualquer soma ou subtração com o mesmo denominador e observe o cartão <strong>Pegadinha Desmascarada</strong>!',
+            apply() { state.t1 = { op: '+', den: 6, a: 3, b: 3, animated: false }; }
+          }
+        ],
+        // ABA 2 (4 etapas)
+        [
+          {
+            title: 'Igualar na Mão · Nível 1 (1/2 + 1/4)',
+            guide: '<strong>Etapa 1:</strong> Use os multiplicadores (<strong>×2, ×3...</strong>) para deixar os dois denominadores iguais! Quando empatarem, libere a animação física.',
+            apply() { state.t2.mode = 'hand'; loadHandChallenge(1, 0); }
+          },
+          {
+            title: 'Igualar na Mão · Nível 2 (1/2 + 1/3)',
+            guide: '<strong>Etapa 2:</strong> Agora os denominadores são primos entre si (2 e 3)! Amplie <strong>as duas frações</strong> até achar uma unidade comum.',
+            apply() { state.t2.mode = 'hand'; loadHandChallenge(2, 0); }
+          },
+          {
+            title: 'Igualar na Mão · Nível 3 (1/4 + 1/6)',
+            guide: '<strong>Etapa 3:</strong> Com 4 e 6, qualquer múltiplo comum funciona (como 24), mas achar o <strong>MMC = 12</strong> ganha medalha dourada de caminho mais curto!',
+            apply() { state.t2.mode = 'hand'; loadHandChallenge(3, 0); }
+          },
+          {
+            title: 'Máquina 3 Passos (MMC automático)',
+            guide: '<strong>Etapa 4:</strong> Na <strong>Máquina 3 Passos</strong>, acompanhe a sequência completa: 1. Originais → 2. Subdividir (MMC) → 3. Operar com animação!',
+            apply() {
+              state.t2.mode = 'machine';
+              state.t2.mOp = '-'; state.t2.mAN = 2; state.t2.mAD = 3; state.t2.mBN = 1; state.t2.mBD = 6; state.t2.mStep = 0;
+            }
+          }
+        ],
+        // ABA 3 (4 etapas)
+        [
+          {
+            title: 'Movimento: 2/3 × 1/2',
+            guide: '<strong>Etapa 1:</strong> Clique em <strong>▶ Animar Movimentos</strong> para ver o retângulo se dividir em 3 partes, pintar 2, depois cortar todas ao meio (6 partes) e pegar metade: <strong>2/6 = 1/3</strong>!',
+            apply() { state.t3.submode = 'grid'; state.t3.gA = 2; state.t3.gB = 3; state.t3.gC = 1; state.t3.gD = 2; state.t3.gStep = 0; state.t3.gShownCells = 0; }
+          },
+          {
+            title: 'Movimento: 3/4 × 1/3',
+            guide: '<strong>Etapa 2:</strong> Em <strong>3/4 × 1/3</strong>, dividimos em 4 colunas, pintamos 3, cortamos tudo em 3 faixas (12 partezinhas) e pegamos 1 faixa: <strong>3/12 = 1/4</strong>!',
+            apply() { state.t3.submode = 'grid'; state.t3.gA = 3; state.t3.gB = 4; state.t3.gC = 1; state.t3.gD = 3; state.t3.gStep = 4; state.t3.gShownCells = 3; }
+          },
+          {
+            title: 'Movimento: 3/5 × 2/3',
+            guide: '<strong>Etapa 3:</strong> Em <strong>3/5 × 2/3</strong>, 5 colunas cortadas em 3 viram <strong>15</strong> partes iguais; a dupla pintura marca 3 × 2 = <strong>6</strong> partes: <strong>6/15 = 2/5</strong>!',
+            apply() { state.t3.submode = 'grid'; state.t3.gA = 3; state.t3.gB = 5; state.t3.gC = 2; state.t3.gD = 3; state.t3.gStep = 4; state.t3.gShownCells = 6; }
+          },
+          {
+            title: 'Natural × Fração (3 × 2/5)',
+            guide: '<strong>Etapa 4:</strong> Multiplicar por um número natural é repetir grupos iguais! Veja <strong>3 × 2/5 = 6 × 1/5 = 6/5</strong> (1 inteiro e 1/5).',
+            apply() { state.t3.submode = 'nat'; state.t3.n = 3; state.t3.a = 2; state.t3.b = 5; state.t3.natShown = 6; }
+          }
+        ],
+        // ABA 4 (4 etapas)
+        [
+          {
+            title: 'Inteiro ÷ Fração (2 ÷ 1/3)',
+            guide: '<strong>Etapa 1:</strong> Dividir é perguntar <strong>“Quantas cabem?”</strong>. Clique em <strong>▶ Encaixar</strong> para descobrir quantos terços (1/3) cabem em 2 inteiros!',
+            apply() { state.t4.submode = 'div'; state.t4.presetIdx = 0; state.t4.fitted = 0; }
+          },
+          {
+            title: 'Mesma unidade (3/4 ÷ 1/4)',
+            guide: '<strong>Etapa 2:</strong> Com a mesma unidade (1/4), basta contar quantas peças cabem: em <strong>3/4</strong> cabem exatamente <strong>3</strong> peças de 1/4!',
+            apply() { state.t4.submode = 'div'; state.t4.presetIdx = 3; state.t4.fitted = 0; }
+          },
+          {
+            title: 'Trocando unidade (1/2 ÷ 1/6)',
+            guide: '<strong>Etapa 3:</strong> Como <strong>1/2 = 3/6</strong>, dentro de meio inteiro cabem exatamente <strong>3</strong> peças de 1/6! Encaixe os blocos para comprovar.',
+            apply() { state.t4.submode = 'div'; state.t4.presetIdx = 4; state.t4.fitted = 0; }
+          },
+          {
+            title: 'Desafio Relâmpago (6 perguntas)',
+            guide: '<strong>Etapa 4:</strong> Hora do <strong>Desafio Relâmpago</strong>! Responda às 6 perguntas visuais e conquiste todas as estrelas ⭐.',
+            apply() { state.t4.submode = 'quiz'; resetQuiz(false); }
+          }
+        ]
+      ];
+
+      /* =======================================================================
+         6. RENDERIZAÇÃO — ABA 1: MESMO DENOMINADOR
+         ======================================================================= */
+      function renderTab1() {
+        const { op, den, a, b, animated } = state.t1;
+        const invalidSub = op === '-' && b > a;
+
+        const stageSVG = buildPhysicalStageSVG({
+          stageId: 't1Stage',
+          op, aN: a, aD: den, bN: b, bD: den,
+          animated: animated && !invalidSub
+        });
+
+        const unitChainHTML = buildUnitChainHTML({
+          op, aN: a, aD: den, bN: b, bD: den,
+          eqAN: a, eqBN: b, commonD: den,
+          invalidSub
+        });
+
+        return `
+          <div class="two-col">
+            <div class="card">
+              <div class="card-title">
+                <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
+                  <span class="badge badge-unit">★ Unidade: 1/${den}</span>
+                  <div class="preset-grid">
+                    ${T1_PRESETS.map((pr, idx) => `
+                      <button class="btn btn-sm ${(op === pr.op && den === pr.den && a === pr.a && b === pr.b) ? 'btn-a' : ''}" data-t1-preset="${idx}">${pr.label}</button>
+                    `).join('')}
+                  </div>
+                </div>
+                <div class="segmented">
+                  <button class="${op === '+' ? 'active' : ''}" data-t1-op="+">+ Soma</button>
+                  <button class="${op === '-' ? 'active' : ''}" data-t1-op="-">− Subtração</button>
+                </div>
+              </div>
+
+              <div class="svg-box">${stageSVG}</div>
+
+              ${invalidSub ? `
+                <div class="warn-box">
+                  <span>💡 Para retirar, a primeira fração precisa ser maior ou igual à segunda.</span>
+                  <button class="btn btn-sm btn-a" id="t1SwapAB">Trocar A ↔ B</button>
+                </div>
+              ` : `
+                <div class="stage-footer">
+                  <span class="stage-hint">
+                    ${op === '+' ? 'As peças de baixo sobem e encaixam em cima!' : 'As peças sobem, encostam em cima e somem juntas!'}
+                  </span>
+                  <div style="display:flex; gap:6px;">
+                    <button class="btn ${animated ? '' : 'btn-res btn-pulse'}" id="t1RunAnim">
+                      ${animated ? '↺ Repetir' : '▶ Animar Operação'}
+                    </button>
+                  </div>
+                </div>
+              `}
+            </div>
+
+            <div class="col-stack">
+              <div class="card" style="gap:7px;">
+                ${unitChainHTML}
+
+                <div class="stepper is-unit">
+                  <div class="stepper-info">
+                    <strong>Denominador (Unidade 1/${den})</strong>
+                    <span>Igual para A e B (2 a 10)</span>
+                  </div>
+                  <div class="stepper-btns">
+                    <button class="step-btn" id="t1DenDec" ${den <= 2 ? 'disabled' : ''}>−</button>
+                    <span class="step-val" style="color:var(--unit-color);">${den}</span>
+                    <button class="step-btn" id="t1DenInc" ${den >= 10 ? 'disabled' : ''}>+</button>
+                  </div>
+                </div>
+
+                <div class="stepper is-a">
+                  <div class="stepper-info">
+                    <strong>Numerador A (Azul)</strong>
+                    <span>Peças em cima (1 a ${den})</span>
+                  </div>
+                  <div class="stepper-btns">
+                    <button class="step-btn" id="t1ADec" ${a <= 1 ? 'disabled' : ''}>−</button>
+                    <span class="step-val" style="color:var(--a-color);">${a}</span>
+                    <button class="step-btn" id="t1AInc" ${a >= den ? 'disabled' : ''}>+</button>
+                  </div>
+                </div>
+
+                <div class="stepper is-b">
+                  <div class="stepper-info">
+                    <strong>Numerador B (Laranja)</strong>
+                    <span>Peças embaixo (1 a ${den})</span>
+                  </div>
+                  <div class="stepper-btns">
+                    <button class="step-btn" id="t1BDec" ${b <= 1 ? 'disabled' : ''}>−</button>
+                    <span class="step-val" style="color:var(--b-color);">${b}</span>
+                    <button class="step-btn" id="t1BInc" ${b >= den ? 'disabled' : ''}>+</button>
+                  </div>
+                </div>
+              </div>
+
+              <div class="trap-card">
+                <div class="trap-title">⚠️ Pegadinha Desmascarada</div>
+                <div class="trap-body">
+                  Por que <strong>2/5 + 1/5 = 3/5</strong> e <strong>NÃO 3/10</strong>?
+                  Porque o tamanho da peça (<strong>1/5</strong>) não muda quando encaixamos uma ao lado da outra!
+                </div>
+              </div>
+            </div>
+          </div>`;
+      }
+
+      /* =======================================================================
+         7. RENDERIZAÇÃO — ABA 2: DENOMINADORES DIFERENTES (2 MODOS)
+         ======================================================================= */
+      function renderTab2Hand() {
+        const t = state.t2;
+        const eqAN = t.aN * t.mA;
+        const eqAD = t.aD * t.mA;
+        const eqBN = t.bN * t.mB;
+        const eqBD = t.bD * t.mB;
+
+        const matched = eqAD === eqBD;
+        const M = lcm(t.aD, t.bD);
+        const isMMC = matched && eqAD === M;
+        const invalidSub = matched && t.op === '-' && eqBN > eqAN;
+
+        const stageSVG = buildPhysicalStageSVG({
+          stageId: 't2HandStage',
+          op: t.op,
+          aN: eqAN, aD: eqAD, bN: eqBN, bD: eqBD,
+          origAD: t.aD, origBD: t.bD,
+          showAlignGuides: matched && !t.animated,
+          animated: t.animated && matched && !invalidSub
+        });
+
+        const unitChainHTML = buildUnitChainHTML({
+          op: t.op,
+          aN: t.aN, aD: t.aD, bN: t.bN, bD: t.bD,
+          eqAN, eqBN,
+          commonD: matched ? eqAD : null,
+          invalidSub
+        });
+
+        const freeEditHTML = t.level === 'free' ? `
+          <div style="display:flex; gap:6px; flex-wrap:wrap; align-items:center; justify-content:space-between;">
+            <div class="segmented">
+              <button class="${t.op === '+' ? 'active' : ''}" data-t2h-op="+">+ Soma</button>
+              <button class="${t.op === '-' ? 'active' : ''}" data-t2h-op="-">− Subtração</button>
+            </div>
+            <div style="display:flex; gap:4px; align-items:center;">
+              <span style="font-size:11px;font-weight:800;color:var(--a-color);">A:</span>
+              <button class="btn btn-sm" data-t2h-free="aN:-1">−N</button>
+              <button class="btn btn-sm" data-t2h-free="aN:1">+N</button>
+              <button class="btn btn-sm" data-t2h-free="aD:-1">−D</button>
+              <button class="btn btn-sm" data-t2h-free="aD:1">+D</button>
+              <span style="font-size:11px;font-weight:800;color:var(--b-color);margin-left:4px;">B:</span>
+              <button class="btn btn-sm" data-t2h-free="bN:-1">−N</button>
+              <button class="btn btn-sm" data-t2h-free="bN:1">+N</button>
+              <button class="btn btn-sm" data-t2h-free="bD:-1">−D</button>
+              <button class="btn btn-sm" data-t2h-free="bD:1">+D</button>
+            </div>
+          </div>` : '';
+
+        return `
+          <div class="two-col">
+            <div class="card">
+              <div class="card-title">
+                <div class="segmented">
+                  <button class="${t.level === 1 ? 'active' : ''}" data-t2h-lvl="1">N1: Cabe no outro</button>
+                  <button class="${t.level === 2 ? 'active' : ''}" data-t2h-lvl="2">N2: Primos</button>
+                  <button class="${t.level === 3 ? 'active' : ''}" data-t2h-lvl="3">N3: Div. comum</button>
+                  <button class="${t.level === 'free' ? 'active' : ''}" data-t2h-lvl="free">✏️ Livre</button>
+                </div>
+                ${t.level !== 'free' ? `<button class="btn btn-sm" id="t2hNextCh">Próximo desafio ▶</button>` : ''}
+              </div>
+
+              ${freeEditHTML}
+
+              <div class="svg-box">${stageSVG}</div>
+
+              ${invalidSub ? `
+                <div class="warn-box">
+                  <span>💡 Para retirar, a primeira fração precisa ser maior ou igual à segunda.</span>
+                  <button class="btn btn-sm btn-a" id="t2hSwapAB">Trocar A ↔ B</button>
+                </div>
+              ` : `
+                <div class="stage-footer">
+                  <span class="stage-hint">
+                    ${!matched
+                      ? `Multiplique A e/ou B ao lado até igualar os denominadores!`
+                      : (t.animated
+                          ? `Operação concluída na unidade 1/${eqAD}!`
+                          : `Unidades igualadas (1/${eqAD})! Agora clique para animar.`)}
+                  </span>
+                  <button class="btn ${matched ? (t.animated ? '' : 'btn-res btn-pulse') : ''}" id="t2hRunAnim" ${!matched ? 'disabled' : ''}>
+                    ${t.animated
+                      ? '↺ Repetir'
+                      : (t.op === '+' ? '▶ Encaixar e Somar!' : '▶ Retirar e Subtrair!')}
+                  </button>
+                </div>
+              `}
+            </div>
+
+            <div class="col-stack">
+              <div class="card" style="gap:7px;">
+                ${unitChainHTML}
+
+                ${matched ? (isMMC
+                  ? `<div class="match-banner mmc pulse-pop">🏆 MMC — Caminho mais curto! (Unidade 1/${eqAD})</div>`
+                  : `<div class="match-banner ok pulse-pop">✅ Mesma unidade (1/${eqAD})! Funciona! (Dica: também dá com MMC = ${M})</div>`)
+                : ''}
+
+                <div class="mult-card is-a">
+                  <div class="mult-header">
+                    <span style="color:var(--a-color);">Fração A: ${t.aN}/${t.aD} × ${t.mA} = <u>${eqAN}/${eqAD}</u></span>
+                    <span class="badge badge-a">Denom: ${eqAD}</span>
+                  </div>
+                  <div class="mult-row">
+                    ${[1, 2, 3, 4, 5, 6].map(k => `
+                      <button class="mult-btn ${t.mA === k ? 'active' : ''}" data-t2h-m="a:${k}">×${k}</button>
+                    `).join('')}
+                  </div>
+                </div>
+
+                <div class="mult-card is-b">
+                  <div class="mult-header">
+                    <span style="color:var(--b-color);">Fração B: ${t.bN}/${t.bD} × ${t.mB} = <u>${eqBN}/${eqBD}</u></span>
+                    <span class="badge badge-b">Denom: ${eqBD}</span>
+                  </div>
+                  <div class="mult-row">
+                    ${[1, 2, 3, 4, 5, 6].map(k => `
+                      <button class="mult-btn ${t.mB === k ? 'active' : ''}" data-t2h-m="b:${k}">×${k}</button>
+                    `).join('')}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>`;
+      }
+
+      function renderTab2Machine() {
+        const t = state.t2;
+        const M = lcm(t.mAD, t.mBD);
+        const fA = M / t.mAD;
+        const fB = M / t.mBD;
+        const eqA = t.mAN * fA;
+        const eqB = t.mBN * fB;
+        const invalidSub = t.mOp === '-' && eqB > eqA;
+
+        const stageSVG = buildPhysicalStageSVG({
+          stageId: 't2MachStage',
+          op: t.mOp,
+          aN: t.mStep === 0 ? t.mAN : eqA,
+          aD: t.mStep === 0 ? t.mAD : M,
+          bN: t.mStep === 0 ? t.mBN : eqB,
+          bD: t.mStep === 0 ? t.mBD : M,
+          origAD: t.mAD,
+          origBD: t.mBD,
+          showAlignGuides: t.mStep === 1,
+          animated: t.mStep === 2 && !invalidSub
+        });
+
+        const unitChainHTML = buildUnitChainHTML({
+          op: t.mOp,
+          aN: t.mAN, aD: t.mAD, bN: t.mBN, bD: t.mBD,
+          eqAN: eqA, eqBN: eqB,
+          commonD: t.mStep >= 1 ? M : null,
+          invalidSub
+        });
+
+        return `
+          <div class="two-col">
+            <div class="card">
+              <div class="card-title">
+                <div class="step-pills">
+                  <button class="m-pill ${t.mStep === 0 ? 'active' : 'done'}" data-t2m-step="0">1. Originais</button>
+                  <button class="m-pill ${t.mStep === 1 ? 'active' : (t.mStep > 1 ? 'done' : '')}" data-t2m-step="1">2. Subdividir (MMC = ${M})</button>
+                  <button class="m-pill ${t.mStep === 2 ? 'active' : ''}" data-t2m-step="2">3. Operar</button>
+                </div>
+                <button class="btn btn-unit btn-sm" id="t2mAdvance">
+                  ${t.mStep < 2 ? 'Avançar Passo ▶' : '↺ Repetir Passo 3'}
+                </button>
+              </div>
+
+              <div class="svg-box">${stageSVG}</div>
+
+              ${invalidSub ? `
+                <div class="warn-box">
+                  <span>💡 Para retirar, a primeira fração precisa ser maior ou igual à segunda.</span>
+                  <button class="btn btn-sm btn-a" id="t2mSwapAB">Trocar A ↔ B</button>
+                </div>
+              ` : `
+                <div class="stage-footer">
+                  <span class="stage-hint">
+                    ${t.mStep === 0 ? `Unidades diferentes (1/${t.mAD} e 1/${t.mBD}). Avance para subdividir!` :
+                      t.mStep === 1 ? `Fatores: A (×${fA}) e B (×${fB}) → unidade comum 1/${M}!` :
+                      `Operação executada na unidade 1/${M}!`}
+                  </span>
+                  <div class="segmented">
+                    <button class="${t.mOp === '+' ? 'active' : ''}" data-t2m-op="+">+ Soma</button>
+                    <button class="${t.mOp === '-' ? 'active' : ''}" data-t2m-op="-">− Subtração</button>
+                  </div>
+                </div>
+              `}
+            </div>
+
+            <div class="col-stack">
+              <div class="card" style="gap:7px;">
+                ${unitChainHTML}
+
+                <div>
+                  <div class="card-title" style="margin-bottom:4px;"><span>Exemplos rápidos</span></div>
+                  <div class="preset-grid">
+                    ${MACHINE_PRESETS.map((pr, idx) => `
+                      <button class="btn btn-sm ${(t.mOp === pr.op && t.mAN === pr.aN && t.mAD === pr.aD && t.mBN === pr.bN && t.mBD === pr.bD) ? 'btn-a' : ''}" data-t2m-preset="${idx}">${pr.label}</button>
+                    `).join('')}
+                  </div>
+                </div>
+
+                <div class="mini-frac-ctrl is-a">
+                  <strong style="color:var(--a-color); font-size:12px;">Fração A</strong>
+                  <div class="mini-pair">N: <button data-t2m-adj="mAN:-1" ${t.mAN <= 1 ? 'disabled' : ''}>−</button><span>${t.mAN}</span><button data-t2m-adj="mAN:1" ${t.mAN >= t.mAD ? 'disabled' : ''}>+</button></div>
+                  <div class="mini-pair">D: <button data-t2m-adj="mAD:-1" ${t.mAD <= 2 ? 'disabled' : ''}>−</button><span>${t.mAD}</span><button data-t2m-adj="mAD:1" ${t.mAD >= 8 ? 'disabled' : ''}>+</button></div>
+                </div>
+
+                <div class="mini-frac-ctrl is-b">
+                  <strong style="color:var(--b-color); font-size:12px;">Fração B</strong>
+                  <div class="mini-pair">N: <button data-t2m-adj="mBN:-1" ${t.mBN <= 1 ? 'disabled' : ''}>−</button><span>${t.mBN}</span><button data-t2m-adj="mBN:1" ${t.mBN >= t.mBD ? 'disabled' : ''}>+</button></div>
+                  <div class="mini-pair">D: <button data-t2m-adj="mBD:-1" ${t.mBD <= 2 ? 'disabled' : ''}>−</button><span>${t.mBD}</span><button data-t2m-adj="mBD:1" ${t.mBD >= 8 ? 'disabled' : ''}>+</button></div>
+                </div>
+              </div>
+            </div>
+          </div>`;
+      }
+
+      function renderTab2() {
+        const mode = state.t2.mode;
+        return `
+          <div class="sub-shell">
+            <div class="sub-toolbar">
+              <div class="segmented">
+                <button class="${mode === 'hand' ? 'active' : ''}" data-t2-mode="hand">🎯 Igualar na Mão (Equivalentes)</button>
+                <button class="${mode === 'machine' ? 'active' : ''}" data-t2-mode="machine">🔬 Máquina 3 Passos</button>
+              </div>
+              <span style="font-size:12px; font-weight:700; color:var(--text-muted);">
+                ${mode === 'hand' ? 'Ache frações equivalentes até empatar os denominadores!' : 'Veja o MMC subdividir e operar em 3 passos'}
+              </span>
+            </div>
+            ${mode === 'hand' ? renderTab2Hand() : renderTab2Machine()}
+          </div>`;
+      }
+
+      /* =======================================================================
+         8. RENDERIZAÇÃO — ABA 3: MULTIPLICAÇÃO
+         ======================================================================= */
+      function buildNatMulSVG(n, a, b, shown) {
+        const totalPieces = n * a;
+        const wholes = Math.max(1, Math.ceil(totalPieces / b));
+        const W = 620, H = 250;
+        const padX = 20;
+        const usableW = W - padX * 2;
+
+        let svg = '';
+
+        // 1) Parte superior: N grupos iguais de a/b
+        svg += `<text x="${padX}" y="18" font-size="12" font-weight="900" fill="#2563eb">${n} ${n === 1 ? 'grupo' : 'grupos'} de ${a}/${b} (${a} ${a === 1 ? 'peça' : 'peças'} de 1/${b} cada)</text>`;
+
+        const gGap = 8;
+        const gW = (usableW - gGap * (n - 1)) / n;
+        const gY = 26, gH = 74;
+
+        for (let g = 0; g < n; g++) {
+          const gx = padX + g * (gW + gGap);
+          svg += `<rect x="${gx.toFixed(1)}" y="${gY}" width="${gW.toFixed(1)}" height="${gH}" rx="8" fill="#eff6ff" stroke="#93c5fd" stroke-width="1.8" />`;
+          svg += `<text x="${(gx + gW / 2).toFixed(1)}" y="${gY + 17}" text-anchor="middle" font-size="11" font-weight="900" fill="#2563eb">Grupo ${g + 1}</text>`;
+
+          const bx = gx + 6;
+          const bw = gW - 12;
+          const by = gY + 26;
+          const bh = 36;
+          const sw = bw / b;
+
+          for (let i = 0; i < b; i++) {
+            svg += `<rect x="${(bx + i * sw).toFixed(2)}" y="${by}" width="${sw.toFixed(2)}" height="${bh}"
+              fill="${i < a ? '#2563eb' : '#ffffff'}" stroke="#1e3a8a" stroke-width="${b > 6 ? 1 : 1.4}" />`;
+          }
+          svg += `<rect x="${bx.toFixed(1)}" y="${by}" width="${bw.toFixed(1)}" height="${bh}" rx="4" fill="none" stroke="#0f172a" stroke-width="1.8" />`;
+        }
+
+        // 2) Parte inferior: Barra de montagem formando inteiros e sobra
+        const yBot = 142;
+        const barH = 54;
+        const wGap = 12;
+        const wholeW = (usableW - wGap * (wholes - 1)) / wholes;
+        const sw = wholeW / b;
+
+        svg += `<text x="${padX}" y="${yBot - 10}" font-size="12.5" font-weight="900" fill="#047857">Montagem: ${shown} de ${totalPieces} peças de 1/${b} (${shown}/${b})</text>`;
+
+        let pieceCounter = 0;
+        for (let w = 0; w < wholes; w++) {
+          const wx = padX + w * (wholeW + wGap);
+          for (let i = 0; i < b; i++) {
+            pieceCounter++;
+            const filled = pieceCounter <= shown;
+            const isLast = pieceCounter === shown;
+            const x = wx + i * sw;
+            svg += `<rect x="${x.toFixed(2)}" y="${yBot}" width="${sw.toFixed(2)}" height="${barH}"
+              fill="${filled ? '#10b981' : '#ffffff'}" stroke="#334155" stroke-width="${b > 6 || wholes > 3 ? 1 : 1.6}"
+              class="${isLast ? 'pulse-pop' : ''}" />`;
+            if (filled && sw >= 20) {
+              svg += `<text x="${(x + sw / 2).toFixed(2)}" y="${yBot + barH / 2 + 4}" text-anchor="middle" font-size="${sw < 28 ? 10 : 12}" font-weight="900" fill="#ffffff">${pieceCounter}</text>`;
+            }
+          }
+          svg += `<rect x="${wx.toFixed(1)}" y="${yBot}" width="${wholeW.toFixed(1)}" height="${barH}" rx="6" fill="none" stroke="#0f172a" stroke-width="2.4" />`;
+          svg += `<text x="${(wx + wholeW / 2).toFixed(1)}" y="${yBot + barH + 17}" text-anchor="middle" font-size="11" font-weight="800" fill="#64748b">${w + 1}º Inteiro</text>`;
+        }
+
+        const fullWholes = Math.floor(shown / b);
+        const rem = shown % b;
+        const summary = shown === 0
+          ? 'Contando as peças...'
+          : (rem === 0
+              ? `Total: ${shown}/${b} = ${fullWholes} ${fullWholes === 1 ? 'inteiro exato' : 'inteiros exatos'}!`
+              : (fullWholes > 0
+                  ? `Total: ${shown}/${b} = ${fullWholes} ${fullWholes === 1 ? 'inteiro' : 'inteiros'} e ${rem}/${b}!`
+                  : `Total: ${shown}/${b}`));
+        svg += `<text x="${W / 2}" y="236" text-anchor="middle" font-size="13" font-weight="900" fill="#047857">${summary}</text>`;
+
+        return `<svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="xMidYMid meet">${svg}</svg>`;
+      }
+
+      function buildAreaGridSVG(a, b, c, d, step = 4, shownCells = a * c) {
+        const W = 480, H = 316;
+        const gx = 84, gy = 48, gw = 330, gh = 216;
+        const colW = gw / b, rowH = gh / d;
+
+        let svg = '';
+
+        // 0) Base do retângulo inteiro (sempre presente)
+        svg += `<rect x="${gx}" y="${gy}" width="${gw}" height="${gh}" rx="6" fill="#ffffff" stroke="#0f172a" stroke-width="3" />`;
+        if (step === 0) {
+          svg += `<text x="${gx + gw / 2}" y="${gy + gh / 2 + 6}" text-anchor="middle" font-size="18" font-weight="900" fill="#64748b">1 Inteiro</text>`;
+        }
+
+        // 2) Pintura das 'a' primeiras colunas em azul suave (Passo >= 2)
+        if (step >= 2) {
+          for (let col = 0; col < a; col++) {
+            const x = gx + col * colW;
+            const delay = step === 2 ? `animation-delay:${(col * 0.14).toFixed(2)}s;` : '';
+            svg += `<rect x="${x.toFixed(2)}" y="${gy}" width="${colW.toFixed(2)}" height="${gh}"
+              fill="#3b82f6" fill-opacity="0.34" class="${step === 2 ? 'anim-col' : ''}" style="${delay}" />`;
+          }
+          // Chave superior indicando a/b
+          svg += `<line x1="${gx}" y1="30" x2="${(gx + a * colW).toFixed(1)}" y2="30" stroke="#2563eb" stroke-width="4.5" stroke-linecap="round" />`;
+          svg += `<text x="${(gx + (a * colW) / 2).toFixed(1)}" y="20" text-anchor="middle" font-size="15" font-weight="900" fill="#2563eb">${a}/${b} (${a} de ${b} partes)</text>`;
+        } else if (step === 1) {
+          svg += `<text x="${gx + gw / 2}" y="22" text-anchor="middle" font-size="14" font-weight="900" fill="#2563eb">Dividido em ${b} partes iguais (colunas)</text>`;
+        }
+
+        // 4) Faixas horizontais laranjas translúcidas + interseção verde numerada (Passo >= 4)
+        if (step >= 4) {
+          for (let r = 0; r < c; r++) {
+            const y = gy + r * rowH;
+            svg += `<rect x="${gx}" y="${y.toFixed(2)}" width="${gw}" height="${rowH.toFixed(2)}"
+              fill="#f97316" fill-opacity="0.28" class="anim-band" style="animation-delay:${(r * 0.12).toFixed(2)}s;" />`;
+          }
+          // Chave lateral esquerda indicando c/d
+          svg += `<line x1="64" y1="${gy}" x2="64" y2="${(gy + c * rowH).toFixed(1)}" stroke="#ea580c" stroke-width="4.5" stroke-linecap="round" />`;
+          svg += `<text x="54" y="${(gy + (c * rowH) / 2 + 5).toFixed(1)}" text-anchor="end" font-size="15" font-weight="900" fill="#ea580c">${c}/${d}</text>`;
+
+          // Células da interseção (dupla pintura) em verde-esmeralda numeradas uma a uma
+          let idxCell = 0;
+          for (let r = 0; r < c; r++) {
+            for (let col = 0; col < a; col++) {
+              idxCell++;
+              if (idxCell > shownCells) continue;
+              const x = gx + col * colW, y = gy + r * rowH;
+              svg += `
+                <g class="anim-cell">
+                  <rect x="${(x + 2).toFixed(2)}" y="${(y + 2).toFixed(2)}" width="${Math.max(4, colW - 4).toFixed(2)}" height="${Math.max(4, rowH - 4).toFixed(2)}"
+                    rx="5" fill="#10b981" fill-opacity="0.9" stroke="#065f46" stroke-width="2.6" />
+                  <text x="${(x + colW / 2).toFixed(2)}" y="${(y + rowH / 2 + 6).toFixed(2)}" text-anchor="middle"
+                    font-size="${Math.min(20, Math.max(12, Math.min(colW, rowH) * 0.42))}" font-weight="900" fill="#ffffff">${idxCell}</text>
+                </g>`;
+            }
+          }
+        }
+
+        // 1) Linhas verticais de corte descendo de cima para baixo (Passo >= 1)
+        if (step >= 1) {
+          for (let col = 1; col < b; col++) {
+            const x = gx + col * colW;
+            const cls = step === 1 ? 'anim-cut' : '';
+            svg += `<line x1="${x.toFixed(2)}" y1="${gy}" x2="${x.toFixed(2)}" y2="${gy + gh}"
+              stroke="#1e3a8a" stroke-width="2.6" class="${cls}" />`;
+          }
+        }
+
+        // 3) Linhas horizontais de corte atravessando da esquerda para a direita (Passo >= 3)
+        if (step >= 3) {
+          for (let r = 1; r < d; r++) {
+            const y = gy + r * rowH;
+            const cls = step === 3 ? 'anim-cut' : '';
+            svg += `<line x1="${gx}" y1="${y.toFixed(2)}" x2="${gx + gw}" y2="${y.toFixed(2)}"
+              stroke="#9a3412" stroke-width="2.6" class="${cls}" />`;
+          }
+        }
+
+        // Contorno externo nítido
+        svg += `<rect x="${gx}" y="${gy}" width="${gw}" height="${gh}" rx="6" fill="none" stroke="#0f172a" stroke-width="3.2" pointer-events="none" />`;
+
+        // Legenda inferior do palco SVG
+        const footerTxt = [
+          'Começamos com 1 retângulo inteiro.',
+          `Passo 1: Cortamos o inteiro em ${b} partes iguais.`,
+          `Passo 2: Pintamos ${a} dessas ${b} partes (${a}/${b}).`,
+          `Passo 3: Cortamos TODAS as ${b} peças em ${d} partes → ${b * d} partezinhas iguais!`,
+          `Passo 4: Pintamos ${c}/${d} das peças → ${a * c} partes de ${b * d} = ${a * c}/${b * d}!`
+        ][step];
+        const footerColor = step === 4 ? '#047857' : '#334155';
+        svg += `<text x="${gx + gw / 2}" y="${gy + gh + 28}" text-anchor="middle" font-size="13" font-weight="900" fill="${footerColor}">${footerTxt}</text>`;
+
+        return `<svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="xMidYMid meet">${svg}</svg>`;
+      }
+
+      function renderTab3() {
+        const m = state.t3;
+        if (m.submode === 'nat') {
+          const prodN = m.n * m.a;
+          return `
+            <div class="sub-shell">
+              <div class="sub-toolbar">
+                <div class="segmented">
+                  <button data-t3-sub="grid">🟩 Fração × Fração (Movimento)</button>
+                  <button class="active" data-t3-sub="nat">🔁 Natural × Fração</button>
+                </div>
+                <span class="badge badge-unit">Unidade 1/${m.b} continua igual!</span>
+              </div>
+
+              <div class="two-col">
+                <div class="card">
+                  <div class="card-title">
+                    <span>Grupos Iguais &amp; Barra de Montagem</span>
+                    <button class="btn btn-sm btn-res" id="t3AnimCount">▶ Animar Contagem</button>
+                  </div>
+                  <div class="svg-box">${buildNatMulSVG(m.n, m.a, m.b, m.natShown)}</div>
+                </div>
+
+                <div class="col-stack">
+                  <div class="card" style="gap:7px;">
+                    <div class="unit-chain-box">
+                      <div class="unit-chain-title"><span>🧱 Multiplicação com Unidades</span></div>
+                      <div class="unit-chain-row">
+                        <strong style="color:var(--unit-color);">${m.n}</strong>
+                        <span>×</span>
+                        ${fracHTML(m.a, m.b, 'frac-md', 'var(--a-color)')}
+                        <span>=</span>
+                        <strong>${prodN} ×</strong>${unitPillHTML(m.b)}
+                        <span>=</span>
+                        ${fracHTML(prodN, m.b, 'frac-lg', 'var(--res-dark)')}
+                        ${mixedOrSimpHTML(prodN, m.b, 'frac-sm', 'var(--res-dark)')}
+                      </div>
+                      <div class="eq-reading">“${leituraCompleta(prodN, m.b)}”</div>
+                    </div>
+
+                    <div class="stepper is-unit">
+                      <div class="stepper-info"><strong>Número Natural (N)</strong><span>Grupos iguais (1 a 6)</span></div>
+                      <div class="stepper-btns">
+                        <button class="step-btn" data-t3-nat="n:-1" ${m.n <= 1 ? 'disabled' : ''}>−</button>
+                        <span class="step-val" style="color:var(--unit-color);">${m.n}</span>
+                        <button class="step-btn" data-t3-nat="n:1" ${m.n >= 6 ? 'disabled' : ''}>+</button>
+                      </div>
+                    </div>
+
+                    <div class="stepper is-a">
+                      <div class="stepper-info"><strong>Numerador (a)</strong><span>Peças por grupo (1 a ${m.b})</span></div>
+                      <div class="stepper-btns">
+                        <button class="step-btn" data-t3-nat="a:-1" ${m.a <= 1 ? 'disabled' : ''}>−</button>
+                        <span class="step-val" style="color:var(--a-color);">${m.a}</span>
+                        <button class="step-btn" data-t3-nat="a:1" ${m.a >= m.b ? 'disabled' : ''}>+</button>
+                      </div>
+                    </div>
+
+                    <div class="stepper is-b">
+                      <div class="stepper-info"><strong>Denominador (b)</strong><span>Unidade fracionária (2 a 8)</span></div>
+                      <div class="stepper-btns">
+                        <button class="step-btn" data-t3-nat="b:-1" ${m.b <= 2 ? 'disabled' : ''}>−</button>
+                        <span class="step-val" style="color:var(--b-color);">${m.b}</span>
+                        <button class="step-btn" data-t3-nat="b:1" ${m.b >= 8 ? 'disabled' : ''}>+</button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>`;
+        } else {
+          const pN = m.gA * m.gC, pD = m.gB * m.gD;
+          const stepNames = [
+            '0. Inteiro',
+            `1. Dividir em ${m.gB}`,
+            `2. Pintar ${m.gA}`,
+            `3. Cortar em ${m.gD}`,
+            `4. Pegar ${m.gC}/${m.gD}`
+          ];
+          const stepLegends = [
+            `<strong>0. Inteiro:</strong> Temos 1 quadrado inteiro pronto para ser dividido.`,
+            `<strong>1. Dividir em ${m.gB}:</strong> Cortes verticais dividem o inteiro em <strong>${m.gB} peças iguais</strong>.`,
+            `<strong>2. Pintar ${m.gA}:</strong> Pintamos de azul <strong>${m.gA} das ${m.gB} peças</strong>, formando <strong>${m.gA}/${m.gB}</strong>.`,
+            `<strong>3. Cortar em ${m.gD}:</strong> Cortes horizontais dividem <strong>todas</strong> as ${m.gB} peças em ${m.gD} partes, criando <strong>${m.gB} × ${m.gD} = ${pD}</strong> partezinhas iguais!`,
+            `<strong>4. Pegar ${m.gC}/${m.gD}:</strong> Pintando ${m.gC} de ${m.gD} faixas, ficam em verde-esmeralda <strong>${pN} partes de ${pD}</strong> (${pN}/${pD})!`
+          ];
+
+          return `
+            <div class="sub-shell">
+              <div class="sub-toolbar">
+                <div class="segmented">
+                  <button class="active" data-t3-sub="grid">🟩 Fração × Fração (Movimento)</button>
+                  <button data-t3-sub="nat">🔁 Natural × Fração</button>
+                </div>
+                <div class="preset-grid">
+                  ${MUL_PRESETS.map((pr, idx) => `
+                    <button class="btn btn-sm ${(m.gA === pr.a && m.gB === pr.b && m.gC === pr.c && m.gD === pr.d) ? 'btn-a' : ''}" data-t3-preset="${idx}">${pr.label}</button>
+                  `).join('')}
+                </div>
+              </div>
+
+              <div class="two-col">
+                <div class="card">
+                  <div class="card-title">
+                    <div class="step-pills">
+                      ${stepNames.map((lbl, sIdx) => `
+                        <button class="m-pill ${m.gStep === sIdx ? 'active' : (m.gStep > sIdx ? 'done' : '')}" data-t3-gstep="${sIdx}">${lbl}</button>
+                      `).join('')}
+                    </div>
+                    <button class="btn btn-sm btn-res ${m.gStep === 0 ? 'btn-pulse' : ''}" id="t3AnimMov">▶ Animar Movimentos</button>
+                  </div>
+                  <div class="svg-box" id="t3GridSvgBox">${buildAreaGridSVG(m.gA, m.gB, m.gC, m.gD, m.gStep, m.gShownCells)}</div>
+                </div>
+
+                <div class="col-stack">
+                  <div class="card" style="gap:7px;">
+                    <div class="mul-legend">${stepLegends[m.gStep]}</div>
+
+                    <div class="eq-box">
+                      <div class="eq-line" style="font-size:15.5px;">
+                        ${fracHTML(m.gA, m.gB, 'frac-md', 'var(--a-color)')}
+                        <span>×</span>
+                        ${fracHTML(m.gC, m.gD, 'frac-md', 'var(--b-color)')}
+                        <span>=</span>
+                        ${fracHTML(`${m.gA}×${m.gC}`, `${m.gB}×${m.gD}`, 'frac-sm', 'var(--text-muted)')}
+                        <span>=</span>
+                        ${fracHTML(pN, pD, 'frac-lg', 'var(--res-dark)')}
+                        ${mixedOrSimpHTML(pN, pD, 'frac-md', 'var(--res-dark)')}
+                      </div>
+                      <div class="eq-reading">Leitura: “${leituraFracao(m.gC, m.gD)} de ${leituraFracao(m.gA, m.gB)} = ${leituraCompleta(pN, pD)}”</div>
+                    </div>
+
+                    <div class="mini-frac-ctrl is-a">
+                      <strong style="color:var(--a-color); font-size:12px;">1ª Fração (Colunas)</strong>
+                      <div class="mini-pair">N: <button data-t3-grid="gA:-1" ${m.gA <= 1 ? 'disabled' : ''}>−</button><span>${m.gA}</span><button data-t3-grid="gA:1" ${m.gA >= m.gB ? 'disabled' : ''}>+</button></div>
+                      <div class="mini-pair">D: <button data-t3-grid="gB:-1" ${m.gB <= 2 ? 'disabled' : ''}>−</button><span>${m.gB}</span><button data-t3-grid="gB:1" ${m.gB >= 6 ? 'disabled' : ''}>+</button></div>
+                    </div>
+
+                    <div class="mini-frac-ctrl is-b">
+                      <strong style="color:var(--b-color); font-size:12px;">2ª Fração (Cortes horiz.)</strong>
+                      <div class="mini-pair">N: <button data-t3-grid="gC:-1" ${m.gC <= 1 ? 'disabled' : ''}>−</button><span>${m.gC}</span><button data-t3-grid="gC:1" ${m.gC >= m.gD ? 'disabled' : ''}>+</button></div>
+                      <div class="mini-pair">D: <button data-t3-grid="gD:-1" ${m.gD <= 2 ? 'disabled' : ''}>−</button><span>${m.gD}</span><button data-t3-grid="gD:1" ${m.gD >= 6 ? 'disabled' : ''}>+</button></div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>`;
+        }
+      }
+
+      /* =======================================================================
+         9. RENDERIZAÇÃO — ABA 4: DIVISÃO & DESAFIO RELÂMPAGO
+         ======================================================================= */
+      function buildDivSVG(preset, fitted) {
+        const valA = preset.aN / preset.aD;
+        const valB = preset.bN / preset.bD;
+        const totalWholes = Math.max(1, Math.ceil(valA));
+        const W = 620, H = 224, padX = 24;
+        const fullW = W - padX * 2;
+        const unitW = fullW / totalWholes;
+        const yTop = 30, barH = 52;
+        const targetW = valA * unitW;
+
+        let svg = `<text x="${padX}" y="20" font-size="12.5" font-weight="900" fill="#2563eb">Alvo: ${preset.aD === 1 ? preset.aN + ' inteiros' : preset.aN + '/' + preset.aD}</text>`;
+        for (let w = 0; w < totalWholes; w++) {
+          svg += `<rect x="${(padX + w * unitW).toFixed(2)}" y="${yTop}" width="${unitW.toFixed(2)}" height="${barH}" fill="#ffffff" stroke="#cbd5e1" stroke-width="2" />`;
+        }
+        svg += `<rect x="${padX}" y="${yTop}" width="${targetW.toFixed(2)}" height="${barH}" rx="6" fill="#2563eb" fill-opacity="0.88" stroke="#1e3a8a" stroke-width="2.5" />`;
+        for (let w = 1; w < totalWholes; w++) {
+          const xw = padX + w * unitW;
+          svg += `<line x1="${xw.toFixed(2)}" y1="${yTop}" x2="${xw.toFixed(2)}" y2="${yTop + barH}" stroke="#ffffff" stroke-width="2.4" stroke-dasharray="5,3" />`;
+        }
+        for (let w = 0; w <= totalWholes; w++) {
+          svg += `<text x="${(padX + w * unitW).toFixed(2)}" y="${yTop + barH + 15}" text-anchor="middle" font-size="11" font-weight="800" fill="#64748b">${w}</text>`;
+        }
+
+        svg += `<line x1="${(padX + targetW).toFixed(2)}" y1="${yTop - 4}" x2="${(padX + targetW).toFixed(2)}" y2="192" stroke="#10b981" stroke-width="3" stroke-dasharray="6,4" />`;
+
+        const yBot = 122;
+        svg += `<text x="${padX}" y="${yBot - 8}" font-size="12.5" font-weight="900" fill="#f97316">Encaixando blocos de ${preset.bN}/${preset.bD} (${fitted} de ${preset.q})</text>`;
+        svg += `<rect x="${padX}" y="${yBot}" width="${targetW.toFixed(2)}" height="${barH}" rx="7" fill="#f1f5f9" stroke="#94a3b8" stroke-width="2" stroke-dasharray="5,4" />`;
+
+        const pieceW = valB * unitW;
+        for (let i = 0; i < fitted; i++) {
+          const px = padX + i * pieceW;
+          const isLast = i === fitted - 1;
+          const isComplete = fitted === preset.q;
+          svg += `
+            <rect x="${(px + 1.5).toFixed(2)}" y="${yBot + 2}" width="${(pieceW - 3).toFixed(2)}" height="${barH - 4}" rx="6"
+              fill="${isComplete ? '#10b981' : '#f97316'}" stroke="#0f172a" stroke-width="2"
+              class="${isLast ? 'pulse-pop' : ''}" />
+            <text x="${(px + pieceW / 2).toFixed(2)}" y="${yBot + 22}" text-anchor="middle" font-size="14.5" font-weight="900" fill="#ffffff">${i + 1}</text>
+            <text x="${(px + pieceW / 2).toFixed(2)}" y="${yBot + 40}" text-anchor="middle" font-size="10.5" font-weight="800" fill="#ffffff">${preset.bN}/${preset.bD}</text>`;
+        }
+
+        if (fitted === preset.q) {
+          svg += `<text x="${padX + targetW / 2}" y="208" text-anchor="middle" font-size="14" font-weight="900" fill="#047857">🎉 Couberam exatamente ${preset.q} blocos de ${preset.bN}/${preset.bD}!</text>`;
+        }
+        return `<svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="xMidYMid meet">${svg}</svg>`;
+      }
+
+      function buildQuizMiniSVG(kind) {
+        if (kind === 'same-add') {
+          let s = '';
+          for (let i = 0; i < 5; i++) {
+            const fill = i < 2 ? '#2563eb' : (i < 3 ? '#f97316' : '#fff');
+            s += `<rect x="${20 + i * 72}" y="26" width="72" height="52" fill="${fill}" stroke="#0f172a" stroke-width="2.2" />`;
+            s += `<text x="${56 + i * 72}" y="57" text-anchor="middle" font-size="14" font-weight="900" fill="${i < 3 ? '#fff' : '#94a3b8'}">1/5</text>`;
+          }
+          return `<svg viewBox="0 0 400 106" preserveAspectRatio="xMidYMid meet">${s}</svg>`;
+        }
+        if (kind === 'diff-eq') {
+          let s = `<rect x="20" y="14" width="180" height="36" fill="#2563eb" stroke="#0f172a" stroke-width="2.2" />`;
+          s += `<rect x="200" y="14" width="180" height="36" fill="#fff" stroke="#0f172a" stroke-width="2.2" />`;
+          s += `<text x="110" y="37" text-anchor="middle" font-size="14" font-weight="900" fill="#fff">1/2</text>`;
+          s += `<rect x="20" y="64" width="120" height="36" fill="#f97316" stroke="#0f172a" stroke-width="2.2" />`;
+          s += `<rect x="140" y="64" width="120" height="36" fill="#fff" stroke="#0f172a" stroke-width="2.2" />`;
+          s += `<rect x="260" y="64" width="120" height="36" fill="#fff" stroke="#0f172a" stroke-width="2.2" />`;
+          s += `<text x="80" y="87" text-anchor="middle" font-size="14" font-weight="900" fill="#fff">1/3</text>`;
+          for (let k = 1; k < 6; k++) {
+            s += `<line x1="${20 + k * 60}" y1="12" x2="${20 + k * 60}" y2="104" stroke="#10b981" stroke-width="2" stroke-dasharray="4,3" />`;
+          }
+          return `<svg viewBox="0 0 400 112" preserveAspectRatio="xMidYMid meet">${s}</svg>`;
+        }
+        if (kind === 'same-sub') {
+          let s = '';
+          for (let i = 0; i < 8; i++) {
+            const x = 16 + i * 46;
+            const fill = i < 3 ? '#10b981' : (i < 5 ? '#fee2e2' : '#fff');
+            s += `<rect x="${x}" y="26" width="46" height="52" fill="${fill}" stroke="#0f172a" stroke-width="2" />`;
+            if (i >= 3 && i < 5) {
+              s += `<line x1="${x + 6}" y1="32" x2="${x + 40}" y2="72" stroke="#dc2626" stroke-width="3" />`;
+              s += `<line x1="${x + 40}" y1="32" x2="${x + 6}" y2="72" stroke="#dc2626" stroke-width="3" />`;
+            }
+          }
+          return `<svg viewBox="0 0 400 106" preserveAspectRatio="xMidYMid meet">${s}</svg>`;
+        }
+        if (kind === 'nat-mul') {
+          let s = '';
+          for (let g = 0; g < 3; g++) {
+            const ox = 16 + g * 126;
+            s += `<rect x="${ox}" y="12" width="114" height="82" rx="8" fill="#eff6ff" stroke="#93c5fd" stroke-width="2" />`;
+            s += `<text x="${ox + 57}" y="32" text-anchor="middle" font-size="12" font-weight="900" fill="#2563eb">Grupo ${g + 1}</text>`;
+            for (let i = 0; i < 5; i++) {
+              s += `<rect x="${ox + 7 + i * 20}" y="44" width="20" height="34" fill="${i < 2 ? '#2563eb' : '#fff'}" stroke="#0f172a" stroke-width="1.4" />`;
+            }
+          }
+          return `<svg viewBox="0 0 400 106" preserveAspectRatio="xMidYMid meet">${s}</svg>`;
+        }
+        if (kind === 'grid-mul') return buildAreaGridSVG(1, 2, 2, 3);
+
+        // div-fit
+        let s = `<rect x="20" y="16" width="180" height="36" fill="#2563eb" stroke="#0f172a" stroke-width="2.2" />`;
+        s += `<rect x="200" y="16" width="180" height="36" fill="#fff" stroke="#cbd5e1" stroke-width="2" />`;
+        s += `<text x="110" y="39" text-anchor="middle" font-size="14" font-weight="900" fill="#fff">1/2</text>`;
+        for (let i = 0; i < 3; i++) {
+          s += `<rect x="${20 + i * 60}" y="64" width="60" height="36" fill="#fff7ed" stroke="#f97316" stroke-width="2" stroke-dasharray="4,3" />`;
+          s += `<text x="${50 + i * 60}" y="87" text-anchor="middle" font-size="12" font-weight="900" fill="#f97316">1/6</text>`;
+        }
+        return `<svg viewBox="0 0 400 112" preserveAspectRatio="xMidYMid meet">${s}</svg>`;
+      }
+
+      function renderTab4() {
+        const t4 = state.t4;
+        if (t4.submode === 'div') {
+          const p = DIV_PRESETS[t4.presetIdx];
+          const M = lcm(p.aD, p.bD);
+          const eqA = p.aN * (M / p.aD);
+          const eqB = p.bN * (M / p.bD);
+          const done = t4.fitted === p.q;
+
+          return `
+            <div class="sub-shell">
+              <div class="sub-toolbar">
+                <div class="segmented">
+                  <button class="active" data-t4-sub="div">📦 Quantas Cabem?</button>
+                  <button data-t4-sub="quiz">⚡ Desafio Relâmpago</button>
+                </div>
+                <span class="badge badge-res">${p.label} ${done ? '= ' + p.q : '= ?'}</span>
+              </div>
+
+              <div class="two-col">
+                <div class="card">
+                  <div class="card-title">
+                    <span>${p.text}</span>
+                    <span class="badge badge-b">Blocos: ${t4.fitted} / ${p.q}</span>
+                  </div>
+                  <div class="svg-box">${buildDivSVG(p, t4.fitted)}</div>
+                  <div class="stage-footer" style="justify-content:center;">
+                    <button class="btn btn-b" id="divFitOne" ${done ? 'disabled' : ''}>▶ Encaixar +1 (${p.bN}/${p.bD})</button>
+                    <button class="btn btn-res" id="divFitAll" ${done ? 'disabled' : ''}>Preencher tudo ▶</button>
+                    <button class="btn" id="divReset" ${t4.fitted === 0 ? 'disabled' : ''}>↺ Reiniciar</button>
+                  </div>
+                </div>
+
+                <div class="col-stack">
+                  <div class="card" style="gap:8px;">
+                    <div>
+                      <div class="card-title" style="margin-bottom:4px;"><span>Inteiro ÷ Fração</span></div>
+                      <div class="preset-grid">
+                        ${DIV_PRESETS.filter(x => x.group === 'int').map(pr => {
+                          const idx = DIV_PRESETS.indexOf(pr);
+                          return `<button class="btn btn-sm ${t4.presetIdx === idx ? 'btn-a' : ''}" data-div-preset="${idx}">${pr.label}</button>`;
+                        }).join('')}
+                      </div>
+                    </div>
+
+                    <div>
+                      <div class="card-title" style="margin-bottom:4px;"><span>Fração ÷ Fração</span></div>
+                      <div class="preset-grid">
+                        ${DIV_PRESETS.filter(x => x.group === 'fra').map(pr => {
+                          const idx = DIV_PRESETS.indexOf(pr);
+                          return `<button class="btn btn-sm ${t4.presetIdx === idx ? 'btn-a' : ''}" data-div-preset="${idx}">${pr.label}</button>`;
+                        }).join('')}
+                      </div>
+                    </div>
+
+                    <div class="eq-box" style="background:var(--unit-soft); border-color:var(--unit-border);">
+                      <div class="card-title" style="margin-bottom:2px; color:var(--unit-color);"><span>🔍 Olhar da Mesma Unidade (1/${M})</span></div>
+                      <div class="eq-line" style="font-size:15px;">
+                        ${p.aD === 1 ? `<strong style="color:var(--a-color);">${p.aN}</strong>` : fracHTML(p.aN, p.aD, 'frac-sm', 'var(--a-color)')}
+                        <span>÷</span>
+                        ${fracHTML(p.bN, p.bD, 'frac-sm', 'var(--b-color)')}
+                        <span>=</span>
+                        ${fracHTML(eqA, M, 'frac-sm', 'var(--a-color)')}
+                        <span>÷</span>
+                        ${fracHTML(eqB, M, 'frac-sm', 'var(--b-color)')}
+                        <span>=</span>
+                        <span>${eqA} ÷ ${eqB}</span>
+                        <span>=</span>
+                        <strong style="color:var(--res-dark); font-size:19px;">${done ? p.q : '?'}</strong>
+                      </div>
+                      <div class="eq-reading">Com a mesma unidade 1/${M}, é só contar quantas peças cabem!</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>`;
+        } else {
+          if (t4.quizDone) {
+            const stars = '⭐'.repeat(t4.quizScore) + '☆'.repeat(QUIZ_POOL.length - t4.quizScore);
+            return `
+              <div class="sub-shell">
+                <div class="sub-toolbar">
+                  <div class="segmented">
+                    <button data-t4-sub="div">📦 Quantas Cabem?</button>
+                    <button class="active" data-t4-sub="quiz">⚡ Desafio Relâmpago</button>
+                  </div>
+                </div>
+                <div class="card pulse-pop" style="flex:1; align-items:center; justify-content:center; gap:12px; text-align:center;">
+                  <div style="font-size:36px;">${stars}</div>
+                  <h2 style="font-size:21px; font-weight:900; color:var(--res-dark);">Desafio Concluído!</h2>
+                  <p style="font-size:14.5px; color:var(--text-muted); max-width:440px;">
+                    Você conquistou <strong>${t4.quizScore} de ${QUIZ_POOL.length}</strong> estrelas dominando todas as operações com frações!
+                  </p>
+                  <button class="btn btn-a" id="quizRestart">🔀 Jogar de Novo (Embaralhar)</button>
+                </div>
+              </div>`;
+          }
+
+          const q = QUIZ_POOL[t4.quizOrder[t4.quizIdx]];
+          const pct = ((t4.quizIdx + (t4.quizSolved ? 1 : 0)) / QUIZ_POOL.length) * 100;
+
+          return `
+            <div class="sub-shell">
+              <div class="sub-toolbar">
+                <div class="segmented">
+                  <button data-t4-sub="div">📦 Quantas Cabem?</button>
+                  <button class="active" data-t4-sub="quiz">⚡ Desafio Relâmpago</button>
+                </div>
+                <div style="display:flex; align-items:center; gap:7px;">
+                  <div class="progress-track"><div class="progress-fill" style="width:${pct}%;"></div></div>
+                  <span class="badge badge-gold">⭐ ${t4.quizScore}/${QUIZ_POOL.length}</span>
+                  ${t4.quizStreak >= 2 ? `<span class="badge badge-unit pulse-pop">🔥 ${t4.quizStreak}</span>` : ''}
+                </div>
+              </div>
+
+              <div class="two-col">
+                <div class="card">
+                  <div class="card-title">
+                    <span>Pergunta ${t4.quizIdx + 1} de ${QUIZ_POOL.length}</span>
+                    <span class="badge badge-a">${q.tag}</span>
+                  </div>
+                  <div style="font-size:15.5px; font-weight:900; color:var(--text-main); margin-bottom:6px;">${q.prompt}</div>
+                  <div class="svg-box">${buildQuizMiniSVG(q.visual)}</div>
+                </div>
+
+                <div class="card card-scroll" style="justify-content:space-between; gap:8px;">
+                  <div class="card-title"><span>Escolha a resposta certa</span></div>
+                  <div class="quiz-opts">
+                    ${q.opts.map((o, idx) => {
+                      const isWrong = t4.quizWrongIdxs.includes(idx);
+                      const cls = (t4.quizSolved && o.ok) ? 'is-correct pulse-pop' : (isWrong ? 'is-wrong' : '');
+                      return `
+                        <button class="quiz-opt-btn ${cls}" data-quiz-opt="${idx}" ${t4.quizSolved || isWrong ? 'disabled' : ''}>
+                          ${o.html}
+                          ${t4.quizSolved && o.ok ? '<span>✓</span>' : (isWrong ? '<span>✗</span>' : '')}
+                        </button>`;
+                    }).join('')}
+                  </div>
+
+                  ${t4.quizFeedback
+                    ? `<div class="feedback-box ${t4.quizFeedback.ok ? 'ok pulse-pop' : 'err'}">${t4.quizFeedback.msg}</div>`
+                    : `<div style="font-size:12px; color:var(--text-light); text-align:center;">Observe o desenho ao lado e toque na alternativa correta!</div>`}
+
+                  <button class="btn ${t4.quizSolved ? 'btn-res pulse-pop' : ''}" id="quizNext" style="width:100%;">
+                    ${t4.quizSolved
+                      ? (t4.quizIdx + 1 < QUIZ_POOL.length ? 'Próxima Pergunta ▶' : 'Ver Resultado Final 🏆')
+                      : 'Pular Pergunta ▶'}
+                  </button>
+                </div>
+              </div>
+            </div>`;
+        }
+      }
+
+      /* =======================================================================
+         10. ORQUESTRAÇÃO DA UI E EVENTOS
+         ======================================================================= */
+      const tabStage = document.getElementById('tabStage');
+      const guideText = document.getElementById('guideText');
+      const stepCounter = document.getElementById('stepCounter');
+      const stepTitle = document.getElementById('stepTitle');
+      const btnPrev = document.getElementById('btnPrev');
+      const btnNext = document.getElementById('btnNext');
+      const soundToggle = document.getElementById('soundToggle');
+
+      function render() {
+        TimerBag.clearAll();
+        const t = state.activeTab;
+        const stepsArr = TAB_STEPS[t];
+        const sIdx = state.steps[t];
+        const curStep = stepsArr[sIdx];
+
+        document.querySelectorAll('.tab-btn').forEach((btn, idx) => {
+          const on = idx === t;
+          btn.classList.toggle('active', on);
+          btn.setAttribute('aria-selected', String(on));
+        });
+
+        guideText.innerHTML = curStep.guide;
+        stepCounter.textContent = `${sIdx + 1} / ${stepsArr.length}`;
+        stepTitle.textContent = curStep.title;
+        btnPrev.disabled = sIdx === 0;
+        btnNext.disabled = sIdx === stepsArr.length - 1;
+
+        if (t === 0) tabStage.innerHTML = renderTab1();
+        else if (t === 1) tabStage.innerHTML = renderTab2();
+        else if (t === 2) tabStage.innerHTML = renderTab3();
+        else if (t === 3) tabStage.innerHTML = renderTab4();
+
+        bindEvents();
+      }
+
+      function triggerStageAnim(cfg, onDoneState) {
+        // Primeiro garante o estado visual pré-animação, depois dispara a transição física
+        runPhysicalAnimation(cfg, () => {
+          onDoneState();
+          render();
+        });
+      }
+
+      function bindEvents() {
+        const t = state.activeTab;
+
+        // --- Eventos Aba 1 ---
+        if (t === 0) {
+          tabStage.querySelectorAll('[data-t1-preset]').forEach(btn => {
+            btn.addEventListener('click', () => {
+              const pr = T1_PRESETS[Number(btn.dataset.t1Preset)];
+              state.t1 = { op: pr.op, den: pr.den, a: pr.a, b: pr.b, animated: false };
+              SoundFX.click();
+              render();
+            });
+          });
+          tabStage.querySelectorAll('[data-t1-op]').forEach(btn => {
+            btn.addEventListener('click', () => {
+              state.t1.op = btn.dataset.t1Op;
+              state.t1.animated = false;
+              SoundFX.click();
+              render();
+            });
+          });
+          document.getElementById('t1SwapAB')?.addEventListener('click', () => {
+            const tmp = state.t1.a;
+            state.t1.a = state.t1.b;
+            state.t1.b = tmp;
+            state.t1.animated = false;
+            SoundFX.click();
+            render();
+          });
+          document.getElementById('t1RunAnim')?.addEventListener('click', () => {
+            const { op, den, a, b } = state.t1;
+            if (op === '-' && b > a) return;
+            if (state.t1.animated) {
+              state.t1.animated = false;
+              render();
+            }
+            triggerStageAnim({ stageId: 't1Stage', op, aN: a, aD: den, bN: b, bD: den }, () => {
+              state.t1.animated = true;
+            });
+          });
+          document.getElementById('t1DenInc')?.addEventListener('click', () => {
+            if (state.t1.den < 10) { state.t1.den++; state.t1.animated = false; SoundFX.click(); render(); }
+          });
+          document.getElementById('t1DenDec')?.addEventListener('click', () => {
+            if (state.t1.den > 2) {
+              state.t1.den--;
+              state.t1.a = Math.min(state.t1.a, state.t1.den);
+              state.t1.b = Math.min(state.t1.b, state.t1.den);
+              state.t1.animated = false;
+              SoundFX.click();
+              render();
+            }
+          });
+          document.getElementById('t1AInc')?.addEventListener('click', () => {
+            if (state.t1.a < state.t1.den) { state.t1.a++; state.t1.animated = false; SoundFX.click(); render(); }
+          });
+          document.getElementById('t1ADec')?.addEventListener('click', () => {
+            if (state.t1.a > 1) { state.t1.a--; state.t1.animated = false; SoundFX.click(); render(); }
+          });
+          document.getElementById('t1BInc')?.addEventListener('click', () => {
+            if (state.t1.b < state.t1.den) { state.t1.b++; state.t1.animated = false; SoundFX.click(); render(); }
+          });
+          document.getElementById('t1BDec')?.addEventListener('click', () => {
+            if (state.t1.b > 1) { state.t1.b--; state.t1.animated = false; SoundFX.click(); render(); }
+          });
+        }
+
+        // --- Eventos Aba 2 ---
+        if (t === 1) {
+          tabStage.querySelectorAll('[data-t2-mode]').forEach(btn => {
+            btn.addEventListener('click', () => {
+              state.t2.mode = btn.dataset.t2Mode;
+              state.t2.animated = false;
+              SoundFX.tab();
+              render();
+            });
+          });
+
+          if (state.t2.mode === 'hand') {
+            tabStage.querySelectorAll('[data-t2h-lvl]').forEach(btn => {
+              btn.addEventListener('click', () => {
+                const raw = btn.dataset.t2hLvl;
+                if (raw === 'free') {
+                  state.t2.level = 'free';
+                  state.t2.mA = 1; state.t2.mB = 1; state.t2.animated = false;
+                } else {
+                  loadHandChallenge(Number(raw), 0);
+                }
+                SoundFX.tab();
+                render();
+              });
+            });
+
+            document.getElementById('t2hNextCh')?.addEventListener('click', () => {
+              loadHandChallenge(state.t2.level, state.t2.idx + 1);
+              SoundFX.step();
+              render();
+            });
+
+            tabStage.querySelectorAll('[data-t2h-m]').forEach(btn => {
+              btn.addEventListener('click', () => {
+                const [side, kStr] = btn.dataset.t2hM.split(':');
+                const k = Number(kStr);
+                if (side === 'a') state.t2.mA = k;
+                else state.t2.mB = k;
+                state.t2.animated = false;
+
+                if (state.t2.aD * state.t2.mA === state.t2.bD * state.t2.mB) SoundFX.match();
+                else SoundFX.click();
+                render();
+              });
+            });
+
+            tabStage.querySelectorAll('[data-t2h-op]').forEach(btn => {
+              btn.addEventListener('click', () => {
+                state.t2.op = btn.dataset.t2hOp;
+                state.t2.animated = false;
+                SoundFX.click();
+                render();
+              });
+            });
+
+            tabStage.querySelectorAll('[data-t2h-free]').forEach(btn => {
+              btn.addEventListener('click', () => {
+                const [field, dStr] = btn.dataset.t2hFree.split(':');
+                state.t2[field] += Number(dStr);
+                state.t2.aD = Math.max(2, Math.min(8, state.t2.aD));
+                state.t2.bD = Math.max(2, Math.min(8, state.t2.bD));
+                state.t2.aN = Math.max(1, Math.min(state.t2.aD, state.t2.aN));
+                state.t2.bN = Math.max(1, Math.min(state.t2.bD, state.t2.bN));
+                state.t2.mA = 1; state.t2.mB = 1; state.t2.animated = false;
+                SoundFX.click();
+                render();
+              });
+            });
+
+            document.getElementById('t2hSwapAB')?.addEventListener('click', () => {
+              const { aN, aD, bN, bD, mA, mB } = state.t2;
+              state.t2.aN = bN; state.t2.aD = bD; state.t2.mA = mB;
+              state.t2.bN = aN; state.t2.bD = aD; state.t2.mB = mA;
+              state.t2.animated = false;
+              SoundFX.click();
+              render();
+            });
+
+            document.getElementById('t2hRunAnim')?.addEventListener('click', () => {
+              const eqAN = state.t2.aN * state.t2.mA;
+              const eqAD = state.t2.aD * state.t2.mA;
+              const eqBN = state.t2.bN * state.t2.mB;
+              const eqBD = state.t2.bD * state.t2.mB;
+              if (eqAD !== eqBD) return;
+              if (state.t2.op === '-' && eqBN > eqAN) return;
+
+              if (state.t2.animated) {
+                state.t2.animated = false;
+                render();
+              }
+              triggerStageAnim({
+                stageId: 't2HandStage', op: state.t2.op,
+                aN: eqAN, aD: eqAD, bN: eqBN, bD: eqBD
+              }, () => {
+                state.t2.animated = true;
+              });
+            });
+          } else {
+            // Máquina 3 Passos
+            const playMachineStep2 = () => {
+              const M = lcm(state.t2.mAD, state.t2.mBD);
+              const eqA = state.t2.mAN * (M / state.t2.mAD);
+              const eqB = state.t2.mBN * (M / state.t2.mBD);
+              if (state.t2.mOp === '-' && eqB > eqA) {
+                state.t2.mStep = 2;
+                render();
+                return;
+              }
+              state.t2.mStep = 1;
+              render();
+              triggerStageAnim({
+                stageId: 't2MachStage', op: state.t2.mOp,
+                aN: eqA, aD: M, bN: eqB, bD: M
+              }, () => {
+                state.t2.mStep = 2;
+              });
+            };
+
+            tabStage.querySelectorAll('[data-t2m-step]').forEach(btn => {
+              btn.addEventListener('click', () => {
+                const s = Number(btn.dataset.t2mStep);
+                if (s === 2) { playMachineStep2(); return; }
+                state.t2.mStep = s;
+                if (s === 1) SoundFX.match();
+                else SoundFX.click();
+                render();
+              });
+            });
+
+            document.getElementById('t2mAdvance')?.addEventListener('click', () => {
+              if (state.t2.mStep === 0) {
+                state.t2.mStep = 1;
+                SoundFX.match();
+                render();
+              } else {
+                playMachineStep2();
+              }
+            });
+
+            tabStage.querySelectorAll('[data-t2m-op]').forEach(btn => {
+              btn.addEventListener('click', () => {
+                state.t2.mOp = btn.dataset.t2mOp;
+                state.t2.mStep = 0;
+                SoundFX.click();
+                render();
+              });
+            });
+
+            document.getElementById('t2mSwapAB')?.addEventListener('click', () => {
+              const { mAN, mAD, mBN, mBD } = state.t2;
+              state.t2.mAN = mBN; state.t2.mAD = mBD;
+              state.t2.mBN = mAN; state.t2.mBD = mAD;
+              state.t2.mStep = 0;
+              SoundFX.click();
+              render();
+            });
+
+            tabStage.querySelectorAll('[data-t2m-preset]').forEach(btn => {
+              btn.addEventListener('click', () => {
+                const pr = MACHINE_PRESETS[Number(btn.dataset.t2mPreset)];
+                state.t2.mOp = pr.op;
+                state.t2.mAN = pr.aN; state.t2.mAD = pr.aD;
+                state.t2.mBN = pr.bN; state.t2.mBD = pr.bD;
+                state.t2.mStep = 0;
+                SoundFX.click();
+                render();
+              });
+            });
+
+            tabStage.querySelectorAll('[data-t2m-adj]').forEach(btn => {
+              btn.addEventListener('click', () => {
+                const [field, dStr] = btn.dataset.t2mAdj.split(':');
+                state.t2[field] += Number(dStr);
+                state.t2.mAD = Math.max(2, Math.min(8, state.t2.mAD));
+                state.t2.mBD = Math.max(2, Math.min(8, state.t2.mBD));
+                state.t2.mAN = Math.max(1, Math.min(state.t2.mAD, state.t2.mAN));
+                state.t2.mBN = Math.max(1, Math.min(state.t2.mBD, state.t2.mBN));
+                state.t2.mStep = 0;
+                SoundFX.click();
+                render();
+              });
+            });
+          }
+        }
+
+        // --- Eventos Aba 3 ---
+        if (t === 2) {
+          tabStage.querySelectorAll('[data-t3-sub]').forEach(btn => {
+            btn.addEventListener('click', () => {
+              state.t3.submode = btn.dataset.t3Sub;
+              SoundFX.tab();
+              render();
+            });
+          });
+
+          tabStage.querySelectorAll('[data-t3-preset]').forEach(btn => {
+            btn.addEventListener('click', () => {
+              const pr = MUL_PRESETS[Number(btn.dataset.t3Preset)];
+              state.t3.gA = pr.a; state.t3.gB = pr.b;
+              state.t3.gC = pr.c; state.t3.gD = pr.d;
+              state.t3.gStep = 0; state.t3.gShownCells = 0;
+              SoundFX.click();
+              render();
+            });
+          });
+
+          tabStage.querySelectorAll('[data-t3-gstep]').forEach(btn => {
+            btn.addEventListener('click', () => {
+              const s = Number(btn.dataset.t3Gstep);
+              state.t3.gStep = s;
+              state.t3.gShownCells = s === 4 ? state.t3.gA * state.t3.gC : 0;
+              if (s === 1 || s === 3) SoundFX.cut();
+              else if (s === 4) SoundFX.success();
+              else SoundFX.click();
+              render();
+            });
+          });
+
+          document.getElementById('t3AnimMov')?.addEventListener('click', () => {
+            const totalCells = state.t3.gA * state.t3.gC;
+            state.t3.gStep = 0;
+            state.t3.gShownCells = 0;
+            render();
+
+            // Passo 1: Cortes verticais
+            TimerBag.set(() => {
+              state.t3.gStep = 1;
+              SoundFX.cut();
+              render();
+            }, 420);
+
+            // Passo 2: Pintar 'a' colunas
+            TimerBag.set(() => {
+              state.t3.gStep = 2;
+              SoundFX.snap(2);
+              render();
+            }, 1150);
+
+            // Passo 3: Cortes horizontais em todas as peças
+            TimerBag.set(() => {
+              state.t3.gStep = 3;
+              SoundFX.cut();
+              render();
+            }, 1950);
+
+            // Passo 4: Pintar 'c/d' e numerar células verdes uma a uma
+            TimerBag.set(() => {
+              state.t3.gStep = 4;
+              state.t3.gShownCells = 0;
+              render();
+
+              for (let k = 1; k <= totalCells; k++) {
+                TimerBag.set(() => {
+                  state.t3.gShownCells = k;
+                  if (k === totalCells) SoundFX.success();
+                  else SoundFX.snap(k - 1);
+                  const box = document.getElementById('t3GridSvgBox');
+                  if (box) {
+                    box.innerHTML = buildAreaGridSVG(
+                      state.t3.gA, state.t3.gB, state.t3.gC, state.t3.gD, 4, k
+                    );
+                  }
+                }, 260 + (k - 1) * 200);
+              }
+            }, 2750);
+          });
+
+          document.getElementById('t3AnimCount')?.addEventListener('click', () => {
+            const total = state.t3.n * state.t3.a;
+            state.t3.natShown = 0;
+            render();
+            for (let k = 1; k <= total; k++) {
+              TimerBag.set(() => {
+                state.t3.natShown = k;
+                if (k === total) SoundFX.success();
+                else SoundFX.snap(k - 1);
+                // Atualiza apenas o SVG para não perder foco
+                const box = tabStage.querySelector('.svg-box');
+                if (box) box.innerHTML = buildNatMulSVG(state.t3.n, state.t3.a, state.t3.b, state.t3.natShown);
+              }, k * 140);
+            }
+          });
+
+          tabStage.querySelectorAll('[data-t3-nat]').forEach(btn => {
+            btn.addEventListener('click', () => {
+              const [field, dStr] = btn.dataset.t3Nat.split(':');
+              state.t3[field] += Number(dStr);
+              state.t3.n = Math.max(1, Math.min(6, state.t3.n));
+              state.t3.b = Math.max(2, Math.min(8, state.t3.b));
+              state.t3.a = Math.max(1, Math.min(state.t3.b, state.t3.a));
+              state.t3.natShown = state.t3.n * state.t3.a;
+              SoundFX.snap(state.t3.natShown);
+              render();
+            });
+          });
+
+          tabStage.querySelectorAll('[data-t3-grid]').forEach(btn => {
+            btn.addEventListener('click', () => {
+              const [field, dStr] = btn.dataset.t3Grid.split(':');
+              state.t3[field] += Number(dStr);
+              state.t3.gB = Math.max(2, Math.min(6, state.t3.gB));
+              state.t3.gD = Math.max(2, Math.min(6, state.t3.gD));
+              state.t3.gA = Math.max(1, Math.min(state.t3.gB, state.t3.gA));
+              state.t3.gC = Math.max(1, Math.min(state.t3.gD, state.t3.gC));
+              state.t3.gStep = 4;
+              state.t3.gShownCells = state.t3.gA * state.t3.gC;
+              SoundFX.click();
+              render();
+            });
+          });
+        }
+
+        // --- Eventos Aba 4 ---
+        if (t === 3) {
+          tabStage.querySelectorAll('[data-t4-sub]').forEach(btn => {
+            btn.addEventListener('click', () => {
+              state.t4.submode = btn.dataset.t4Sub;
+              SoundFX.tab();
+              render();
+            });
+          });
+
+          tabStage.querySelectorAll('[data-div-preset]').forEach(btn => {
+            btn.addEventListener('click', () => {
+              state.t4.presetIdx = Number(btn.dataset.divPreset);
+              state.t4.fitted = 0;
+              SoundFX.click();
+              render();
+            });
+          });
+
+          document.getElementById('divFitOne')?.addEventListener('click', () => {
+            const p = DIV_PRESETS[state.t4.presetIdx];
+            if (state.t4.fitted < p.q) {
+              state.t4.fitted++;
+              if (state.t4.fitted === p.q) SoundFX.success();
+              else SoundFX.snap(state.t4.fitted - 1);
+              render();
+            }
+          });
+
+          document.getElementById('divFitAll')?.addEventListener('click', () => {
+            const p = DIV_PRESETS[state.t4.presetIdx];
+            const start = state.t4.fitted;
+            for (let k = start + 1; k <= p.q; k++) {
+              TimerBag.set(() => {
+                state.t4.fitted = k;
+                if (k === p.q) SoundFX.success();
+                else SoundFX.snap(k - 1);
+                render();
+              }, (k - start) * 140);
+            }
+          });
+
+          document.getElementById('divReset')?.addEventListener('click', () => {
+            state.t4.fitted = 0;
+            SoundFX.click();
+            render();
+          });
+
+          tabStage.querySelectorAll('[data-quiz-opt]').forEach(btn => {
+            btn.addEventListener('click', () => {
+              if (state.t4.quizSolved) return;
+              const idx = Number(btn.dataset.quizOpt);
+              const q = QUIZ_POOL[state.t4.quizOrder[state.t4.quizIdx]];
+              const opt = q.opts[idx];
+
+              if (opt.ok) {
+                state.t4.quizSolved = true;
+                state.t4.quizStreak = state.t4.quizWrongIdxs.length === 0 ? state.t4.quizStreak + 1 : 1;
+                state.t4.quizScore++;
+                state.t4.quizFeedback = { ok: true, msg: `🎉 ${opt.why}` };
+                SoundFX.success();
+              } else {
+                state.t4.quizStreak = 0;
+                state.t4.quizWrongIdxs.push(idx);
+                state.t4.quizFeedback = { ok: false, msg: `💡 ${opt.why} Tente outra opção!` };
+                SoundFX.softErr();
+              }
+              render();
+            });
+          });
+
+          document.getElementById('quizNext')?.addEventListener('click', () => {
+            if (state.t4.quizIdx + 1 < QUIZ_POOL.length) {
+              state.t4.quizIdx++;
+              state.t4.quizSolved = false;
+              state.t4.quizWrongIdxs = [];
+              state.t4.quizFeedback = null;
+              SoundFX.step();
+            } else {
+              state.t4.quizDone = true;
+              SoundFX.success();
+            }
+            render();
+          });
+
+          document.getElementById('quizRestart')?.addEventListener('click', () => {
+            resetQuiz(true);
+            SoundFX.tab();
+            render();
+          });
+        }
+      }
+
+      /* =======================================================================
+         11. CONTROLES GLOBAIS (ABAS, RODAPÉ ◀ 1/4 ▶, SOM, TECLADO)
+         ======================================================================= */
+      document.querySelectorAll('.tab-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const idx = Number(btn.dataset.tab);
+          if (idx === state.activeTab) return;
+          state.activeTab = idx;
+          TAB_STEPS[idx][state.steps[idx]].apply();
+          SoundFX.tab();
+          render();
+        });
+      });
+
+      btnPrev.addEventListener('click', () => {
+        const t = state.activeTab;
+        if (state.steps[t] > 0) {
+          state.steps[t]--;
+          TAB_STEPS[t][state.steps[t]].apply();
+          SoundFX.step();
+          render();
+        }
+      });
+
+      btnNext.addEventListener('click', () => {
+        const t = state.activeTab;
+        if (state.steps[t] < TAB_STEPS[t].length - 1) {
+          state.steps[t]++;
+          TAB_STEPS[t][state.steps[t]].apply();
+          SoundFX.step();
+          render();
+        }
+      });
+
+      soundToggle.addEventListener('click', () => {
+        const on = SoundFX.toggle();
+        soundToggle.textContent = on ? '🔊' : '🔇';
+        soundToggle.classList.toggle('muted', !on);
+      });
+
+      window.addEventListener('keydown', (e) => {
+        if (e.key === 'ArrowRight' && !btnNext.disabled) btnNext.click();
+        if (e.key === 'ArrowLeft' && !btnPrev.disabled) btnPrev.click();
+      });
+
+      // Inicialização limpa na Aba 1, Etapa 1
+      TAB_STEPS[0][0].apply();
+      render();
+    });
+  </script>
+<div id="autoriaTxt" onclick="this.classList.remove('on')" style="position:fixed;top:44px;right:8px;z-index:2147483000;max-width:260px;padding:8px 10px;border-radius:8px;background:#222;color:#fff;font:12px/1.35 sans-serif;display:none">© Ygor B. F. Ferreira · A Saga dos Reinos Matemáticos · Matematkês · uso livre em sala</div><style>#autoriaTxt.on{display:block!important}</style>
+</body>
+</html>

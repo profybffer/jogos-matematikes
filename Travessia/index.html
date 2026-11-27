@@ -1,0 +1,3279 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>MATEMATIKÊS — A Travessia dos Conjuntos Numéricos</title>
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Fontes: Inter e JetBrains Mono -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@500;700;800&display=swap" rel="stylesheet" />
+
+  <style>
+    :root {
+      --bg-deep: #060A14;
+      --panel-bg: rgba(10, 17, 32, 0.9);
+      --border-subtle: rgba(148, 163, 184, 0.16);
+      --accent-N: #F59E0B;
+      --accent-Z: #06B6D4;
+      --accent-Q: #8B5CF6;
+      --accent-R: #10B981;
+      --accent-C: #D4AF37;
+      --accent-C-im: #10B981;
+    }
+
+    * {
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    html, body {
+      margin: 0;
+      padding: 0;
+      width: 100%;
+      height: 100dvh;
+      overflow: hidden;
+      background-color: var(--bg-deep);
+      color: #F8FAFC;
+      font-family: 'Inter', system-ui, -apple-system, sans-serif;
+      user-select: none;
+    }
+
+    input {
+      user-select: text;
+    }
+
+    .font-mono-math {
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    /* Glassmorphism refinado */
+    .glass-panel {
+      background: var(--panel-bg);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border-color: var(--border-subtle);
+    }
+
+    /* Pulso cinematográfico para botões de Portal */
+    @keyframes portalPulse {
+      0%, 100% {
+        transform: scale(1);
+        box-shadow: 0 0 18px var(--portal-glow, rgba(6, 182, 212, 0.65)), inset 0 0 12px rgba(255, 255, 255, 0.22);
+      }
+      50% {
+        transform: scale(1.035);
+        box-shadow: 0 0 34px var(--portal-glow, rgba(6, 182, 212, 0.95)), inset 0 0 18px rgba(255, 255, 255, 0.42);
+      }
+    }
+
+    .portal-btn-pulse {
+      animation: portalPulse 1.65s ease-in-out infinite;
+    }
+
+    /* Animação de vórtice do Portal Selado */
+    @keyframes vortexSpin {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+    @keyframes vortexSpinReverse {
+      from { transform: rotate(360deg); }
+      to { transform: rotate(0deg); }
+    }
+    .vortex-cw {
+      animation: vortexSpin 16s linear infinite;
+      transform-origin: center;
+    }
+    .vortex-ccw {
+      animation: vortexSpinReverse 11s linear infinite;
+      transform-origin: center;
+    }
+
+    /* Vibração suave ao errar alternativa no quiz */
+    @keyframes modalShake {
+      0%, 100% { transform: translateX(0); }
+      20% { transform: translateX(-8px); }
+      40% { transform: translateX(8px); }
+      60% { transform: translateX(-5px); }
+      80% { transform: translateX(5px); }
+    }
+    .shake-anim {
+      animation: modalShake 0.36s ease-in-out;
+    }
+
+    /* Toast animado */
+    @keyframes fadeSlideUp {
+      from { opacity: 0; transform: translate(-50%, 10px); }
+      to { opacity: 1; transform: translate(-50%, 0); }
+    }
+    .toast-anim {
+      animation: fadeSlideUp 0.25s ease-out forwards;
+    }
+
+    /* Transição de botões */
+    .ctrl-btn {
+      transition: transform 0.12s ease, background-color 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
+    }
+    .ctrl-btn:active {
+      transform: scale(0.95);
+    }
+
+    /* Barra de rolagem discreta para o Passaporte no mobile */
+    .custom-scroll::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    .custom-scroll::-webkit-scrollbar-track {
+      background: rgba(15, 23, 42, 0.4);
+    }
+    .custom-scroll::-webkit-scrollbar-thumb {
+      background: rgba(148, 163, 184, 0.32);
+      border-radius: 999px;
+    }
+
+    /* Container rolável robusto para a Fase Bônus (PC 1366x768 e Mobile) */
+    .passport-scroll {
+      flex: 1 1 0%;
+      min-height: 0;
+      overflow-y: auto;
+      overflow-x: hidden;
+      -webkit-overflow-scrolling: touch;
+      overscroll-behavior: contain;
+    }
+
+    .passport-inner {
+      padding-bottom: calc(56px + env(safe-area-inset-bottom, 0px));
+    }
+
+    /* Diagrama SVG concêntrico transições */
+    .venn-ring {
+      transition: fill-opacity 0.35s ease, stroke-opacity 0.35s ease, stroke-width 0.35s ease, filter 0.35s ease;
+    }
+
+    /* Destaque da roupagem ativa no Passaporte */
+    .passport-card-active {
+      transform: translateY(-2px) scale(1.02);
+    }
+  </style>
+</head>
+<body class="flex flex-col h-[100dvh] w-screen overflow-hidden bg-[#060A14]">
+
+  <!-- ==================== CABEÇALHO SUPERIOR COMPACTO ==================== -->
+  <header class="glass-panel border-b px-3 sm:px-5 py-1.5 sm:py-2 z-30 shrink-0">
+    <div class="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-2">
+
+      <!-- Marca MATEMATIKÊS + Título -->
+      <div class="flex items-center gap-2.5 min-w-0">
+        <div id="brandOrb" class="w-3.5 h-3.5 rounded-full bg-amber-400 shadow-[0_0_12px_#F59E0B] shrink-0 transition-all duration-500"></div>
+        <div class="min-w-0">
+          <div class="flex items-center gap-2">
+            <span class="text-xs sm:text-sm font-black tracking-[0.16em] text-transparent bg-clip-text bg-gradient-to-r from-amber-300 via-cyan-300 to-emerald-300">
+              MATEMATIKÊS
+            </span>
+            <span class="hidden md:inline text-slate-600">•</span>
+            <h1 class="hidden md:inline text-xs sm:text-sm font-bold text-slate-200 truncate">
+              A Travessia dos Conjuntos Numéricos
+            </h1>
+          </div>
+          <p class="text-[10px] text-slate-400 leading-tight truncate hidden sm:block">
+            Inspirado no universo de <span class="text-slate-300 font-medium">A Saga dos Reinos Matemáticos</span>
+          </p>
+        </div>
+      </div>
+
+      <!-- Seletor de Modo Principal (Travessia vs Passaporte) -->
+      <div class="flex items-center bg-slate-900/85 border border-slate-700/70 rounded-xl p-0.5 gap-0.5">
+        <button id="tabJourney" class="ctrl-btn px-2.5 sm:px-3.5 py-1.5 rounded-lg text-[11px] sm:text-xs font-bold bg-slate-700/90 text-white shadow-sm flex items-center gap-1.5 cursor-pointer">
+          <span>🚀</span>
+          <span>Travessia</span>
+        </button>
+        <button id="tabPassport" class="ctrl-btn px-2.5 sm:px-3.5 py-1.5 rounded-lg text-[11px] sm:text-xs font-bold text-slate-400 hover:text-slate-100 flex items-center gap-1.5 cursor-pointer">
+          <span>🪪</span>
+          <span>Passaporte</span>
+        </button>
+      </div>
+
+      <!-- Controles Rápidos: Modo Livre, Som, Reiniciar -->
+      <div class="flex items-center gap-1.5">
+        <button id="btnFreeMode" title="Ative para pular quizzes e navegar livremente entre todos os conjuntos (ideal para aulas e vídeos)"
+          class="ctrl-btn px-2.5 py-1.5 rounded-lg text-[11px] sm:text-xs font-semibold border border-slate-700/80 bg-slate-800/65 text-slate-300 hover:text-white flex items-center gap-1.5 cursor-pointer">
+          <span id="freeModeDot" class="w-2 h-2 rounded-full bg-slate-500 transition-all"></span>
+          <span class="hidden lg:inline">Modo Livre (Sem Quiz)</span>
+          <span class="lg:hidden">Livre</span>
+        </button>
+
+        <button id="btnSound" title="Ligar/Desligar efeitos sonoros"
+          class="ctrl-btn px-2.5 py-1.5 rounded-lg text-xs font-semibold border border-slate-700/80 bg-slate-800/65 text-slate-200 hover:bg-slate-700/70 cursor-pointer">
+          <span id="soundIcon">🔊</span>
+        </button>
+
+        <button id="btnReset" title="Reiniciar a jornada do início"
+          class="ctrl-btn px-2.5 py-1.5 rounded-lg text-xs font-semibold border border-slate-700/80 bg-slate-800/65 text-slate-300 hover:text-white hover:border-rose-500/60 hover:bg-rose-950/30 cursor-pointer">
+          ↺
+        </button>
+      </div>
+    </div>
+
+    <!-- Barra de Progresso e Inclusão (N ⊂ Z ⊂ Q ⊂ R ⊂ C) — visível no Modo Jornada -->
+    <div id="stepperBar" class="max-w-7xl mx-auto mt-1.5 pt-1.5 border-t border-slate-800/80 flex items-center justify-between gap-2">
+      <nav id="stageStepper" aria-label="Inclusão dos Conjuntos Numéricos" class="flex items-center gap-1 sm:gap-1.5 mx-auto">
+        <!-- Renderizado dinamicamente via JS -->
+      </nav>
+    </div>
+  </header>
+
+  <!-- ==================== MODO 1: JORNADA DOS PORTAIS ==================== -->
+  <section id="journeyView" class="flex-1 flex flex-col min-h-0 overflow-hidden relative">
+
+    <!-- Área Central do Canvas 2D -->
+    <main id="canvasContainer" class="relative flex-1 w-full min-h-[210px] overflow-hidden">
+      <canvas id="mathCanvas" class="block w-full h-full cursor-crosshair touch-none"></canvas>
+
+      <!-- Toast de Feedback Rápido -->
+      <div id="canvasToast" class="hidden pointer-events-none absolute top-3.5 left-1/2 -translate-x-1/2 px-4 py-2 rounded-full glass-panel border text-xs sm:text-sm font-semibold shadow-2xl z-20 max-w-[92%] text-center">
+      </div>
+
+      <!-- Dica de Navegação Discreta (Desktop) -->
+      <div id="canvasHint" class="pointer-events-none absolute top-3 left-3 px-2.5 py-1 rounded-lg bg-slate-900/65 border border-slate-700/50 text-[10px] sm:text-xs text-slate-400 hidden md:flex items-center gap-1.5">
+        <span>⌨️ Setas do teclado ou clique/toque direto na reta</span>
+      </div>
+
+      <!-- Badge de Conquista: Ciclo Completo -->
+      <div id="cycleBadge" class="hidden absolute top-3 right-3 px-3 py-1.5 rounded-xl bg-gradient-to-r from-amber-500/20 via-emerald-500/20 to-cyan-500/20 border border-amber-400/50 text-[11px] sm:text-xs font-extrabold text-amber-200 shadow-[0_0_18px_rgba(245,158,11,0.3)] z-20 flex items-center gap-1.5">
+        <span>🏆</span>
+        <span class="font-mono-math">Ciclo Completo: ℕ ⊂ ℤ ⊂ ℚ ⊂ ℝ ⊂ ℂ</span>
+      </div>
+
+      <!-- Card Curto de Colapso Dimensional (aparece no caminho de retorno) -->
+      <div id="collapseCard" class="hidden absolute top-14 right-3 sm:right-4 w-[280px] sm:w-[320px] glass-panel border border-cyan-500/40 rounded-2xl p-3 shadow-2xl z-20">
+        <div class="flex items-start justify-between gap-2">
+          <div class="text-[11px] font-extrabold uppercase tracking-wider text-cyan-300" id="collapseCardTitle">
+            Colapso Dimensional
+          </div>
+          <button id="btnCloseCollapseCard" class="text-slate-400 hover:text-white text-xs font-bold px-1 cursor-pointer">✕</button>
+        </div>
+        <p id="collapseCardText" class="text-xs text-slate-200 mt-1 leading-relaxed"></p>
+      </div>
+
+      <!-- Botões Flutuantes de Portal (Expansão / Retorno) sobre a base do Canvas -->
+      <div class="absolute bottom-3 left-1/2 -translate-x-1/2 z-20 w-[94%] sm:w-auto flex flex-wrap items-center justify-center gap-2 pointer-events-none">
+        <!-- Botão Principal de Expansão (Ida) -->
+        <button id="btnOpenPortal"
+          class="hidden pointer-events-auto portal-btn-pulse ctrl-btn px-4 sm:px-6 py-2.5 sm:py-3 rounded-2xl font-extrabold text-xs sm:text-sm md:text-base text-white tracking-wide flex items-center justify-center gap-2 border border-white/30 cursor-pointer">
+          <span id="portalBtnText">Abrir Portal</span>
+        </button>
+
+        <!-- Botão Elegante de Retorno / Colapso Dimensional (Volta) -->
+        <button id="btnCollapsePortal"
+          class="hidden pointer-events-auto ctrl-btn px-3.5 sm:px-4 py-2 sm:py-2.5 rounded-2xl font-bold text-[11px] sm:text-xs text-slate-100 bg-slate-900/85 hover:bg-slate-800 border border-slate-500/60 hover:border-cyan-400/70 shadow-lg flex items-center gap-1.5 cursor-pointer">
+          <span>⏪</span>
+          <span id="collapseBtnText">Retornar</span>
+        </button>
+      </div>
+    </main>
+
+    <!-- Painel Inferior (HUD Responsivo) -->
+    <footer class="glass-panel border-t px-2.5 sm:px-5 py-2 sm:py-2.5 z-20 shrink-0 max-h-[44vh] overflow-y-auto custom-scroll">
+      <div class="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-2 sm:gap-2.5 items-center">
+
+        <!-- Esquerda: Posição Atual do Viajante -->
+        <div class="lg:col-span-3 flex items-center justify-between gap-2 bg-slate-900/75 border border-slate-700/60 rounded-2xl px-3 py-2">
+          <div class="min-w-0">
+            <div class="flex items-center gap-1.5 mb-0.5">
+              <span id="hudStageBadge" class="px-2 py-0.5 rounded-md text-[10px] sm:text-xs font-bold uppercase tracking-wider bg-amber-500/20 text-amber-300 border border-amber-500/40">
+                ℕ • Naturais
+              </span>
+              <span id="hudModulus" class="hidden text-[11px] font-mono-math text-emerald-300 font-semibold">
+                |z| = 1
+              </span>
+            </div>
+            <div id="hudValue" class="font-mono-math text-lg sm:text-xl font-extrabold text-white truncate">
+              1
+            </div>
+          </div>
+          <div id="hudSymbolBig" class="text-2xl sm:text-3xl font-extrabold opacity-30 font-mono-math select-none shrink-0 text-amber-400">
+            ℕ
+          </div>
+        </div>
+
+        <!-- Centro: Controles Contextuais (Touch-Friendly) -->
+        <div id="hudControls" class="lg:col-span-5 flex flex-wrap items-center justify-center gap-1.5">
+          <!-- Renderizado dinamicamente -->
+        </div>
+
+        <!-- Direita: Nota da Fronteira -->
+        <div class="lg:col-span-4 bg-slate-900/65 border border-slate-700/50 rounded-2xl px-3 py-2 flex items-start gap-2">
+          <div id="noteIcon" class="text-base shrink-0 mt-0.5">🧭</div>
+          <div class="min-w-0">
+            <div id="noteTitle" class="text-[10px] sm:text-[11px] font-bold uppercase tracking-wider text-amber-300 truncate">
+              Nota da Fronteira
+            </div>
+            <p id="noteBody" class="text-[11px] sm:text-xs text-slate-300 leading-snug mt-0.5 line-clamp-2 sm:line-clamp-none">
+              Nos Naturais, o caminho começa no 0. Tente ir para a esquerda do 0!
+            </p>
+          </div>
+        </div>
+
+      </div>
+    </footer>
+  </section>
+
+  <!-- ==================== MODO 2: PASSAPORTE DO NÚMERO (FASE BÔNUS) ==================== -->
+  <section id="passportView" class="hidden passport-scroll custom-scroll px-3 sm:px-6 py-3 sm:py-4">
+    <div class="passport-inner max-w-6xl mx-auto space-y-3.5 sm:space-y-4">
+
+      <!-- Cabeçalho Compacto do Passaporte -->
+      <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 border-b border-slate-800/80 pb-2.5">
+        <div class="space-y-0.5 text-center sm:text-left">
+          <div class="flex flex-wrap items-center justify-center sm:justify-start gap-2">
+            <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-widest bg-emerald-500/15 text-emerald-300 border border-emerald-500/35">
+              🪪 Fase Bônus
+            </span>
+            <h2 class="text-lg sm:text-2xl font-black tracking-tight text-white">
+              Passaporte do Número
+            </h2>
+          </div>
+          <p class="text-[11px] sm:text-xs text-slate-400">
+            Digite qualquer número para ver em quais conjuntos ele existe (<span class="font-mono-math text-emerald-300">∈</span>) e <strong class="text-slate-200">como ele se veste</strong> em cada um.
+          </p>
+        </div>
+        <button id="btnTopBackToJourney"
+          class="hidden sm:inline-flex ctrl-btn px-3.5 py-2 rounded-xl text-xs font-bold bg-slate-800/90 hover:bg-slate-700 text-slate-100 border border-slate-600/70 hover:border-cyan-400/60 items-center gap-1.5 cursor-pointer shrink-0">
+          <span>🚀</span>
+          <span>Voltar à Travessia</span>
+        </button>
+      </div>
+
+      <!-- Painel de Entrada + Diagrama SVG Concêntrico -->
+      <div class="grid grid-cols-1 sm:grid-cols-12 gap-2.5 sm:gap-3 items-stretch">
+
+        <!-- Entrada e Chips de Exemplos Rápidos -->
+        <div class="sm:col-span-7 glass-panel border rounded-2xl p-3 sm:p-3.5 flex flex-col justify-between gap-2.5">
+          <div>
+            <label for="passportInput" class="block text-[10px] sm:text-[11px] font-bold uppercase tracking-wider text-slate-400 mb-1">
+              Digite um número (ex: 2, -5, 0,5, 1/3, √2, pi, 3+2i)
+            </label>
+            <div class="flex items-stretch gap-2">
+              <input id="passportInput" type="text" value="2" autocomplete="off" spellcheck="false"
+                placeholder="Ex: 2, -5, 1/3, √2, 3+2i..."
+                class="min-w-0 flex-1 bg-slate-950/90 border border-slate-600/80 focus:border-cyan-400 focus:outline-none focus:ring-2 focus:ring-cyan-400/25 rounded-xl px-3 py-2 font-mono-math text-sm sm:text-base font-bold text-white placeholder-slate-500" />
+              <button id="btnAnalyzeNumber"
+                class="ctrl-btn px-3 sm:px-4 py-2 rounded-xl font-extrabold text-xs sm:text-sm bg-gradient-to-r from-cyan-500 to-emerald-500 hover:from-cyan-400 hover:to-emerald-400 text-slate-950 shadow-lg cursor-pointer shrink-0 whitespace-nowrap">
+                <span class="hidden sm:inline">Emitir Passaporte</span>
+                <span class="sm:hidden">Analisar</span>
+              </button>
+            </div>
+            <div id="passportError" class="hidden mt-1 text-xs text-rose-400 font-medium"></div>
+          </div>
+
+          <!-- Chips de Exemplos Rápidos -->
+          <div>
+            <div class="text-[10px] sm:text-[11px] font-semibold text-slate-400 mb-1">Exemplos rápidos:</div>
+            <div id="passportChips" class="flex flex-wrap gap-1.5">
+              <!-- Renderizado via JS -->
+            </div>
+          </div>
+
+          <!-- Resumo da Classificação -->
+          <div id="passportSummary" class="bg-slate-900/80 border border-slate-700/60 rounded-xl px-3 py-2 flex flex-wrap items-center justify-between gap-2">
+            <div>
+              <div class="text-[10px] uppercase tracking-wider text-slate-400 font-bold">Menor conjunto que o contém</div>
+              <div id="passportHomeSet" class="text-xs sm:text-sm font-extrabold text-amber-300 mt-0.5">
+                Números Naturais (ℕ)
+              </div>
+            </div>
+            <div id="passportChain" class="font-mono-math text-[11px] sm:text-xs font-bold text-slate-300 bg-slate-950/80 px-2.5 py-1 rounded-lg border border-slate-800">
+              2 ∈ ℕ ⊂ ℤ ⊂ ℚ ⊂ ℝ ⊂ ℂ
+            </div>
+          </div>
+        </div>
+
+        <!-- Diagrama Visual SVG Concêntrico de Inclusão -->
+        <div class="sm:col-span-5 glass-panel border rounded-2xl p-2.5 sm:p-3 flex flex-col items-center justify-center relative">
+          <div class="text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-1">
+            Inclusão (ℕ ⊂ ℤ ⊂ ℚ ⊂ ℝ ⊂ ℂ)
+          </div>
+          <svg id="vennSvg" viewBox="0 0 360 225" class="w-full max-w-[235px] h-auto" aria-label="Diagrama concêntrico dos conjuntos numéricos">
+            <!-- Complexos C -->
+            <ellipse id="ring-C" class="venn-ring" cx="180" cy="112" rx="172" ry="102" fill="#D4AF37" fill-opacity="0.10" stroke="#D4AF37" stroke-width="2" />
+            <text x="326" y="42" fill="#FDE68A" font-family="JetBrains Mono, monospace" font-weight="800" font-size="14">ℂ</text>
+
+            <!-- Reais R -->
+            <ellipse id="ring-R" class="venn-ring" cx="158" cy="112" rx="138" ry="84" fill="#10B981" fill-opacity="0.12" stroke="#10B981" stroke-width="2" />
+            <text x="274" y="56" fill="#6EE7B7" font-family="JetBrains Mono, monospace" font-weight="800" font-size="14">ℝ</text>
+
+            <!-- Racionais Q -->
+            <ellipse id="ring-Q" class="venn-ring" cx="136" cy="112" rx="104" ry="66" fill="#8B5CF6" fill-opacity="0.13" stroke="#8B5CF6" stroke-width="2" />
+            <text x="220" y="72" fill="#C4B5FD" font-family="JetBrains Mono, monospace" font-weight="800" font-size="14">ℚ</text>
+
+            <!-- Inteiros Z -->
+            <ellipse id="ring-Z" class="venn-ring" cx="114" cy="112" rx="72" ry="48" fill="#06B6D4" fill-opacity="0.14" stroke="#06B6D4" stroke-width="2" />
+            <text x="167" y="88" fill="#67E8F9" font-family="JetBrains Mono, monospace" font-weight="800" font-size="14">ℤ</text>
+
+            <!-- Naturais N -->
+            <ellipse id="ring-N" class="venn-ring" cx="92" cy="112" rx="40" ry="30" fill="#F59E0B" fill-opacity="0.22" stroke="#F59E0B" stroke-width="2.5" />
+            <text x="86" y="106" fill="#FCD34D" font-family="JetBrains Mono, monospace" font-weight="800" font-size="14" text-anchor="middle">ℕ</text>
+
+            <!-- Indicador do número atual no diagrama -->
+            <g id="vennMarker" transform="translate(92, 125)">
+              <circle r="5" fill="#FFFFFF" />
+              <text id="vennMarkerLabel" y="16" fill="#FFFFFF" font-family="JetBrains Mono, monospace" font-weight="800" font-size="11" text-anchor="middle">2</text>
+            </g>
+          </svg>
+        </div>
+      </div>
+
+      <!-- Barra Interativa de Evolução das Roupagens (Passo a Passo) -->
+      <div class="glass-panel border border-cyan-500/30 rounded-2xl px-3 py-2 flex flex-wrap items-center justify-between gap-2">
+        <div class="flex items-center gap-2 min-w-0">
+          <span class="text-sm">🎭</span>
+          <div class="min-w-0">
+            <div class="text-[10px] uppercase tracking-wider text-slate-400 font-bold">Roupagem em Destaque</div>
+            <div id="outfitStepLabel" class="font-mono-math text-xs sm:text-sm font-extrabold text-amber-300 truncate">
+              ℕ (Naturais): 2
+            </div>
+          </div>
+        </div>
+        <div class="flex items-center gap-1.5">
+          <button id="btnPrevOutfit"
+            class="ctrl-btn px-2.5 sm:px-3 py-1.5 rounded-xl text-[11px] sm:text-xs font-bold bg-slate-800/90 hover:bg-slate-700 text-slate-200 border border-slate-600/80 cursor-pointer">
+            ◀ Anterior
+          </button>
+          <button id="btnNextOutfit"
+            class="ctrl-btn px-3 sm:px-4 py-1.5 rounded-xl text-[11px] sm:text-xs font-extrabold bg-gradient-to-r from-amber-400 via-cyan-400 to-emerald-400 hover:brightness-110 text-slate-950 shadow-md cursor-pointer">
+            Próxima Roupagem ▶
+          </button>
+        </div>
+      </div>
+
+      <!-- 5 Cartões Simultâneos dos Conjuntos -->
+      <div id="passportCards" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-2 sm:gap-2.5">
+        <!-- Renderizado dinamicamente via JS -->
+      </div>
+
+      <!-- Barra de Ações Inferior do Passaporte (100% visível com folga segura) -->
+      <div class="pt-1 flex flex-wrap items-center justify-center gap-2.5">
+        <button id="btnViewOnJourney"
+          class="ctrl-btn px-4 sm:px-5 py-2.5 rounded-2xl text-xs sm:text-sm font-extrabold bg-gradient-to-r from-amber-400 via-cyan-400 to-emerald-400 hover:brightness-110 text-slate-950 shadow-[0_0_20px_rgba(6,182,212,0.3)] flex items-center gap-2 cursor-pointer">
+          <span>📍</span>
+          <span>Ver este número na Reta/Plano</span>
+        </button>
+
+        <button id="btnBackToJourney"
+          class="ctrl-btn px-4 sm:px-5 py-2.5 rounded-2xl text-xs sm:text-sm font-bold bg-slate-800/90 hover:bg-slate-700 text-slate-100 border border-slate-600/80 hover:border-cyan-400/70 flex items-center gap-2 cursor-pointer">
+          <span>🚀</span>
+          <span>Voltar à Travessia</span>
+        </button>
+      </div>
+
+      <!-- Rodapé Sutil do Canal -->
+      <div class="text-center pt-1 text-[11px] text-slate-500">
+        <span class="font-bold text-slate-400">MATEMATIKÊS</span> • Ferramenta educacional gratuita inspirada em <em class="text-slate-400">A Saga dos Reinos Matemáticos</em>
+      </div>
+    </div>
+  </section>
+
+  <!-- ==================== MODAL IMERSIVO: PORTAL SELADO (QUIZ) ==================== -->
+  <div id="quizModal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-5 bg-slate-950/85 backdrop-blur-md">
+    <div id="quizCard" class="relative w-full max-w-xl glass-panel border-2 border-cyan-500/50 rounded-3xl p-5 sm:p-7 shadow-[0_0_50px_rgba(6,182,212,0.28)] overflow-hidden">
+
+      <!-- Vórtice SVG Animado de Fundo -->
+      <div class="pointer-events-none absolute -top-24 -right-24 w-64 h-64 opacity-20">
+        <svg viewBox="0 0 200 200" class="w-full h-full">
+          <g class="vortex-cw">
+            <circle cx="100" cy="100" r="88" fill="none" stroke="currentColor" stroke-width="2" stroke-dasharray="14 10" class="text-cyan-400" />
+            <circle cx="100" cy="100" r="64" fill="none" stroke="currentColor" stroke-width="2.5" stroke-dasharray="8 8" class="text-violet-400" />
+          </g>
+          <g class="vortex-ccw">
+            <circle cx="100" cy="100" r="42" fill="none" stroke="currentColor" stroke-width="2" stroke-dasharray="10 6" class="text-emerald-400" />
+          </g>
+        </svg>
+      </div>
+
+      <!-- Cabeçalho do Portal Selado -->
+      <div class="relative z-10 flex items-start justify-between gap-3">
+        <div class="flex items-center gap-3">
+          <div id="quizPortalIcon" class="w-11 h-11 rounded-2xl flex items-center justify-center text-2xl bg-cyan-500/20 border border-cyan-400/50 shadow-inner shrink-0">
+            🌀
+          </div>
+          <div>
+            <div class="text-[11px] font-black uppercase tracking-[0.2em] text-cyan-300" id="quizSubtitle">
+              PORTAL SELADO • ℕ → ℤ
+            </div>
+            <h3 id="quizTitle" class="text-lg sm:text-xl font-extrabold text-white leading-tight">
+              O Enigma do Espelho
+            </h3>
+          </div>
+        </div>
+        <button id="btnCloseQuiz" title="Fechar e voltar ao mapa"
+          class="ctrl-btn w-8 h-8 rounded-xl bg-slate-800/80 hover:bg-slate-700 text-slate-300 hover:text-white flex items-center justify-center font-bold cursor-pointer">
+          ✕
+        </button>
+      </div>
+
+      <!-- Contexto + Pergunta -->
+      <div class="relative z-10 mt-4 space-y-2">
+        <p id="quizContext" class="text-xs sm:text-sm text-slate-300 leading-relaxed"></p>
+        <p id="quizQuestion" class="text-sm sm:text-base font-bold text-white bg-slate-900/80 border border-slate-700/70 rounded-2xl px-4 py-3"></p>
+      </div>
+
+      <!-- Alternativas A, B, C, D -->
+      <div id="quizOptions" class="relative z-10 mt-4 grid grid-cols-1 gap-2">
+        <!-- Renderizado dinamicamente -->
+      </div>
+
+      <!-- Feedback / Dica Pedagógica -->
+      <div id="quizFeedback" class="hidden relative z-10 mt-4 rounded-2xl px-4 py-3 text-xs sm:text-sm font-medium border">
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ==================== SCRIPT PRINCIPAL ==================== -->
+  <script>
+    (() => {
+      'use strict';
+
+      /* =========================================================================
+         1. CONFIGURAÇÃO DOS 5 CONJUNTOS, QUIZZES E COLAPSO DIMENSIONAL
+         ========================================================================= */
+      const STAGES = [
+        {
+          id: 0,
+          symbol: 'ℕ',
+          name: 'Naturais',
+          fullName: 'Números Naturais (ℕ)',
+          color: '#F59E0B',
+          light: '#FCD34D',
+          badgeClass: 'bg-amber-500/20 text-amber-300 border-amber-500/40',
+          portalBtnLabel: '🪞 Abrir Portal para ℤ (Espelho da Simetria)',
+          portalBtnGradient: 'linear-gradient(135deg, #0891B2, #06B6D4, #38BDF8)',
+          portalGlow: 'rgba(6, 182, 212, 0.85)',
+          noteTitle: 'Fronteira de ℕ • O Limite do Zero',
+          noteDefault: 'Nos Naturais (0, 1, 2, 3...), o caminho só existe à direita do zero. Vá até o 0 e tente fazer 0 − 1 para testar a barreira.',
+          noteBlocked: 'Barreira atingida! A subtração 0 − 1 não tem chão nos Naturais. Abra o Portal do Espelho da Simetria para criar os negativos!'
+        },
+        {
+          id: 1,
+          symbol: 'ℤ',
+          name: 'Inteiros',
+          fullName: 'Números Inteiros (ℤ)',
+          color: '#06B6D4',
+          light: '#67E8F9',
+          badgeClass: 'bg-cyan-500/20 text-cyan-300 border-cyan-500/40',
+          portalBtnLabel: '🔍 Abrir Portal para ℚ (Lente de Frações)',
+          portalBtnGradient: 'linear-gradient(135deg, #7C3AED, #8B5CF6, #A78BFA)',
+          portalGlow: 'rgba(139, 92, 246, 0.85)',
+          noteTitle: 'Fronteira de ℤ • O Vazio Entre Inteiros',
+          noteDefault: 'Agora há pilares positivos e negativos, mas o espaço entre eles está vazio. Clique em "Dividir por 2" num ímpar ou toque entre 0 e 1.',
+          noteBlocked: 'Sem chão! Entre dois inteiros consecutivos não existe outro inteiro. Abra o Portal da Lente de Frações para subdividir os intervalos!'
+        },
+        {
+          id: 2,
+          symbol: 'ℚ',
+          name: 'Racionais',
+          fullName: 'Números Racionais (ℚ)',
+          color: '#8B5CF6',
+          light: '#C4B5FD',
+          badgeClass: 'bg-violet-500/20 text-violet-300 border-violet-500/40',
+          portalBtnLabel: '🧭 Abrir Portal para ℝ (Arco do Compasso)',
+          portalBtnGradient: 'linear-gradient(135deg, #059669, #10B981, #34D399)',
+          portalGlow: 'rgba(16, 185, 129, 0.85)',
+          noteTitle: 'Fronteira de ℚ • A Fenda Invisível (√2)',
+          noteDefault: 'Frações e decimais preenchem quase tudo, mas existe uma microfenda verde em √2 (~1,4142). Clique em "Buscar √2" para tentar alcançá-la.',
+          noteBlocked: '1,4 → 1,41 → 1,4142... Nenhuma fração atinge √2 exatamente! Use o Arco do Compasso para projetar a diagonal do quadrado na reta.'
+        },
+        {
+          id: 3,
+          symbol: 'ℝ',
+          name: 'Reais',
+          fullName: 'Números Reais (ℝ)',
+          color: '#10B981',
+          light: '#6EE7B7',
+          badgeClass: 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40',
+          portalBtnLabel: '🌀 Abrir Portal para ℂ (Plano 2D)',
+          portalBtnGradient: 'linear-gradient(135deg, #B45309, #D4AF37, #10B981)',
+          portalGlow: 'rgba(212, 175, 55, 0.85)',
+          noteTitle: 'Fronteira de ℝ • O Limite da Reta 1D',
+          noteDefault: 'A reta real é contínua e abriga Racionais e Irracionais (√2, π). Clique em "Calcular √(−1)" para testar o limite da dimensão 1D.',
+          noteBlocked: 'Nenhum número real ao quadrado resulta em −1. Para resolver √(−1), precisamos expandir a reta 1D para o Plano Complexo 2D!'
+        },
+        {
+          id: 4,
+          symbol: 'ℂ',
+          name: 'Complexos',
+          fullName: 'Números Complexos (ℂ)',
+          color: '#D4AF37',
+          light: '#6EE7B7',
+          badgeClass: 'bg-amber-500/20 text-amber-200 border-amber-400/50',
+          portalBtnLabel: '',
+          portalBtnGradient: '',
+          portalGlow: '',
+          noteTitle: 'Plano de Argand-Gauss (ℂ) • Rotações 2D',
+          noteDefault: 'Eixo Real (dourado) + Eixo Imaginário (esmeralda). Clique no plano ou em "Multiplicar por i" para ver o giro de 90° (1 → i → −1 → −i).',
+          noteBlocked: ''
+        }
+      ];
+
+      // Perguntas dos Portais Selados (Ida)
+      const PORTAL_QUIZZES = {
+        0: {
+          subtitle: 'PORTAL SELADO • ℕ → ℤ',
+          title: 'O Enigma do Espelho da Simetria',
+          icon: '🪞',
+          accent: '#06B6D4',
+          context: 'Nos Números Naturais (0, 1, 2, 3...), toda soma funciona, mas algumas subtrações esbarram na barreira do zero.',
+          question: 'Por que a operação 3 − 5 exige a criação dos Números Inteiros (ℤ)?',
+          options: [
+            { letter: 'A', text: 'Porque 3 − 5 dá uma fração entre 0 e 1.' },
+            { letter: 'B', text: 'Porque o resultado (−2) está à esquerda do zero, exigindo o reflexo simétrico dos positivos.', correct: true },
+            { letter: 'C', text: 'Porque os Naturais terminam no número 5.' },
+            { letter: 'D', text: 'Porque toda subtração gera um número irracional.' }
+          ],
+          hint: 'Dica: Pense na reta numérica. Saindo do 3 e recuando 5 passos para a esquerda, você atravessa o 0 e vai para o lado oposto!'
+        },
+        1: {
+          subtitle: 'PORTAL SELADO • ℤ → ℚ',
+          title: 'O Enigma da Lente de Frações',
+          icon: '🔍',
+          accent: '#8B5CF6',
+          context: 'Nos Inteiros (..., −2, −1, 0, 1, 2...), já podemos subtrair qualquer valor, mas ainda existem vãos vazios entre pilares vizinhos.',
+          question: 'Qual operação entre números inteiros mostra a necessidade do conjunto dos Racionais (ℚ)?',
+          options: [
+            { letter: 'A', text: 'A soma (−3) + 7, que resulta em 4.' },
+            { letter: 'B', text: 'A multiplicação (−2) × (−5), que resulta em 10.' },
+            { letter: 'C', text: 'A divisão 1 ÷ 2 (ou 9 ÷ 2), cujo resultado fica exatamente no espaço entre dois inteiros.', correct: true },
+            { letter: 'D', text: 'A subtração 0 − 8, que resulta em −8.' }
+          ],
+          hint: 'Dica: Soma, subtração e multiplicação de inteiros sempre dão inteiros. Qual operação "quebra" um número em partes?'
+        },
+        2: {
+          subtitle: 'PORTAL SELADO • ℚ → ℝ',
+          title: 'O Enigma da Fenda Invisível',
+          icon: '🧭',
+          accent: '#10B981',
+          context: 'Os Racionais parecem cobrir toda a reta, mas a diagonal de um quadrado de lado 1 mede √2 ≈ 1,41421356...',
+          question: 'Por que √2 não pode ser alcançado dentro do conjunto dos Racionais (ℚ)?',
+          options: [
+            { letter: 'A', text: 'Porque √2 é um número negativo muito pequeno.' },
+            { letter: 'B', text: 'Porque sua expansão decimal é infinita e não periódica, não podendo ser escrita como fração de inteiros.', correct: true },
+            { letter: 'C', text: 'Porque √2 é maior do que 2.' },
+            { letter: 'D', text: 'Porque a geometria não funciona na reta numérica.' }
+          ],
+          hint: 'Dica: Todo número racional tem decimal finito ou dízima periódica (que se repete). Em √2 = 1,41421356..., os dígitos nunca formam um período!'
+        },
+        3: {
+          subtitle: 'PORTAL SELADO • ℝ → ℂ',
+          title: 'O Enigma da Dimensão Imaginária',
+          icon: '🌀',
+          accent: '#D4AF37',
+          context: 'A reta Real (ℝ) é totalmente contínua, mas ao buscar a solução da equação x² = −1, ficamos presos sem saída na reta 1D.',
+          question: 'Como os Números Complexos (ℂ) resolvem o impasse de √(−1)?',
+          options: [
+            { letter: 'A', text: 'Definindo que (−1) × (−1) passa a valer −1.' },
+            { letter: 'B', text: 'Apagando os números negativos da reta real.' },
+            { letter: 'C', text: 'Expandindo a reta para um plano 2D com a unidade imaginária i (onde i² = −1), representando rotações de 90°.', correct: true },
+            { letter: 'D', text: 'Aproximando √(−1) por uma fração com denominador 100.' }
+          ],
+          hint: 'Dica: Na reta real, positivo² > 0 e negativo² > 0. Para que um número ao quadrado vire −1 (giro de 180°), precisamos de um giro de 90° fora da reta!'
+        }
+      };
+
+      // Descrições do Caminho de Retorno (Colapso Dimensional)
+      const COLLAPSE_INFO = {
+        4: {
+          title: 'Colapso ℂ → ℝ (Perda do Eixo Imaginário)',
+          text: 'Ao zerar a parte imaginária (b = 0), o plano 2D se achata na reta real. Perdemos as rotações fora da reta e as soluções de x² = −1.'
+        },
+        3: {
+          title: 'Colapso ℝ → ℚ (Perda dos Irracionais)',
+          text: 'O filtro racional remove números de decimais infinitas sem período (como √2 e π). A reta contínua volta a ter microfendas invisíveis.'
+        },
+        2: {
+          title: 'Colapso ℚ → ℤ (Perda das Frações)',
+          text: 'A lente de frações se fecha! Restam apenas os pilares inteiros isolados; divisões como 1 ÷ 2 voltam a não ter chão.'
+        },
+        1: {
+          title: 'Colapso ℤ → ℕ (Perda dos Negativos)',
+          text: 'O Espelho da Simetria se recolhe no zero. O lado esquerdo volta a ser névoa e subtrações como 0 − 1 voltam a ser impossíveis.'
+        }
+      };
+
+      /* =========================================================================
+         2. MOTOR DE ÁUDIO SINTÉTICO (Web Audio API)
+         ========================================================================= */
+      class SoundEngine {
+        constructor() {
+          this.enabled = true;
+          this.ctx = null;
+        }
+        ensureContext() {
+          if (!this.enabled) return null;
+          if (!this.ctx) {
+            const AudioCtx = window.AudioContext || window.webkitAudioContext;
+            if (AudioCtx) this.ctx = new AudioCtx();
+          }
+          if (this.ctx && this.ctx.state === 'suspended') {
+            this.ctx.resume().catch(() => {});
+          }
+          return this.ctx;
+        }
+        playStep(pitchOffset = 0) {
+          const ctx = this.ensureContext();
+          if (!ctx) return;
+          const now = ctx.currentTime;
+          const osc = ctx.createOscillator();
+          const gain = ctx.createGain();
+          osc.type = 'sine';
+          const base = 360 + Math.max(-140, Math.min(240, pitchOffset * 18));
+          osc.frequency.setValueAtTime(base, now);
+          osc.frequency.exponentialRampToValueAtTime(base * 1.22, now + 0.06);
+          gain.gain.setValueAtTime(0.001, now);
+          gain.gain.linearRampToValueAtTime(0.085, now + 0.012);
+          gain.gain.exponentialRampToValueAtTime(0.0008, now + 0.11);
+          osc.connect(gain);
+          gain.connect(ctx.destination);
+          osc.start(now);
+          osc.stop(now + 0.12);
+        }
+        playTick(freq = 540) {
+          const ctx = this.ensureContext();
+          if (!ctx) return;
+          const now = ctx.currentTime;
+          const osc = ctx.createOscillator();
+          const gain = ctx.createGain();
+          osc.type = 'triangle';
+          osc.frequency.setValueAtTime(freq, now);
+          gain.gain.setValueAtTime(0.055, now);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + 0.08);
+          osc.connect(gain);
+          gain.connect(ctx.destination);
+          osc.start(now);
+          osc.stop(now + 0.09);
+        }
+        playBarrier() {
+          const ctx = this.ensureContext();
+          if (!ctx) return;
+          const now = ctx.currentTime;
+          const osc1 = ctx.createOscillator();
+          const osc2 = ctx.createOscillator();
+          const filter = ctx.createBiquadFilter();
+          const gain = ctx.createGain();
+          osc1.type = 'sawtooth';
+          osc2.type = 'triangle';
+          osc1.frequency.setValueAtTime(120, now);
+          osc1.frequency.exponentialRampToValueAtTime(52, now + 0.26);
+          osc2.frequency.setValueAtTime(127, now);
+          osc2.frequency.exponentialRampToValueAtTime(48, now + 0.26);
+          filter.type = 'lowpass';
+          filter.frequency.setValueAtTime(400, now);
+          filter.frequency.exponentialRampToValueAtTime(90, now + 0.26);
+          gain.gain.setValueAtTime(0.001, now);
+          gain.gain.linearRampToValueAtTime(0.16, now + 0.015);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + 0.3);
+          osc1.connect(filter);
+          osc2.connect(filter);
+          filter.connect(gain);
+          gain.connect(ctx.destination);
+          osc1.start(now);
+          osc2.start(now);
+          osc1.stop(now + 0.31);
+          osc2.stop(now + 0.31);
+        }
+        playQuizCorrect() {
+          const ctx = this.ensureContext();
+          if (!ctx) return;
+          const now = ctx.currentTime;
+          [523.25, 659.25, 783.99].forEach((f, idx) => {
+            const osc = ctx.createOscillator();
+            const gain = ctx.createGain();
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(f, now + idx * 0.07);
+            gain.gain.setValueAtTime(0.001, now + idx * 0.07);
+            gain.gain.linearRampToValueAtTime(0.1, now + idx * 0.07 + 0.02);
+            gain.gain.exponentialRampToValueAtTime(0.001, now + idx * 0.07 + 0.35);
+            osc.connect(gain);
+            gain.connect(ctx.destination);
+            osc.start(now + idx * 0.07);
+            osc.stop(now + idx * 0.07 + 0.36);
+          });
+        }
+        playQuizWrong() {
+          const ctx = this.ensureContext();
+          if (!ctx) return;
+          const now = ctx.currentTime;
+          const osc = ctx.createOscillator();
+          const gain = ctx.createGain();
+          osc.type = 'triangle';
+          osc.frequency.setValueAtTime(210, now);
+          osc.frequency.linearRampToValueAtTime(165, now + 0.18);
+          gain.gain.setValueAtTime(0.09, now);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + 0.22);
+          osc.connect(gain);
+          gain.connect(ctx.destination);
+          osc.start(now);
+          osc.stop(now + 0.23);
+        }
+        playPortalOpen(targetStageIndex) {
+          const ctx = this.ensureContext();
+          if (!ctx) return;
+          const now = ctx.currentTime;
+          const chords = [
+            [261.63, 329.63, 392.00, 523.25, 659.25],
+            [293.66, 369.99, 440.00, 587.33, 739.99],
+            [329.63, 415.30, 493.88, 659.25, 830.61],
+            [392.00, 493.88, 587.33, 739.99, 987.77]
+          ];
+          const notes = chords[Math.min(Math.max(0, targetStageIndex - 1), chords.length - 1)];
+          notes.forEach((freq, idx) => {
+            const start = now + idx * 0.08;
+            const osc = ctx.createOscillator();
+            const gain = ctx.createGain();
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(freq, start);
+            gain.gain.setValueAtTime(0.0001, start);
+            gain.gain.linearRampToValueAtTime(0.11, start + 0.03);
+            gain.gain.exponentialRampToValueAtTime(0.0008, start + 1.05);
+            osc.connect(gain);
+            gain.connect(ctx.destination);
+            osc.start(start);
+            osc.stop(start + 1.1);
+          });
+        }
+        playCollapse() {
+          const ctx = this.ensureContext();
+          if (!ctx) return;
+          const now = ctx.currentTime;
+          const notes = [659.25, 523.25, 392.00, 293.66];
+          notes.forEach((freq, idx) => {
+            const start = now + idx * 0.09;
+            const osc = ctx.createOscillator();
+            const gain = ctx.createGain();
+            osc.type = 'triangle';
+            osc.frequency.setValueAtTime(freq, start);
+            gain.gain.setValueAtTime(0.001, start);
+            gain.gain.linearRampToValueAtTime(0.09, start + 0.02);
+            gain.gain.exponentialRampToValueAtTime(0.001, start + 0.45);
+            osc.connect(gain);
+            gain.connect(ctx.destination);
+            osc.start(start);
+            osc.stop(start + 0.48);
+          });
+        }
+        playRotate() {
+          const ctx = this.ensureContext();
+          if (!ctx) return;
+          const now = ctx.currentTime;
+          const osc = ctx.createOscillator();
+          const gain = ctx.createGain();
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(320, now);
+          osc.frequency.exponentialRampToValueAtTime(640, now + 0.34);
+          gain.gain.setValueAtTime(0.001, now);
+          gain.gain.linearRampToValueAtTime(0.095, now + 0.05);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + 0.4);
+          osc.connect(gain);
+          gain.connect(ctx.destination);
+          osc.start(now);
+          osc.stop(now + 0.42);
+        }
+      }
+
+      const sound = new SoundEngine();
+
+      /* =========================================================================
+         3. ESTADO GLOBAL
+         ========================================================================= */
+      const state = {
+        mode: 'journey',          // 'journey' | 'passport'
+        stage: 0,                 // 0: ℕ, 1: ℤ, 2: ℚ, 3: ℝ, 4: ℂ
+        maxUnlockedStage: 0,
+        reachedComplex: false,    // Marca se já chegou em ℂ (para conquista de Ciclo Completo)
+        cycleCompleted: false,    // Conquista ida até ℂ + retorno até ℕ
+        freeMode: false,          // Modo Livre (Sem Quiz)
+        boundaryTriggered: false,
+        busy: false,
+
+        traveler: {
+          x: 1,
+          y: 0,
+          vx: 1,
+          vy: 0,
+          specialLabel: null,     // 'sqrt2' | 'pi' | null
+          trail: [],
+          wobbleTime: 0,
+          wobbleMode: null,       // 'barrier' | 'void' | 'imag' | null
+          orbit: null
+        },
+
+        camera: {
+          x: 2.2,
+          y: 0,
+          scale: 92,
+          targetX: 2.2,
+          targetY: 0,
+          targetScale: 92,
+          shake: 0
+        },
+
+        particles: [],
+        shockwaves: [],
+        stars: [],
+        portalAnim: null,         // { direction: 'expand'|'collapse', fromStage, toStage, progress, duration, impactDone, onComplete }
+        sqrt2Search: null,
+        time: 0,
+
+        // Estado do Passaporte do Número
+        passport: {
+          raw: '2',
+          parsed: null,
+          qAltIndex: 0,
+          rDizimaMode: false,
+          activeSetIndex: 0,      // 0: ℕ, 1: ℤ, 2: ℚ, 3: ℝ, 4: ℂ
+          validSetIndices: [0, 1, 2, 3, 4]
+        }
+      };
+
+      /* =========================================================================
+         4. REFERÊNCIAS DO DOM
+         ========================================================================= */
+      const canvas = document.getElementById('mathCanvas');
+      const ctx = canvas.getContext('2d');
+      const canvasContainer = document.getElementById('canvasContainer');
+
+      const tabJourney = document.getElementById('tabJourney');
+      const tabPassport = document.getElementById('tabPassport');
+      const journeyView = document.getElementById('journeyView');
+      const passportView = document.getElementById('passportView');
+      const stepperBar = document.getElementById('stepperBar');
+      const stageStepper = document.getElementById('stageStepper');
+
+      const brandOrb = document.getElementById('brandOrb');
+      const btnFreeMode = document.getElementById('btnFreeMode');
+      const freeModeDot = document.getElementById('freeModeDot');
+      const btnSound = document.getElementById('btnSound');
+      const soundIcon = document.getElementById('soundIcon');
+      const btnReset = document.getElementById('btnReset');
+
+      const canvasToast = document.getElementById('canvasToast');
+      const cycleBadge = document.getElementById('cycleBadge');
+      const collapseCard = document.getElementById('collapseCard');
+      const collapseCardTitle = document.getElementById('collapseCardTitle');
+      const collapseCardText = document.getElementById('collapseCardText');
+      const btnCloseCollapseCard = document.getElementById('btnCloseCollapseCard');
+
+      const btnOpenPortal = document.getElementById('btnOpenPortal');
+      const portalBtnText = document.getElementById('portalBtnText');
+      const btnCollapsePortal = document.getElementById('btnCollapsePortal');
+      const collapseBtnText = document.getElementById('collapseBtnText');
+
+      const hudStageBadge = document.getElementById('hudStageBadge');
+      const hudModulus = document.getElementById('hudModulus');
+      const hudValue = document.getElementById('hudValue');
+      const hudSymbolBig = document.getElementById('hudSymbolBig');
+      const hudControls = document.getElementById('hudControls');
+      const noteIcon = document.getElementById('noteIcon');
+      const noteTitle = document.getElementById('noteTitle');
+      const noteBody = document.getElementById('noteBody');
+
+      // Modal de Quiz
+      const quizModal = document.getElementById('quizModal');
+      const quizCard = document.getElementById('quizCard');
+      const quizPortalIcon = document.getElementById('quizPortalIcon');
+      const quizSubtitle = document.getElementById('quizSubtitle');
+      const quizTitle = document.getElementById('quizTitle');
+      const quizContext = document.getElementById('quizContext');
+      const quizQuestion = document.getElementById('quizQuestion');
+      const quizOptions = document.getElementById('quizOptions');
+      const quizFeedback = document.getElementById('quizFeedback');
+      const btnCloseQuiz = document.getElementById('btnCloseQuiz');
+
+      // Passaporte do Número
+      const passportInput = document.getElementById('passportInput');
+      const btnAnalyzeNumber = document.getElementById('btnAnalyzeNumber');
+      const passportError = document.getElementById('passportError');
+      const passportChips = document.getElementById('passportChips');
+      const passportHomeSet = document.getElementById('passportHomeSet');
+      const passportChain = document.getElementById('passportChain');
+      const passportCards = document.getElementById('passportCards');
+      const vennMarker = document.getElementById('vennMarker');
+      const vennMarkerLabel = document.getElementById('vennMarkerLabel');
+      const btnTopBackToJourney = document.getElementById('btnTopBackToJourney');
+      const btnBackToJourney = document.getElementById('btnBackToJourney');
+      const btnViewOnJourney = document.getElementById('btnViewOnJourney');
+      const outfitStepLabel = document.getElementById('outfitStepLabel');
+      const btnPrevOutfit = document.getElementById('btnPrevOutfit');
+      const btnNextOutfit = document.getElementById('btnNextOutfit');
+
+      let canvasW = 800;
+      let canvasH = 480;
+      let toastTimer = null;
+
+      /* =========================================================================
+         5. UTILITÁRIOS MATEMÁTICOS
+         ========================================================================= */
+      function roundClean(num, decimals = 4) {
+        const f = Math.pow(10, decimals);
+        const r = Math.round(num * f) / f;
+        return Object.is(r, -0) ? 0 : r;
+      }
+
+      function formatBR(num, maxDec = 4) {
+        const clean = roundClean(num, maxDec);
+        if (Number.isInteger(clean)) return String(clean).replace('-', '−');
+        return clean.toFixed(maxDec).replace(/\.?0+$/, '').replace('.', ',').replace('-', '−');
+      }
+
+      function gcd(a, b) {
+        a = Math.abs(Math.round(a));
+        b = Math.abs(Math.round(b));
+        while (b !== 0) {
+          const t = b;
+          b = a % b;
+          a = t;
+        }
+        return a || 1;
+      }
+
+      function toFractionString(val) {
+        const clean = roundClean(val, 4);
+        if (Number.isInteger(clean)) return null;
+        const sign = clean < 0 ? '−' : '';
+        const absVal = Math.abs(clean);
+        const commonDenoms = [2, 3, 4, 5, 6, 8, 10, 20, 25, 50, 100, 1000];
+        for (const d of commonDenoms) {
+          const n = Math.round(absVal * d);
+          if (Math.abs(absVal - n / d) < 1e-6) {
+            const g = gcd(n, d);
+            return `${sign}${n / g}/${d / g}`;
+          }
+        }
+        return null;
+      }
+
+      function getTravelerDisplayText() {
+        const t = state.traveler;
+        if (state.stage === 4) {
+          const a = roundClean(t.x, 2);
+          const b = roundClean(t.y, 2);
+          const aStr = formatBR(a, 2);
+          const absB = Math.abs(b);
+          const bCoef = absB === 1 ? '' : formatBR(absB, 2);
+          if (b === 0) return `${aStr} + 0i`;
+          if (a === 0) return b > 0 ? `${bCoef}i` : `−${bCoef}i`;
+          return b > 0 ? `${aStr} + ${bCoef}i` : `${aStr} − ${bCoef}i`;
+        }
+        if (t.specialLabel === 'sqrt2') return '√2 ≈ 1,4142...';
+        if (t.specialLabel === 'pi') return 'π ≈ 3,1415...';
+        if (state.stage === 2) {
+          const frac = toFractionString(t.x);
+          if (frac) return `${frac} (${formatBR(t.x, 4)})`;
+        }
+        return formatBR(t.x, 4);
+      }
+
+      function getTravelerOrbLabel() {
+        const t = state.traveler;
+        if (state.stage === 4) {
+          const a = roundClean(t.x, 1);
+          const b = roundClean(t.y, 1);
+          if (b === 0) return formatBR(a, 1);
+          const absB = Math.abs(b);
+          const bCoef = absB === 1 ? '' : formatBR(absB, 1);
+          if (a === 0) return b > 0 ? `${bCoef}i` : `−${bCoef}i`;
+          return b > 0 ? `${formatBR(a, 1)}+${bCoef}i` : `${formatBR(a, 1)}−${bCoef}i`;
+        }
+        if (t.specialLabel === 'sqrt2') return '√2';
+        if (t.specialLabel === 'pi') return 'π';
+        if (state.stage === 2) {
+          const frac = toFractionString(t.x);
+          if (frac && frac.length <= 5) return frac;
+        }
+        return formatBR(t.x, 2);
+      }
+
+      /* =========================================================================
+         6. COORDENADAS MUNDO <-> TELA E EFEITOS VISUAIS
+         ========================================================================= */
+      function worldToScreen(wx, wy = 0) {
+        return {
+          x: canvasW / 2 + (wx - state.camera.x) * state.camera.scale,
+          y: canvasH / 2 - (wy - state.camera.y) * state.camera.scale
+        };
+      }
+
+      function screenToWorld(sx, sy) {
+        return {
+          x: state.camera.x + (sx - canvasW / 2) / state.camera.scale,
+          y: state.camera.y - (sy - canvasH / 2) / state.camera.scale
+        };
+      }
+
+      function initStars() {
+        state.stars = [];
+        for (let i = 0; i < 80; i++) {
+          state.stars.push({
+            x: Math.random(),
+            y: Math.random(),
+            r: Math.random() * 1.5 + 0.4,
+            alpha: Math.random() * 0.48 + 0.14,
+            speed: Math.random() * 0.8 + 0.3,
+            phase: Math.random() * Math.PI * 2
+          });
+        }
+      }
+
+      function spawnParticles(wx, wy, color, count = 24, speed = 160) {
+        const pos = worldToScreen(wx, wy);
+        for (let i = 0; i < count; i++) {
+          const angle = Math.random() * Math.PI * 2;
+          const vel = (Math.random() * 0.75 + 0.25) * speed;
+          state.particles.push({
+            x: pos.x,
+            y: pos.y,
+            vx: Math.cos(angle) * vel,
+            vy: Math.sin(angle) * vel,
+            r: Math.random() * 3.1 + 1.2,
+            color,
+            life: 1,
+            decay: Math.random() * 0.9 + 0.7
+          });
+        }
+      }
+
+      function spawnShockwave(wx, wy, color, maxRadius = 260, lineWidth = 4) {
+        const pos = worldToScreen(wx, wy);
+        state.shockwaves.push({
+          x: pos.x,
+          y: pos.y,
+          radius: 8,
+          maxRadius,
+          color,
+          lineWidth,
+          alpha: 0.95
+        });
+      }
+
+      function showToast(msg, color = '#38BDF8') {
+        canvasToast.textContent = msg;
+        canvasToast.style.borderColor = color;
+        canvasToast.style.boxShadow = `0 0 22px ${color}44`;
+        canvasToast.classList.remove('hidden', 'toast-anim');
+        void canvasToast.offsetWidth;
+        canvasToast.classList.add('toast-anim');
+        clearTimeout(toastTimer);
+        toastTimer = setTimeout(() => {
+          canvasToast.classList.add('hidden');
+        }, 3200);
+      }
+
+      function showCollapseCard(fromStage) {
+        const info = COLLAPSE_INFO[fromStage];
+        if (!info) return;
+        collapseCardTitle.textContent = info.title;
+        collapseCardText.textContent = info.text;
+        collapseCard.classList.remove('hidden');
+      }
+
+      /* =========================================================================
+         7. ALTERNÂNCIA DE MODOS E UI DO MODO JORNADA
+         ========================================================================= */
+      function setMode(newMode) {
+        state.mode = newMode;
+        if (newMode === 'journey') {
+          journeyView.classList.remove('hidden');
+          stepperBar.classList.remove('hidden');
+          passportView.classList.add('hidden');
+
+          tabJourney.className = 'ctrl-btn px-2.5 sm:px-3.5 py-1.5 rounded-lg text-[11px] sm:text-xs font-bold bg-slate-700/90 text-white shadow-sm flex items-center gap-1.5 cursor-pointer';
+          tabPassport.className = 'ctrl-btn px-2.5 sm:px-3.5 py-1.5 rounded-lg text-[11px] sm:text-xs font-bold text-slate-400 hover:text-slate-100 flex items-center gap-1.5 cursor-pointer';
+          resizeCanvas();
+        } else {
+          journeyView.classList.add('hidden');
+          stepperBar.classList.add('hidden');
+          passportView.classList.remove('hidden');
+          passportView.scrollTop = 0;
+
+          tabPassport.className = 'ctrl-btn px-2.5 sm:px-3.5 py-1.5 rounded-lg text-[11px] sm:text-xs font-bold bg-gradient-to-r from-cyan-600/80 to-emerald-600/80 text-white shadow-sm flex items-center gap-1.5 cursor-pointer';
+          tabJourney.className = 'ctrl-btn px-2.5 sm:px-3.5 py-1.5 rounded-lg text-[11px] sm:text-xs font-bold text-slate-400 hover:text-slate-100 flex items-center gap-1.5 cursor-pointer';
+          analyzePassport(passportInput.value);
+        }
+        sound.playTick(newMode === 'passport' ? 620 : 500);
+      }
+
+      function updateCameraTarget() {
+        const t = state.traveler;
+        const isSmall = Math.min(canvasW, canvasH) < 520;
+        const baseScale = isSmall ? 60 : 90;
+
+        if (state.stage === 0) {
+          state.camera.targetScale = baseScale;
+          state.camera.targetX = Math.max(1.6, t.x + 1.0);
+          state.camera.targetY = 0;
+        } else if (state.stage === 1) {
+          state.camera.targetScale = baseScale * 0.94;
+          state.camera.targetX = t.x;
+          state.camera.targetY = 0;
+        } else if (state.stage === 2) {
+          state.camera.targetScale = baseScale * 1.4;
+          state.camera.targetX = t.x;
+          state.camera.targetY = 0;
+        } else if (state.stage === 3) {
+          state.camera.targetScale = baseScale * 1.15;
+          state.camera.targetX = t.x;
+          state.camera.targetY = 0;
+        } else if (state.stage === 4) {
+          state.camera.targetScale = isSmall ? 46 : 74;
+          state.camera.targetX = t.x * 0.42;
+          state.camera.targetY = t.y * 0.42;
+        }
+      }
+
+      function renderStepper() {
+        stageStepper.innerHTML = '';
+        STAGES.forEach((st, idx) => {
+          const unlocked = state.freeMode || idx <= state.maxUnlockedStage;
+          const active = idx === state.stage;
+
+          const btn = document.createElement('button');
+          btn.className = `ctrl-btn flex items-center gap-1 px-2 sm:px-3 py-1 rounded-xl text-xs font-bold border transition-all ${
+            active
+              ? 'text-white scale-105'
+              : unlocked
+              ? 'bg-slate-800/75 text-slate-300 border-slate-700 hover:border-slate-500 cursor-pointer'
+              : 'bg-slate-900/50 text-slate-600 border-slate-800/70 cursor-not-allowed'
+          }`;
+
+          if (active) {
+            btn.style.backgroundColor = `${st.color}2A`;
+            btn.style.borderColor = st.color;
+            btn.style.boxShadow = `0 0 14px ${st.color}55`;
+          }
+
+          const icon = unlocked ? (idx < state.maxUnlockedStage && !active ? '✓' : '') : '🔒';
+          btn.innerHTML = `
+            <span class="font-mono-math text-sm" style="color:${unlocked ? st.light : '#475569'}">${st.symbol}</span>
+            <span class="hidden sm:inline text-[11px]">${st.name}</span>
+            ${icon ? `<span class="text-[10px] opacity-80">${icon}</span>` : ''}
+          `;
+
+          btn.addEventListener('click', () => {
+            if (!unlocked || state.busy) return;
+            jumpToStage(idx);
+          });
+          stageStepper.appendChild(btn);
+
+          if (idx < STAGES.length - 1) {
+            const sym = document.createElement('span');
+            sym.className = 'text-slate-500 font-mono-math text-xs select-none px-0.5';
+            sym.textContent = '⊂';
+            stageStepper.appendChild(sym);
+          }
+        });
+      }
+
+      function updateHUD() {
+        const st = STAGES[state.stage];
+
+        brandOrb.style.backgroundColor = st.color;
+        brandOrb.style.boxShadow = `0 0 14px ${st.color}`;
+
+        hudStageBadge.className = `px-2 py-0.5 rounded-md text-[10px] sm:text-xs font-bold uppercase tracking-wider border ${st.badgeClass}`;
+        hudStageBadge.textContent = `${st.symbol} • ${st.name}`;
+        hudValue.textContent = getTravelerDisplayText();
+        hudSymbolBig.textContent = st.symbol;
+        hudSymbolBig.style.color = st.color;
+
+        if (state.stage === 4) {
+          const mod = Math.hypot(state.traveler.x, state.traveler.y);
+          hudModulus.textContent = `|z| = ${formatBR(mod, 2)}`;
+          hudModulus.classList.remove('hidden');
+        } else {
+          hudModulus.classList.add('hidden');
+        }
+
+        noteTitle.textContent = st.noteTitle;
+        noteTitle.style.color = st.light;
+        noteBody.textContent = state.boundaryTriggered && st.noteBlocked ? st.noteBlocked : st.noteDefault;
+        noteIcon.textContent = state.boundaryTriggered ? '⚡' : '🧭';
+
+        // Botão de Expansão (Ida)
+        if (state.boundaryTriggered && state.stage < 4 && !state.portalAnim) {
+          btnOpenPortal.classList.remove('hidden');
+          portalBtnText.textContent = st.portalBtnLabel;
+          btnOpenPortal.style.background = st.portalBtnGradient;
+          btnOpenPortal.style.setProperty('--portal-glow', st.portalGlow);
+        } else {
+          btnOpenPortal.classList.add('hidden');
+        }
+
+        // Botão de Retorno / Colapso Dimensional (Volta: disponível em qualquer conjunto acima de ℕ)
+        if (state.stage > 0 && !state.portalAnim) {
+          const prevSt = STAGES[state.stage - 1];
+          collapseBtnText.textContent = `Colapsar para ${prevSt.symbol} (${prevSt.name})`;
+          btnCollapsePortal.classList.remove('hidden');
+        } else {
+          btnCollapsePortal.classList.add('hidden');
+        }
+
+        // Conquista de Ciclo Completo
+        if (state.cycleCompleted) {
+          cycleBadge.classList.remove('hidden');
+        } else {
+          cycleBadge.classList.add('hidden');
+        }
+
+        renderStepper();
+      }
+
+      function makeCtrlBtn(label, onClick, variant = 'default', title = '') {
+        const btn = document.createElement('button');
+        btn.title = title;
+        let cls = 'ctrl-btn px-3 sm:px-3.5 py-2 rounded-xl text-xs sm:text-sm font-bold font-mono-math border cursor-pointer flex items-center gap-1.5 ';
+        if (variant === 'challenge') {
+          cls += 'bg-amber-500/15 hover:bg-amber-500/25 text-amber-200 border-amber-400/50 shadow-[0_0_12px_rgba(245,158,11,0.18)]';
+        } else if (variant === 'special') {
+          cls += 'bg-emerald-500/15 hover:bg-emerald-500/25 text-emerald-200 border-emerald-400/40';
+        } else if (variant === 'rotate') {
+          cls += 'bg-gradient-to-r from-amber-500/85 to-emerald-500/85 hover:from-amber-400 hover:to-emerald-400 text-slate-950 font-extrabold border-white/25 shadow-[0_0_16px_rgba(212,175,55,0.35)]';
+        } else if (variant === 'imag') {
+          cls += 'bg-emerald-500/15 hover:bg-emerald-500/25 text-emerald-200 border-emerald-400/45';
+        } else {
+          cls += 'bg-slate-800/85 hover:bg-slate-700/90 text-slate-100 border-slate-600/70';
+        }
+        btn.className = cls;
+        btn.innerHTML = label;
+        btn.addEventListener('click', () => {
+          if (state.busy) return;
+          onClick();
+        });
+        return btn;
+      }
+
+      function renderControls() {
+        hudControls.innerHTML = '';
+        if (state.stage === 0) {
+          hudControls.appendChild(makeCtrlBtn('← −1', () => moveStep(-1, 0)));
+          hudControls.appendChild(makeCtrlBtn('+1 →', () => moveStep(1, 0)));
+          hudControls.appendChild(makeCtrlBtn('Ir ao 0', () => setTravelerPos(0, 0), 'special'));
+        } else if (state.stage === 1) {
+          hudControls.appendChild(makeCtrlBtn('← −1', () => moveStep(-1, 0)));
+          hudControls.appendChild(makeCtrlBtn('+1 →', () => moveStep(1, 0)));
+          hudControls.appendChild(makeCtrlBtn('÷ 2 (Dividir)', () => attemptDivideByTwo(), 'challenge'));
+          hudControls.appendChild(makeCtrlBtn('Vazio (0,5)', () => triggerIntegerBoundary(0.5), 'special'));
+        } else if (state.stage === 2) {
+          hudControls.appendChild(makeCtrlBtn('−0,5', () => moveStep(-0.5, 0)));
+          hudControls.appendChild(makeCtrlBtn('−0,1', () => moveStep(-0.1, 0)));
+          hudControls.appendChild(makeCtrlBtn('+0,1', () => moveStep(0.1, 0)));
+          hudControls.appendChild(makeCtrlBtn('+0,5', () => moveStep(0.5, 0)));
+          hudControls.appendChild(makeCtrlBtn('📐 Buscar √2', () => startSqrt2Challenge(), 'challenge'));
+        } else if (state.stage === 3) {
+          hudControls.appendChild(makeCtrlBtn('−1', () => moveStep(-1, 0)));
+          hudControls.appendChild(makeCtrlBtn('−0,25', () => moveStep(-0.25, 0)));
+          hudControls.appendChild(makeCtrlBtn('+0,25', () => moveStep(0.25, 0)));
+          hudControls.appendChild(makeCtrlBtn('+1', () => moveStep(1, 0)));
+          hudControls.appendChild(makeCtrlBtn('√2', () => setTravelerPos(Math.SQRT2, 0, 'sqrt2'), 'special'));
+          hudControls.appendChild(makeCtrlBtn('π', () => setTravelerPos(Math.PI, 0, 'pi'), 'special'));
+          hudControls.appendChild(makeCtrlBtn('⚡ Calcular √(−1)', () => triggerRealBoundary(), 'challenge'));
+        } else if (state.stage === 4) {
+          hudControls.appendChild(makeCtrlBtn('← −1', () => moveStep(-1, 0)));
+          hudControls.appendChild(makeCtrlBtn('+1 →', () => moveStep(1, 0)));
+          hudControls.appendChild(makeCtrlBtn('↓ −i', () => moveStep(0, -1), 'imag'));
+          hudControls.appendChild(makeCtrlBtn('↑ +i', () => moveStep(0, 1), 'imag'));
+          hudControls.appendChild(makeCtrlBtn('↻ Multiplicar por i (Giro 90°)', () => multiplyByI(), 'rotate'));
+        }
+      }
+
+      /* =========================================================================
+         8. AÇÕES DO VIAJANTE E DESAFIOS DE FRONTEIRA
+         ========================================================================= */
+      function setTravelerPos(nx, ny = 0, specialLabel = null) {
+        state.traveler.x = nx;
+        state.traveler.y = ny;
+        state.traveler.specialLabel = specialLabel;
+        state.traveler.wobbleMode = null;
+        sound.playStep(nx + ny);
+        updateCameraTarget();
+        updateHUD();
+      }
+
+      function moveStep(dx, dy = 0) {
+        const t = state.traveler;
+        t.specialLabel = null;
+        t.wobbleMode = null;
+        collapseCard.classList.add('hidden');
+
+        let nx = roundClean(t.x + dx, 4);
+        let ny = roundClean(t.y + dy, 4);
+
+        if (state.stage === 0 && nx < 0) {
+          t.x = 0;
+          t.wobbleMode = 'barrier';
+          t.wobbleTime = 0.45;
+          state.camera.shake = 12;
+          sound.playBarrier();
+          spawnParticles(0, 0, '#F59E0B', 28, 190);
+          spawnParticles(0, 0, '#38BDF8', 14, 150);
+          spawnShockwave(0, 0, '#F59E0B', 150, 3);
+          showToast('⚠️ 0 − 1 não existe nos Naturais (ℕ)!', '#F59E0B');
+          state.boundaryTriggered = true;
+          updateHUD();
+          return;
+        }
+
+        nx = Math.max(-12, Math.min(12, nx));
+        ny = Math.max(-8, Math.min(8, ny));
+        if (state.stage <= 1) { nx = Math.round(nx); ny = 0; }
+        else if (state.stage < 4) { ny = 0; }
+
+        t.x = nx;
+        t.y = ny;
+        sound.playStep(nx + ny);
+        updateCameraTarget();
+        updateHUD();
+      }
+
+      function attemptDivideByTwo() {
+        const x = Math.round(state.traveler.x);
+        if (x === 0) {
+          showToast('0 ÷ 2 = 0 (ainda é inteiro). Vá para um número ímpar como 1 ou 3!', '#06B6D4');
+          sound.playStep(0);
+          return;
+        }
+        if (x % 2 === 0) {
+          setTravelerPos(x / 2, 0);
+          showToast(`${x} ÷ 2 = ${x / 2} (inteiro exato!). Tente dividir um ímpar agora.`, '#06B6D4');
+          return;
+        }
+        triggerIntegerBoundary(x / 2);
+      }
+
+      function triggerIntegerBoundary(targetHalf) {
+        const t = state.traveler;
+        t.x = targetHalf;
+        t.wobbleMode = 'void';
+        t.wobbleTime = 999;
+        state.camera.shake = 10;
+        sound.playBarrier();
+        spawnParticles(targetHalf, 0, '#8B5CF6', 26, 170);
+        spawnShockwave(targetHalf, 0, '#8B5CF6', 140, 3);
+        showToast(`⚠️ ${formatBR(targetHalf, 1)} está no vazio entre inteiros!`, '#8B5CF6');
+        state.boundaryTriggered = true;
+        updateCameraTarget();
+        updateHUD();
+      }
+
+      function startSqrt2Challenge() {
+        if (state.sqrt2Search) return;
+        state.busy = true;
+        const steps = [
+          { val: 1.4, label: '1,4² = 1,96 (< 2)' },
+          { val: 1.41, label: '1,41² = 1,9881 (< 2)' },
+          { val: 1.414, label: '1,414² = 1,9993 (< 2)' },
+          { val: 1.4142, label: '1,4142² = 1,99996... Fenda ainda aberta!' }
+        ];
+        let i = 0;
+        const runNext = () => {
+          if (i >= steps.length) {
+            state.sqrt2Search = null;
+            state.busy = false;
+            state.camera.shake = 9;
+            sound.playBarrier();
+            spawnParticles(Math.SQRT2, 0, '#10B981', 30, 160);
+            spawnShockwave(Math.SQRT2, 0, '#10B981', 150, 3);
+            state.boundaryTriggered = true;
+            updateHUD();
+            return;
+          }
+          const stp = steps[i];
+          state.traveler.x = stp.val;
+          state.traveler.specialLabel = null;
+          sound.playTick(480 + i * 95);
+          showToast(`Testando ${formatBR(stp.val, 4)} → ${stp.label}`, '#10B981');
+          updateCameraTarget();
+          state.camera.targetScale = (Math.min(canvasW, canvasH) < 520 ? 90 : 150) + i * 16;
+          updateHUD();
+          i++;
+          state.sqrt2Search = setTimeout(runNext, 660);
+        };
+        runNext();
+      }
+
+      function triggerRealBoundary() {
+        const t = state.traveler;
+        t.x = -1;
+        t.y = 0;
+        t.specialLabel = null;
+        t.wobbleMode = 'imag';
+        t.wobbleTime = 999;
+        state.camera.shake = 13;
+        sound.playBarrier();
+        spawnParticles(-1, 0, '#D4AF37', 30, 190);
+        spawnParticles(-1, 0, '#10B981', 22, 160);
+        spawnShockwave(-1, 0, '#D4AF37', 170, 3.5);
+        showToast('⚡ x² = −1 não tem solução na reta real 1D!', '#D4AF37');
+        state.boundaryTriggered = true;
+        updateCameraTarget();
+        updateHUD();
+      }
+
+      function multiplyByI() {
+        const t = state.traveler;
+        if (t.x === 0 && t.y === 0) {
+          t.x = 1; t.y = 0; t.vx = 1; t.vy = 0;
+          showToast('Partindo de 1 + 0i para demonstrar o giro de 90°!', '#10B981');
+        }
+        const startX = t.x;
+        const startY = t.y;
+        const targetX = roundClean(-startY, 2);
+        const targetY = roundClean(startX, 2);
+        const radius = Math.hypot(startX, startY);
+        const startAngle = Math.atan2(startY, startX);
+
+        state.busy = true;
+        sound.playRotate();
+        t.orbit = {
+          radius,
+          startAngle,
+          endAngle: startAngle + Math.PI / 2,
+          progress: 0,
+          duration: 0.65,
+          targetX,
+          targetY
+        };
+      }
+
+      /* =========================================================================
+         9. MODAL DE PORTAL SELADO (QUIZ)
+         ========================================================================= */
+      function requestOpenPortal() {
+        if (state.busy || state.stage >= 4) return;
+        // Se Modo Livre estiver ativo, pula o quiz e abre o portal diretamente
+        if (state.freeMode) {
+          executePortalExpand();
+          return;
+        }
+        openQuizModal(state.stage);
+      }
+
+      function openQuizModal(stageIdx) {
+        const q = PORTAL_QUIZZES[stageIdx];
+        if (!q) {
+          executePortalExpand();
+          return;
+        }
+
+        quizPortalIcon.textContent = q.icon;
+        quizPortalIcon.style.borderColor = `${q.accent}88`;
+        quizPortalIcon.style.backgroundColor = `${q.accent}22`;
+        quizCard.style.borderColor = `${q.accent}77`;
+        quizSubtitle.textContent = q.subtitle;
+        quizSubtitle.style.color = q.accent;
+        quizTitle.textContent = q.title;
+        quizContext.textContent = q.context;
+        quizQuestion.textContent = q.question;
+        quizFeedback.classList.add('hidden');
+
+        quizOptions.innerHTML = '';
+        q.options.forEach((opt) => {
+          const btn = document.createElement('button');
+          btn.className = 'ctrl-btn w-full text-left px-4 py-3 rounded-2xl bg-slate-900/85 hover:bg-slate-800 border border-slate-700/80 hover:border-slate-500 text-xs sm:text-sm text-slate-100 flex items-start gap-3 cursor-pointer';
+          btn.innerHTML = `
+            <span class="font-mono-math font-extrabold px-2 py-0.5 rounded-lg bg-slate-800 text-cyan-300 border border-slate-700 shrink-0">${opt.letter}</span>
+            <span class="leading-snug">${opt.text}</span>
+          `;
+
+          btn.addEventListener('click', () => {
+            if (opt.correct) {
+              sound.playQuizCorrect();
+              btn.className = 'w-full text-left px-4 py-3 rounded-2xl bg-emerald-500/20 border-2 border-emerald-400 text-xs sm:text-sm text-emerald-100 flex items-start gap-3 shadow-[0_0_20px_rgba(16,185,129,0.35)]';
+              quizFeedback.className = 'relative z-10 mt-4 rounded-2xl px-4 py-3 text-xs sm:text-sm font-bold border bg-emerald-500/15 border-emerald-400/50 text-emerald-200';
+              quizFeedback.textContent = '✨ Selo quebrado! Abrindo portal para o próximo conjunto...';
+              quizFeedback.classList.remove('hidden');
+
+              // Desabilita cliques extras e dispara o portal
+              Array.from(quizOptions.children).forEach(b => b.disabled = true);
+              setTimeout(() => {
+                quizModal.classList.add('hidden');
+                executePortalExpand();
+              }, 750);
+            } else {
+              sound.playQuizWrong();
+              btn.className = 'w-full text-left px-4 py-3 rounded-2xl bg-rose-950/50 border border-rose-500/60 text-xs sm:text-sm text-rose-200/80 flex items-start gap-3 opacity-75';
+              quizCard.classList.remove('shake-anim');
+              void quizCard.offsetWidth;
+              quizCard.classList.add('shake-anim');
+
+              quizFeedback.className = 'relative z-10 mt-4 rounded-2xl px-4 py-3 text-xs sm:text-sm font-medium border bg-amber-500/15 border-amber-400/45 text-amber-100';
+              quizFeedback.textContent = `💡 ${q.hint}`;
+              quizFeedback.classList.remove('hidden');
+            }
+          });
+          quizOptions.appendChild(btn);
+        });
+
+        sound.playTick(440);
+        quizModal.classList.remove('hidden');
+      }
+
+      /* =========================================================================
+         10. ANIMAÇÕES DE PORTAL: EXPANSÃO (IDA) E COLAPSO DIMENSIONAL (VOLTA)
+         ========================================================================= */
+      function executePortalExpand() {
+        if (state.busy || state.stage >= 4) return;
+        const fromStage = state.stage;
+        const toStage = fromStage + 1;
+
+        state.busy = true;
+        state.boundaryTriggered = false;
+        state.traveler.wobbleMode = null;
+        collapseCard.classList.add('hidden');
+        btnOpenPortal.classList.add('hidden');
+        btnCollapsePortal.classList.add('hidden');
+        sound.playPortalOpen(toStage);
+
+        const durations = [1.85, 1.85, 2.3, 1.95];
+        const duration = durations[fromStage] || 1.8;
+
+        const isSmall = Math.min(canvasW, canvasH) < 520;
+        if (fromStage === 0) {
+          state.camera.targetX = 0;
+          state.camera.targetScale = isSmall ? 56 : 84;
+          spawnShockwave(0, 0, '#06B6D4', 420, 5);
+        } else if (fromStage === 1) {
+          state.camera.targetX = Math.floor(state.traveler.x) + 0.5;
+          state.camera.targetScale = isSmall ? 105 : 155;
+        } else if (fromStage === 2) {
+          state.camera.targetX = 0.85;
+          state.camera.targetY = 0.35;
+          state.camera.targetScale = isSmall ? 105 : 160;
+        } else if (fromStage === 3) {
+          state.camera.targetX = 0;
+          state.camera.targetY = 0;
+          state.camera.targetScale = isSmall ? 48 : 74;
+          spawnShockwave(0, 0, '#D4AF37', 460, 5);
+          spawnShockwave(0, 0, '#10B981', 340, 3);
+        }
+
+        state.portalAnim = {
+          direction: 'expand',
+          fromStage,
+          toStage,
+          progress: 0,
+          duration,
+          impactDone: false,
+          onComplete: () => {
+            state.stage = toStage;
+            if (toStage > state.maxUnlockedStage) state.maxUnlockedStage = toStage;
+            if (toStage === 4) state.reachedComplex = true;
+
+            if (toStage === 1) {
+              state.traveler.x = -1; state.traveler.y = 0;
+              showToast('✨ Espelho aberto! Bem-vindo aos Inteiros (ℤ)', '#06B6D4');
+            } else if (toStage === 2) {
+              state.traveler.x = 0.5; state.traveler.y = 0;
+              showToast('✨ Lente ativada! Bem-vindo aos Racionais (ℚ)', '#8B5CF6');
+            } else if (toStage === 3) {
+              state.traveler.x = Math.SQRT2; state.traveler.y = 0;
+              state.traveler.specialLabel = 'sqrt2';
+              showToast('✨ Fendas seladas! Bem-vindo aos Reais (ℝ)', '#10B981');
+            } else if (toStage === 4) {
+              state.traveler.x = 1; state.traveler.y = 1;
+              state.traveler.specialLabel = null;
+              showToast('✨ Plano 2D aberto! Bem-vindo aos Complexos (ℂ)', '#D4AF37');
+            }
+            state.busy = false;
+            state.portalAnim = null;
+            updateCameraTarget();
+            renderControls();
+            updateHUD();
+          }
+        };
+      }
+
+      // Caminho de Retorno: Colapso Dimensional (ℂ -> ℝ -> ℚ -> ℤ -> ℕ)
+      function executePortalCollapse() {
+        if (state.busy || state.stage <= 0) return;
+        const fromStage = state.stage;
+        const toStage = fromStage - 1;
+
+        state.busy = true;
+        state.boundaryTriggered = false;
+        state.traveler.wobbleMode = null;
+        state.traveler.specialLabel = null;
+        btnOpenPortal.classList.add('hidden');
+        btnCollapsePortal.classList.add('hidden');
+        sound.playCollapse();
+
+        // Ajusta o viajante para o conjunto restrito de destino durante o colapso
+        if (fromStage === 4) {
+          state.traveler.y = 0; // Zera a parte imaginária
+          spawnShockwave(0, 0, '#10B981', 360, 4);
+        } else if (fromStage === 3) {
+          state.traveler.x = roundClean(Math.round(state.traveler.x * 2) / 2, 2);
+          spawnParticles(Math.SQRT2, 0, '#8B5CF6', 28, 160);
+        } else if (fromStage === 2) {
+          state.traveler.x = Math.round(state.traveler.x);
+          spawnShockwave(state.traveler.x, 0, '#06B6D4', 240, 3.5);
+        } else if (fromStage === 1) {
+          state.traveler.x = Math.max(0, Math.round(state.traveler.x));
+          state.camera.targetX = 0;
+          spawnShockwave(0, 0, '#F59E0B', 320, 4);
+        }
+
+        state.portalAnim = {
+          direction: 'collapse',
+          fromStage,
+          toStage,
+          progress: 0,
+          duration: 1.35,
+          impactDone: false,
+          onComplete: () => {
+            state.stage = toStage;
+            state.busy = false;
+            state.portalAnim = null;
+            showCollapseCard(fromStage);
+
+            // Verifica conquista de Ciclo Completo (foi até ℂ e retornou até ℕ)
+            if (toStage === 0 && state.reachedComplex && !state.cycleCompleted) {
+              state.cycleCompleted = true;
+              sound.playPortalOpen(4);
+              spawnParticles(0, 0, '#F59E0B', 45, 230);
+              spawnParticles(0, 0, '#10B981', 35, 200);
+              showToast('🏆 Conquista desbloqueada! Ciclo Completo: ℕ ⊂ ℤ ⊂ ℚ ⊂ ℝ ⊂ ℂ', '#F59E0B');
+            } else {
+              showToast(`⏪ Colapso concluído: agora em ${STAGES[toStage].fullName}`, STAGES[toStage].color);
+            }
+
+            updateCameraTarget();
+            renderControls();
+            updateHUD();
+          }
+        };
+      }
+
+      function jumpToStage(targetStage) {
+        clearTimeout(state.sqrt2Search);
+        state.sqrt2Search = null;
+        state.portalAnim = null;
+        state.traveler.orbit = null;
+        state.traveler.wobbleMode = null;
+        state.traveler.trail = [];
+        state.boundaryTriggered = false;
+        state.busy = false;
+        state.stage = targetStage;
+        collapseCard.classList.add('hidden');
+        if (targetStage === 4) state.reachedComplex = true;
+
+        if (targetStage === 0) { state.traveler.x = 1; state.traveler.y = 0; state.traveler.specialLabel = null; }
+        else if (targetStage === 1) { state.traveler.x = 1; state.traveler.y = 0; state.traveler.specialLabel = null; }
+        else if (targetStage === 2) { state.traveler.x = 0.5; state.traveler.y = 0; state.traveler.specialLabel = null; }
+        else if (targetStage === 3) { state.traveler.x = Math.SQRT2; state.traveler.y = 0; state.traveler.specialLabel = 'sqrt2'; }
+        else if (targetStage === 4) { state.traveler.x = 2; state.traveler.y = 1; state.traveler.specialLabel = null; }
+
+        state.traveler.vx = state.traveler.x;
+        state.traveler.vy = state.traveler.y;
+        sound.playStep(targetStage * 2);
+        updateCameraTarget();
+        renderControls();
+        updateHUD();
+      }
+
+      function resetJourney() {
+        state.maxUnlockedStage = 0;
+        state.reachedComplex = false;
+        state.cycleCompleted = false;
+        jumpToStage(0);
+        showToast('↺ Jornada reiniciada nos Números Naturais (ℕ)', '#F59E0B');
+      }
+
+      /* =========================================================================
+         11. RENDERIZAÇÃO DO CANVAS 2D (60 FPS)
+         ========================================================================= */
+      function resizeCanvas() {
+        const rect = canvasContainer.getBoundingClientRect();
+        if (rect.width < 10 || rect.height < 10) return;
+        const dpr = Math.min(window.devicePixelRatio || 1, 2);
+        canvasW = rect.width;
+        canvasH = rect.height;
+        canvas.width = Math.floor(canvasW * dpr);
+        canvas.height = Math.floor(canvasH * dpr);
+        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+        updateCameraTarget();
+      }
+
+      function drawBackground() {
+        const grad = ctx.createRadialGradient(
+          canvasW * 0.5, canvasH * 0.5, 20,
+          canvasW * 0.5, canvasH * 0.5, Math.max(canvasW, canvasH) * 0.78
+        );
+        grad.addColorStop(0, '#0D162B');
+        grad.addColorStop(1, '#060A14');
+        ctx.fillStyle = grad;
+        ctx.fillRect(0, 0, canvasW, canvasH);
+
+        for (const s of state.stars) {
+          const px = ((s.x * canvasW - state.camera.x * 6) % canvasW + canvasW) % canvasW;
+          const py = ((s.y * canvasH + state.camera.y * 6) % canvasH + canvasH) % canvasH;
+          const twinkle = 0.5 + 0.5 * Math.sin(state.time * s.speed + s.phase);
+          ctx.fillStyle = `rgba(226, 232, 240, ${s.alpha * (0.4 + 0.6 * twinkle)})`;
+          ctx.beginPath();
+          ctx.arc(px, py, s.r, 0, Math.PI * 2);
+          ctx.fill();
+        }
+      }
+
+      function drawPillar(n, alpha = 1, customColor = null) {
+        const pos = worldToScreen(n, 0);
+        if (pos.x < -60 || pos.x > canvasW + 60) return;
+        const isZero = n === 0;
+        const color = customColor || (n < 0 ? '#06B6D4' : '#F59E0B');
+
+        ctx.save();
+        ctx.globalAlpha = alpha;
+        const colGrad = ctx.createLinearGradient(pos.x, pos.y + 8, pos.x, pos.y + 108);
+        colGrad.addColorStop(0, `${color}55`);
+        colGrad.addColorStop(1, 'rgba(6, 10, 20, 0)');
+        ctx.fillStyle = colGrad;
+        const w = Math.max(13, Math.min(26, state.camera.scale * 0.28));
+        ctx.fillRect(pos.x - w / 2, pos.y + 8, w, 100);
+
+        ctx.fillStyle = isZero ? '#F8FAFC' : color;
+        ctx.shadowColor = color;
+        ctx.shadowBlur = isZero ? 18 : 10;
+        ctx.beginPath();
+        ctx.roundRect(pos.x - w / 2 - 3, pos.y + 4, w + 6, 7, 4);
+        ctx.fill();
+
+        ctx.shadowBlur = 0;
+        ctx.fillStyle = isZero ? '#FFFFFF' : '#E2E8F0';
+        ctx.font = `${isZero ? '800 15px' : '700 13px'} "JetBrains Mono", monospace`;
+        ctx.textAlign = 'center';
+        ctx.fillText(String(n).replace('-', '−'), pos.x, pos.y + 34);
+        ctx.restore();
+      }
+
+      function drawNaturalsStage() {
+        const origin = worldToScreen(0, 0);
+        const fogGrad = ctx.createLinearGradient(0, 0, origin.x, 0);
+        fogGrad.addColorStop(0, 'rgba(2, 4, 10, 0.93)');
+        fogGrad.addColorStop(0.8, 'rgba(6, 10, 20, 0.78)');
+        fogGrad.addColorStop(1, 'rgba(245, 158, 11, 0.08)');
+        ctx.fillStyle = fogGrad;
+        ctx.fillRect(0, 0, Math.max(0, origin.x), canvasH);
+
+        ctx.save();
+        const barGrad = ctx.createLinearGradient(0, origin.y - 110, 0, origin.y + 110);
+        barGrad.addColorStop(0, 'rgba(245, 158, 11, 0)');
+        barGrad.addColorStop(0.5, state.boundaryTriggered ? 'rgba(251, 191, 36, 0.95)' : 'rgba(245, 158, 11, 0.48)');
+        barGrad.addColorStop(1, 'rgba(245, 158, 11, 0)');
+        ctx.strokeStyle = barGrad;
+        ctx.lineWidth = state.boundaryTriggered ? 3.5 : 2;
+        ctx.setLineDash([6, 6]);
+        ctx.beginPath();
+        ctx.moveTo(origin.x - 16, origin.y - 110);
+        ctx.lineTo(origin.x - 16, origin.y + 110);
+        ctx.stroke();
+
+        if (origin.x > 105) {
+          ctx.setLineDash([]);
+          ctx.fillStyle = 'rgba(148, 163, 184, 0.46)';
+          ctx.font = '700 12px "Inter", sans-serif';
+          ctx.textAlign = 'center';
+          ctx.fillText('O LIMITE DO ZERO', origin.x * 0.5, origin.y - 14);
+          ctx.font = '400 11px "Inter", sans-serif';
+          ctx.fillText('(sem chão à esquerda em ℕ)', origin.x * 0.5, origin.y + 6);
+        }
+        ctx.restore();
+
+        ctx.save();
+        ctx.strokeStyle = 'rgba(245, 158, 11, 0.28)';
+        ctx.lineWidth = 2;
+        ctx.setLineDash([4, 8]);
+        ctx.beginPath();
+        ctx.moveTo(origin.x, origin.y + 7);
+        ctx.lineTo(canvasW, origin.y + 7);
+        ctx.stroke();
+        ctx.restore();
+
+        const maxN = Math.ceil(screenToWorld(canvasW + 80, 0).x);
+        for (let n = 0; n <= Math.min(30, maxN); n++) drawPillar(n, 1, '#F59E0B');
+      }
+
+      function drawIntegersStage() {
+        const y0 = worldToScreen(0, 0).y;
+        ctx.save();
+        ctx.strokeStyle = 'rgba(6, 182, 212, 0.22)';
+        ctx.lineWidth = 2;
+        ctx.setLineDash([3, 10]);
+        ctx.beginPath();
+        ctx.moveTo(0, y0 + 7);
+        ctx.lineTo(canvasW, y0 + 7);
+        ctx.stroke();
+        ctx.restore();
+
+        const minN = Math.floor(screenToWorld(-60, 0).x);
+        const maxN = Math.ceil(screenToWorld(canvasW + 60, 0).x);
+        for (let n = minN; n <= maxN; n++) drawPillar(n, 1, n < 0 ? '#06B6D4' : '#F59E0B');
+
+        const mid = worldToScreen(0.5, 0);
+        const pulse = 0.4 + 0.4 * Math.sin(state.time * 3.2);
+        ctx.save();
+        ctx.strokeStyle = `rgba(139, 92, 246, ${0.3 + pulse * 0.28})`;
+        ctx.lineWidth = 1.5;
+        ctx.setLineDash([3, 3]);
+        ctx.beginPath();
+        ctx.arc(mid.x, mid.y + 7, 10 + pulse * 3, 0, Math.PI * 2);
+        ctx.stroke();
+        ctx.restore();
+      }
+
+      function drawRationalsStage() {
+        const minX = screenToWorld(-40, 0).x;
+        const maxX = screenToWorld(canvasW + 40, 0).x;
+
+        ctx.save();
+        const step = 0.05;
+        const start = Math.floor(minX / step) * step;
+        for (let x = start; x <= maxX; x += step) {
+          if (Math.abs(x - Math.SQRT2) < 0.032) continue;
+          const p = worldToScreen(x, 0);
+          const isInt = Math.abs(x - Math.round(x)) < 0.001;
+          const isHalf = Math.abs((x * 2) - Math.round(x * 2)) < 0.001;
+          const isQuarter = Math.abs((x * 4) - Math.round(x * 4)) < 0.001;
+
+          ctx.fillStyle = isInt ? '#F8FAFC' : isHalf ? '#C4B5FD' : isQuarter ? '#A78BFA' : 'rgba(139, 92, 246, 0.55)';
+          const r = isInt ? 5.5 : isHalf ? 4 : isQuarter ? 2.8 : 1.7;
+          ctx.beginPath();
+          ctx.arc(p.x, p.y, r, 0, Math.PI * 2);
+          ctx.fill();
+
+          if (isInt) {
+            ctx.fillStyle = '#F1F5F9';
+            ctx.font = '700 13px "JetBrains Mono", monospace';
+            ctx.textAlign = 'center';
+            ctx.fillText(String(Math.round(x)).replace('-', '−'), p.x, p.y + 28);
+          } else if (isHalf && state.camera.scale > 70) {
+            const num = Math.round(x * 2);
+            ctx.fillStyle = '#C4B5FD';
+            ctx.font = '600 11px "JetBrains Mono", monospace';
+            ctx.textAlign = 'center';
+            ctx.fillText(`${num < 0 ? '−' : ''}${Math.abs(num)}/2`, p.x, p.y + 24);
+          }
+        }
+        ctx.restore();
+
+        // Microfenda em √2
+        const fenda = worldToScreen(Math.SQRT2, 0);
+        const pulse = 0.5 + 0.5 * Math.sin(state.time * 5);
+        ctx.save();
+        ctx.strokeStyle = `rgba(16, 185, 129, ${0.55 + pulse * 0.45})`;
+        ctx.lineWidth = 2.5;
+        ctx.shadowColor = '#10B981';
+        ctx.shadowBlur = 16;
+        ctx.beginPath();
+        ctx.moveTo(fenda.x, fenda.y - 24 - pulse * 6);
+        ctx.lineTo(fenda.x, fenda.y + 24 + pulse * 6);
+        ctx.stroke();
+
+        ctx.fillStyle = '#060A14';
+        ctx.beginPath();
+        ctx.arc(fenda.x, fenda.y, 6, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.stroke();
+
+        ctx.shadowBlur = 0;
+        ctx.fillStyle = '#6EE7B7';
+        ctx.font = '700 11px "JetBrains Mono", monospace';
+        ctx.textAlign = 'center';
+        ctx.fillText('? (√2)', fenda.x, fenda.y - 34);
+        ctx.restore();
+      }
+
+      function drawRealsStage() {
+        const y0 = worldToScreen(0, 0).y;
+        ctx.save();
+        ctx.shadowColor = '#10B981';
+        ctx.shadowBlur = 18;
+        ctx.strokeStyle = '#10B981';
+        ctx.lineWidth = 5;
+        ctx.beginPath();
+        ctx.moveTo(0, y0);
+        ctx.lineTo(canvasW, y0);
+        ctx.stroke();
+
+        ctx.shadowBlur = 0;
+        ctx.strokeStyle = '#D1FAE5';
+        ctx.lineWidth = 1.8;
+        ctx.beginPath();
+        ctx.moveTo(0, y0);
+        ctx.lineTo(canvasW, y0);
+        ctx.stroke();
+
+        const minN = Math.floor(screenToWorld(-40, 0).x);
+        const maxN = Math.ceil(screenToWorld(canvasW + 40, 0).x);
+        for (let n = minN; n <= maxN; n++) {
+          const p = worldToScreen(n, 0);
+          ctx.strokeStyle = 'rgba(209, 250, 229, 0.72)';
+          ctx.lineWidth = 2;
+          ctx.beginPath();
+          ctx.moveTo(p.x, y0 - 8);
+          ctx.lineTo(p.x, y0 + 8);
+          ctx.stroke();
+          ctx.fillStyle = '#E2E8F0';
+          ctx.font = '700 13px "JetBrains Mono", monospace';
+          ctx.textAlign = 'center';
+          ctx.fillText(String(n).replace('-', '−'), p.x, y0 + 28);
+        }
+
+        [
+          { val: Math.SQRT2, label: '√2', color: '#34D399' },
+          { val: Math.PI, label: 'π', color: '#38BDF8' }
+        ].forEach((sp) => {
+          const p = worldToScreen(sp.val, 0);
+          if (p.x < -30 || p.x > canvasW + 30) return;
+          ctx.fillStyle = sp.color;
+          ctx.beginPath();
+          ctx.arc(p.x, y0, 4.5, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.font = '700 12px "JetBrains Mono", monospace';
+          ctx.fillText(sp.label, p.x, y0 - 16);
+        });
+        ctx.restore();
+      }
+
+      // Plano de Argand-Gauss (Eixo Real Dourado + Eixo Imaginário Esmeralda)
+      function drawComplexStage(gridAlpha = 1, ySquash = 1) {
+        const origin = worldToScreen(0, 0);
+        const minW = screenToWorld(0, canvasH);
+        const maxW = screenToWorld(canvasW, 0);
+
+        ctx.save();
+        ctx.globalAlpha = gridAlpha;
+
+        // Grade 2D
+        ctx.lineWidth = 1;
+        for (let gx = Math.floor(minW.x); gx <= Math.ceil(maxW.x); gx++) {
+          const sx = worldToScreen(gx, 0).x;
+          ctx.strokeStyle = 'rgba(148, 163, 184, 0.11)';
+          ctx.beginPath();
+          ctx.moveTo(sx, origin.y - (canvasH * ySquash));
+          ctx.lineTo(sx, origin.y + (canvasH * ySquash));
+          ctx.stroke();
+        }
+        for (let gy = Math.floor(minW.y); gy <= Math.ceil(maxW.y); gy++) {
+          const sy = origin.y - (gy - state.camera.y) * state.camera.scale * ySquash;
+          ctx.strokeStyle = 'rgba(148, 163, 184, 0.11)';
+          ctx.beginPath();
+          ctx.moveTo(0, sy);
+          ctx.lineTo(canvasW, sy);
+          ctx.stroke();
+        }
+
+        // Eixo Real (Horizontal - Dourado)
+        ctx.shadowColor = '#D4AF37';
+        ctx.shadowBlur = 12;
+        ctx.strokeStyle = '#F59E0B';
+        ctx.lineWidth = 2.6;
+        ctx.beginPath();
+        ctx.moveTo(0, origin.y);
+        ctx.lineTo(canvasW, origin.y);
+        ctx.stroke();
+
+        // Eixo Imaginário (Vertical - Esmeralda)
+        ctx.shadowColor = '#10B981';
+        ctx.shadowBlur = 12;
+        ctx.strokeStyle = '#10B981';
+        ctx.lineWidth = 2.6;
+        ctx.beginPath();
+        ctx.moveTo(origin.x, origin.y - canvasH * 0.65 * ySquash);
+        ctx.lineTo(origin.x, origin.y + canvasH * 0.65 * ySquash);
+        ctx.stroke();
+
+        ctx.shadowBlur = 0;
+
+        // Rótulos dos Eixos
+        ctx.font = '700 11px "Inter", sans-serif';
+        ctx.fillStyle = '#FCD34D';
+        ctx.textAlign = 'right';
+        ctx.fillText('EIXO REAL (Re)', canvasW - 14, origin.y - 10);
+
+        if (ySquash > 0.35) {
+          ctx.fillStyle = '#6EE7B7';
+          ctx.textAlign = 'left';
+          ctx.fillText('EIXO IMAGINÁRIO (Im)', origin.x + 12, 22);
+        }
+
+        // Números nos eixos
+        ctx.font = '600 11px "JetBrains Mono", monospace';
+        ctx.fillStyle = 'rgba(253, 230, 138, 0.8)';
+        ctx.textAlign = 'center';
+        for (let gx = Math.floor(minW.x); gx <= Math.ceil(maxW.x); gx++) {
+          if (gx === 0) continue;
+          const p = worldToScreen(gx, 0);
+          ctx.fillText(String(gx).replace('-', '−'), p.x, origin.y + 16);
+        }
+        if (ySquash > 0.35) {
+          ctx.textAlign = 'right';
+          ctx.fillStyle = 'rgba(110, 231, 183, 0.85)';
+          for (let gy = Math.floor(minW.y); gy <= Math.ceil(maxW.y); gy++) {
+            if (gy === 0) continue;
+            const sy = origin.y - (gy - state.camera.y) * state.camera.scale * ySquash;
+            const lbl = gy === 1 ? 'i' : gy === -1 ? '−i' : `${String(gy).replace('-', '−')}i`;
+            ctx.fillText(lbl, origin.x - 10, sy + 4);
+          }
+        }
+
+        // Vetor luminoso ligando Origem ao Viajante
+        const tp = worldToScreen(state.traveler.vx, state.traveler.vy * ySquash);
+        const mod = Math.hypot(state.traveler.vx, state.traveler.vy);
+        if (mod > 0.02 && ySquash > 0.5) {
+          ctx.strokeStyle = 'rgba(16, 185, 129, 0.18)';
+          ctx.lineWidth = 1.5;
+          ctx.setLineDash([4, 6]);
+          ctx.beginPath();
+          ctx.arc(origin.x, origin.y, mod * state.camera.scale, 0, Math.PI * 2);
+          ctx.stroke();
+
+          ctx.strokeStyle = 'rgba(148, 163, 184, 0.35)';
+          ctx.lineWidth = 1.2;
+          ctx.beginPath();
+          ctx.moveTo(tp.x, tp.y);
+          ctx.lineTo(tp.x, origin.y);
+          ctx.moveTo(tp.x, tp.y);
+          ctx.lineTo(origin.x, tp.y);
+          ctx.stroke();
+          ctx.setLineDash([]);
+
+          const vecGrad = ctx.createLinearGradient(origin.x, origin.y, tp.x, tp.y);
+          vecGrad.addColorStop(0, '#F59E0B');
+          vecGrad.addColorStop(1, '#10B981');
+          ctx.strokeStyle = vecGrad;
+          ctx.lineWidth = 3;
+          ctx.shadowColor = '#10B981';
+          ctx.shadowBlur = 10;
+          ctx.beginPath();
+          ctx.moveTo(origin.x, origin.y);
+          ctx.lineTo(tp.x, tp.y);
+          ctx.stroke();
+          ctx.shadowBlur = 0;
+
+          ctx.fillStyle = '#6EE7B7';
+          ctx.font = '700 11px "JetBrains Mono", monospace';
+          ctx.textAlign = 'center';
+          ctx.fillText(`|z|=${formatBR(mod, 2)}`, (origin.x + tp.x) / 2, (origin.y + tp.y) / 2 - 10);
+        }
+        ctx.restore();
+      }
+
+      /* =========================================================================
+         12. RENDERIZAÇÃO DAS ANIMAÇÕES DE PORTAL (EXPANSÃO E COLAPSO)
+         ========================================================================= */
+      function drawPortalAnimation() {
+        const anim = state.portalAnim;
+        if (!anim) return;
+        const p = Math.min(1, anim.progress / anim.duration);
+        const ease = 1 - Math.pow(1 - p, 3);
+
+        // ---------- EXPANSÃO (IDA) ----------
+        if (anim.direction === 'expand') {
+          if (anim.fromStage === 0) {
+            const origin = worldToScreen(0, 0);
+            ctx.save();
+            const mirrorH = 260 * Math.min(1, p * 2.2);
+            const grad = ctx.createLinearGradient(0, origin.y - mirrorH, 0, origin.y + mirrorH);
+            grad.addColorStop(0, 'rgba(6, 182, 212, 0)');
+            grad.addColorStop(0.5, 'rgba(224, 242, 254, 0.98)');
+            grad.addColorStop(1, 'rgba(6, 182, 212, 0)');
+            ctx.strokeStyle = grad;
+            ctx.lineWidth = 6 * (1 - p * 0.4);
+            ctx.shadowColor = '#06B6D4';
+            ctx.shadowBlur = 24;
+            ctx.beginPath();
+            ctx.moveTo(origin.x, origin.y - mirrorH);
+            ctx.lineTo(origin.x, origin.y + mirrorH);
+            ctx.stroke();
+
+            const sweepX = origin.x - ease * (origin.x + 120);
+            const waveGrad = ctx.createLinearGradient(sweepX, 0, sweepX + 90, 0);
+            waveGrad.addColorStop(0, 'rgba(6, 182, 212, 0)');
+            waveGrad.addColorStop(0.5, 'rgba(103, 232, 249, 0.55)');
+            waveGrad.addColorStop(1, 'rgba(6, 182, 212, 0)');
+            ctx.fillStyle = waveGrad;
+            ctx.fillRect(sweepX, origin.y - 140, 90, 280);
+            ctx.restore();
+
+            for (let n = -1; n >= -10; n--) {
+              const pos = worldToScreen(n, 0);
+              if (pos.x > sweepX + 20) drawPillar(n, Math.min(1, (pos.x - sweepX) / 80), '#06B6D4');
+            }
+          } else if (anim.fromStage === 1) {
+            const minN = Math.floor(screenToWorld(-40, 0).x);
+            const maxN = Math.ceil(screenToWorld(canvasW + 40, 0).x);
+            ctx.save();
+            for (let n = minN; n < maxN; n++) {
+              const pA = worldToScreen(n, 0);
+              const pB = worldToScreen(n + 1, 0);
+              const dist = pB.x - pA.x;
+              const midX = (pA.x + pB.x) / 2;
+              const arcSpan = Math.min(1, p * 1.5) * (Math.PI * 0.65);
+
+              ctx.strokeStyle = `rgba(167, 139, 250, ${0.75 * (1 - p * 0.45)})`;
+              ctx.lineWidth = 1.8;
+              ctx.beginPath();
+              ctx.arc(pA.x, pA.y, dist * 0.65, -arcSpan / 2, arcSpan / 2);
+              ctx.stroke();
+              ctx.beginPath();
+              ctx.arc(pB.x, pB.y, dist * 0.65, Math.PI - arcSpan / 2, Math.PI + arcSpan / 2);
+              ctx.stroke();
+
+              if (p > 0.35) {
+                const lineP = Math.min(1, (p - 0.35) / 0.4);
+                ctx.strokeStyle = `rgba(196, 181, 253, ${0.9 * (1 - (p - 0.35) * 0.8)})`;
+                ctx.lineWidth = 2;
+                ctx.beginPath();
+                ctx.moveTo(midX, pA.y - 55 * lineP);
+                ctx.lineTo(midX, pA.y + 55 * lineP);
+                ctx.stroke();
+
+                [0.5, 0.25, 0.75, 0.125, 0.375, 0.625, 0.875].forEach((f, idx) => {
+                  if (p > 0.4 + idx * 0.06) {
+                    const fp = worldToScreen(n + f, 0);
+                    ctx.fillStyle = '#C4B5FD';
+                    ctx.shadowColor = '#8B5CF6';
+                    ctx.shadowBlur = 10;
+                    ctx.beginPath();
+                    ctx.arc(fp.x, fp.y, f === 0.5 ? 4.5 : 2.6, 0, Math.PI * 2);
+                    ctx.fill();
+                  }
+                });
+              }
+            }
+            ctx.restore();
+            if (p > 0.45 && !anim.impactDone) {
+              anim.impactDone = true;
+              spawnParticles(state.camera.targetX, 0, '#A78BFA', 40, 210);
+              spawnShockwave(state.camera.targetX, 0, '#8B5CF6', 280, 4);
+            }
+          } else if (anim.fromStage === 2) {
+            const p0 = worldToScreen(0, 0);
+            const p1 = worldToScreen(1, 0);
+            const p11 = worldToScreen(1, 1);
+            const unitPx = p1.x - p0.x;
+            const diagPx = unitPx * Math.SQRT2;
+
+            ctx.save();
+            const sqP = Math.min(1, p / 0.35);
+            ctx.strokeStyle = 'rgba(56, 189, 248, 0.85)';
+            ctx.fillStyle = `rgba(16, 185, 129, ${0.12 * sqP})`;
+            ctx.lineWidth = 2.5;
+            const h = unitPx * sqP;
+            ctx.fillRect(p0.x, p0.y - h, unitPx, h);
+            ctx.strokeRect(p0.x, p0.y - h, unitPx, h);
+
+            if (p > 0.28) {
+              const dP = Math.min(1, (p - 0.28) / 0.22);
+              ctx.strokeStyle = '#34D399';
+              ctx.shadowColor = '#10B981';
+              ctx.shadowBlur = 16;
+              ctx.lineWidth = 3.5;
+              ctx.beginPath();
+              ctx.moveTo(p0.x, p0.y);
+              ctx.lineTo(p0.x + (p11.x - p0.x) * dP, p0.y + (p11.y - p0.y) * dP);
+              ctx.stroke();
+              ctx.shadowBlur = 0;
+              ctx.fillStyle = '#6EE7B7';
+              ctx.font = '800 13px "JetBrains Mono", monospace';
+              ctx.textAlign = 'center';
+              ctx.fillText('√2', (p0.x + p11.x) / 2 - 14, (p0.y + p11.y) / 2 - 10);
+            }
+            if (p > 0.48) {
+              const arcP = Math.min(1, (p - 0.48) / 0.34);
+              const easeArc = 1 - Math.pow(1 - arcP, 2.5);
+              const curAngle = -Math.PI / 4 + (Math.PI / 4) * easeArc;
+              ctx.strokeStyle = '#FCD34D';
+              ctx.lineWidth = 2.5;
+              ctx.setLineDash([5, 5]);
+              ctx.beginPath();
+              ctx.arc(p0.x, p0.y, diagPx, -Math.PI / 4, curAngle);
+              ctx.stroke();
+              ctx.setLineDash([]);
+              const tipX = p0.x + Math.cos(curAngle) * diagPx;
+              const tipY = p0.y + Math.sin(curAngle) * diagPx;
+              ctx.strokeStyle = '#FDE68A';
+              ctx.lineWidth = 3;
+              ctx.beginPath();
+              ctx.moveTo(p0.x, p0.y);
+              ctx.lineTo(tipX, tipY);
+              ctx.stroke();
+              ctx.fillStyle = '#FFFFFF';
+              ctx.shadowColor = '#10B981';
+              ctx.shadowBlur = 16;
+              ctx.beginPath();
+              ctx.arc(tipX, tipY, 5.5, 0, Math.PI * 2);
+              ctx.fill();
+            }
+            if (p >= 0.82) {
+              if (!anim.impactDone) {
+                anim.impactDone = true;
+                state.camera.shake = 12;
+                spawnParticles(Math.SQRT2, 0, '#10B981', 50, 240);
+                spawnShockwave(Math.SQRT2, 0, '#10B981', 380, 5);
+              }
+              const waveP = (p - 0.82) / 0.18;
+              const pSqrt2 = worldToScreen(Math.SQRT2, 0);
+              const spread = waveP * canvasW * 1.1;
+              ctx.strokeStyle = '#10B981';
+              ctx.shadowColor = '#10B981';
+              ctx.shadowBlur = 22;
+              ctx.lineWidth = 6;
+              ctx.beginPath();
+              ctx.moveTo(pSqrt2.x - spread, pSqrt2.y);
+              ctx.lineTo(pSqrt2.x + spread, pSqrt2.y);
+              ctx.stroke();
+            }
+            ctx.restore();
+          } else if (anim.fromStage === 3) {
+            const origin = worldToScreen(0, 0);
+            if (p > 0.25) drawComplexStage(Math.min(1, (p - 0.25) / 0.7), Math.min(1, (p - 0.2) / 0.7));
+            const axisH = ease * (canvasH * 0.65);
+            ctx.save();
+            ctx.strokeStyle = '#10B981';
+            ctx.shadowColor = '#10B981';
+            ctx.shadowBlur = 24;
+            ctx.lineWidth = 4;
+            ctx.beginPath();
+            ctx.moveTo(origin.x, origin.y - axisH);
+            ctx.lineTo(origin.x, origin.y + axisH);
+            ctx.stroke();
+            ctx.restore();
+            if (p > 0.15 && !anim.impactDone) {
+              anim.impactDone = true;
+              state.camera.shake = 10;
+              spawnParticles(0, 0, '#D4AF37', 40, 230);
+              spawnParticles(0, 0, '#10B981', 35, 210);
+            }
+          }
+        }
+
+        // ---------- COLAPSO DIMENSIONAL (VOLTA) ----------
+        else if (anim.direction === 'collapse') {
+          const inv = 1 - ease;
+          if (anim.fromStage === 4) {
+            // Achata o eixo imaginário para 0
+            drawComplexStage(inv, Math.max(0.02, inv));
+            drawRealsStage();
+          } else if (anim.fromStage === 3) {
+            // Reabre microfendas na reta real
+            const fenda = worldToScreen(Math.SQRT2, 0);
+            ctx.save();
+            ctx.strokeStyle = '#8B5CF6';
+            ctx.lineWidth = 3;
+            ctx.beginPath();
+            ctx.moveTo(fenda.x, fenda.y - 45 * ease);
+            ctx.lineTo(fenda.x, fenda.y + 45 * ease);
+            ctx.stroke();
+            ctx.restore();
+          } else if (anim.fromStage === 2) {
+            // Recolhe a lente de frações
+            const y0 = worldToScreen(0, 0).y;
+            ctx.save();
+            ctx.strokeStyle = `rgba(139, 92, 246, ${inv * 0.7})`;
+            ctx.lineWidth = 10 * inv;
+            ctx.beginPath();
+            ctx.moveTo(0, y0);
+            ctx.lineTo(canvasW, y0);
+            ctx.stroke();
+            ctx.restore();
+          } else if (anim.fromStage === 1) {
+            // Recolhe os negativos para dentro do Espelho no 0
+            const origin = worldToScreen(0, 0);
+            const fogRight = origin.x * ease;
+            const fogGrad = ctx.createLinearGradient(0, 0, fogRight + 40, 0);
+            fogGrad.addColorStop(0, 'rgba(6, 10, 20, 0.96)');
+            fogGrad.addColorStop(1, 'rgba(6, 10, 20, 0)');
+            ctx.fillStyle = fogGrad;
+            ctx.fillRect(0, 0, fogRight + 40, canvasH);
+
+            ctx.save();
+            ctx.strokeStyle = `rgba(6, 182, 212, ${inv})`;
+            ctx.lineWidth = 4;
+            ctx.beginPath();
+            ctx.moveTo(origin.x, origin.y - 160 * inv);
+            ctx.lineTo(origin.x, origin.y + 160 * inv);
+            ctx.stroke();
+            ctx.restore();
+          }
+        }
+      }
+
+      function drawTraveler() {
+        const t = state.traveler;
+        const st = STAGES[state.stage];
+
+        let offX = 0, offY = 0;
+        if (t.wobbleMode === 'barrier' && t.wobbleTime > 0) {
+          offX = Math.sin(state.time * 48) * 7 * (t.wobbleTime / 0.45);
+        } else if (t.wobbleMode === 'void') {
+          offY = Math.sin(state.time * 9) * 8;
+        } else if (t.wobbleMode === 'imag') {
+          offX = Math.sin(state.time * 38) * 4;
+          offY = Math.cos(state.time * 44) * 5;
+        }
+
+        const pos = worldToScreen(t.vx, t.vy);
+        const cx = pos.x + offX;
+        const cy = pos.y + offY;
+
+        if (t.trail.length > 1) {
+          ctx.save();
+          for (let i = 1; i < t.trail.length; i++) {
+            const prev = worldToScreen(t.trail[i - 1].x, t.trail[i - 1].y);
+            const curr = worldToScreen(t.trail[i].x, t.trail[i].y);
+            const ratio = i / t.trail.length;
+            ctx.strokeStyle = st.color;
+            ctx.globalAlpha = ratio * 0.45;
+            ctx.lineWidth = ratio * 7;
+            ctx.lineCap = 'round';
+            ctx.beginPath();
+            ctx.moveTo(prev.x, prev.y);
+            ctx.lineTo(curr.x, curr.y);
+            ctx.stroke();
+          }
+          ctx.restore();
+        }
+
+        const pulse = 0.5 + 0.5 * Math.sin(state.time * 4.5);
+        ctx.save();
+        const haloGrad = ctx.createRadialGradient(cx, cy, 6, cx, cy, 34 + pulse * 9);
+        haloGrad.addColorStop(0, `${st.color}AA`);
+        haloGrad.addColorStop(0.5, `${st.color}33`);
+        haloGrad.addColorStop(1, 'rgba(0,0,0,0)');
+        ctx.fillStyle = haloGrad;
+        ctx.beginPath();
+        ctx.arc(cx, cy, 34 + pulse * 9, 0, Math.PI * 2);
+        ctx.fill();
+
+        ctx.strokeStyle = `${st.light}AA`;
+        ctx.lineWidth = 1.6;
+        ctx.beginPath();
+        ctx.arc(cx, cy, 23 + pulse * 2.5, state.time * 1.6, state.time * 1.6 + Math.PI * 1.35);
+        ctx.stroke();
+
+        const orbGrad = ctx.createRadialGradient(cx - 6, cy - 6, 3, cx, cy, 20);
+        orbGrad.addColorStop(0, '#FFFFFF');
+        orbGrad.addColorStop(0.45, st.light);
+        orbGrad.addColorStop(1, st.color);
+
+        ctx.shadowColor = st.color;
+        ctx.shadowBlur = 20;
+        ctx.fillStyle = orbGrad;
+        ctx.beginPath();
+        ctx.arc(cx, cy, 19, 0, Math.PI * 2);
+        ctx.fill();
+
+        ctx.shadowBlur = 0;
+        const label = getTravelerOrbLabel();
+        ctx.fillStyle = '#060A14';
+        ctx.font = `${label.length > 4 ? '800 10px' : '800 12px'} "JetBrains Mono", monospace`;
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText(label, cx, cy + 0.5);
+
+        if (t.wobbleMode === 'void') {
+          ctx.fillStyle = '#C4B5FD';
+          ctx.font = '700 11px "Inter", sans-serif';
+          ctx.fillText('SEM CHÃO!', cx, cy - 31);
+        } else if (t.wobbleMode === 'imag') {
+          ctx.fillStyle = '#FCD34D';
+          ctx.font = '700 11px "JetBrains Mono", monospace';
+          ctx.fillText('√(−1) = ?', cx, cy - 32);
+        }
+        ctx.restore();
+      }
+
+      function drawEffects() {
+        for (const sw of state.shockwaves) {
+          ctx.save();
+          ctx.strokeStyle = sw.color;
+          ctx.globalAlpha = Math.max(0, sw.alpha);
+          ctx.lineWidth = sw.lineWidth;
+          ctx.beginPath();
+          ctx.arc(sw.x, sw.y, sw.radius, 0, Math.PI * 2);
+          ctx.stroke();
+          ctx.restore();
+        }
+        for (const pt of state.particles) {
+          ctx.save();
+          ctx.fillStyle = pt.color;
+          ctx.globalAlpha = Math.max(0, pt.life);
+          ctx.shadowColor = pt.color;
+          ctx.shadowBlur = 8;
+          ctx.beginPath();
+          ctx.arc(pt.x, pt.y, pt.r, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.restore();
+        }
+      }
+
+      /* =========================================================================
+         13. LOOP PRINCIPAL (60 FPS)
+         ========================================================================= */
+      let lastTime = performance.now();
+
+      function update(dt) {
+        state.time += dt;
+        if (state.mode !== 'journey') return;
+
+        const camLerp = 1 - Math.exp(-7 * dt);
+        state.camera.x += (state.camera.targetX - state.camera.x) * camLerp;
+        state.camera.y += (state.camera.targetY - state.camera.y) * camLerp;
+        state.camera.scale += (state.camera.targetScale - state.camera.scale) * camLerp;
+
+        if (state.camera.shake > 0.1) state.camera.shake *= Math.exp(-10 * dt);
+        else state.camera.shake = 0;
+
+        const t = state.traveler;
+        if (t.orbit) {
+          t.orbit.progress += dt;
+          const p = Math.min(1, t.orbit.progress / t.orbit.duration);
+          const ease = p < 0.5 ? 2 * p * p : 1 - Math.pow(-2 * p + 2, 2) / 2;
+          const ang = t.orbit.startAngle + (t.orbit.endAngle - t.orbit.startAngle) * ease;
+          t.vx = Math.cos(ang) * t.orbit.radius;
+          t.vy = Math.sin(ang) * t.orbit.radius;
+          if (p >= 1) {
+            t.x = t.orbit.targetX; t.y = t.orbit.targetY;
+            t.vx = t.x; t.vy = t.y;
+            t.orbit = null;
+            state.busy = false;
+            spawnParticles(t.x, t.y, '#10B981', 18, 120);
+            updateCameraTarget();
+            updateHUD();
+          }
+        } else {
+          const tLerp = 1 - Math.exp(-13 * dt);
+          t.vx += (t.x - t.vx) * tLerp;
+          t.vy += (t.y - t.vy) * tLerp;
+        }
+
+        const lastTrail = t.trail[t.trail.length - 1];
+        if (!lastTrail || Math.hypot(t.vx - lastTrail.x, t.vy - lastTrail.y) > 0.03) {
+          t.trail.push({ x: t.vx, y: t.vy });
+          if (t.trail.length > 24) t.trail.shift();
+        } else if (t.trail.length > 1) {
+          t.trail.shift();
+        }
+
+        if (t.wobbleMode === 'barrier' && t.wobbleTime > 0) {
+          t.wobbleTime = Math.max(0, t.wobbleTime - dt);
+          if (t.wobbleTime === 0) t.wobbleMode = null;
+        }
+
+        if (state.portalAnim) {
+          state.portalAnim.progress += dt;
+          if (state.portalAnim.progress >= state.portalAnim.duration) {
+            state.portalAnim.onComplete();
+          }
+        }
+
+        for (let i = state.particles.length - 1; i >= 0; i--) {
+          const pt = state.particles[i];
+          pt.x += pt.vx * dt; pt.y += pt.vy * dt;
+          pt.vx *= 0.96; pt.vy *= 0.96;
+          pt.life -= pt.decay * dt;
+          if (pt.life <= 0) state.particles.splice(i, 1);
+        }
+        for (let i = state.shockwaves.length - 1; i >= 0; i--) {
+          const sw = state.shockwaves[i];
+          sw.radius += (sw.maxRadius - sw.radius) * Math.min(1, 5.5 * dt);
+          sw.alpha -= 1.25 * dt;
+          if (sw.alpha <= 0) state.shockwaves.splice(i, 1);
+        }
+      }
+
+      function render() {
+        if (state.mode !== 'journey') return;
+        ctx.save();
+        if (state.camera.shake > 0) {
+          ctx.translate((Math.random() - 0.5) * state.camera.shake, (Math.random() - 0.5) * state.camera.shake);
+        }
+        drawBackground();
+
+        // Se estiver em colapso de C -> R, o drawPortalAnimation já desenha a transição completa
+        const hideBaseForComplexCollapse = state.portalAnim && state.portalAnim.direction === 'collapse' && state.portalAnim.fromStage === 4;
+        if (!hideBaseForComplexCollapse) {
+          if (state.stage === 0) drawNaturalsStage();
+          else if (state.stage === 1) drawIntegersStage();
+          else if (state.stage === 2) drawRationalsStage();
+          else if (state.stage === 3) drawRealsStage();
+          else if (state.stage === 4) drawComplexStage(1, 1);
+        }
+
+        drawPortalAnimation();
+        drawTraveler();
+        drawEffects();
+        ctx.restore();
+      }
+
+      function loop(now) {
+        const dt = Math.min(0.05, (now - lastTime) / 1000);
+        lastTime = now;
+        update(dt);
+        render();
+        requestAnimationFrame(loop);
+      }
+
+      /* =========================================================================
+         14. MODO 2: PASSAPORTE DO NÚMERO (PARSER ROBUSTO + 5 CARTÕES + SVG)
+         ========================================================================= */
+      const QUICK_EXAMPLES = ['2', '0', '-5', '0,5', '1/3', '√2', 'π', '3 + 2i'];
+
+      function parsePassportNumber(inputRaw) {
+        const raw = (inputRaw || '').trim();
+        if (!raw) return { error: 'Digite um número para analisar.' };
+
+        // Normaliza: remove espaços, troca vírgula por ponto, menos tipográfico por hífen
+        let s = raw
+          .replace(/\s+/g, '')
+          .replace(/,/g, '.')
+          .replace(/[−–—]/g, '-')
+          .toLowerCase();
+
+        // 1. Verifica se contém unidade imaginária 'i' (mas não 'pi')
+        const withoutPi = s.replace(/pi/g, '');
+        if (withoutPi.includes('i')) {
+          // Casos puros e compostos: a+bi, a-bi, bi, -bi, i, -i
+          // Regex para a+bi ou bi
+          if (s === 'i' || s === '+i') return { kind: 'complex', a: 0, b: 1, display: 'i' };
+          if (s === '-i') return { kind: 'complex', a: 0, b: -1, display: '−i' };
+
+          // Tenta casar imaginário puro: ex -4i, 2.5i
+          const pureImag = s.match(/^([+-]?\d*\.?\d+)i$/);
+          if (pureImag) {
+            const b = parseFloat(pureImag[1]);
+            if (isNaN(b)) return { error: 'Formato complexo inválido. Use ex: 3+2i ou -4i.' };
+            return { kind: 'complex', a: 0, b, display: `${formatBR(b, 4)}i` };
+          }
+
+          // Tenta casar a+bi ou a-bi (ex: 3+2i, -1.5-i, 2+0i)
+          const compMatch = s.match(/^([+-]?\d*\.?\d+)([+-]\d*\.?\d*)i$/);
+          if (compMatch) {
+            const a = parseFloat(compMatch[1]);
+            let bStr = compMatch[2];
+            if (bStr === '+') bStr = '1';
+            else if (bStr === '-') bStr = '-1';
+            const b = parseFloat(bStr);
+            if (isNaN(a) || isNaN(b)) return { error: 'Formato complexo inválido. Use ex: 3+2i.' };
+            // Se b === 0, cai na análise real abaixo!
+            if (Math.abs(b) < 1e-12) {
+              return classifyRealValue(a);
+            }
+            return { kind: 'complex', a, b, display: formatComplex(a, b) };
+          }
+
+          return { error: 'Não entendi esse número complexo. Tente formatos como 3+2i, -4i ou i.' };
+        }
+
+        // 2. Irracionais famosos: pi / π
+        if (s === 'pi' || s === '+pi' || s === 'π' || s === '+π') {
+          return { kind: 'irrational', value: Math.PI, symbol: 'π', decimalExpand: '3,14159265...', reason: 'Decimal infinita e não periódica' };
+        }
+        if (s === '-pi' || s === '-π') {
+          return { kind: 'irrational', value: -Math.PI, symbol: '−π', decimalExpand: '−3,14159265...', reason: 'Decimal infinita e não periódica' };
+        }
+
+        // 3. Raízes quadradas: √n, -√n, raiz(n), sqrt(n)
+        const rootMatch = s.match(/^([+-]?)(?:√|raiz|sqrt)\(?([+-]?\d*\.?\d+)\)?$/);
+        if (rootMatch) {
+          const sign = rootMatch[1] === '-' ? -1 : 1;
+          const radicand = parseFloat(rootMatch[2]);
+          if (isNaN(radicand)) return { error: 'Raiz inválida. Tente √2 ou raiz(5).' };
+          if (radicand < 0) {
+            const mag = Math.sqrt(Math.abs(radicand));
+            const b = sign * mag;
+            const isExactInt = Math.abs(mag - Math.round(mag)) < 1e-9;
+            return {
+              kind: 'complex',
+              a: 0,
+              b,
+              display: isExactInt ? (Math.round(b) === 1 ? 'i' : Math.round(b) === -1 ? '−i' : `${formatBR(Math.round(b))}i`) : `${sign < 0 ? '−' : ''}√${formatBR(Math.abs(radicand))}i`
+            };
+          }
+          const val = sign * Math.sqrt(radicand);
+          const nearest = Math.round(val);
+          if (Math.abs(val - nearest) < 1e-9) {
+            return classifyRealValue(nearest);
+          }
+          const sym = `${sign < 0 ? '−' : ''}√${formatBR(radicand, 2)}`;
+          const dec = `${val < 0 ? '−' : ''}${Math.abs(val).toFixed(8).replace('.', ',')}...`;
+          return { kind: 'irrational', value: val, symbol: sym, decimalExpand: dec, reason: 'Raiz não exata (infinita sem período)' };
+        }
+
+        // 4. Frações explícitas: p/q
+        const fracMatch = s.match(/^([+-]?\d+)\/([+-]?\d+)$/);
+        if (fracMatch) {
+          let num = parseInt(fracMatch[1], 10);
+          let den = parseInt(fracMatch[2], 10);
+          if (den === 0) return { error: 'Divisão por zero (denominador 0) não existe em nenhum conjunto numérico!' };
+          if (den < 0) { num = -num; den = -den; }
+          const g = gcd(num, den);
+          const sn = num / g;
+          const sd = den / g;
+          if (sd === 1) {
+            return classifyRealValue(sn, `${num}/${den}`);
+          }
+          return {
+            kind: 'rational',
+            value: sn / sd,
+            num: sn,
+            den: sd,
+            originalFrac: `${num < 0 ? '−' : ''}${Math.abs(num)}/${den}`
+          };
+        }
+
+        // 5. Número decimal ou inteiro padrão
+        if (/^[+-]?(?:\d+\.?\d*|\.\d+)$/.test(s)) {
+          const val = parseFloat(s);
+          if (isNaN(val)) return { error: 'Número inválido.' };
+          return classifyRealValue(val);
+        }
+
+        return { error: 'Formato não reconhecido. Experimente: 2, -5, 0,5, 1/3, √2, π ou 3+2i.' };
+      }
+
+      function classifyRealValue(val, originalFrac = null) {
+        const clean = roundClean(val, 8);
+        if (Number.isInteger(clean)) {
+          return {
+            kind: clean >= 0 ? 'natural' : 'integer',
+            value: clean,
+            num: clean,
+            den: 1,
+            originalFrac
+          };
+        }
+        // Decimal finito -> converte para fração irredutível
+        const str = Math.abs(clean).toString();
+        const decPart = str.includes('.') ? str.split('.')[1].length : 0;
+        const den = Math.pow(10, Math.min(decPart, 6));
+        const num = Math.round(clean * den);
+        const g = gcd(num, den);
+        return {
+          kind: 'rational',
+          value: clean,
+          num: num / g,
+          den: den / g,
+          originalFrac
+        };
+      }
+
+      function formatComplex(a, b) {
+        const aStr = formatBR(a, 4);
+        const absB = Math.abs(b);
+        const bCoef = Math.abs(absB - 1) < 1e-9 ? '' : formatBR(absB, 4);
+        if (Math.abs(a) < 1e-9) return b >= 0 ? `${bCoef}i` : `−${bCoef}i`;
+        return b >= 0 ? `${aStr} + ${bCoef}i` : `${aStr} − ${bCoef}i`;
+      }
+
+      // Gera alternativas de escrita em Q para inteiros ou frações
+      function getRationalForms(parsed) {
+        if (parsed.kind === 'natural' || parsed.kind === 'integer') {
+          const n = parsed.value;
+          const sign = n < 0 ? '−' : '';
+          const a = Math.abs(n);
+          if (n === 2) return ['6/3', '2/1', '4/2', '10/5'];
+          if (n === 0) return ['0/1', '0/3', '0/5', '0/10'];
+          return [
+            `${sign}${a * 3}/3`,
+            `${sign}${a}/1`,
+            `${sign}${a * 2}/2`,
+            `${sign}${a * 5}/5`
+          ];
+        }
+        if (parsed.kind === 'rational') {
+          const { num, den } = parsed;
+          const sign = num < 0 ? '−' : '';
+          const a = Math.abs(num);
+          return [
+            `${sign}${a}/${den}`,
+            `${sign}${a * 2}/${den * 2}`,
+            `${sign}${a * 3}/${den * 3}`,
+            `${sign}${a * 5}/${den * 5}`
+          ];
+        }
+        return [];
+      }
+
+      function getRealRepresentation(parsed, dizimaMode) {
+        if (parsed.kind === 'irrational') {
+          return { main: parsed.decimalExpand, hasDizimaToggle: false, sub: `Forma exata: ${parsed.symbol}` };
+        }
+        if (parsed.kind === 'natural' || parsed.kind === 'integer') {
+          const n = parsed.value;
+          if (dizimaMode && n !== 0) {
+            if (n > 0) {
+              return {
+                main: `${n - 1},99999...`,
+                hasDizimaToggle: true,
+                sub: 'Curiosidade: 0,999... = 1! É exatamente o mesmo número.'
+              };
+            } else {
+              return {
+                main: `−${Math.abs(n) - 1},99999...`,
+                hasDizimaToggle: true,
+                sub: 'Dízima periódica equivalente na reta real!'
+              };
+            }
+          }
+          return {
+            main: `${formatBR(n, 0)},00000...`,
+            hasDizimaToggle: n !== 0,
+            sub: 'Expansão decimal infinita de zeros'
+          };
+        }
+        if (parsed.kind === 'rational') {
+          const v = parsed.value;
+          const decStr = (v < 0 ? '−' : '') + Math.abs(v).toFixed(6).replace('.', ',');
+          // Detecta se é dízima periódica (denominador tem fator primo diferente de 2 e 5)
+          let d = parsed.den;
+          while (d % 2 === 0) d /= 2;
+          while (d % 5 === 0) d /= 5;
+          const isRepeating = d > 1;
+          return {
+            main: isRepeating ? `${decStr}...` : `${formatBR(v, 4)}000...`,
+            hasDizimaToggle: false,
+            sub: isRepeating ? 'Dízima periódica (racional e real)' : 'Decimal exato na reta contínua'
+          };
+        }
+        return { main: '—', hasDizimaToggle: false, sub: '' };
+      }
+
+      function analyzePassport(rawInput) {
+        const parsed = parsePassportNumber(rawInput);
+        if (parsed.error) {
+          passportError.textContent = parsed.error;
+          passportError.classList.remove('hidden');
+          return;
+        }
+        passportError.classList.add('hidden');
+        state.passport.parsed = parsed;
+
+        // Reseta toggles secundários se o texto mudou
+        const isNewInput = state.passport.raw !== rawInput;
+        if (isNewInput) {
+          state.passport.raw = rawInput;
+          state.passport.qAltIndex = 0;
+          state.passport.rDizimaMode = false;
+        }
+
+        // Pertinência em cada conjunto
+        const inN = parsed.kind === 'natural';
+        const inZ = inN || parsed.kind === 'integer';
+        const inQ = inZ || parsed.kind === 'rational';
+        const inR = inQ || parsed.kind === 'irrational';
+        const inC = true;
+
+        const validIndices = [];
+        if (inN) validIndices.push(0);
+        if (inZ) validIndices.push(1);
+        if (inQ) validIndices.push(2);
+        if (inR) validIndices.push(3);
+        if (inC) validIndices.push(4);
+        state.passport.validSetIndices = validIndices;
+
+        if (isNewInput || !validIndices.includes(state.passport.activeSetIndex)) {
+          state.passport.activeSetIndex = validIndices[0];
+        }
+
+        // Menor conjunto e cadeia de inclusão
+        const shortLabel = parsed.kind === 'complex'
+          ? parsed.display
+          : parsed.kind === 'irrational'
+          ? parsed.symbol
+          : parsed.kind === 'rational'
+          ? `${parsed.num < 0 ? '−' : ''}${Math.abs(parsed.num)}/${parsed.den}`
+          : formatBR(parsed.value, 0);
+
+        if (inN) {
+          passportHomeSet.textContent = 'Números Naturais (ℕ)';
+          passportHomeSet.style.color = '#FCD34D';
+          passportChain.textContent = `${shortLabel} ∈ ℕ ⊂ ℤ ⊂ ℚ ⊂ ℝ ⊂ ℂ`;
+        } else if (inZ) {
+          passportHomeSet.textContent = 'Números Inteiros (ℤ)';
+          passportHomeSet.style.color = '#67E8F9';
+          passportChain.textContent = `${shortLabel} ∈ ℤ ⊂ ℚ ⊂ ℝ ⊂ ℂ`;
+        } else if (inQ) {
+          passportHomeSet.textContent = 'Números Racionais (ℚ)';
+          passportHomeSet.style.color = '#C4B5FD';
+          passportChain.textContent = `${shortLabel} ∈ ℚ ⊂ ℝ ⊂ ℂ`;
+        } else if (inR) {
+          passportHomeSet.textContent = 'Números Reais (ℝ — Irracional)';
+          passportHomeSet.style.color = '#6EE7B7';
+          passportChain.textContent = `${shortLabel} ∈ (ℝ − ℚ) ⊂ ℝ ⊂ ℂ`;
+        } else {
+          passportHomeSet.textContent = 'Números Complexos (ℂ)';
+          passportHomeSet.style.color = '#FDE68A';
+          passportChain.textContent = `${shortLabel} ∈ ℂ (fora de ℝ)`;
+        }
+
+        // Atualiza Diagrama Concêntrico SVG
+        updateVennDiagram({ inN, inZ, inQ, inR, inC }, shortLabel);
+
+        // Monta os 5 Cartões
+        const qForms = getRationalForms(parsed);
+        const qCurrent = qForms[state.passport.qAltIndex % (qForms.length || 1)] || '';
+        const rRep = getRealRepresentation(parsed, state.passport.rDizimaMode);
+        const cRep = parsed.kind === 'complex'
+          ? parsed.display
+          : parsed.kind === 'irrational'
+          ? `${parsed.symbol} + 0i`
+          : parsed.kind === 'rational'
+          ? `${formatBR(parsed.value, 4)} + 0i`
+          : `${formatBR(parsed.value, 0)} + 0i`;
+
+        const cardsData = [
+          {
+            idx: 0, symbol: 'ℕ', name: 'Naturais', color: '#F59E0B', light: '#FCD34D',
+            belongs: inN,
+            dress: inN ? formatBR(parsed.value, 0) : null,
+            sub: inN ? 'Contagem pura (inteiro ≥ 0)' : (parsed.kind === 'integer' ? 'Negativos não existem em ℕ.' : 'Apenas inteiros ≥ 0 vivem aqui.')
+          },
+          {
+            idx: 1, symbol: 'ℤ', name: 'Inteiros', color: '#06B6D4', light: '#67E8F9',
+            belongs: inZ,
+            dress: inZ ? (parsed.value > 0 ? `+${parsed.value}` : formatBR(parsed.value, 0)) : null,
+            sub: inZ ? (parsed.value > 0 ? 'Sinal explícito na reta inteira' : 'Inteiro com direção definida') : 'Não é um número inteiro exato.'
+          },
+          {
+            idx: 2, symbol: 'ℚ', name: 'Racionais', color: '#8B5CF6', light: '#C4B5FD',
+            belongs: inQ,
+            dress: inQ ? qCurrent : null,
+            sub: inQ ? 'Razão p/q entre dois inteiros' : (parsed.kind === 'irrational' ? 'Irracional: não vira fração!' : 'Possui parte imaginária.'),
+            actionBtn: inQ ? {
+              label: '🔄 Outra forma',
+              onClick: (e) => {
+                e.stopPropagation();
+                state.passport.activeSetIndex = 2;
+                state.passport.qAltIndex = (state.passport.qAltIndex + 1) % qForms.length;
+                sound.playTick(580);
+                analyzePassport(passportInput.value);
+              }
+            } : null
+          },
+          {
+            idx: 3, symbol: 'ℝ', name: 'Reais', color: '#10B981', light: '#6EE7B7',
+            belongs: inR,
+            dress: inR ? rRep.main : null,
+            sub: inR ? rRep.sub : 'Fora da reta real (b ≠ 0).',
+            actionBtn: inR && rRep.hasDizimaToggle ? {
+              label: state.passport.rDizimaMode ? '↩ Forma padrão' : '✨ Dízima (0,999...=1)',
+              onClick: (e) => {
+                e.stopPropagation();
+                state.passport.activeSetIndex = 3;
+                state.passport.rDizimaMode = !state.passport.rDizimaMode;
+                sound.playTick(660);
+                analyzePassport(passportInput.value);
+              }
+            } : null
+          },
+          {
+            idx: 4, symbol: 'ℂ', name: 'Complexos', color: '#D4AF37', light: '#FDE68A',
+            belongs: inC,
+            dress: cRep,
+            sub: parsed.kind === 'complex' ? 'Coordenada (a, b) no Plano 2D' : 'Parte imaginária nula (0i) no Plano 2D'
+          }
+        ];
+
+        // Atualiza rótulo da Roupagem em Destaque e Diagrama Concêntrico SVG
+        const activeCard = cardsData[state.passport.activeSetIndex] || cardsData[validIndices[0]];
+        outfitStepLabel.textContent = `${activeCard.symbol} (${activeCard.name}): ${activeCard.dress}`;
+        outfitStepLabel.style.color = activeCard.light;
+        updateVennDiagram({ inN, inZ, inQ, inR, inC }, activeCard.dress || shortLabel, state.passport.activeSetIndex);
+
+        passportCards.innerHTML = '';
+        cardsData.forEach((c) => {
+          const isFocused = c.belongs && c.idx === state.passport.activeSetIndex;
+          const card = document.createElement('div');
+          card.className = `rounded-2xl p-2.5 sm:p-3 border flex flex-col justify-between gap-2 transition-all ${
+            c.belongs
+              ? `glass-panel shadow-lg cursor-pointer ${isFocused ? 'passport-card-active ring-2' : 'opacity-85 hover:opacity-100'}`
+              : 'bg-slate-950/65 border-slate-800/80 opacity-50'
+          }`;
+          if (c.belongs) {
+            card.style.borderColor = isFocused ? c.light : `${c.color}66`;
+            card.style.boxShadow = isFocused ? `0 0 26px ${c.color}55` : `0 0 14px ${c.color}18`;
+            if (isFocused) card.style.setProperty('--tw-ring-color', c.color);
+            card.addEventListener('click', () => {
+              state.passport.activeSetIndex = c.idx;
+              sound.playTick(480 + c.idx * 55);
+              analyzePassport(passportInput.value);
+            });
+          }
+
+          card.innerHTML = `
+            <div class="flex items-center justify-between gap-1">
+              <div class="flex items-center gap-1.5 min-w-0">
+                <span class="font-mono-math text-lg font-black shrink-0" style="color:${c.belongs ? c.light : '#64748B'}">${c.symbol}</span>
+                <span class="text-[11px] font-bold text-slate-200 truncate">${c.name}</span>
+              </div>
+              <span class="px-1.5 py-0.5 rounded-full text-[9px] font-extrabold font-mono-math border shrink-0 ${
+                c.belongs
+                  ? 'bg-emerald-500/15 text-emerald-300 border-emerald-500/40'
+                  : 'bg-slate-800/80 text-slate-500 border-slate-700'
+              }">
+                ${c.belongs ? '∈' : '∉'}
+              </span>
+            </div>
+
+            <div class="py-1 text-center">
+              ${
+                c.belongs
+                  ? `<div class="text-[9px] uppercase tracking-wider text-slate-400 mb-0.5">${isFocused ? '★ Roupagem ativa' : 'Roupagem'}</div>
+                     <div class="font-mono-math text-base sm:text-lg font-extrabold text-white break-all" style="text-shadow: 0 0 14px ${c.color}55">${c.dress}</div>`
+                  : `<div class="font-mono-math text-xl font-bold text-slate-600">∅</div>`
+              }
+            </div>
+
+            <div class="space-y-1.5">
+              <p class="text-[10px] text-slate-400 leading-snug text-center">${c.sub}</p>
+              <div class="card-action-slot flex justify-center"></div>
+            </div>
+          `;
+
+          if (c.actionBtn) {
+            const slot = card.querySelector('.card-action-slot');
+            const btn = document.createElement('button');
+            btn.className = 'ctrl-btn px-2 py-1 rounded-lg text-[10px] font-bold leading-tight bg-slate-800/90 hover:bg-slate-700 text-slate-200 border border-slate-600/70 cursor-pointer';
+            btn.textContent = c.actionBtn.label;
+            btn.addEventListener('click', c.actionBtn.onClick);
+            slot.appendChild(btn);
+          }
+
+          passportCards.appendChild(card);
+        });
+      }
+
+      // Avança ou retrocede para a próxima roupagem válida do número (ℕ -> ℤ -> ℚ -> ℝ -> ℂ)
+      function stepPassportOutfit(delta) {
+        const valid = state.passport.validSetIndices;
+        if (!valid || valid.length === 0) return;
+        const pos = valid.indexOf(state.passport.activeSetIndex);
+        const nextPos = ((pos === -1 ? 0 : pos) + delta + valid.length) % valid.length;
+        state.passport.activeSetIndex = valid[nextPos];
+        sound.playTick(480 + state.passport.activeSetIndex * 60);
+        analyzePassport(passportInput.value);
+      }
+
+      // Envia o número atual do Passaporte diretamente para a Reta/Plano na Travessia
+      function viewPassportNumberOnJourney() {
+        const parsed = state.passport.parsed;
+        if (!parsed || parsed.error) {
+          setMode('journey');
+          return;
+        }
+
+        let targetStage = 0;
+        let nx = 0;
+        let ny = 0;
+        let special = null;
+
+        if (parsed.kind === 'natural') {
+          targetStage = 0;
+          nx = Math.max(0, Math.min(12, parsed.value));
+        } else if (parsed.kind === 'integer') {
+          targetStage = 1;
+          nx = Math.max(-12, Math.min(12, parsed.value));
+        } else if (parsed.kind === 'rational') {
+          targetStage = 2;
+          nx = Math.max(-12, Math.min(12, parsed.value));
+        } else if (parsed.kind === 'irrational') {
+          targetStage = 3;
+          nx = Math.max(-12, Math.min(12, parsed.value));
+          if (Math.abs(parsed.value - Math.SQRT2) < 1e-6) special = 'sqrt2';
+          else if (Math.abs(parsed.value - Math.PI) < 1e-6) special = 'pi';
+        } else {
+          targetStage = 4;
+          nx = Math.max(-10, Math.min(10, parsed.a));
+          ny = Math.max(-7, Math.min(7, parsed.b));
+        }
+
+        if (targetStage > state.maxUnlockedStage) {
+          state.maxUnlockedStage = targetStage;
+        }
+        setMode('journey');
+        jumpToStage(targetStage);
+        setTravelerPos(nx, ny, special);
+        showToast(`📍 Mostrando ${state.passport.raw} em ${STAGES[targetStage].fullName}`, STAGES[targetStage].color);
+      }
+
+      function updateVennDiagram(flags, label, focusIndex = null) {
+        const map = [
+          { id: 'ring-N', idx: 0, active: flags.inN },
+          { id: 'ring-Z', idx: 1, active: flags.inZ },
+          { id: 'ring-Q', idx: 2, active: flags.inQ },
+          { id: 'ring-R', idx: 3, active: flags.inR },
+          { id: 'ring-C', idx: 4, active: flags.inC }
+        ];
+        map.forEach((m) => {
+          const el = document.getElementById(m.id);
+          if (!el) return;
+          const isFocused = focusIndex === m.idx;
+          el.setAttribute('fill-opacity', isFocused ? '0.36' : m.active ? '0.16' : '0.03');
+          el.setAttribute('stroke-opacity', isFocused ? '1' : m.active ? '0.75' : '0.22');
+          el.setAttribute('stroke-width', isFocused ? '3.5' : m.active ? '2' : '1.2');
+        });
+
+        // Posiciona o ponto marcador no anel em destaque (ou no anel mais interno)
+        const targetIdx = focusIndex !== null ? focusIndex : (flags.inN ? 0 : flags.inZ ? 1 : flags.inQ ? 2 : flags.inR ? 3 : 4);
+        const coords = [
+          { x: 92, y: 122 },   // ℕ
+          { x: 158, y: 122 },  // ℤ
+          { x: 212, y: 122 },  // ℚ
+          { x: 266, y: 122 },  // ℝ
+          { x: 318, y: 122 }   // ℂ
+        ];
+        const pt = coords[targetIdx] || coords[4];
+
+        vennMarker.setAttribute('transform', `translate(${pt.x}, ${pt.y})`);
+        vennMarkerLabel.textContent = label.length > 9 ? label.slice(0, 8) + '…' : label;
+      }
+
+      function renderPassportChips() {
+        passportChips.innerHTML = '';
+        QUICK_EXAMPLES.forEach((ex) => {
+          const btn = document.createElement('button');
+          btn.className = 'ctrl-btn px-3 py-1.5 rounded-xl font-mono-math text-xs sm:text-sm font-bold bg-slate-800/80 hover:bg-slate-700 text-slate-200 border border-slate-700 hover:border-cyan-400/60 cursor-pointer';
+          btn.textContent = ex;
+          btn.addEventListener('click', () => {
+            passportInput.value = ex;
+            sound.playTick(540);
+            analyzePassport(ex);
+          });
+          passportChips.appendChild(btn);
+        });
+      }
+
+      /* =========================================================================
+         15. EVENTOS GERAIS
+         ========================================================================= */
+      tabJourney.addEventListener('click', () => setMode('journey'));
+      tabPassport.addEventListener('click', () => setMode('passport'));
+
+      btnOpenPortal.addEventListener('click', () => requestOpenPortal());
+      btnCollapsePortal.addEventListener('click', () => executePortalCollapse());
+      btnCloseCollapseCard.addEventListener('click', () => collapseCard.classList.add('hidden'));
+      btnCloseQuiz.addEventListener('click', () => quizModal.classList.add('hidden'));
+
+      btnSound.addEventListener('click', () => {
+        sound.enabled = !sound.enabled;
+        soundIcon.textContent = sound.enabled ? '🔊' : '🔇';
+        if (sound.enabled) sound.playTick(600);
+      });
+
+      btnReset.addEventListener('click', () => {
+        if (state.mode === 'passport') {
+          passportInput.value = '2';
+          analyzePassport('2');
+          return;
+        }
+        resetJourney();
+      });
+
+      btnFreeMode.addEventListener('click', () => {
+        state.freeMode = !state.freeMode;
+        if (state.freeMode) {
+          freeModeDot.className = 'w-2 h-2 rounded-full bg-emerald-400 shadow-[0_0_8px_#34D399]';
+          btnFreeMode.classList.add('border-emerald-500/60', 'text-emerald-200');
+          showToast('🎬 Modo Livre ativado — quizzes pulados e todos os conjuntos liberados!', '#10B981');
+        } else {
+          freeModeDot.className = 'w-2 h-2 rounded-full bg-slate-500';
+          btnFreeMode.classList.remove('border-emerald-500/60', 'text-emerald-200');
+          showToast('🔒 Modo Jornada com Portais Selados ativado.', '#94A3B8');
+        }
+        renderStepper();
+      });
+
+      // Eventos do Passaporte
+      btnTopBackToJourney.addEventListener('click', () => setMode('journey'));
+      btnBackToJourney.addEventListener('click', () => setMode('journey'));
+      btnViewOnJourney.addEventListener('click', () => viewPassportNumberOnJourney());
+      btnPrevOutfit.addEventListener('click', () => stepPassportOutfit(-1));
+      btnNextOutfit.addEventListener('click', () => stepPassportOutfit(1));
+
+      btnAnalyzeNumber.addEventListener('click', () => {
+        sound.playStep(2);
+        analyzePassport(passportInput.value);
+      });
+      passportInput.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') {
+          e.preventDefault();
+          sound.playStep(2);
+          analyzePassport(passportInput.value);
+        }
+      });
+
+      // Teclado no Modo Jornada
+      window.addEventListener('keydown', (e) => {
+        if (state.mode !== 'journey' || state.busy || !quizModal.classList.contains('hidden')) return;
+        if (e.key === 'ArrowRight') {
+          e.preventDefault();
+          moveStep(state.stage === 2 ? 0.1 : state.stage === 3 ? 0.25 : 1, 0);
+        } else if (e.key === 'ArrowLeft') {
+          e.preventDefault();
+          moveStep(state.stage === 2 ? -0.1 : state.stage === 3 ? -0.25 : -1, 0);
+        } else if (e.key === 'ArrowUp' && state.stage === 4) {
+          e.preventDefault();
+          moveStep(0, 1);
+        } else if (e.key === 'ArrowDown' && state.stage === 4) {
+          e.preventDefault();
+          moveStep(0, -1);
+        } else if (e.key === 'Enter' && state.boundaryTriggered && state.stage < 4) {
+          e.preventDefault();
+          requestOpenPortal();
+        }
+      });
+
+      // Clique / Toque direto no Canvas
+      canvas.addEventListener('pointerdown', (e) => {
+        if (state.mode !== 'journey' || state.busy) return;
+        const rect = canvas.getBoundingClientRect();
+        const w = screenToWorld(e.clientX - rect.left, e.clientY - rect.top);
+
+        if (state.stage === 0) {
+          if (w.x < -0.2) { state.traveler.x = 0; moveStep(-1, 0); }
+          else setTravelerPos(Math.max(0, Math.min(12, Math.round(w.x))), 0);
+        } else if (state.stage === 1) {
+          const fracDist = Math.abs(w.x - Math.round(w.x));
+          if (fracDist > 0.32 && fracDist < 0.68) triggerIntegerBoundary(Math.floor(w.x) + 0.5);
+          else setTravelerPos(Math.max(-12, Math.min(12, Math.round(w.x))), 0);
+        } else if (state.stage === 2) {
+          setTravelerPos(Math.max(-12, Math.min(12, Math.round(w.x * 10) / 10)), 0);
+        } else if (state.stage === 3) {
+          setTravelerPos(Math.max(-12, Math.min(12, roundClean(w.x, 2))), 0);
+        } else if (state.stage === 4) {
+          setTravelerPos(Math.max(-10, Math.min(10, Math.round(w.x))), Math.max(-7, Math.min(7, Math.round(w.y))));
+        }
+      });
+
+      window.addEventListener('resize', resizeCanvas);
+
+      /* =========================================================================
+         16. INICIALIZAÇÃO
+         ========================================================================= */
+      window.onload = () => {
+        initStars();
+        renderPassportChips();
+        analyzePassport('2');
+        resizeCanvas();
+        renderControls();
+        updateHUD();
+        lastTime = performance.now();
+        requestAnimationFrame(loop);
+      };
+    })();
+  </script>
+<style>#autoriaBtn{position:fixed;left:6px;bottom:6px;z-index:2147483000;width:22px;height:22px;border-radius:50%;border:1px solid rgba(128,128,128,.5);background:rgba(255,255,255,.75);color:#333;font:12px/20px sans-serif;text-align:center;padding:0;cursor:pointer;opacity:.5}#autoriaBtn:hover,#autoriaBtn:focus{opacity:1}#autoriaTxt{position:fixed;left:6px;bottom:34px;z-index:2147483000;max-width:260px;padding:8px 10px;border-radius:8px;background:#222;color:#fff;font:12px/1.35 sans-serif;display:none}#autoriaTxt.on{display:block}</style><button id="autoriaBtn" type="button" aria-label="Autoria" onclick="document.getElementById('autoriaTxt').classList.toggle('on')">©</button><div id="autoriaTxt" onclick="this.classList.remove('on')">© Ygor B. F. Ferreira · A Saga dos Reinos Matemáticos · Matematkês · uso livre em sala</div>
+</body>
+</html>

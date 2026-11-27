@@ -1,0 +1,523 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>O Matematikês - Câmara das Formas</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap');
+
+        :root {
+            --bg-stone: #292524;
+            --bg-stone-dark: #1c1917;
+            --cyan-glow: #00f0ff;
+            --red-error: #ef4444;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-stone);
+            color: #d6d3d1;
+            overflow: hidden;
+            touch-action: none; 
+            user-select: none;
+            -webkit-user-select: none;
+        }
+
+        /* --- MENUS --- */
+        .menu-btn {
+            background: linear-gradient(145deg, #3f3f46, #27272a);
+            border: 2px solid #52525b;
+            box-shadow: 4px 4px 8px rgba(0,0,0,0.6), inset -2px -2px 5px rgba(0,0,0,0.3), inset 2px 2px 5px rgba(255,255,255,0.05);
+            transition: all 0.2s ease;
+        }
+        .menu-btn:active {
+            transform: scale(0.95);
+            box-shadow: 2px 2px 4px rgba(0,0,0,0.6), inset -1px -1px 3px rgba(0,0,0,0.3);
+            border-color: var(--cyan-glow);
+        }
+
+        /* --- NICHOS (Alvos) --- */
+        .niche {
+            width: 70px;
+            height: 70px;
+            background-color: #52525B; 
+            border: 2px dashed #D4D4D8; 
+            border-radius: 12px; 
+            box-shadow: inset 0 4px 10px rgba(0,0,0,0.6), 0 2px 4px rgba(255,255,255,0.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.5s ease;
+            position: relative;
+        }
+
+        .niche.active-glow {
+            background-color: var(--bg-stone-dark);
+            border-color: var(--cyan-glow);
+            box-shadow: inset 0 0 20px rgba(0, 240, 255, 0.4), 0 0 15px rgba(0, 240, 255, 0.6) !important;
+        }
+
+        .niche svg {
+            width: 50px;
+            height: 50px;
+            opacity: 1;
+            transition: opacity 0.5s ease, filter 0.5s ease;
+        }
+
+        .niche.active-glow svg {
+            filter: drop-shadow(0 0 5px var(--cyan-glow));
+        }
+
+        .niche-label {
+            margin-top: 0.25rem;
+            font-size: 0.55rem;
+            font-weight: 900;
+            letter-spacing: 0.05em;
+            color: #44403c;
+            text-shadow: inset 1px 1px 2px rgba(0,0,0,0.9);
+            transition: all 0.5s ease;
+            text-align: center;
+            min-height: 12px;
+        }
+
+        .niche-label.revealed {
+            color: var(--cyan-glow);
+            text-shadow: 0 0 8px rgba(0,240,255,0.8);
+        }
+
+        /* --- PEÇA ATIVA (Arrastável) --- */
+        #active-piece {
+            position: absolute;
+            left: -50px; 
+            top: -50px;
+            width: 100px;
+            height: 100px;
+            z-index: 50;
+            will-change: transform;
+        }
+
+        #shake-wrapper {
+            width: 100%;
+            height: 100%;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .shake-error {
+            animation: error-shake 0.4s cubic-bezier(.36,.07,.19,.97) both;
+        }
+
+        @keyframes error-shake {
+            0%, 100% { transform: translateX(0); filter: drop-shadow(0 0 0px transparent); }
+            20% { transform: translateX(-8px); filter: drop-shadow(0 0 15px var(--red-error)); }
+            40% { transform: translateX(8px); filter: drop-shadow(0 0 15px var(--red-error)); }
+            60% { transform: translateX(-4px); filter: drop-shadow(0 0 15px var(--red-error)); }
+            80% { transform: translateX(4px); filter: drop-shadow(0 0 15px var(--red-error)); }
+        }
+
+        .shape-body {
+            width: 70px;
+            height: 70px;
+            filter: drop-shadow(0px 10px 8px rgba(0,0,0,0.8));
+            pointer-events: auto;
+            cursor: grab;
+            touch-action: none;
+            transition: filter 0.3s ease;
+        }
+        
+        .shape-body polygon, .shape-body path {
+            pointer-events: none;
+        }
+        
+        .shape-body:active {
+            cursor: grabbing;
+        }
+
+        .rotation-ring {
+            position: absolute;
+            width: 120px;
+            height: 120px;
+            border: 2px dashed #78716c;
+            border-radius: 50%;
+            pointer-events: none; 
+            opacity: 0.5;
+        }
+
+        .rotation-handle {
+            position: absolute;
+            top: -15px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 32px;
+            height: 32px;
+            background-color: #d6d3d1;
+            border: 3px solid #292524;
+            border-radius: 50%;
+            pointer-events: auto;
+            cursor: grab;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.6);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            touch-action: none;
+        }
+        
+        .rotation-handle::after {
+            content: "↻";
+            color: #1c1917;
+            font-size: 18px;
+            font-weight: 900;
+        }
+        
+        .rotation-handle:active {
+            background-color: var(--cyan-glow);
+            cursor: grabbing;
+        }
+
+        .piece-success {
+            filter: drop-shadow(0 0 15px var(--cyan-glow)) !important;
+        }
+
+        #victory-message {
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 1s ease;
+        }
+        #victory-message.show {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        /* Ocultar elementos */
+        .hidden-screen {
+            display: none !important;
+        }
+    </style>
+</head>
+<body class="h-screen w-screen flex flex-col relative">
+
+    <!-- TELA 1: PAINEL DO REGENTE (Menu) -->
+    <div id="main-menu" class="absolute inset-0 z-50 flex flex-col items-center justify-center p-4 bg-stone-900 bg-[url('data:image/svg+xml,%3Csvg width=\'40\' height=\'40\' viewBox=\'0 0 40 40\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cpath d=\'M0 0h40v40H0V0zm20 20h20v20H20V20zM0 20h20v20H0V20zM20 0h20v20H20V0z\' fill=\'%231c1917\' fill-opacity=\'0.4\' fill-rule=\'evenodd\'/%3E%3C/svg%3E')]">
+        <h1 class="text-2xl font-black tracking-widest text-stone-300 mb-8 uppercase text-center border-b-2 border-stone-700 pb-4 w-full max-w-sm">Painel do Regente</h1>
+        
+        <div class="grid grid-cols-1 gap-4 w-full max-w-xs">
+            <button onclick="startLevel(1)" class="menu-btn py-4 rounded-xl text-stone-300 font-bold uppercase tracking-wider">I. Formas Primordiais</button>
+            <button onclick="startLevel(2)" class="menu-btn py-4 rounded-xl text-stone-300 font-bold uppercase tracking-wider">II. Polígonos Básicos</button>
+            <button onclick="startLevel(3)" class="menu-btn py-4 rounded-xl text-stone-300 font-bold uppercase tracking-wider">III. Polígonos Maiores</button>
+            <button onclick="startLevel(4)" class="menu-btn py-4 rounded-xl text-stone-300 font-bold uppercase tracking-wider flex flex-col items-center"><span class="text-[0.6rem] text-stone-400 mb-1">Câmara Mestra</span> Triângulos</button>
+            <button onclick="startLevel(5)" class="menu-btn py-4 rounded-xl text-stone-300 font-bold uppercase tracking-wider flex flex-col items-center"><span class="text-[0.6rem] text-stone-400 mb-1">Câmara Mestra</span> Quadriláteros</button>
+        </div>
+    </div>
+
+    <!-- TELA 2: ÁREA DE JOGO -->
+    <div id="game-area" class="absolute inset-0 z-10 flex flex-col hidden-screen bg-stone-800">
+        
+        <!-- ÁREA SUPERIOR (45%) -->
+        <div class="h-[45%] bg-stone-900 shadow-[inset_0_-10px_20px_rgba(0,0,0,0.6)] flex flex-col justify-center relative pt-8 pb-2">
+            
+            <button onclick="showMenu()" class="absolute top-2 left-2 px-3 py-1 bg-stone-800 border border-stone-600 rounded text-xs text-stone-400 uppercase font-bold active:bg-stone-700 z-50">
+                ← Voltar
+            </button>
+            
+            <div class="absolute top-2 right-0 w-full text-center opacity-40 pointer-events-none">
+                <h1 id="level-title" class="text-[10px] font-black tracking-[0.2em] uppercase text-stone-300 mt-1">Nível</h1>
+            </div>
+
+            <!-- Container dos Nichos Gerados Dinamicamente -->
+            <div class="flex flex-wrap justify-center content-center gap-2 w-full max-w-md mx-auto px-2" id="niches-container">
+                <!-- Nichos injetados aqui -->
+            </div>
+        </div>
+
+        <!-- ÁREA INFERIOR (55%) -->
+        <div class="h-[55%] relative flex flex-col items-center justify-center bg-[url('data:image/svg+xml,%3Csvg width=\'40\' height=\'40\' viewBox=\'0 0 40 40\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cpath d=\'M0 0h40v40H0V0zm20 20h20v20H20V20zM0 20h20v20H0V20zM20 0h20v20H20V0z\' fill=\'%231c1917\' fill-opacity=\'0.2\' fill-rule=\'evenodd\'/%3E%3C/svg%3E')] z-0" id="pedestal-area">
+            <div id="pedestal" class="w-28 h-28 rounded-full bg-stone-900 border-4 border-stone-800 shadow-[0_10px_25px_rgba(0,0,0,0.8)] flex items-center justify-center mt-[-20px]">
+                <div class="w-14 h-14 rounded-full border-2 border-dashed border-stone-600 opacity-30"></div>
+            </div>
+        </div>
+
+        <!-- BOARD INVISÍVEL PARA A PEÇA -->
+        <div id="board" class="absolute inset-0 pointer-events-none z-40"></div>
+
+        <!-- TELA DE VITÓRIA (Overlay) -->
+        <div id="victory-message" class="absolute inset-0 bg-stone-900/95 backdrop-blur-sm z-[100] flex flex-col items-center justify-center">
+            <h2 class="text-2xl font-black tracking-widest text-cyan-400 mb-6 drop-shadow-[0_0_10px_rgba(0,240,255,0.8)] text-center uppercase">Câmara<br>Concluída</h2>
+            <button onclick="showMenu()" class="px-8 py-3 bg-stone-800 border-2 border-cyan-500/50 text-cyan-100 font-bold rounded shadow-[0_0_15px_rgba(0,240,255,0.2)] active:scale-95 transition-transform uppercase tracking-widest">
+                Retornar ao Painel
+            </button>
+        </div>
+
+    </div>
+
+    <script>
+        // BANCO DE DADOS DAS FORMAS GEOMÉTRICAS
+        const shapeConfigs = {
+            'star': { id: 'star', name: 'Estrela', path: "50,5 61,35 95,35 68,57 79,90 50,70 21,90 32,57 5,35 39,35", sym: 72 }, // 5 pontas, a cada 72 graus encaixa
+            'moon': { id: 'moon', name: 'Lua', pathD: "M50,5 A45,45 0 1,0 50,95 A30,30 0 1,1 50,5 Z", sym: 360 }, // Lua crescente, apenas 1 posição
+            'tri':  { id: 'tri',  name: 'Triângulo', path: "50,15 90,80 10,80", sym: 120 }, // Equilátero genérico
+            
+            'sqre': { id: 'sqre', name: 'Quadrado', path: "20,20 80,20 80,80 20,80", sym: 90 },
+            'pent': { id: 'pent', name: 'Pentágono', path: "50,10 95,40 75,90 25,90 5,40", sym: 72 },
+            'hexa': { id: 'hexa', name: 'Hexágono', path: "50,5 90,25 90,75 50,95 10,75 10,25", sym: 60 },
+            
+            'hept': { id: 'hept', name: 'Heptágono', path: "50,5 85,25 95,65 70,95 30,95 5,65 15,25", sym: 360 }, // Aprox 51.4, forçamos 360 para o 1º ano
+            'octa': { id: 'octa', name: 'Octógono', path: "30,10 70,10 90,30 90,70 70,90 30,90 10,70 10,30", sym: 45 },
+            
+            'tri_eq':  { id: 'tri_eq',  name: 'Equilátero', path: "50,15 90,80 10,80", sym: 120 },
+            'tri_iso': { id: 'tri_iso', name: 'Isósceles', path: "50,10 75,90 25,90", sym: 360 },
+            'tri_sca': { id: 'tri_sca', name: 'Escaleno', path: "20,10 90,60 10,90", sym: 360 },
+            
+            'rect': { id: 'rect', name: 'Retângulo', path: "10,30 90,30 90,70 10,70", sym: 180 },
+            'trap': { id: 'trap', name: 'Trapézio', path: "30,20 70,20 90,80 10,80", sym: 360 }, 
+            'para': { id: 'para', name: 'Paralelogramo', path: "10,25 95,25 85,75 0,75", sym: 180 }, // Esticado
+            'rhom': { id: 'rhom', name: 'Losango', path: "50,5 85,50 50,95 15,50", sym: 180 } // Diamante
+        };
+
+        // ESTRUTURA DOS NÍVEIS
+        const levelData = {
+            1: { title: "Formas Primordiais", targets: ['star', 'moon', 'tri'] },
+            2: { title: "Polígonos Básicos", targets: ['sqre', 'pent', 'hexa'] },
+            3: { title: "Polígonos Maiores", targets: ['hept', 'octa'] },
+            4: { title: "Câmara: Triângulos", targets: ['tri_eq', 'tri_iso', 'tri_sca'] },
+            5: { title: "Câmara: Quadriláteros", targets: ['rect', 'trap', 'para', 'rhom', 'sqre'] }
+        };
+
+        let playQueue = [];
+        let currentConfig = null;
+
+        // Estado Físico
+        let pieceEl = null, shapeEl = null, handleEl = null, shakeWrapper = null;
+        let tx = 0, ty = 0, rot = 0; 
+        let startTx = 0, startTy = 0, startRot = 0;
+        let startMouseX = 0, startMouseY = 0, startMouseAngle = 0;
+        let interactionMode = null; 
+        let pedestalX = 0, pedestalY = 0;
+
+        // --- NAVEGAÇÃO ---
+        function showMenu() {
+            document.getElementById('game-area').classList.add('hidden-screen');
+            document.getElementById('main-menu').classList.remove('hidden-screen');
+            document.getElementById('victory-message').classList.remove('show');
+            document.getElementById('board').innerHTML = ''; // Limpa a peça ativa
+            pieceEl = null;
+        }
+
+        function startLevel(levelId) {
+            const data = levelData[levelId];
+            document.getElementById('level-title').innerText = data.title;
+            
+            // Montar os Nichos na tela
+            const container = document.getElementById('niches-container');
+            container.innerHTML = '';
+            
+            data.targets.forEach(targetId => {
+                const shape = shapeConfigs[targetId];
+                let innerSVG = shape.pathD 
+                    ? `<path d="${shape.pathD}" fill="#27272A" stroke="#D4D4D8" stroke-width="3" stroke-linejoin="round"/>`
+                    : `<polygon points="${shape.path}" fill="#27272A" stroke="#D4D4D8" stroke-width="3" stroke-linejoin="round"/>`;
+
+                container.innerHTML += `
+                    <div class="flex flex-col items-center">
+                        <div class="niche" id="niche-${shape.id}" data-id="${shape.id}">
+                            <svg viewBox="0 0 100 100">${innerSVG}</svg>
+                        </div>
+                        <div class="niche-label" id="label-${shape.id}">${shape.name.toUpperCase()}</div>
+                    </div>
+                `;
+            });
+
+            document.getElementById('main-menu').classList.add('hidden-screen');
+            document.getElementById('game-area').classList.remove('hidden-screen');
+            document.getElementById('victory-message').classList.remove('show');
+
+            // Preparar a fila de jogo do nível (embaralhada)
+            playQueue = data.targets.map(id => shapeConfigs[id]).sort(() => Math.random() - 0.5);
+            
+            // Delay rápido para renderizar antes de calcular coordenadas
+            setTimeout(() => {
+                updatePedestalCoordinates();
+                spawnNextPiece();
+            }, 100);
+        }
+
+        // --- MOTOR FÍSICO ---
+        function updatePedestalCoordinates() {
+            const ped = document.getElementById('pedestal');
+            if(ped) {
+                const rect = ped.getBoundingClientRect();
+                pedestalX = rect.left + rect.width / 2;
+                pedestalY = rect.top + rect.height / 2;
+            }
+        }
+
+        window.addEventListener('resize', () => {
+            if (!document.getElementById('game-area').classList.contains('hidden-screen')) {
+                updatePedestalCoordinates();
+                if (pieceEl && interactionMode === null) {
+                    tx = pedestalX; ty = pedestalY;
+                    applyTransform(false);
+                }
+            }
+        });
+
+        function spawnNextPiece() {
+            const board = document.getElementById('board');
+            board.innerHTML = ''; 
+
+            if (playQueue.length === 0) {
+                setTimeout(() => document.getElementById('victory-message').classList.add('show'), 800);
+                return;
+            }
+
+            currentConfig = playQueue.shift();
+            tx = pedestalX;
+            ty = pedestalY;
+            rot = Math.floor(Math.random() * 360); 
+
+            let shapeGraphic = currentConfig.pathD 
+                ? `<path d="${currentConfig.pathD}" fill="#d6d3d1" stroke="#1c1917" stroke-width="3" stroke-linejoin="round"/>`
+                : `<polygon points="${currentConfig.path}" fill="#d6d3d1" stroke="#1c1917" stroke-width="3" stroke-linejoin="round"/>`;
+
+            pieceEl = document.createElement('div');
+            pieceEl.id = 'active-piece';
+            pieceEl.innerHTML = `
+                <div id="shake-wrapper">
+                    <div class="rotation-ring pointer-events-none" id="rot-ring">
+                        <div class="rotation-handle" id="rot-handle"></div>
+                    </div>
+                    <svg viewBox="0 0 100 100" class="shape-body" id="shape-body">
+                        ${shapeGraphic}
+                    </svg>
+                </div>
+            `;
+            board.appendChild(pieceEl);
+
+            shapeEl = document.getElementById('shape-body');
+            handleEl = document.getElementById('rot-handle');
+            shakeWrapper = document.getElementById('shake-wrapper');
+
+            applyTransform(false);
+            bindPointerEvents();
+        }
+
+        function applyTransform(animate = false) {
+            if (!pieceEl) return;
+            pieceEl.style.transition = animate ? "transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275)" : "none";
+            pieceEl.style.transform = `translate(${tx}px, ${ty}px) rotate(${rot}deg)`;
+        }
+
+        function bindPointerEvents() {
+            shapeEl.addEventListener('pointerdown', e => onPointerDown(e, 'move'));
+            handleEl.addEventListener('pointerdown', e => onPointerDown(e, 'rotate'));
+            document.addEventListener('pointermove', onPointerMove, { passive: false });
+            document.addEventListener('pointerup', onPointerUp);
+            document.addEventListener('pointercancel', onPointerUp);
+        }
+
+        function unbindPointerEvents() {
+            document.removeEventListener('pointermove', onPointerMove);
+            document.removeEventListener('pointerup', onPointerUp);
+            document.removeEventListener('pointercancel', onPointerUp);
+        }
+
+        function onPointerDown(e, mode) {
+            e.preventDefault();
+            interactionMode = mode;
+            if (mode === 'move') shapeEl.setPointerCapture(e.pointerId);
+            else handleEl.setPointerCapture(e.pointerId);
+
+            startMouseX = e.clientX; startMouseY = e.clientY;
+            startTx = tx; startTy = ty; startRot = rot;
+            startMouseAngle = Math.atan2(e.clientY - ty, e.clientX - tx) * (180 / Math.PI);
+            applyTransform(false);
+        }
+
+        function onPointerMove(e) {
+            if (!interactionMode) return;
+            e.preventDefault(); 
+            if (interactionMode === 'move') {
+                tx = startTx + (e.clientX - startMouseX);
+                ty = startTy + (e.clientY - startMouseY);
+            } else if (interactionMode === 'rotate') {
+                let currentMouseAngle = Math.atan2(e.clientY - ty, e.clientX - tx) * (180 / Math.PI);
+                rot = startRot + (currentMouseAngle - startMouseAngle);
+            }
+            applyTransform(false);
+        }
+
+        function onPointerUp(e) {
+            if (!interactionMode) return;
+            try {
+                if (interactionMode === 'move') shapeEl.releasePointerCapture(e.pointerId);
+                if (interactionMode === 'rotate') handleEl.releasePointerCapture(e.pointerId);
+            } catch(err){}
+            interactionMode = null;
+            validateEnigma();
+        }
+
+        function validateEnigma() {
+            const nicheEl = document.getElementById(`niche-${currentConfig.id}`);
+            if(!nicheEl) { triggerError(); return; } // Previne bugs se alvo não existir
+
+            const rectNiche = nicheEl.getBoundingClientRect();
+            const nicheX = rectNiche.left + rectNiche.width / 2;
+            const nicheY = rectNiche.top + rectNiche.height / 2;
+
+            const distance = Math.sqrt(Math.pow(tx - nicheX, 2) + Math.pow(ty - nicheY, 2));
+
+            let normalizedRotation = ((rot % 360) + 360) % 360;
+            let nearestMultiple = Math.round(normalizedRotation / currentConfig.sym) * currentConfig.sym;
+            let angleDiff = Math.abs(normalizedRotation - nearestMultiple);
+
+            // Tolerância: Distância < 30px e Ângulo < 20 graus da simetria exigida
+            if (distance < 30 && angleDiff < 20) {
+                tx = nicheX; ty = nicheY;
+                rot = startRot + (nearestMultiple - normalizedRotation); 
+                triggerSuccess(nicheEl);
+            } else {
+                triggerError();
+            }
+        }
+
+        function triggerError() {
+            tx = pedestalX; ty = pedestalY;
+            applyTransform(true);
+            shakeWrapper.classList.remove('shake-error');
+            void shakeWrapper.offsetWidth; 
+            shakeWrapper.classList.add('shake-error');
+        }
+
+        function triggerSuccess(nicheEl) {
+            unbindPointerEvents(); 
+            applyTransform(true); 
+
+            document.getElementById('rot-ring').style.display = 'none'; 
+            shapeEl.classList.add('piece-success');
+            
+            // Pinta a forma de branco-brilhante no sucesso
+            if(currentConfig.pathD) shapeEl.querySelector('path').setAttribute('fill', '#f5f5f4');
+            else shapeEl.querySelector('polygon').setAttribute('fill', '#f5f5f4');
+            
+            nicheEl.classList.add('active-glow');
+            document.getElementById(`label-${currentConfig.id}`).classList.add('revealed');
+
+            // Disparo de Áudio Nativo (TTS) para Acessibilidade
+            if ('speechSynthesis' in window) {
+                const utterance = new SpeechSynthesisUtterance(currentConfig.name);
+                utterance.lang = "pt-BR";
+                utterance.rate = 0.9;
+                window.speechSynthesis.speak(utterance);
+            }
+
+            setTimeout(spawnNextPiece, 1200);
+        }
+    </script>
+<style>#autoriaBtn{position:fixed;left:6px;bottom:6px;z-index:2147483000;width:22px;height:22px;border-radius:50%;border:1px solid rgba(128,128,128,.5);background:rgba(255,255,255,.75);color:#333;font:12px/20px sans-serif;text-align:center;padding:0;cursor:pointer;opacity:.5}#autoriaBtn:hover,#autoriaBtn:focus{opacity:1}#autoriaTxt{position:fixed;left:6px;bottom:34px;z-index:2147483000;max-width:260px;padding:8px 10px;border-radius:8px;background:#222;color:#fff;font:12px/1.35 sans-serif;display:none}#autoriaTxt.on{display:block}</style><button id="autoriaBtn" type="button" aria-label="Autoria" onclick="document.getElementById('autoriaTxt').classList.toggle('on')">©</button><div id="autoriaTxt" onclick="this.classList.remove('on')">© Ygor B. F. Ferreira · A Saga dos Reinos Matemáticos · Matematkês · uso livre em sala</div>
+</body>
+</html>

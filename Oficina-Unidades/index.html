@@ -1,0 +1,2823 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>Oficina de Unidades de Medida — Interlúdio das Frações</title>
+  <style>
+    /* =========================================================================
+       1. DESIGN TOKENS E RESET GLOBAL
+       ========================================================================= */
+    :root {
+      --bg-app: #F8FAFC;
+      --bg-card: #FFFFFF;
+      --bg-soft: #F1F5F9;
+      --border: #E2E8F0;
+      --border-strong: #CBD5E1;
+      --text-main: #0F172A;
+      --text-muted: #475569;
+      --text-light: #64748B;
+
+      /* Paleta pedagógica vibrante */
+      --blue: #2563EB;
+      --blue-bg: #EFF6FF;
+      --blue-border: #BFDBFE;
+
+      --purple: #7C3AED;
+      --purple-bg: #F5F3FF;
+      --purple-border: #DDD6FE;
+
+      --green: #059669;
+      --green-bg: #ECFDF5;
+      --green-border: #A7F3D0;
+
+      --orange: #EA580C;
+      --orange-bg: #FFF7ED;
+      --orange-border: #FED7AA;
+
+      --amber: #D97706;
+      --amber-bg: #FFFBEB;
+      --amber-border: #FDE68A;
+
+      --red: #DC2626;
+      --red-bg: #FEF2F2;
+      --red-border: #FECACA;
+
+      --radius-sm: 8px;
+      --radius-md: 12px;
+      --radius-lg: 16px;
+      --shadow-sm: 0 1px 3px rgba(15, 23, 42, 0.06);
+      --shadow-md: 0 4px 12px rgba(15, 23, 42, 0.08);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    html, body {
+      height: 100dvh;
+      width: 100vw;
+      overflow: hidden;
+      font-family: system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+      background-color: var(--bg-app);
+      color: var(--text-main);
+      user-select: none;
+    }
+
+    /* Estrutura fixa 100dvh x 100vw */
+    .app-shell {
+      height: 100dvh;
+      width: 100vw;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    /* =========================================================================
+       2. CABEÇALHO COMPACTO E BARRA DE 5 ABAS
+       ========================================================================= */
+    .app-header {
+      flex-shrink: 0;
+      background: var(--bg-card);
+      border-bottom: 2px solid var(--border);
+      padding: 6px 12px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      box-shadow: var(--shadow-sm);
+      z-index: 10;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-shrink: 0;
+    }
+
+    .brand-icon {
+      width: 30px;
+      height: 30px;
+      border-radius: 9px;
+      background: linear-gradient(135deg, var(--blue), var(--purple));
+      color: #fff;
+      display: grid;
+      place-items: center;
+      font-weight: 900;
+      font-size: 14px;
+      flex-shrink: 0;
+    }
+
+    .brand-title {
+      font-size: 14px;
+      font-weight: 800;
+      color: var(--text-main);
+      white-space: nowrap;
+      line-height: 1.1;
+    }
+
+    .brand-sub {
+      font-size: 10.5px;
+      font-weight: 700;
+      color: var(--text-light);
+      white-space: nowrap;
+    }
+
+    .tabs-nav {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      background: var(--bg-soft);
+      padding: 3px;
+      border-radius: var(--radius-md);
+      border: 1.5px solid var(--border);
+      overflow-x: auto;
+      scrollbar-width: none;
+      -webkit-overflow-scrolling: touch;
+      min-width: 0;
+    }
+    .tabs-nav::-webkit-scrollbar { display: none; }
+
+    .tab-btn {
+      border: none;
+      background: transparent;
+      color: var(--text-muted);
+      font-weight: 700;
+      font-size: 12.5px;
+      padding: 6px 10px;
+      border-radius: 9px;
+      cursor: pointer;
+      white-space: nowrap;
+      flex-shrink: 0;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      transition: all 0.15s ease;
+    }
+
+    .tab-btn:hover {
+      background: rgba(255, 255, 255, 0.75);
+      color: var(--text-main);
+    }
+
+    .tab-btn.active {
+      background: var(--bg-card);
+      color: var(--blue);
+      box-shadow: 0 1px 4px rgba(15, 23, 42, 0.12);
+    }
+
+    .tab-num {
+      display: inline-grid;
+      place-items: center;
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      background: var(--border);
+      color: var(--text-muted);
+      font-size: 11px;
+      font-weight: 800;
+    }
+
+    .tab-btn.active .tab-num {
+      background: var(--blue);
+      color: #fff;
+    }
+
+    .sound-btn {
+      border: 1.5px solid var(--border-strong);
+      background: var(--bg-card);
+      color: var(--text-main);
+      width: 34px;
+      height: 34px;
+      border-radius: 10px;
+      cursor: pointer;
+      font-size: 16px;
+      display: grid;
+      place-items: center;
+      flex-shrink: 0;
+      transition: transform 0.1s, background 0.15s;
+    }
+    .sound-btn:hover { background: var(--bg-soft); }
+    .sound-btn:active { transform: scale(0.93); }
+    .sound-btn.muted { opacity: 0.55; background: var(--bg-soft); }
+
+    /* =========================================================================
+       3. ÁREA PRINCIPAL E BANNER PEDAGÓGICO
+       ========================================================================= */
+    .app-main {
+      flex: 1;
+      min-height: 0;
+      display: flex;
+      flex-direction: column;
+      padding: 8px 12px;
+      gap: 8px;
+      overflow: hidden;
+    }
+
+    .guide-banner {
+      flex-shrink: 0;
+      background: var(--bg-card);
+      border: 1.5px solid var(--border);
+      border-left: 5px solid var(--blue);
+      border-radius: var(--radius-md);
+      padding: 6px 12px;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .guide-text {
+      font-size: 13px;
+      line-height: 1.32;
+      color: var(--text-main);
+    }
+    .guide-text strong { color: var(--blue); }
+
+    .tab-stage {
+      flex: 1;
+      min-height: 0;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    /* =========================================================================
+       4. COMPONENTES REUTILIZÁVEIS
+       ========================================================================= */
+    .card {
+      background: var(--bg-card);
+      border: 1.5px solid var(--border);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-sm);
+      padding: 10px 12px;
+      display: flex;
+      flex-direction: column;
+      min-height: 0;
+    }
+
+    .card-scroll {
+      overflow-y: auto;
+    }
+
+    .card-title {
+      font-size: 11.5px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      color: var(--text-light);
+      margin-bottom: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 6px;
+      flex-shrink: 0;
+      flex-wrap: wrap;
+    }
+
+    .svg-box {
+      flex: 1;
+      min-height: 0;
+      width: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      overflow: hidden;
+    }
+    .svg-box svg {
+      width: 100%;
+      height: 100%;
+      max-height: 100%;
+      display: block;
+    }
+
+    /* Fração empilhada */
+    .frac {
+      display: inline-flex;
+      flex-direction: column;
+      align-items: center;
+      vertical-align: middle;
+      line-height: 1;
+      font-weight: 900;
+      margin: 0 2px;
+    }
+    .frac .f-num {
+      padding: 0 4px 2px;
+      border-bottom: 2.5px solid currentColor;
+    }
+    .frac .f-den {
+      padding: 2px 4px 0;
+    }
+    .frac-xl .f-num, .frac-xl .f-den { font-size: 32px; padding-left: 7px; padding-right: 7px; }
+    .frac-xl .f-num { border-bottom-width: 3.5px; }
+    .frac-lg .f-num, .frac-lg .f-den { font-size: 21px; padding-left: 5px; padding-right: 5px; }
+    .frac-lg .f-num { border-bottom-width: 2.5px; }
+    .frac-md .f-num, .frac-md .f-den { font-size: 16px; }
+    .frac-md .f-num { border-bottom-width: 2px; }
+
+    /* Botões */
+    .btn {
+      border: 1.5px solid var(--border-strong);
+      background: var(--bg-card);
+      color: var(--text-main);
+      font-weight: 700;
+      font-size: 13px;
+      padding: 7px 12px;
+      border-radius: 10px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 5px;
+      transition: all 0.12s ease;
+      white-space: nowrap;
+    }
+    .btn:hover:not(:disabled) { background: var(--bg-soft); border-color: #94A3B8; }
+    .btn:active:not(:disabled) { transform: scale(0.96); }
+    .btn:disabled { opacity: 0.4; cursor: not-allowed; }
+    .btn-sm { padding: 5px 9px; font-size: 12px; border-radius: 8px; }
+
+    .btn-blue { background: var(--blue); border-color: var(--blue); color: #fff; }
+    .btn-blue:hover:not(:disabled) { background: #1D4ED8; border-color: #1D4ED8; }
+
+    .btn-purple { background: var(--purple); border-color: var(--purple); color: #fff; }
+    .btn-purple:hover:not(:disabled) { background: #6D28D9; border-color: #6D28D9; }
+
+    .btn-green { background: var(--green); border-color: var(--green); color: #fff; }
+    .btn-green:hover:not(:disabled) { background: #047857; border-color: #047857; }
+
+    .btn-orange { background: var(--orange); border-color: var(--orange); color: #fff; }
+    .btn-orange:hover:not(:disabled) { background: #C2410C; border-color: #C2410C; }
+
+    .btn-amber { background: var(--amber); border-color: var(--amber); color: #fff; }
+    .btn-amber:hover:not(:disabled) { background: #B45309; border-color: #B45309; }
+
+    .segmented {
+      display: inline-flex;
+      background: var(--bg-soft);
+      border: 1.5px solid var(--border);
+      border-radius: 10px;
+      padding: 2px;
+      gap: 2px;
+      flex-wrap: wrap;
+    }
+    .segmented button {
+      border: none;
+      background: transparent;
+      color: var(--text-muted);
+      font-weight: 700;
+      font-size: 12px;
+      padding: 5px 10px;
+      border-radius: 7px;
+      cursor: pointer;
+      transition: all 0.14s;
+    }
+    .segmented button.active {
+      background: var(--bg-card);
+      color: var(--blue);
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 3px 9px;
+      border-radius: 999px;
+      font-size: 11.5px;
+      font-weight: 800;
+      border: 1.5px solid transparent;
+      white-space: nowrap;
+    }
+    .badge-blue   { background: var(--blue-bg);   color: var(--blue);   border-color: var(--blue-border); }
+    .badge-purple { background: var(--purple-bg); color: var(--purple); border-color: var(--purple-border); }
+    .badge-green  { background: var(--green-bg);  color: var(--green);  border-color: var(--green-border); }
+    .badge-orange { background: var(--orange-bg); color: var(--orange); border-color: var(--orange-border); }
+    .badge-amber  { background: var(--amber-bg);  color: var(--amber);  border-color: var(--amber-border); }
+
+    .clickable-seg { cursor: pointer; transition: filter 0.12s; }
+    .clickable-seg:hover { filter: brightness(0.93); }
+
+    .pulse-pop {
+      animation: popAnim 0.32s cubic-bezier(0.22, 1, 0.36, 1);
+    }
+    @keyframes popAnim {
+      0% { transform: scale(0.9); }
+      55% { transform: scale(1.04); }
+      100% { transform: scale(1); }
+    }
+
+    /* =========================================================================
+       5. ESTILOS ESPECÍFICOS DAS 5 ABAS
+       ========================================================================= */
+
+    /* --- ABA 1: A UNIDADE --- */
+    .u1-grid {
+      flex: 1;
+      min-height: 0;
+      display: grid;
+      grid-template-columns: 1.35fr 1fr;
+      gap: 10px;
+    }
+
+    .bridge-box {
+      padding: 10px;
+      border-radius: var(--radius-md);
+      background: var(--blue-bg);
+      border: 1.5px solid var(--blue-border);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+      text-align: center;
+    }
+
+    .bridge-eq {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 8px;
+      font-size: 19px;
+      font-weight: 900;
+      color: var(--text-main);
+    }
+
+    .bridge-reading {
+      font-size: 15px;
+      font-weight: 800;
+      color: #1E3A8A;
+    }
+
+    .whole-celebration {
+      padding: 9px 12px;
+      border-radius: var(--radius-md);
+      background: var(--green-bg);
+      border: 2px solid var(--green);
+      color: var(--green);
+      font-weight: 900;
+      font-size: 13.5px;
+      text-align: center;
+    }
+
+    /* --- ABA 2: RAIO-X --- */
+    .xray-shell {
+      flex: 1;
+      min-height: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .xray-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 6px;
+      flex-shrink: 0;
+    }
+
+    .xray-grid {
+      flex: 1;
+      min-height: 0;
+      display: grid;
+      grid-template-columns: 1.25fr 1fr;
+      gap: 10px;
+    }
+
+    .xray-qbar {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      padding: 8px 12px;
+      background: var(--bg-soft);
+      border: 1.5px solid var(--border);
+      border-radius: var(--radius-md);
+      flex-wrap: wrap;
+      flex-shrink: 0;
+    }
+
+    .xray-prompt {
+      font-size: 15.5px;
+      font-weight: 800;
+      color: var(--text-main);
+    }
+
+    .xray-opts {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+    }
+
+    .xray-opt-btn {
+      border: 2px solid var(--border-strong);
+      background: #fff;
+      color: var(--text-main);
+      font-size: 17px;
+      font-weight: 900;
+      padding: 10px;
+      border-radius: var(--radius-md);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      transition: all 0.14s ease;
+    }
+    .xray-opt-btn:hover:not(:disabled) {
+      border-color: var(--purple);
+      background: var(--purple-bg);
+      transform: translateY(-1px);
+    }
+    .xray-opt-btn.is-correct {
+      background: var(--green-bg);
+      border-color: var(--green);
+      color: var(--green);
+    }
+    .xray-opt-btn.is-wrong {
+      background: var(--red-bg);
+      border-color: var(--red);
+      color: var(--red);
+      opacity: 0.7;
+    }
+
+    .xray-builder {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 10px;
+      padding: 12px 10px;
+      background: var(--bg-soft);
+      border: 1.5px solid var(--border);
+      border-radius: var(--radius-md);
+    }
+
+    .xray-sentence {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 8px;
+      font-size: 16.5px;
+      font-weight: 800;
+    }
+
+    .xray-slot {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      background: #fff;
+      border: 2px solid var(--blue);
+      border-radius: 10px;
+      padding: 4px 7px;
+    }
+    .xray-slot.is-den { border-color: var(--purple); }
+    .xray-slot button {
+      width: 30px;
+      height: 30px;
+      border-radius: 8px;
+      border: 1.5px solid var(--border-strong);
+      background: var(--bg-soft);
+      color: var(--text-main);
+      font-size: 18px;
+      font-weight: 900;
+      cursor: pointer;
+      display: grid;
+      place-items: center;
+    }
+    .xray-slot button:hover:not(:disabled) { background: #E2E8F0; }
+    .xray-slot span {
+      min-width: 28px;
+      text-align: center;
+      font-size: 20px;
+      font-weight: 900;
+      color: var(--blue);
+    }
+    .xray-slot.is-den span { color: var(--purple); }
+
+    .feedback-box {
+      padding: 8px 10px;
+      border-radius: var(--radius-md);
+      font-size: 13px;
+      font-weight: 700;
+      text-align: center;
+      line-height: 1.35;
+    }
+    .feedback-box.ok {
+      background: var(--green-bg);
+      border: 1.5px solid var(--green);
+      color: #065F46;
+    }
+    .feedback-box.err {
+      background: var(--red-bg);
+      border: 1.5px solid var(--red-border);
+      color: var(--red);
+    }
+
+    /* --- ABA 3: NO DIA A DIA --- */
+    .daily-shell {
+      flex: 1;
+      min-height: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .daily-grid {
+      flex: 1;
+      min-height: 0;
+      display: grid;
+      grid-template-columns: 1.15fr 1fr;
+      gap: 10px;
+    }
+
+    .readout-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 6px;
+    }
+
+    .readout-tile {
+      padding: 8px 6px;
+      border-radius: var(--radius-md);
+      background: var(--bg-soft);
+      border: 1.5px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      gap: 3px;
+    }
+    .readout-tile .rt-label {
+      font-size: 10.5px;
+      font-weight: 800;
+      text-transform: uppercase;
+      color: var(--text-light);
+    }
+    .readout-tile .rt-val {
+      font-size: 18px;
+      font-weight: 900;
+      color: var(--text-main);
+    }
+
+    .chips-wrap {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 5px;
+      padding: 6px;
+      background: var(--bg-soft);
+      border-radius: var(--radius-sm);
+      border: 1px dashed var(--border-strong);
+      min-height: 36px;
+      align-items: center;
+    }
+
+    /* --- ABA 4: RÉGUA 1/10 --- */
+    .ruler-shell {
+      flex: 1;
+      min-height: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .ruler-stage-card {
+      flex: 1;
+      min-height: 0;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .ruler-interactive {
+      flex: 1;
+      min-height: 0;
+      width: 100%;
+      cursor: ew-resize;
+      touch-action: none;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .ruler-interactive svg {
+      width: 100%;
+      height: 100%;
+      max-height: 260px;
+      display: block;
+    }
+
+    .triple-bar {
+      flex-shrink: 0;
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+    }
+
+    .triple-card {
+      background: var(--bg-card);
+      border: 2px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 8px 10px;
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 2px;
+    }
+    .triple-card.t-mm  { border-color: var(--blue-border); background: var(--blue-bg); }
+    .triple-card.t-fr  { border-color: var(--purple-border); background: var(--purple-bg); }
+    .triple-card.t-dec { border-color: var(--green-border); background: var(--green-bg); }
+    .triple-label { font-size: 11px; font-weight: 800; text-transform: uppercase; color: var(--text-muted); }
+    .triple-val   { font-size: 20px; font-weight: 900; color: var(--text-main); }
+    .triple-sub   { font-size: 11.5px; font-weight: 700; color: var(--text-muted); }
+
+    /* --- ABA 5: MESMA UNIDADE --- */
+    .same-shell {
+      flex: 1;
+      min-height: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .same-grid {
+      flex: 1;
+      min-height: 0;
+      display: grid;
+      grid-template-columns: 1.4fr 1fr;
+      gap: 10px;
+    }
+
+    .quiz-grid {
+      flex: 1;
+      min-height: 0;
+      display: grid;
+      grid-template-columns: 1.2fr 1fr;
+      gap: 10px;
+    }
+
+    .progress-track {
+      height: 8px;
+      background: var(--border);
+      border-radius: 999px;
+      overflow: hidden;
+      flex: 1;
+      max-width: 200px;
+    }
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--blue), var(--green));
+      transition: width 0.25s ease;
+    }
+
+    /* =========================================================================
+       6. RODAPÉ FIXO DE NAVEGAÇÃO GUIADA
+       ========================================================================= */
+    .app-footer {
+      flex-shrink: 0;
+      background: var(--bg-card);
+      border-top: 2px solid var(--border);
+      padding: 6px 12px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      z-index: 10;
+    }
+
+    .step-indicator {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 13px;
+      font-weight: 800;
+      color: var(--text-main);
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .step-pill {
+      background: var(--blue-bg);
+      color: var(--blue);
+      border: 1.5px solid var(--blue-border);
+      padding: 2px 9px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 800;
+      flex-shrink: 0;
+    }
+
+    /* =========================================================================
+       7. RESPONSIVIDADE (CELULAR / CHAT / IFRAME ESTREITO)
+       ========================================================================= */
+    @media (max-width: 820px) {
+      .app-header { padding: 5px 8px; gap: 6px; }
+      .brand-sub { display: none; }
+      .brand-title { font-size: 13px; }
+      .tab-btn { padding: 5px 8px; font-size: 12px; }
+      .app-main { padding: 6px 8px; gap: 6px; }
+      .guide-banner { padding: 5px 9px; }
+      .guide-text { font-size: 12px; }
+
+      .u1-grid,
+      .xray-grid,
+      .daily-grid,
+      .same-grid,
+      .quiz-grid {
+        grid-template-columns: 1fr;
+        grid-template-rows: 1fr auto;
+      }
+
+      .card { padding: 8px 10px; }
+      .bridge-eq { font-size: 15.5px; }
+      .bridge-reading { font-size: 13.5px; }
+      .triple-val { font-size: 16px; }
+      .triple-sub { font-size: 10.5px; }
+      .xray-prompt { font-size: 13.5px; }
+      .xray-opt-btn { padding: 8px; font-size: 15px; }
+      .xray-sentence { font-size: 14px; }
+      .readout-tile .rt-val { font-size: 15px; }
+    }
+
+    @media (max-width: 540px) {
+      .brand { display: none; }
+      .tab-btn .tab-num { display: none; }
+      .step-title-text { display: none; }
+      .app-footer .btn { padding: 5px 9px; font-size: 12px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="app-shell">
+    <!-- CABEÇALHO COMPACTO -->
+    <header class="app-header">
+      <div class="brand">
+        <div class="brand-icon">1/n</div>
+        <div>
+          <div class="brand-title">Unidades de Medida</div>
+          <div class="brand-sub">Interlúdio · Frações</div>
+        </div>
+      </div>
+
+      <nav class="tabs-nav" role="tablist" aria-label="Abas da Oficina">
+        <button class="tab-btn active" data-tab="0" role="tab" aria-selected="true">
+          <span class="tab-num">1</span> A Unidade
+        </button>
+        <button class="tab-btn" data-tab="1" role="tab" aria-selected="false">
+          <span class="tab-num">2</span> Raio-X
+        </button>
+        <button class="tab-btn" data-tab="2" role="tab" aria-selected="false">
+          <span class="tab-num">3</span> No Dia a Dia
+        </button>
+        <button class="tab-btn" data-tab="3" role="tab" aria-selected="false">
+          <span class="tab-num">4</span> Régua 1/10
+        </button>
+        <button class="tab-btn" data-tab="4" role="tab" aria-selected="false">
+          <span class="tab-num">5</span> Mesma Unidade
+        </button>
+      </nav>
+
+      <button id="soundToggle" class="sound-btn" title="Ligar/Desligar som" aria-label="Ligar ou desligar som">🔊</button>
+    <button id="autoriaBtn" type="button" aria-label="Autoria" onclick="document.getElementById('autoriaTxt').classList.toggle('on')" style="flex:0 0 auto;width:20px;height:20px;margin:0 4px;border-radius:50%;border:1px solid rgba(128,128,128,.5);background:transparent;color:inherit;font:11px/18px sans-serif;text-align:center;padding:0;cursor:pointer;opacity:.5">©</button></header>
+
+    <!-- ÁREA PRINCIPAL -->
+    <main class="app-main">
+      <div class="guide-banner">
+        <div class="guide-text" id="guideText"></div>
+      </div>
+
+      <section class="tab-stage" id="tabStage" aria-live="polite"></section>
+    </main>
+
+    <!-- RODAPÉ FIXO DE NAVEGAÇÃO GUIADA -->
+    <footer class="app-footer">
+      <button id="btnPrev" class="btn">◀ Anterior</button>
+      <div class="step-indicator">
+        <span class="step-pill" id="stepCounter">1 / 4</span>
+        <span class="step-title-text" id="stepTitle">A Unidade 1/2</span>
+      </div>
+      <button id="btnNext" class="btn btn-blue">Próximo ▶</button>
+    </footer>
+  </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      /* =======================================================================
+         1. MOTOR DE ÁUDIO DE LATÊNCIA ZERO (WEB AUDIO API SOB DEMANDA)
+         ======================================================================= */
+      const SoundFX = (() => {
+        let ctx = null;
+        let enabled = true;
+
+        function getCtx() {
+          if (!enabled) return null;
+          try {
+            if (!ctx) {
+              const AudioCtx = window.AudioContext || window.webkitAudioContext;
+              if (AudioCtx) ctx = new AudioCtx();
+            }
+            if (ctx && ctx.state === 'suspended') {
+              ctx.resume().catch(() => {});
+            }
+            return ctx;
+          } catch (e) {
+            return null;
+          }
+        }
+
+        function tone(freq, dur = 0.08, type = 'sine', gainVal = 0.11, delay = 0) {
+          const c = getCtx();
+          if (!c) return;
+          try {
+            const now = c.currentTime + delay;
+            const osc = c.createOscillator();
+            const gain = c.createGain();
+            osc.type = type;
+            osc.frequency.setValueAtTime(freq, now);
+            gain.gain.setValueAtTime(0.0001, now);
+            gain.gain.exponentialRampToValueAtTime(gainVal, now + 0.01);
+            gain.gain.exponentialRampToValueAtTime(0.0001, now + dur);
+            osc.connect(gain);
+            gain.connect(c.destination);
+            osc.start(now);
+            osc.stop(now + dur + 0.015);
+          } catch (e) {
+            // Silencioso se o navegador bloquear áudio
+          }
+        }
+
+        return {
+          toggle() {
+            enabled = !enabled;
+            if (enabled) this.click();
+            return enabled;
+          },
+          click() { tone(520, 0.05, 'triangle', 0.09); },
+          snap(step = 0) { tone(390 + (step % 10) * 34, 0.075, 'sine', 0.11); },
+          tab() {
+            tone(440, 0.055, 'sine', 0.08, 0);
+            tone(587.3, 0.075, 'sine', 0.08, 0.045);
+          },
+          step() {
+            tone(493.9, 0.055, 'sine', 0.08, 0);
+            tone(659.3, 0.07, 'sine', 0.08, 0.045);
+          },
+          neutral() {
+            tone(290, 0.09, 'triangle', 0.09, 0);
+            tone(245, 0.11, 'triangle', 0.08, 0.08);
+          },
+          success() {
+            tone(523.25, 0.09, 'sine', 0.10, 0);
+            tone(659.25, 0.09, 'sine', 0.10, 0.065);
+            tone(783.99, 0.11, 'sine', 0.10, 0.13);
+            tone(1046.5, 0.22, 'triangle', 0.12, 0.20);
+          }
+        };
+      })();
+
+      /* =======================================================================
+         2. UTILITÁRIOS MATEMÁTICOS E LEITURA POR EXTENSO (PT-BR)
+         ======================================================================= */
+      function gcd(a, b) {
+        a = Math.abs(a); b = Math.abs(b);
+        while (b !== 0) { const t = b; b = a % b; a = t; }
+        return a || 1;
+      }
+
+      function formatBR(num, decimals = 2) {
+        return Number(num.toFixed(decimals)).toString().replace('.', ',');
+      }
+
+      const NUM_EXTENSO = {
+        0: 'zero', 1: 'um', 2: 'dois', 3: 'três', 4: 'quatro', 5: 'cinco',
+        6: 'seis', 7: 'sete', 8: 'oito', 9: 'nove', 10: 'dez',
+        11: 'onze', 12: 'doze', 13: 'treze', 14: 'catorze', 15: 'quinze',
+        16: 'dezesseis', 17: 'dezessete', 18: 'dezoito', 19: 'dezenove', 20: 'vinte'
+      };
+
+      function denExtenso(den, singular) {
+        const spec = {
+          1: singular ? 'inteiro' : 'inteiros',
+          2: singular ? 'meio' : 'meios',
+          3: singular ? 'terço' : 'terços',
+          4: singular ? 'quarto' : 'quartos',
+          5: singular ? 'quinto' : 'quintos',
+          6: singular ? 'sexto' : 'sextos',
+          7: singular ? 'sétimo' : 'sétimos',
+          8: singular ? 'oitavo' : 'oitavos',
+          9: singular ? 'nono' : 'nonos',
+          10: singular ? 'décimo' : 'décimos'
+        };
+        if (spec[den]) return spec[den];
+        return `${NUM_EXTENSO[den] || den} ${singular ? 'avo' : 'avos'}`;
+      }
+
+      function leituraExtenso(num, den, useWordsForNum = false) {
+        const sing = num === 1;
+        const nTxt = useWordsForNum ? (NUM_EXTENSO[num] || String(num)) : String(num);
+        return `${nTxt} ${denExtenso(den, sing)}`;
+      }
+
+      function fracHTML(num, den, sizeClass = 'frac-md', color = '') {
+        const st = color ? `style="color:${color};"` : '';
+        return `<span class="frac ${sizeClass}" ${st}><span class="f-num">${num}</span><span class="f-den">${den}</span></span>`;
+      }
+
+      /* =======================================================================
+         3. DADOS PEDAGÓGICOS DAS ABAS
+         ======================================================================= */
+      const UNIT_COLORS = { 2: '#2563EB', 4: '#EA580C', 6: '#7C3AED', 10: '#059669' };
+
+      const XRAY_L1 = [
+        { n: 11, d: 15, opts: [{ n: 1, d: 15 }, { n: 11, d: 1 }, { n: 1, d: 11 }, { n: 15, d: 15 }] },
+        { n: 7,  d: 12, opts: [{ n: 1, d: 7 },  { n: 1, d: 12 }, { n: 7, d: 1 },  { n: 12, d: 12 }] },
+        { n: 5,  d: 9,  opts: [{ n: 5, d: 1 },  { n: 1, d: 5 },  { n: 1, d: 9 },  { n: 9, d: 9 }] },
+        { n: 13, d: 10, opts: [{ n: 1, d: 13 }, { n: 10, d: 10 },{ n: 1, d: 10 }, { n: 13, d: 1 }] },
+        { n: 4,  d: 7,  opts: [{ n: 1, d: 7 },  { n: 1, d: 4 },  { n: 4, d: 1 },  { n: 7, d: 7 }] },
+        { n: 9,  d: 16, opts: [{ n: 1, d: 9 },  { n: 9, d: 1 },  { n: 16, d: 16 },{ n: 1, d: 16 }] },
+        { n: 17, d: 15, opts: [{ n: 1, d: 17 }, { n: 1, d: 15 }, { n: 15, d: 15 },{ n: 17, d: 1 }] },
+        { n: 3,  d: 8,  opts: [{ n: 1, d: 3 },  { n: 3, d: 1 },  { n: 1, d: 8 },  { n: 8, d: 8 }] }
+      ];
+
+      const XRAY_L2 = [
+        { n: 7,  d: 8 },
+        { n: 11, d: 15 },
+        { n: 5,  d: 6 },
+        { n: 9,  d: 10 },
+        { n: 13, d: 12 }
+      ];
+
+      const XRAY_L3 = [
+        {
+          target: { n: 4, d: 9 },
+          opts: [
+            { n: 4, d: 5, kind: 'sameNum' },
+            { n: 7, d: 9, kind: 'ok' },
+            { n: 9, d: 4, kind: 'inverted' },
+            { n: 5, d: 8, kind: 'other' }
+          ]
+        },
+        {
+          target: { n: 5, d: 12 },
+          opts: [
+            { n: 12, d: 5, kind: 'inverted' },
+            { n: 5, d: 7,  kind: 'sameNum' },
+            { n: 4, d: 9,  kind: 'other' },
+            { n: 11, d: 12, kind: 'ok' }
+          ]
+        },
+        {
+          target: { n: 3, d: 7 },
+          opts: [
+            { n: 6, d: 7,  kind: 'ok' },
+            { n: 3, d: 10, kind: 'sameNum' },
+            { n: 7, d: 3,  kind: 'inverted' },
+            { n: 4, d: 6,  kind: 'other' }
+          ]
+        },
+        {
+          target: { n: 7, d: 10 },
+          opts: [
+            { n: 7, d: 8,  kind: 'sameNum' },
+            { n: 10, d: 7, kind: 'inverted' },
+            { n: 3, d: 10, kind: 'ok' },
+            { n: 5, d: 9,  kind: 'other' }
+          ]
+        },
+        {
+          target: { n: 8, d: 15 },
+          opts: [
+            { n: 15, d: 8, kind: 'inverted' },
+            { n: 11, d: 15, kind: 'ok' },
+            { n: 8, d: 12, kind: 'sameNum' },
+            { n: 7, d: 10, kind: 'other' }
+          ]
+        }
+      ];
+
+      const RULER_OBJECTS = [
+        { id: 'ladybug', name: '🐞 Joaninha', mm: 7 },
+        { id: 'clip',    name: '📎 Clipe',    mm: 14 },
+        { id: 'eraser',  name: '🧽 Borracha', mm: 23 },
+        { id: 'screw',   name: '🔩 Parafuso', mm: 18 },
+        { id: 'free',    name: '📏 Medida Livre', mm: 12 }
+      ];
+
+      const SWAP_PRESETS = [
+        {
+          id: 'time',
+          label: '🕒 1/2 h + 1/6 h',
+          aN: 1, aD: 2, bN: 1, bD: 6,
+          commonD: 6, aConvN: 3, bConvN: 1,
+          unitTxt: 'h',
+          realA: '30 min (1/2 h)', realB: '10 min (1/6 h)',
+          realSum: '40 min = 4/6 h = 2/3 h',
+          explain: '1/2 hora vale 3 peças de 1/6 hora (3 × 10 min = 30 min). Agora todas as peças valem 1/6 h!'
+        },
+        {
+          id: 'liter',
+          label: '💧 1/2 L + 3/10 L',
+          aN: 1, aD: 2, bN: 3, bD: 10,
+          commonD: 10, aConvN: 5, bConvN: 3,
+          unitTxt: 'L',
+          realA: '500 mL (1/2 L)', realB: '300 mL (3/10 L)',
+          realSum: '800 mL = 8/10 L = 0,8 L',
+          explain: 'Meio litro (1/2 L) se divide em 5 décimos de litro (5/10 L). Somando com 3/10 L, dá 8/10 L!'
+        },
+        {
+          id: 'mass',
+          label: '⚖️ 1/2 kg + 1/4 kg',
+          aN: 1, aD: 2, bN: 1, bD: 4,
+          commonD: 4, aConvN: 2, bConvN: 1,
+          unitTxt: 'kg',
+          realA: '500 g (1/2 kg)', realB: '250 g (1/4 kg)',
+          realSum: '750 g = 3/4 kg = 0,75 kg',
+          explain: 'Meio quilo (1/2 kg) vale 2 quartos de quilo (2/4 kg). Juntando com 1/4 kg, temos 3/4 kg!'
+        },
+        {
+          id: 'bars',
+          label: '🧱 1/2 + 1/3',
+          aN: 1, aD: 2, bN: 1, bD: 3,
+          commonD: 6, aConvN: 3, bConvN: 2,
+          unitTxt: '',
+          realA: '1 meio (1/2)', realB: '1 terço (1/3)',
+          realSum: '5 sextos (5/6)',
+          explain: 'Trocamos os dois para sextos (1/6): 1/2 vira 3/6 e 1/3 vira 2/6. Juntando: 3/6 + 2/6 = 5/6!'
+        }
+      ];
+
+      const QUIZ_QUESTIONS = [
+        {
+          prompt: 'Quantos décimos de litro (1/10 L) cabem em meio litro (1/2 L)?',
+          visual: 'bar-half-ten',
+          opts: ['2 décimos (2/10)', '5 décimos (5/10)', '10 décimos (10/10)', '4 décimos (4/10)'],
+          correct: 1,
+          tip: 'Meio litro (500 mL) = 5 copinhos de 100 mL = 5/10 L!'
+        },
+        {
+          prompt: 'Se somarmos 2/6 + 3/6 (mesma unidade 1/6), qual é o resultado?',
+          visual: 'same-sixths',
+          opts: ['5/12', '5/6', '6/5', '1/6'],
+          correct: 1,
+          tip: 'As peças têm o mesmo tamanho (1/6)! 2 sextos + 3 sextos = 5 sextos (5/6).'
+        },
+        {
+          prompt: 'Na régua, 14 milímetros (14 décimos de cm) equivalem a:',
+          visual: 'ruler-14',
+          opts: ['0,14 cm', '1,4 cm', '14 cm', '1,04 cm'],
+          correct: 1,
+          tip: '10 mm fazem 1 cm inteiro e sobram 4 décimos: 14/10 cm = 1,4 cm!'
+        },
+        {
+          prompt: 'No relógio, 1/2 hora (30 min) + 1/6 hora (10 min) é igual a:',
+          visual: 'clock-40',
+          opts: ['2/8 de hora', '4/6 de hora (40 min)', '2/6 de hora (20 min)', '1 hora inteira'],
+          correct: 1,
+          tip: '1/2 h = 3/6 h. Somando 3/6 h + 1/6 h = 4/6 h (40 minutos)!'
+        },
+        {
+          prompt: 'Na balança, colocamos 1/2 kg (500 g) e 1/4 kg (250 g). Quanto marca o visor?',
+          visual: 'scale-750',
+          opts: ['0,75 kg (3/4 kg)', '0,6 kg (6/10 kg)', '1,25 kg', '0,50 kg'],
+          correct: 0,
+          tip: '1/2 kg = 2/4 kg. Juntando com 1/4 kg dá 3/4 kg = 750 g = 0,75 kg!'
+        }
+      ];
+
+      /* =======================================================================
+         4. ESTADO GLOBAL E PASSOS GUIADOS POR ABA
+         ======================================================================= */
+      const state = {
+        activeTab: 0,
+        steps: [0, 0, 0, 0, 0],
+
+        // Aba 1: A Unidade
+        u1: { den: 2, count: 1, wholes: 1 },
+
+        // Aba 2: Raio-X
+        xray: {
+          level: 1,
+          idx: 0,
+          score: 0,
+          streak: 0,
+          solved: false,
+          wrongKeys: [],
+          feedback: null,
+          l2Qty: 1,
+          l2Den: 2,
+          l3Picked: null
+        },
+
+        // Aba 3: No Dia a Dia
+        daily: {
+          mode: 'clock', // 'clock' | 'jug' | 'scale'
+          clockSlices: [{ den: 2, min: 30, color: '#2563EB', label: '1/2 h' }],
+          jugTenths: 5, // 0..10 (cada 1 = 100 mL = 1/10 L)
+          scaleWeights: [{ den: 2, g: 500, color: '#2563EB', label: '1/2 kg' }]
+        },
+
+        // Aba 4: Régua 1/10
+        ruler: {
+          objIdx: 0, // 0..4
+          mm: 7      // 0..30
+        },
+
+        // Aba 5: Mesma Unidade
+        same: {
+          mode: 'lab', // 'lab' | 'quiz'
+          presetIdx: 0,
+          stage: 0, // 0: original, 1: subdividido, 2: somado
+          quizIdx: 0,
+          quizScore: 0,
+          quizAnswered: false,
+          quizSelected: null,
+          quizDone: false
+        }
+      };
+
+      function resetXray(level, idx) {
+        state.xray.level = level;
+        state.xray.idx = idx;
+        state.xray.solved = false;
+        state.xray.wrongKeys = [];
+        state.xray.feedback = null;
+        state.xray.l2Qty = 1;
+        state.xray.l2Den = 2;
+        state.xray.l3Picked = null;
+      }
+
+      const TAB_STEPS = [
+        // ABA 1 (4 passos)
+        [
+          {
+            title: 'A Unidade 1/2 (meio)',
+            guide: '<strong>Passo 1:</strong> Uma fração nasce da repetição de uma <strong>unidade</strong>! Clique em <strong>+ Adicionar</strong> ou na barra para juntar meios (1/2).',
+            apply() { state.u1 = { den: 2, count: 1, wholes: 1 }; }
+          },
+          {
+            title: 'A Unidade 1/6 (sexto)',
+            guide: '<strong>Passo 2:</strong> Em <strong>4/6</strong>, temos <strong>4 peças</strong> da unidade <strong>1/6</strong>. Observe a ponte linguística: 4 sextos = 4 × (1/6) = 4/6!',
+            apply() { state.u1 = { den: 6, count: 4, wholes: 1 }; }
+          },
+          {
+            title: 'A Unidade 1/10 (décimo)',
+            guide: '<strong>Passo 3:</strong> O <strong>décimo (1/10)</strong> é a unidade do nosso sistema decimal! Clique na barra para ver quantos décimos formam 1 inteiro.',
+            apply() { state.u1 = { den: 10, count: 7, wholes: 1 }; }
+          },
+          {
+            title: 'Completando 1 e 2 Inteiros',
+            guide: '<strong>Passo 4:</strong> Quando completamos <strong>6/6</strong> temos <strong>1 inteiro</strong>! Com 2 inteiros ativos, podemos continuar contando unidades além de 1.',
+            apply() { state.u1 = { den: 6, count: 6, wholes: 2 }; }
+          }
+        ],
+        // ABA 2: RAIO-X (3 níveis)
+        [
+          {
+            title: 'Nível 1: Qual é a unidade?',
+            guide: '<strong>Raio-X · Nível 1:</strong> O denominador (número de baixo) diz o nome e o tamanho da <strong>unidade fracionária</strong>. Qual é a unidade desta fração?',
+            apply() { resetXray(1, 0); }
+          },
+          {
+            title: 'Nível 2: Desmonte a fração!',
+            guide: '<strong>Raio-X · Nível 2:</strong> Toda fração é uma contagem de peças unitárias! Ajuste os dois contadores e clique em <strong>Conferir</strong>.',
+            apply() { resetXray(2, 0); }
+          },
+          {
+            title: 'Nível 3: Mesma Família!',
+            guide: '<strong>Raio-X · Nível 3:</strong> Ponte direta para somar frações! Descubra qual fração usa a <strong>mesma unidade</strong> (peças do mesmo tamanho).',
+            apply() { resetXray(3, 0); }
+          }
+        ],
+        // ABA 3: NO DIA A DIA (3 submodos)
+        [
+          {
+            title: 'Relógio (Tempo)',
+            guide: '<strong>Relógio:</strong> Uma hora tem 60 minutos. Adicione <strong>1/2 h (30 min)</strong>, <strong>1/4 h (15 min)</strong> ou <strong>1/6 h (10 min)</strong> e veja o mostrador se preencher!',
+            apply() {
+              state.daily.mode = 'clock';
+              state.daily.clockSlices = [{ den: 2, min: 30, color: '#2563EB', label: '1/2 h' }];
+            }
+          },
+          {
+            title: 'Jarra Medidora (Capacidade)',
+            guide: '<strong>Jarra de 1 Litro:</strong> Cada marca vale <strong>1/10 L (100 mL = 0,1 L)</strong>. Adicione 1/10 L ou 1/2 L e acompanhe o líquido e o decimal!',
+            apply() {
+              state.daily.mode = 'jug';
+              state.daily.jugTenths = 5;
+            }
+          },
+          {
+            title: 'Balança Digital (Massa)',
+            guide: '<strong>Balança Digital:</strong> Coloque pesos de <strong>1/2 kg (500 g)</strong>, <strong>1/4 kg (250 g)</strong> e <strong>1/10 kg (100 g)</strong> no prato e leia o visor!',
+            apply() {
+              state.daily.mode = 'scale';
+              state.daily.scaleWeights = [
+                { den: 2, g: 500, color: '#2563EB', label: '1/2 kg' },
+                { den: 4, g: 250, color: '#EA580C', label: '1/4 kg' }
+              ];
+            }
+          }
+        ],
+        // ABA 4: RÉGUA 1/10 (5 objetos)
+        RULER_OBJECTS.map((obj, idx) => ({
+          title: obj.name,
+          guide: idx < 4
+            ? `<strong>Régua 1/10:</strong> Meça o objeto <strong>${obj.name}</strong>! Clique ou arraste na régua para conferir milímetros, fração de cm e decimal.`
+            : '<strong>Medida Livre:</strong> Clique ou arraste em qualquer ponto da régua de 0 a 3 cm para explorar décimos de centímetro!',
+          apply() {
+            state.ruler.objIdx = idx;
+            state.ruler.mm = obj.mm;
+          }
+        })),
+        // ABA 5: MESMA UNIDADE (2 submodos)
+        [
+          {
+            title: 'Laboratório de Troca',
+            guide: '<strong>Laboratório de Troca:</strong> Para somar frações de unidades diferentes, primeiro <strong>subdividimos</strong> para a mesma unidade e depois <strong>juntamos tudo</strong>!',
+            apply() {
+              state.same.mode = 'lab';
+              state.same.presetIdx = 0;
+              state.same.stage = 0;
+            }
+          },
+          {
+            title: 'Desafio Relâmpago (5 perguntas)',
+            guide: '<strong>Desafio Relâmpago:</strong> Teste o que você aprendeu sobre unidades fracionárias em 5 perguntas rápidas e ganhe estrelas!',
+            apply() {
+              state.same.mode = 'quiz';
+              state.same.quizIdx = 0;
+              state.same.quizScore = 0;
+              state.same.quizAnswered = false;
+              state.same.quizSelected = null;
+              state.same.quizDone = false;
+            }
+          }
+        ]
+      ];
+
+      /* =======================================================================
+         5. RENDERIZAÇÃO DAS 5 ABAS
+         ======================================================================= */
+
+      // --- ABA 1: A UNIDADE ---
+      function renderTab1() {
+        const { den, count, wholes } = state.u1;
+        const maxCount = den * wholes;
+        const color = UNIT_COLORS[den] || '#2563EB';
+        const isExactWhole = count > 0 && count % den === 0;
+        const wholesCompleted = Math.floor(count / den);
+
+        // SVG da(s) barra(s)
+        const W = 560;
+        const H = wholes === 1 ? 150 : 230;
+        const padX = 20;
+        const barW = W - padX * 2;
+        const barH = 62;
+
+        let svg = '';
+        for (let w = 0; w < wholes; w++) {
+          const y = wholes === 1 ? 46 : (w === 0 ? 32 : 136);
+          const segW = barW / den;
+          const filledHere = Math.max(0, Math.min(den, count - w * den));
+
+          svg += `<text x="${padX}" y="${y - 10}" font-size="13" font-weight="800" fill="${filledHere === den ? '#059669' : '#475569'}">${w + 1}º Inteiro ${filledHere === den ? '✓ Completo!' : `(${filledHere}/${den})`}</text>`;
+
+          for (let i = 0; i < den; i++) {
+            const globalIdx = w * den + i + 1;
+            const on = globalIdx <= count;
+            const x = padX + i * segW;
+            svg += `
+              <rect x="${x.toFixed(2)}" y="${y}" width="${segW.toFixed(2)}" height="${barH}"
+                fill="${on ? color : '#FFFFFF'}" stroke="#334155" stroke-width="2"
+                class="clickable-seg" data-u1-click="${globalIdx}" />
+              <text x="${(x + segW / 2).toFixed(2)}" y="${y + barH / 2 + 5}" text-anchor="middle"
+                font-size="${den >= 10 ? 12 : 15}" font-weight="900" pointer-events="none"
+                fill="${on ? '#FFFFFF' : '#94A3B8'}">1/${den}</text>`;
+          }
+          svg += `<rect x="${padX}" y="${y}" width="${barW}" height="${barH}" rx="8" fill="none" stroke="#0F172A" stroke-width="3" pointer-events="none" />`;
+        }
+
+        const reading = leituraExtenso(count, den, false);
+        const readingWords = leituraExtenso(count, den, true);
+
+        return `
+          <div class="u1-grid">
+            <div class="card">
+              <div class="card-title">
+                <span>Clique na barra ou nos botões para empilhar 1/${den}</span>
+                <div class="segmented">
+                  <button class="${wholes === 1 ? 'active' : ''}" data-u1-wholes="1">1 Inteiro</button>
+                  <button class="${wholes === 2 ? 'active' : ''}" data-u1-wholes="2">2 Inteiros</button>
+                </div>
+              </div>
+              <div class="svg-box">
+                <svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="xMidYMid meet">${svg}</svg>
+              </div>
+              <div style="display:flex; flex-wrap:wrap; gap:6px; justify-content:center; padding-top:6px; border-top:1.5px dashed var(--border); flex-shrink:0;">
+                <button class="btn btn-blue" id="u1Add" ${count >= maxCount ? 'disabled' : ''}>+ Adicionar 1/${den}</button>
+                <button class="btn" id="u1Sub" ${count <= 0 ? 'disabled' : ''}>− Remover</button>
+                <button class="btn" id="u1Clear" ${count === 0 ? 'disabled' : ''}>🧹 Limpar</button>
+              </div>
+            </div>
+
+            <div class="card card-scroll" style="gap:10px; justify-content:space-between;">
+              <div>
+                <div class="card-title"><span>Escolha a unidade fracionária</span></div>
+                <div style="display:grid; grid-template-columns:repeat(4,1fr); gap:6px;">
+                  ${[2, 4, 6, 10].map(d => `
+                    <button class="btn ${den === d ? 'btn-blue' : ''}" data-u1-den="${d}" style="padding:8px 4px;">
+                      1/${d}
+                    </button>`).join('')}
+                </div>
+              </div>
+
+              <div class="bridge-box">
+                <div class="card-title" style="margin-bottom:0; color:var(--blue);"><span>Ponte Linguística da Unidade</span></div>
+                <div class="bridge-eq">
+                  <span style="color:${color};">${reading}</span>
+                  <span>=</span>
+                  <span>${count} × ${fracHTML(1, den, 'frac-md', color)}</span>
+                  <span>=</span>
+                  ${fracHTML(count, den, 'frac-lg', color)}
+                </div>
+                <div class="bridge-reading">Leitura: “${readingWords}”</div>
+              </div>
+
+              ${isExactWhole ? `
+                <div class="whole-celebration pulse-pop">
+                  🎉 Parabéns! ${count}/${den} = ${wholesCompleted} ${wholesCompleted === 1 ? 'inteiro exato' : 'inteiros exatos'}!
+                </div>
+              ` : `
+                <div style="padding:8px 10px; border-radius:10px; background:var(--bg-soft); border:1.5px solid var(--border); font-size:12.5px; color:var(--text-muted); text-align:center;">
+                  ${count === 0
+                    ? `Adicione unidades de <strong>1/${den}</strong> para começar a medir.`
+                    : `Faltam <strong>${den - (count % den)}</strong> ${den - (count % den) === 1 ? 'peça' : 'peças'} de <strong>1/${den}</strong> para completar o próximo inteiro!`}
+                </div>
+              `}
+            </div>
+          </div>`;
+      }
+
+      // --- ABA 2: RAIO-X ---
+      function buildXrayBarSVG(num, den, opts = {}) {
+        const { highlightUnit = false, explode = false, fillColor = '#2563EB' } = opts;
+        const wholes = Math.max(1, Math.ceil(num / den));
+        const W = 560;
+        const H = wholes === 1 ? 148 : 214;
+        const padX = 20;
+        const barW = W - padX * 2;
+        const barH = 52;
+
+        let svg = '';
+        for (let w = 0; w < wholes; w++) {
+          const y = wholes === 1 ? 42 : (w === 0 ? 28 : 124);
+          const filledHere = Math.max(0, Math.min(den, num - w * den));
+          const gap = explode ? Math.min(6, Math.max(2, 42 / den)) : 0;
+          const segW = (barW - gap * (den - 1)) / den;
+
+          svg += `<text x="${padX}" y="${y - 9}" font-size="12.5" font-weight="800" fill="#475569">${wholes === 1 ? `1 inteiro dividido em ${den} partes iguais` : `${w + 1}º Inteiro (${filledHere}/${den})`}</text>`;
+
+          for (let i = 0; i < den; i++) {
+            const on = i < filledHere;
+            const x = padX + i * (segW + gap);
+            const isUnit = highlightUnit && w === 0 && i === 0;
+            const fill = isUnit ? '#F59E0B' : (on ? fillColor : '#FFFFFF');
+            svg += `<rect x="${x.toFixed(2)}" y="${y}" width="${segW.toFixed(2)}" height="${barH}" rx="${explode ? 5 : 2}"
+              fill="${fill}" stroke="${isUnit ? '#B45309' : '#334155'}" stroke-width="${isUnit ? 3 : 1.5}"
+              style="transition: all 0.25s ease;" />`;
+            if (den <= 10 || isUnit) {
+              svg += `<text x="${(x + segW / 2).toFixed(2)}" y="${y + barH / 2 + 4}" text-anchor="middle"
+                font-size="${den > 12 ? 9.5 : (den > 8 ? 11 : 13)}" font-weight="900"
+                fill="${(on || isUnit) ? '#FFFFFF' : '#94A3B8'}">1/${den}</text>`;
+            }
+          }
+          if (!explode) {
+            svg += `<rect x="${padX}" y="${y}" width="${barW}" height="${barH}" rx="7" fill="none" stroke="#0F172A" stroke-width="2.6" />`;
+          }
+          if (highlightUnit && w === 0) {
+            const ux1 = padX;
+            const ux2 = padX + segW;
+            const by = y + barH + 8;
+            svg += `
+              <path d="M ${ux1 + 1} ${by} L ${ux1 + 1} ${by + 7} L ${ux2 - 1} ${by + 7} L ${ux2 - 1} ${by}"
+                fill="none" stroke="#D97706" stroke-width="2.8" stroke-linecap="round" />
+              <text x="${Math.max(padX + 54, (ux1 + ux2) / 2).toFixed(1)}" y="${by + 24}" text-anchor="middle"
+                font-size="13.5" font-weight="900" fill="#B45309">★ 1 unidade = 1/${den}</text>`;
+          }
+        }
+        return `<svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="xMidYMid meet">${svg}</svg>`;
+      }
+
+      function buildXrayCompareSVG(tN, tD, pN, pD) {
+        const W = 560, H = 180;
+        const padX = 20, barW = W - padX * 2, barH = 44;
+        const same = tD === pD;
+
+        function drawRow(n, d, y, color, label) {
+          const segW = barW / d;
+          const fillCount = Math.min(n, d);
+          let s = `<text x="${padX}" y="${y - 7}" font-size="12.5" font-weight="800" fill="${color}">${label} — cada peça vale 1/${d}</text>`;
+          for (let i = 0; i < d; i++) {
+            const x = padX + i * segW;
+            const on = i < fillCount;
+            s += `<rect x="${x.toFixed(2)}" y="${y}" width="${segW.toFixed(2)}" height="${barH}"
+              fill="${on ? color : '#FFFFFF'}" fill-opacity="${i === 0 ? '1' : '0.65'}"
+              stroke="${i === 0 ? '#0F172A' : '#475569'}" stroke-width="${i === 0 ? 2.6 : 1.4}" />`;
+          }
+          s += `<rect x="${padX}" y="${y}" width="${barW}" height="${barH}" rx="6" fill="none" stroke="#0F172A" stroke-width="2.5" />`;
+          if (n > d) {
+            s += `<text x="${padX + barW}" y="${y - 7}" text-anchor="end" font-size="11.5" font-weight="800" fill="#DC2626">(> 1 inteiro)</text>`;
+          }
+          return s;
+        }
+
+        const xGuide = padX + barW / tD;
+        let svg = '';
+        svg += drawRow(tN, tD, 28, '#2563EB', `Alvo: ${tN}/${tD}`);
+        svg += drawRow(pN, pD, 110, same ? '#059669' : '#DC2626', `Escolha: ${pN}/${pD}`);
+        svg += `<line x1="${xGuide.toFixed(2)}" y1="22" x2="${xGuide.toFixed(2)}" y2="162" stroke="${same ? '#059669' : '#DC2626'}" stroke-width="2.8" stroke-dasharray="5,4" />`;
+        svg += `<text x="${Math.min(W - 100, Math.max(100, xGuide)).toFixed(1)}" y="175" text-anchor="middle" font-size="12.5" font-weight="900" fill="${same ? '#059669' : '#DC2626'}">${same ? '✓ Mesma unidade (peças iguais)!' : '✗ Unidades diferentes!'}</text>`;
+        return `<svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="xMidYMid meet">${svg}</svg>`;
+      }
+
+      function renderTab2() {
+        const xr = state.xray;
+        const lvl = xr.level;
+        let leftHTML = '';
+        let rightHTML = '';
+
+        if (lvl === 1) {
+          const q = XRAY_L1[xr.idx % XRAY_L1.length];
+          leftHTML = `
+            <div class="card">
+              <div class="card-title">
+                <span>Nível 1 · Desafio ${(xr.idx % XRAY_L1.length) + 1} de ${XRAY_L1.length}</span>
+                <span class="badge badge-blue">${q.n > q.d ? 'Imprópria (2 barras)' : 'Fração Própria'}</span>
+              </div>
+              <div class="xray-qbar">
+                <span class="xray-prompt">Qual é a <strong>unidade fracionária</strong> de</span>
+                ${fracHTML(q.n, q.d, 'frac-xl', '#2563EB')}
+                <span class="xray-prompt">?</span>
+              </div>
+              <div class="svg-box">${buildXrayBarSVG(q.n, q.d, { highlightUnit: xr.solved, fillColor: '#2563EB' })}</div>
+            </div>`;
+
+          rightHTML = `
+            <div class="card card-scroll" style="justify-content:space-between; gap:8px;">
+              <div class="card-title"><span>Escolha a unidade (1 peça)</span></div>
+              <div class="xray-opts">
+                ${q.opts.map(o => {
+                  const key = `${o.n}/${o.d}`;
+                  const isOk = o.n === 1 && o.d === q.d;
+                  const isWrong = xr.wrongKeys.includes(key);
+                  const cls = (xr.solved && isOk) ? 'is-correct pulse-pop' : (isWrong ? 'is-wrong' : '');
+                  return `
+                    <button class="xray-opt-btn ${cls}" data-xray-l1="${key}" ${xr.solved || isWrong ? 'disabled' : ''}>
+                      ${fracHTML(o.n, o.d, 'frac-lg')}
+                      ${xr.solved && isOk ? '<span>✓</span>' : (isWrong ? '<span>✗</span>' : '')}
+                    </button>`;
+                }).join('')}
+              </div>
+              ${xr.feedback
+                ? `<div class="feedback-box ${xr.feedback.ok ? 'ok pulse-pop' : 'err'}">${xr.feedback.msg}</div>`
+                : `<div style="font-size:12px; color:var(--text-light); text-align:center;">Dica: o número de baixo (denominador) diz em quantas partes iguais o inteiro foi cortado.</div>`}
+              <button class="btn ${xr.solved ? 'btn-green pulse-pop' : ''}" id="xrayNext" style="width:100%;">
+                ${xr.solved ? 'Próximo Desafio ▶' : 'Pular Desafio ▶'}
+              </button>
+            </div>`;
+        } else if (lvl === 2) {
+          const q = XRAY_L2[xr.idx % XRAY_L2.length];
+          leftHTML = `
+            <div class="card">
+              <div class="card-title">
+                <span>Nível 2 · Desafio ${(xr.idx % XRAY_L2.length) + 1} de ${XRAY_L2.length}</span>
+                <span class="badge badge-purple">Desmonte em peças unitárias</span>
+              </div>
+              <div class="xray-qbar">
+                <span class="xray-prompt">Desmonte a fração</span>
+                ${fracHTML(q.n, q.d, 'frac-xl', '#7C3AED')}
+                ${xr.solved ? `<span class="badge badge-green pulse-pop">${q.n} × 1/${q.d} = ${q.n}/${q.d} (${leituraExtenso(q.n, q.d, true)})</span>` : ''}
+              </div>
+              <div class="svg-box">${buildXrayBarSVG(q.n, q.d, { highlightUnit: xr.solved, explode: xr.solved, fillColor: '#7C3AED' })}</div>
+            </div>`;
+
+          rightHTML = `
+            <div class="card card-scroll" style="justify-content:space-between; gap:8px;">
+              <div class="card-title"><span>Complete os dois contadores</span></div>
+              <div class="xray-builder">
+                <div class="xray-sentence">
+                  <span>São</span>
+                  <span class="xray-slot">
+                    <button data-l2-step="qty:-1" ${xr.solved || xr.l2Qty <= 1 ? 'disabled' : ''}>−</button>
+                    <span>${xr.l2Qty}</span>
+                    <button data-l2-step="qty:1" ${xr.solved || xr.l2Qty >= 20 ? 'disabled' : ''}>+</button>
+                  </span>
+                  <span>peças de</span>
+                  <span class="xray-slot is-den">
+                    <strong style="color:var(--purple); font-size:16px;">1 /</strong>
+                    <button data-l2-step="den:-1" ${xr.solved || xr.l2Den <= 2 ? 'disabled' : ''}>−</button>
+                    <span>${xr.l2Den}</span>
+                    <button data-l2-step="den:1" ${xr.solved || xr.l2Den >= 20 ? 'disabled' : ''}>+</button>
+                  </span>
+                </div>
+                <div style="font-size:12px; color:var(--text-muted); text-align:center;">
+                  Ajuste quantas peças (numerador) e qual o tamanho da unidade (denominador).
+                </div>
+              </div>
+              ${xr.feedback ? `<div class="feedback-box ${xr.feedback.ok ? 'ok pulse-pop' : 'err'}">${xr.feedback.msg}</div>` : ''}
+              <div style="display:flex; gap:6px;">
+                ${!xr.solved ? `<button class="btn btn-purple" id="xrayL2Check" style="flex:1;">✓ Conferir</button>` : ''}
+                <button class="btn ${xr.solved ? 'btn-green pulse-pop' : ''}" id="xrayNext" style="flex:${xr.solved ? 1 : 0};">
+                  ${xr.solved ? 'Próximo Desafio ▶' : 'Pular ▶'}
+                </button>
+              </div>
+            </div>`;
+        } else {
+          const q = XRAY_L3[xr.idx % XRAY_L3.length];
+          const t = q.target;
+          const visualSVG = xr.l3Picked
+            ? buildXrayCompareSVG(t.n, t.d, xr.l3Picked.n, xr.l3Picked.d)
+            : buildXrayBarSVG(t.n, t.d, { highlightUnit: true, fillColor: '#2563EB' });
+
+          leftHTML = `
+            <div class="card">
+              <div class="card-title">
+                <span>Nível 3 · Desafio ${(xr.idx % XRAY_L3.length) + 1} de ${XRAY_L3.length}</span>
+                <span class="badge badge-green">Ponte → Operações</span>
+              </div>
+              <div class="xray-qbar">
+                <span class="xray-prompt">Qual fração usa a <strong>mesma unidade</strong> que</span>
+                ${fracHTML(t.n, t.d, 'frac-xl', '#2563EB')}
+                <span class="xray-prompt">?</span>
+              </div>
+              <div class="svg-box">${visualSVG}</div>
+            </div>`;
+
+          rightHTML = `
+            <div class="card card-scroll" style="justify-content:space-between; gap:8px;">
+              <div class="card-title"><span>Cuidado com as pegadinhas!</span></div>
+              <div class="xray-opts">
+                ${q.opts.map(o => {
+                  const key = `${o.n}/${o.d}`;
+                  const isOk = o.kind === 'ok';
+                  const isWrong = xr.wrongKeys.includes(key);
+                  const cls = (xr.solved && isOk) ? 'is-correct pulse-pop' : (isWrong ? 'is-wrong' : '');
+                  return `
+                    <button class="xray-opt-btn ${cls}" data-xray-l3="${key}:${o.kind}" ${xr.solved || isWrong ? 'disabled' : ''}>
+                      ${fracHTML(o.n, o.d, 'frac-lg')}
+                      ${xr.solved && isOk ? '<span>✓</span>' : (isWrong ? '<span>✗</span>' : '')}
+                    </button>`;
+                }).join('')}
+              </div>
+              ${xr.feedback
+                ? `<div class="feedback-box ${xr.feedback.ok ? 'ok pulse-pop' : 'err'}">${xr.feedback.msg}</div>`
+                : `<div style="font-size:12px; color:var(--text-light); text-align:center;">Toque em uma opção para alinhar as barras e comparar o tamanho das peças!</div>`}
+              <button class="btn ${xr.solved ? 'btn-green pulse-pop' : ''}" id="xrayNext" style="width:100%;">
+                ${xr.solved ? 'Próximo Desafio ▶' : 'Pular Desafio ▶'}
+              </button>
+            </div>`;
+        }
+
+        return `
+          <div class="xray-shell">
+            <div class="xray-top">
+              <div class="segmented">
+                <button class="${lvl === 1 ? 'active' : ''}" data-xray-lvl="1">1. Qual é a unidade?</button>
+                <button class="${lvl === 2 ? 'active' : ''}" data-xray-lvl="2">2. Desmonte!</button>
+                <button class="${lvl === 3 ? 'active' : ''}" data-xray-lvl="3">3. Mesma Família!</button>
+              </div>
+              <div style="display:flex; gap:6px; align-items:center;">
+                <span class="badge badge-amber">⭐ Acertos: ${xr.score}</span>
+                ${xr.streak >= 2 ? `<span class="badge badge-orange pulse-pop">🔥 Sequência: ${xr.streak}</span>` : ''}
+              </div>
+            </div>
+            <div class="xray-grid">${leftHTML}${rightHTML}</div>
+          </div>`;
+      }
+
+      // --- ABA 3: NO DIA A DIA ---
+      function buildClockSVG(slices) {
+        const size = 260, cx = 130, cy = 130, r = 104;
+        let svg = `<circle cx="${cx}" cy="${cy}" r="${r + 8}" fill="#F1F5F9" stroke="#334155" stroke-width="3" />`;
+        svg += `<circle cx="${cx}" cy="${cy}" r="${r}" fill="#FFFFFF" stroke="#CBD5E1" stroke-width="2" />`;
+
+        // Setores preenchidos
+        let accMin = 0;
+        slices.forEach(s => {
+          const startMin = accMin;
+          const endMin = Math.min(60, accMin + s.min);
+          if (endMin > startMin) {
+            const a1 = -Math.PI / 2 + (startMin / 60) * 2 * Math.PI;
+            const a2 = -Math.PI / 2 + (endMin / 60) * 2 * Math.PI;
+            const x1 = cx + r * Math.cos(a1);
+            const y1 = cy + r * Math.sin(a1);
+            const x2 = cx + r * Math.cos(a2);
+            const y2 = cy + r * Math.sin(a2);
+            const largeArc = (endMin - startMin) > 30 ? 1 : 0;
+            if (endMin - startMin >= 60) {
+              svg += `<circle cx="${cx}" cy="${cy}" r="${r}" fill="${s.color}" fill-opacity="0.82" />`;
+            } else {
+              svg += `<path d="M ${cx} ${cy} L ${x1.toFixed(2)} ${y1.toFixed(2)} A ${r} ${r} 0 ${largeArc} 1 ${x2.toFixed(2)} ${y2.toFixed(2)} Z"
+                fill="${s.color}" fill-opacity="0.82" stroke="#FFFFFF" stroke-width="2" />`;
+            }
+          }
+          accMin += s.min;
+        });
+
+        // Marcações das 12 horas
+        for (let h = 1; h <= 12; h++) {
+          const a = -Math.PI / 2 + (h / 12) * 2 * Math.PI;
+          const x1 = cx + (r - 10) * Math.cos(a);
+          const y1 = cy + (r - 10) * Math.sin(a);
+          const x2 = cx + r * Math.cos(a);
+          const y2 = cy + r * Math.sin(a);
+          const tx = cx + (r - 22) * Math.cos(a);
+          const ty = cy + (r - 22) * Math.sin(a) + 5;
+          svg += `<line x1="${x1.toFixed(1)}" y1="${y1.toFixed(1)}" x2="${x2.toFixed(1)}" y2="${y2.toFixed(1)}" stroke="#0F172A" stroke-width="2.2" />`;
+          svg += `<text x="${tx.toFixed(1)}" y="${ty.toFixed(1)}" text-anchor="middle" font-size="13" font-weight="800" fill="#0F172A">${h}</text>`;
+        }
+
+        // Ponteiro dos minutos
+        const anglePtr = -Math.PI / 2 + ((accMin % 60) / 60) * 2 * Math.PI;
+        const px = cx + (r - 26) * Math.cos(anglePtr);
+        const py = cy + (r - 26) * Math.sin(anglePtr);
+        svg += `<line x1="${cx}" y1="${cy}" x2="${px.toFixed(1)}" y2="${py.toFixed(1)}" stroke="#0F172A" stroke-width="4" stroke-linecap="round" />`;
+        svg += `<circle cx="${cx}" cy="${cy}" r="6" fill="#0F172A" />`;
+
+        return `<svg viewBox="0 0 ${size} ${size}" preserveAspectRatio="xMidYMid meet">${svg}</svg>`;
+      }
+
+      function buildJugSVG(tenths) {
+        const W = 260, H = 260;
+        const jx = 64, jy = 26, jw = 122, jh = 204;
+        const fillH = (tenths / 10) * (jh - 12);
+        const fillY = jy + jh - 6 - fillH;
+
+        let svg = '';
+        // Alça da jarra
+        svg += `<path d="M ${jx + jw} ${jy + 32} C ${jx + jw + 46} ${jy + 32}, ${jx + jw + 46} ${jy + 150}, ${jx + jw} ${jy + 150}" fill="none" stroke="#94A3B8" stroke-width="11" stroke-linecap="round" />`;
+        // Corpo vidro
+        svg += `<rect x="${jx}" y="${jy}" width="${jw}" height="${jh}" rx="12" fill="#F8FAFC" stroke="#334155" stroke-width="3.5" />`;
+        // Líquido animado
+        if (tenths > 0) {
+          svg += `<rect x="${jx + 3}" y="${fillY.toFixed(1)}" width="${jw - 6}" height="${fillH.toFixed(1)}" rx="8" fill="#0EA5E9" fill-opacity="0.72" style="transition: all 0.25s ease;" />`;
+          svg += `<line x1="${jx + 4}" y1="${fillY.toFixed(1)}" x2="${jx + jw - 4}" y2="${fillY.toFixed(1)}" stroke="#0284C7" stroke-width="3" style="transition: all 0.25s ease;" />`;
+        }
+        // Graduações de 1/10 em 1/10
+        for (let i = 1; i <= 10; i++) {
+          const y = jy + jh - 6 - (i / 10) * (jh - 12);
+          const isHalf = i === 5 || i === 10;
+          svg += `<line x1="${jx + 4}" y1="${y.toFixed(1)}" x2="${jx + (isHalf ? 36 : 22)}" y2="${y.toFixed(1)}" stroke="${isHalf ? '#0F172A' : '#475569'}" stroke-width="${isHalf ? 2.4 : 1.5}" />`;
+          if (i % 2 === 0 || i === 5) {
+            svg += `<text x="${jx - 6}" y="${(y + 4).toFixed(1)}" text-anchor="end" font-size="11" font-weight="800" fill="#334155">${i}/10</text>`;
+          }
+          if (i === 5) svg += `<text x="${jx + jw - 8}" y="${(y + 4).toFixed(1)}" text-anchor="end" font-size="11" font-weight="900" fill="#0369A1">1/2 L</text>`;
+          if (i === 10) svg += `<text x="${jx + jw - 8}" y="${(y + 4).toFixed(1)}" text-anchor="end" font-size="11.5" font-weight="900" fill="#059669">1 L</text>`;
+        }
+        return `<svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="xMidYMid meet">${svg}</svg>`;
+      }
+
+      function buildScaleSVG(weights) {
+        const totalG = weights.reduce((s, w) => s + w.g, 0);
+        const totalKgStr = formatBR(totalG / 1000, 2) + ' kg';
+        const W = 320, H = 230;
+
+        let svg = '';
+        // Pesos no prato
+        const shown = weights.slice(0, 8);
+        shown.forEach((w, idx) => {
+          const col = idx % 4;
+          const row = Math.floor(idx / 4);
+          const bw = 48, bh = 32;
+          const bx = 62 + col * 50;
+          const by = 82 - row * 34;
+          svg += `
+            <rect x="${bx}" y="${by}" width="${bw}" height="${bh}" rx="6" fill="${w.color}" stroke="#0F172A" stroke-width="2" />
+            <text x="${bx + bw / 2}" y="${by + 20}" text-anchor="middle" font-size="11" font-weight="900" fill="#FFFFFF">${w.label.replace(' kg', '')}</text>`;
+        });
+
+        // Prato da balança
+        svg += `<rect x="44" y="114" width="232" height="10" rx="5" fill="#64748B" stroke="#0F172A" stroke-width="2" />`;
+        svg += `<rect x="142" y="124" width="36" height="16" fill="#94A3B8" stroke="#0F172A" stroke-width="2" />`;
+        // Corpo da balança
+        svg += `<path d="M 52 140 L 268 140 L 284 214 L 36 214 Z" fill="#E2E8F0" stroke="#334155" stroke-width="3" stroke-linejoin="round" />`;
+        // Visor digital LED
+        svg += `<rect x="86" y="154" width="148" height="44" rx="8" fill="#0F172A" stroke="#475569" stroke-width="2.5" />`;
+        svg += `<text x="160" y="184" text-anchor="middle" font-family="monospace" font-size="22" font-weight="900" fill="#34D399">${totalKgStr}</text>`;
+
+        return `<svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="xMidYMid meet">${svg}</svg>`;
+      }
+
+      function renderTab3() {
+        const d = state.daily;
+        let visualHTML = '';
+        let controlsHTML = '';
+
+        if (d.mode === 'clock') {
+          const totalMin = d.clockSlices.reduce((s, x) => s + x.min, 0);
+          const g = gcd(totalMin, 60);
+          const simpFrac = totalMin === 0 ? '0 h' : (totalMin === 60 ? '1 hora' : `${totalMin / g}/${60 / g} h`);
+
+          visualHTML = `
+            <div class="card">
+              <div class="card-title">
+                <span>Relógio Analógico (1 hora = 60 min)</span>
+                ${totalMin === 60 ? '<span class="badge badge-green pulse-pop">🎉 1 hora completa!</span>' : ''}
+              </div>
+              <div class="svg-box">${buildClockSVG(d.clockSlices)}</div>
+            </div>`;
+
+          controlsHTML = `
+            <div class="card card-scroll" style="justify-content:space-between; gap:10px;">
+              <div class="readout-grid">
+                <div class="readout-tile">
+                  <span class="rt-label">Minutos</span>
+                  <span class="rt-val" style="color:var(--blue);">${totalMin} min</span>
+                </div>
+                <div class="readout-tile">
+                  <span class="rt-label">Fração de Hora</span>
+                  <span class="rt-val" style="color:var(--purple);">${simpFrac}</span>
+                </div>
+                <div class="readout-tile">
+                  <span class="rt-label">Em 60 avos</span>
+                  <span class="rt-val">${totalMin}/60 h</span>
+                </div>
+              </div>
+
+              <div>
+                <div class="card-title"><span>Adicionar fração de hora (máx. 60 min)</span></div>
+                <div style="display:flex; flex-wrap:wrap; gap:6px;">
+                  <button class="btn btn-blue" data-clock-add="2" ${totalMin + 30 > 60 ? 'disabled' : ''}>+ 1/2 h (30 min)</button>
+                  <button class="btn btn-orange" data-clock-add="4" ${totalMin + 15 > 60 ? 'disabled' : ''}>+ 1/4 h (15 min)</button>
+                  <button class="btn btn-purple" data-clock-add="6" ${totalMin + 10 > 60 ? 'disabled' : ''}>+ 1/6 h (10 min)</button>
+                </div>
+              </div>
+
+              <div>
+                <div class="card-title"><span>Peças no relógio</span></div>
+                <div class="chips-wrap">
+                  ${d.clockSlices.length === 0
+                    ? '<span style="font-size:12px; color:var(--text-light);">Relógio zerado. Adicione uma fração de hora!</span>'
+                    : d.clockSlices.map(s => `<span class="badge" style="background:${s.color}; color:#fff;">${s.label} (${s.min}m)</span>`).join('')}
+                </div>
+              </div>
+
+              <div style="display:flex; gap:6px;">
+                <button class="btn" id="clockUndo" ${d.clockSlices.length === 0 ? 'disabled' : ''}>↩ Desfazer</button>
+                <button class="btn" id="clockClear" ${d.clockSlices.length === 0 ? 'disabled' : ''}>🧹 Zerar</button>
+              </div>
+            </div>`;
+        } else if (d.mode === 'jug') {
+          const t = d.jugTenths;
+          const ml = t * 100;
+          const g = gcd(t, 10);
+          const simp = t === 0 ? '0 L' : (t === 10 ? '1 L' : `${t / g}/${10 / g} L`);
+
+          visualHTML = `
+            <div class="card">
+              <div class="card-title">
+                <span>Jarra Medidora (1 Litro = 1000 mL)</span>
+                ${t === 10 ? '<span class="badge badge-green pulse-pop">🎉 1 Litro completo!</span>' : ''}
+              </div>
+              <div class="svg-box">${buildJugSVG(t)}</div>
+            </div>`;
+
+          controlsHTML = `
+            <div class="card card-scroll" style="justify-content:space-between; gap:10px;">
+              <div class="readout-grid">
+                <div class="readout-tile">
+                  <span class="rt-label">Mililitros</span>
+                  <span class="rt-val" style="color:var(--blue);">${ml} mL</span>
+                </div>
+                <div class="readout-tile">
+                  <span class="rt-label">Fração de Litro</span>
+                  <span class="rt-val" style="color:var(--purple);">${t}/10 L</span>
+                </div>
+                <div class="readout-tile">
+                  <span class="rt-label">Decimal</span>
+                  <span class="rt-val" style="color:var(--green);">${formatBR(t / 10, 1)} L</span>
+                </div>
+              </div>
+
+              <div style="text-align:center; font-size:13px; font-weight:700; color:var(--text-muted); background:var(--bg-soft); padding:7px; border-radius:10px;">
+                Equivalência: <strong>${ml} mL</strong> = <strong>${t}/10 L</strong> ${simp !== `${t}/10 L` && t > 0 ? `(= <strong>${simp}</strong>)` : ''} = <strong>${formatBR(t / 10, 1)} L</strong>
+              </div>
+
+              <div>
+                <div class="card-title"><span>Colocar ou retirar líquido (máx. 1 L)</span></div>
+                <div style="display:flex; flex-wrap:wrap; gap:6px;">
+                  <button class="btn btn-green" id="jugAdd1" ${t + 1 > 10 ? 'disabled' : ''}>+ 1/10 L (100 mL)</button>
+                  <button class="btn btn-blue" id="jugAdd5" ${t + 5 > 10 ? 'disabled' : ''}>+ 1/2 L (500 mL)</button>
+                  <button class="btn" id="jugSub1" ${t <= 0 ? 'disabled' : ''}>− 1/10 L</button>
+                  <button class="btn" id="jugClear" ${t === 0 ? 'disabled' : ''}>🧹 Esvaziar</button>
+                </div>
+              </div>
+            </div>`;
+        } else {
+          const totalG = d.scaleWeights.reduce((s, w) => s + w.g, 0);
+          const g = gcd(totalG, 1000);
+          const fracKg = totalG === 0 ? '0 kg' : (totalG % 1000 === 0 ? `${totalG / 1000} kg` : `${totalG / g}/${1000 / g} kg`);
+
+          visualHTML = `
+            <div class="card">
+              <div class="card-title">
+                <span>Balança Digital (1 kg = 1000 g)</span>
+                ${totalG === 1000 ? '<span class="badge badge-green pulse-pop">🎉 1 kg exato!</span>' : ''}
+              </div>
+              <div class="svg-box">${buildScaleSVG(d.scaleWeights)}</div>
+            </div>`;
+
+          controlsHTML = `
+            <div class="card card-scroll" style="justify-content:space-between; gap:10px;">
+              <div class="readout-grid">
+                <div class="readout-tile">
+                  <span class="rt-label">Gramas</span>
+                  <span class="rt-val" style="color:var(--blue);">${totalG} g</span>
+                </div>
+                <div class="readout-tile">
+                  <span class="rt-label">Fração de kg</span>
+                  <span class="rt-val" style="color:var(--purple);">${fracKg}</span>
+                </div>
+                <div class="readout-tile">
+                  <span class="rt-label">Decimal</span>
+                  <span class="rt-val" style="color:var(--green);">${formatBR(totalG / 1000, 2)} kg</span>
+                </div>
+              </div>
+
+              <div>
+                <div class="card-title"><span>Colocar pesos no prato (máx. 2 kg)</span></div>
+                <div style="display:flex; flex-wrap:wrap; gap:6px;">
+                  <button class="btn btn-blue" data-scale-add="2" ${totalG + 500 > 2000 ? 'disabled' : ''}>+ 1/2 kg (500 g)</button>
+                  <button class="btn btn-orange" data-scale-add="4" ${totalG + 250 > 2000 ? 'disabled' : ''}>+ 1/4 kg (250 g)</button>
+                  <button class="btn btn-green" data-scale-add="10" ${totalG + 100 > 2000 ? 'disabled' : ''}>+ 1/10 kg (100 g)</button>
+                </div>
+              </div>
+
+              <div>
+                <div class="card-title"><span>Pesos no prato</span></div>
+                <div class="chips-wrap">
+                  ${d.scaleWeights.length === 0
+                    ? '<span style="font-size:12px; color:var(--text-light);">Prato vazio. Adicione pesos acima!</span>'
+                    : d.scaleWeights.map(w => `<span class="badge" style="background:${w.color}; color:#fff;">${w.label} (${w.g}g)</span>`).join('')}
+                </div>
+              </div>
+
+              <div style="display:flex; gap:6px;">
+                <button class="btn" id="scaleUndo" ${d.scaleWeights.length === 0 ? 'disabled' : ''}>↩ Tirar último</button>
+                <button class="btn" id="scaleClear" ${d.scaleWeights.length === 0 ? 'disabled' : ''}>🧹 Limpar prato</button>
+              </div>
+            </div>`;
+        }
+
+        return `
+          <div class="daily-shell">
+            <div style="display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:6px; flex-shrink:0;">
+              <div class="segmented">
+                <button class="${d.mode === 'clock' ? 'active' : ''}" data-daily-mode="clock">🕒 Relógio</button>
+                <button class="${d.mode === 'jug' ? 'active' : ''}" data-daily-mode="jug">💧 Jarra 1 L</button>
+                <button class="${d.mode === 'scale' ? 'active' : ''}" data-daily-mode="scale">⚖️ Balança</button>
+              </div>
+              <span style="font-size:12px; font-weight:700; color:var(--text-muted);">Veja 1/2, 1/4, 1/6 e 1/10 funcionando no mundo real!</span>
+            </div>
+            <div class="daily-grid">${visualHTML}${controlsHTML}</div>
+          </div>`;
+      }
+
+      // --- ABA 4: RÉGUA 1/10 ---
+      function buildRulerObjectSVG(objId, x0, xEnd) {
+        const w = Math.max(12, xEnd - x0);
+        const midX = x0 + w / 2;
+        if (objId === 'ladybug') {
+          const rx = w / 2;
+          return `
+            <ellipse cx="${midX.toFixed(1)}" cy="54" rx="${rx.toFixed(1)}" ry="26" fill="#EF4444" stroke="#0F172A" stroke-width="2.5" />
+            <circle cx="${(x0 + 16).toFixed(1)}" cy="54" r="14" fill="#0F172A" />
+            <line x1="${(x0 + 26).toFixed(1)}" y1="54" x2="${xEnd.toFixed(1)}" y2="54" stroke="#0F172A" stroke-width="2.2" />
+            <circle cx="${(x0 + w * 0.45).toFixed(1)}" cy="43" r="4.5" fill="#0F172A" />
+            <circle cx="${(x0 + w * 0.72).toFixed(1)}" cy="45" r="4.5" fill="#0F172A" />
+            <circle cx="${(x0 + w * 0.55).toFixed(1)}" cy="65" r="4.5" fill="#0F172A" />`;
+        }
+        if (objId === 'clip') {
+          return `
+            <rect x="${x0}" y="38" width="${w.toFixed(1)}" height="32" rx="16" fill="none" stroke="#64748B" stroke-width="6" />
+            <rect x="${x0 + 14}" y="46" width="${Math.max(10, w - 28).toFixed(1)}" height="16" rx="8" fill="none" stroke="#94A3B8" stroke-width="4" />`;
+        }
+        if (objId === 'eraser') {
+          const split = x0 + w * 0.62;
+          return `
+            <rect x="${x0}" y="34" width="${w.toFixed(1)}" height="40" rx="7" fill="#F43F5E" stroke="#0F172A" stroke-width="2.5" />
+            <rect x="${split.toFixed(1)}" y="34" width="${(xEnd - split).toFixed(1)}" height="40" rx="5" fill="#3B82F6" stroke="#0F172A" stroke-width="2.5" />
+            <text x="${(x0 + (split - x0) / 2).toFixed(1)}" y="59" text-anchor="middle" font-size="13" font-weight="900" fill="#FFFFFF">BORRACHA</text>`;
+        }
+        if (objId === 'screw') {
+          return `
+            <rect x="${x0}" y="34" width="24" height="40" rx="4" fill="#64748B" stroke="#0F172A" stroke-width="2.5" />
+            <rect x="${x0 + 24}" y="44" width="${Math.max(10, w - 24).toFixed(1)}" height="20" rx="3" fill="#CBD5E1" stroke="#0F172A" stroke-width="2.2" />
+            <line x1="${x0 + 48}" y1="44" x2="${x0 + 40}" y2="64" stroke="#475569" stroke-width="2" />
+            <line x1="${x0 + 74}" y1="44" x2="${x0 + 66}" y2="64" stroke="#475569" stroke-width="2" />
+            <line x1="${x0 + 100}" y1="44" x2="${x0 + 92}" y2="64" stroke="#475569" stroke-width="2" />`;
+        }
+        // Medida livre: barra verde elegante
+        return `
+          <rect x="${x0}" y="40" width="${w.toFixed(1)}" height="28" rx="8" fill="#10B981" fill-opacity="0.85" stroke="#065F46" stroke-width="2.5" />
+          <text x="${midX.toFixed(1)}" y="59" text-anchor="middle" font-size="13" font-weight="900" fill="#FFFFFF">${w > 55 ? 'Arraste na régua ↔' : ''}</text>`;
+      }
+
+      function renderTab4() {
+        const { objIdx, mm } = state.ruler;
+        const obj = RULER_OBJECTS[objIdx];
+        const wholes = Math.floor(mm / 10);
+        const rem = mm % 10;
+        const mixedTxt = wholes > 0
+          ? (rem === 0 ? `${wholes} cm inteiro${wholes > 1 ? 's' : ''}` : `${wholes} inteiro${wholes > 1 ? 's' : ''} e ${rem}/10 cm`)
+          : `${mm}/10 de 1 cm`;
+
+        const W = 680, H = 215;
+        const x0 = 40, xMax = 640;
+        const stepPx = (xMax - x0) / 30;
+        const curX = x0 + mm * stepPx;
+
+        let ticks = '';
+        for (let i = 0; i <= 30; i++) {
+          const x = x0 + i * stepPx;
+          const isCm = i % 10 === 0;
+          const isHalf = i % 5 === 0 && !isCm;
+          const th = isCm ? 34 : (isHalf ? 24 : 15);
+          ticks += `<line x1="${x.toFixed(1)}" y1="104" x2="${x.toFixed(1)}" y2="${104 + th}" stroke="#0F172A" stroke-width="${isCm ? 2.8 : (isHalf ? 2 : 1.3)}" />`;
+          if (isCm) {
+            ticks += `<text x="${x.toFixed(1)}" y="160" text-anchor="middle" font-size="18" font-weight="900" fill="#0F172A">${i / 10} cm</text>`;
+          }
+        }
+
+        const svg = `
+          <svg id="rulerSvg" viewBox="0 0 ${W} ${H}" preserveAspectRatio="xMidYMid meet">
+            <!-- Objeto sobre o zero -->
+            ${buildRulerObjectSVG(obj.id, x0, curX)}
+
+            <!-- Corpo da régua -->
+            <rect x="20" y="104" width="640" height="72" rx="8" fill="#FEF3C7" stroke="#B45309" stroke-width="3" />
+            <!-- Faixa destacada de 0 até mm -->
+            <rect x="${x0}" y="104" width="${(curX - x0).toFixed(1)}" height="16" fill="#2563EB" fill-opacity="0.28" />
+            ${ticks}
+
+            <!-- Linha guia e alça de arraste -->
+            <line x1="${curX.toFixed(1)}" y1="22" x2="${curX.toFixed(1)}" y2="188" stroke="#2563EB" stroke-width="3" stroke-dasharray="5,4" />
+            <circle cx="${curX.toFixed(1)}" cy="192" r="13" fill="#2563EB" stroke="#FFFFFF" stroke-width="2.5" />
+            <text x="${curX.toFixed(1)}" y="196" text-anchor="middle" font-size="11" font-weight="900" fill="#FFFFFF">↔</text>
+          </svg>`;
+
+        return `
+          <div class="ruler-shell">
+            <div style="display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:6px; flex-shrink:0;">
+              <div class="segmented">
+                ${RULER_OBJECTS.map((o, idx) => `
+                  <button class="${objIdx === idx ? 'active' : ''}" data-ruler-obj="${idx}">${o.name}</button>
+                `).join('')}
+              </div>
+              <div style="display:flex; gap:4px; align-items:center;">
+                <button class="btn btn-sm" id="rulerDec" ${mm <= 0 ? 'disabled' : ''}>− 1 mm</button>
+                <button class="btn btn-sm" id="rulerInc" ${mm >= 30 ? 'disabled' : ''}>+ 1 mm</button>
+              </div>
+            </div>
+
+            <div class="card ruler-stage-card">
+              <div class="card-title">
+                <span>Régua ampliada de 0 a 3 cm (cada traço = 1/10 cm = 1 mm)</span>
+                <span class="badge badge-blue">Clique ou arraste na régua</span>
+              </div>
+              <div class="ruler-interactive" id="rulerHitArea">${svg}</div>
+            </div>
+
+            <div class="triple-bar">
+              <div class="triple-card t-mm">
+                <span class="triple-label">Milímetros</span>
+                <span class="triple-val" style="color:var(--blue);">${mm} mm</span>
+                <span class="triple-sub">${mm} décimos de cm</span>
+              </div>
+              <div class="triple-card t-fr">
+                <span class="triple-label">Fração de cm</span>
+                <span class="triple-val" style="color:var(--purple);">${mm}/10 cm</span>
+                <span class="triple-sub">${mixedTxt}</span>
+              </div>
+              <div class="triple-card t-dec">
+                <span class="triple-label">Decimal</span>
+                <span class="triple-val" style="color:var(--green);">${formatBR(mm / 10, 1)} cm</span>
+                <span class="triple-sub">Vírgula separa inteiros e décimos</span>
+              </div>
+            </div>
+          </div>`;
+      }
+
+      // --- ABA 5: MESMA UNIDADE ---
+      function buildSwapSVG(p, stage) {
+        const W = 580, H = 248;
+        const padL = 78, barW = 472, barH = 44;
+
+        function drawBar(n, d, y, color, label, subdivD = null) {
+          let s = `<text x="${padL - 10}" y="${y + barH / 2 + 5}" text-anchor="end" font-size="16" font-weight="900" fill="${color}">${n}/${d}</text>`;
+          s += `<text x="${padL}" y="${y - 6}" font-size="11.5" font-weight="800" fill="#475569">${label}</text>`;
+          const segW = barW / d;
+          for (let i = 0; i < d; i++) {
+            s += `<rect x="${(padL + i * segW).toFixed(2)}" y="${y}" width="${segW.toFixed(2)}" height="${barH}"
+              fill="${i < n ? color : '#FFFFFF'}" stroke="#334155" stroke-width="1.8" />`;
+          }
+          // Se subdividido, desenha cortes tracejados internos da unidade comum
+          if (subdivD && subdivD > d) {
+            const subW = barW / subdivD;
+            for (let j = 1; j < subdivD; j++) {
+              const x = padL + j * subW;
+              s += `<line x1="${x.toFixed(2)}" y1="${y}" x2="${x.toFixed(2)}" y2="${y + barH}" stroke="#0F172A" stroke-width="2" stroke-dasharray="4,3" />`;
+            }
+          }
+          s += `<rect x="${padL}" y="${y}" width="${barW}" height="${barH}" rx="6" fill="none" stroke="#0F172A" stroke-width="2.6" />`;
+          return s;
+        }
+
+        let svg = '';
+        if (stage === 0) {
+          svg += drawBar(p.aN, p.aD, 28, '#2563EB', `Parcela 1: ${p.realA}`);
+          svg += drawBar(p.bN, p.bD, 108, '#EA580C', `Parcela 2: ${p.realB}`);
+          svg += `<text x="${padL + barW / 2}" y="198" text-anchor="middle" font-size="14" font-weight="800" fill="#64748B">As peças têm tamanhos diferentes! Clique em "Subdividir" para igualar a unidade.</text>`;
+        } else if (stage === 1) {
+          svg += drawBar(p.aConvN, p.commonD, 28, '#2563EB', `Parcela 1 trocada: ${p.aN}/${p.aD} = ${p.aConvN}/${p.commonD}`, p.commonD);
+          svg += drawBar(p.bConvN, p.commonD, 108, '#EA580C', `Parcela 2 na mesma unidade: ${p.bN}/${p.bD} = ${p.bConvN}/${p.commonD}`, p.commonD);
+          svg += `<text x="${padL + barW / 2}" y="198" text-anchor="middle" font-size="14.5" font-weight="900" fill="#7C3AED">✓ Agora todas as peças valem 1/${p.commonD}! Clique em "Juntar tudo!".</text>`;
+        } else {
+          const sumN = p.aConvN + p.bConvN;
+          svg += drawBar(p.aConvN, p.commonD, 22, '#2563EB', `${p.aConvN}/${p.commonD}`);
+          svg += drawBar(p.bConvN, p.commonD, 96, '#EA580C', `${p.bConvN}/${p.commonD}`);
+          // Barra resultado somada com duas cores
+          const y3 = 178;
+          const segW = barW / p.commonD;
+          svg += `<text x="${padL - 10}" y="${y3 + barH / 2 + 5}" text-anchor="end" font-size="17" font-weight="900" fill="#059669">${sumN}/${p.commonD}</text>`;
+          svg += `<text x="${padL}" y="${y3 - 6}" font-size="12" font-weight="900" fill="#059669">Resultado: ${p.realSum}</text>`;
+          for (let i = 0; i < p.commonD; i++) {
+            let fill = '#FFFFFF';
+            if (i < p.aConvN) fill = '#2563EB';
+            else if (i < sumN) fill = '#EA580C';
+            svg += `<rect x="${(padL + i * segW).toFixed(2)}" y="${y3}" width="${segW.toFixed(2)}" height="${barH}" fill="${fill}" stroke="#334155" stroke-width="1.8" />`;
+          }
+          svg += `<rect x="${padL}" y="${y3}" width="${barW}" height="${barH}" rx="6" fill="none" stroke="#059669" stroke-width="3.2" />`;
+        }
+
+        return `<svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="xMidYMid meet">${svg}</svg>`;
+      }
+
+      function buildQuizVisualSVG(kind) {
+        if (kind === 'bar-half-ten') {
+          let s = `<rect x="20" y="20" width="200" height="40" fill="#2563EB" stroke="#0F172A" stroke-width="2.5" />`;
+          s += `<rect x="220" y="20" width="200" height="40" fill="#FFF" stroke="#0F172A" stroke-width="2.5" />`;
+          s += `<text x="120" y="45" text-anchor="middle" font-size="16" font-weight="900" fill="#FFF">1/2 L</text>`;
+          for (let i = 0; i < 10; i++) {
+            s += `<rect x="${20 + i * 40}" y="82" width="40" height="40" fill="${i < 5 ? '#E0F2FE' : '#FFF'}" stroke="#334155" stroke-width="1.8" />`;
+            s += `<text x="${40 + i * 40}" y="106" text-anchor="middle" font-size="10.5" font-weight="800" fill="#0369A1">1/10</text>`;
+          }
+          s += `<line x1="220" y1="14" x2="220" y2="128" stroke="#059669" stroke-width="3" stroke-dasharray="5,4" />`;
+          return `<svg viewBox="0 0 440 140" preserveAspectRatio="xMidYMid meet">${s}</svg>`;
+        }
+        if (kind === 'same-sixths') {
+          let s = '';
+          for (let i = 0; i < 6; i++) {
+            const fill = i < 2 ? '#2563EB' : (i < 5 ? '#EA580C' : '#FFF');
+            s += `<rect x="${20 + i * 66}" y="42" width="66" height="52" fill="${fill}" stroke="#0F172A" stroke-width="2.2" />`;
+            s += `<text x="${53 + i * 66}" y="73" text-anchor="middle" font-size="14" font-weight="900" fill="${i < 5 ? '#FFF' : '#94A3B8'}">1/6</text>`;
+          }
+          return `<svg viewBox="0 0 440 130" preserveAspectRatio="xMidYMid meet">${s}</svg>`;
+        }
+        if (kind === 'ruler-14') {
+          let s = `<rect x="20" y="44" width="400" height="56" rx="6" fill="#FEF3C7" stroke="#B45309" stroke-width="2.5" />`;
+          s += `<rect x="40" y="44" width="252" height="16" fill="#2563EB" fill-opacity="0.32" />`;
+          for (let i = 0; i <= 20; i++) {
+            const x = 40 + i * 18;
+            const big = i % 10 === 0;
+            s += `<line x1="${x}" y1="44" x2="${x}" y2="${big ? 74 : 58}" stroke="#0F172A" stroke-width="${big ? 2.5 : 1.4}" />`;
+            if (big) s += `<text x="${x}" y="92" text-anchor="middle" font-size="14" font-weight="900">${i / 10} cm</text>`;
+          }
+          s += `<line x1="292" y1="22" x2="292" y2="108" stroke="#2563EB" stroke-width="3" stroke-dasharray="4,3" />`;
+          s += `<text x="292" y="18" text-anchor="middle" font-size="13" font-weight="900" fill="#2563EB">14 mm</text>`;
+          return `<svg viewBox="0 0 440 120" preserveAspectRatio="xMidYMid meet">${s}</svg>`;
+        }
+        if (kind === 'clock-40') {
+          return buildClockSVG([
+            { den: 2, min: 30, color: '#2563EB', label: '1/2 h' },
+            { den: 6, min: 10, color: '#7C3AED', label: '1/6 h' }
+          ]);
+        }
+        return buildScaleSVG([
+          { den: 2, g: 500, color: '#2563EB', label: '1/2 kg' },
+          { den: 4, g: 250, color: '#EA580C', label: '1/4 kg' }
+        ]);
+      }
+
+      function renderTab5() {
+        const sm = state.same;
+        let bodyHTML = '';
+
+        if (sm.mode === 'lab') {
+          const p = SWAP_PRESETS[sm.presetIdx];
+          bodyHTML = `
+            <div class="same-grid">
+              <div class="card">
+                <div class="card-title">
+                  <span>Troca de Unidades · ${p.label}</span>
+                  <span class="badge badge-purple">Unidade comum: 1/${p.commonD}</span>
+                </div>
+                <div class="svg-box">${buildSwapSVG(p, sm.stage)}</div>
+              </div>
+
+              <div class="card card-scroll" style="justify-content:space-between; gap:10px;">
+                <div>
+                  <div class="card-title"><span>Escolha uma situação</span></div>
+                  <div style="display:grid; grid-template-columns:1fr 1fr; gap:6px;">
+                    ${SWAP_PRESETS.map((pr, idx) => `
+                      <button class="btn btn-sm ${sm.presetIdx === idx ? 'btn-blue' : ''}" data-swap-preset="${idx}">${pr.label}</button>
+                    `).join('')}
+                  </div>
+                </div>
+
+                <div style="padding:10px; border-radius:12px; background:var(--bg-soft); border:1.5px solid var(--border); font-size:13px; line-height:1.38; color:var(--text-main);">
+                  ${sm.stage === 0
+                    ? `Temos <strong>${p.realA}</strong> + <strong>${p.realB}</strong>. Primeiro precisamos cortar na <strong>mesma unidade (1/${p.commonD})</strong>.`
+                    : sm.stage === 1
+                    ? p.explain
+                    : `🎉 <strong>Pronto!</strong> ${p.aConvN}/${p.commonD} + ${p.bConvN}/${p.commonD} = <strong>${p.aConvN + p.bConvN}/${p.commonD}</strong> (${p.realSum})!`}
+                </div>
+
+                <div style="display:flex; flex-direction:column; gap:6px;">
+                  <button class="btn btn-purple" id="swapSubdiv" ${sm.stage >= 1 ? 'disabled' : ''}>
+                    ✂️ 1. Subdividir para a mesma unidade (1/${p.commonD})
+                  </button>
+                  <button class="btn btn-green" id="swapJoin" ${sm.stage !== 1 ? 'disabled' : ''}>
+                    ➕ 2. Juntar tudo!
+                  </button>
+                  ${sm.stage > 0 ? `<button class="btn btn-sm" id="swapReset">↩ Recomeçar esta troca</button>` : ''}
+                </div>
+              </div>
+            </div>`;
+        } else {
+          // DESAFIO RELÂMPAGO
+          if (sm.quizDone) {
+            const stars = '⭐'.repeat(sm.quizScore) + '☆'.repeat(QUIZ_QUESTIONS.length - sm.quizScore);
+            bodyHTML = `
+              <div class="card pulse-pop" style="flex:1; align-items:center; justify-content:center; gap:14px; text-align:center;">
+                <div style="font-size:38px;">${stars}</div>
+                <h2 style="font-size:22px; font-weight:900; color:var(--green);">Desafio Relâmpago Concluído!</h2>
+                <p style="font-size:15px; color:var(--text-muted); max-width:420px;">
+                  Você acertou <strong>${sm.quizScore} de ${QUIZ_QUESTIONS.length}</strong> perguntas sobre unidades fracionárias. Agora a turma está pronta para <strong>Operações com Frações (Parte 2)</strong>!
+                </p>
+                <button class="btn btn-blue" id="quizRestart">🔄 Jogar novamente</button>
+              </div>`;
+          } else {
+            const q = QUIZ_QUESTIONS[sm.quizIdx];
+            const pct = ((sm.quizIdx + (sm.quizAnswered ? 1 : 0)) / QUIZ_QUESTIONS.length) * 100;
+
+            bodyHTML = `
+              <div class="quiz-grid">
+                <div class="card">
+                  <div class="card-title">
+                    <span>Pergunta ${sm.quizIdx + 1} de ${QUIZ_QUESTIONS.length}</span>
+                    <div style="display:flex; align-items:center; gap:8px;">
+                      <div class="progress-track"><div class="progress-fill" style="width:${pct}%;"></div></div>
+                      <span class="badge badge-amber">⭐ ${sm.quizScore}</span>
+                    </div>
+                  </div>
+                  <div style="font-size:15.5px; font-weight:800; color:var(--text-main); margin-bottom:6px;">${q.prompt}</div>
+                  <div class="svg-box">${buildQuizVisualSVG(q.visual)}</div>
+                </div>
+
+                <div class="card card-scroll" style="justify-content:space-between; gap:8px;">
+                  <div class="card-title"><span>Escolha a resposta certa</span></div>
+                  <div style="display:flex; flex-direction:column; gap:7px;">
+                    ${q.opts.map((opt, idx) => {
+                      let cls = '';
+                      if (sm.quizAnswered) {
+                        if (idx === q.correct) cls = 'is-correct pulse-pop';
+                        else if (idx === sm.quizSelected) cls = 'is-wrong';
+                      }
+                      return `
+                        <button class="xray-opt-btn ${cls}" style="font-size:14.5px; padding:10px 12px;" data-quiz-opt="${idx}" ${sm.quizAnswered ? 'disabled' : ''}>
+                          ${opt}
+                        </button>`;
+                    }).join('')}
+                  </div>
+                  ${sm.quizAnswered ? `
+                    <div class="feedback-box ${sm.quizSelected === q.correct ? 'ok pulse-pop' : 'err'}">
+                      ${sm.quizSelected === q.correct ? '🎉 Correto! ' : '💡 Quase! '}${q.tip}
+                    </div>
+                    <button class="btn btn-green pulse-pop" id="quizNext" style="width:100%;">
+                      ${sm.quizIdx + 1 < QUIZ_QUESTIONS.length ? 'Próxima Pergunta ▶' : 'Ver Resultado Final 🏆'}
+                    </button>
+                  ` : ''}
+                </div>
+              </div>`;
+          }
+        }
+
+        return `
+          <div class="same-shell">
+            <div style="display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:6px; flex-shrink:0;">
+              <div class="segmented">
+                <button class="${sm.mode === 'lab' ? 'active' : ''}" data-same-mode="lab">✂️ Laboratório de Troca</button>
+                <button class="${sm.mode === 'quiz' ? 'active' : ''}" data-same-mode="quiz">⚡ Desafio Relâmpago</button>
+              </div>
+              <span style="font-size:12px; font-weight:700; color:var(--text-muted);">Só somamos direto quando a unidade é igual!</span>
+            </div>
+            ${bodyHTML}
+          </div>`;
+      }
+
+      /* =======================================================================
+         6. ORQUESTRAÇÃO DA UI E EVENTOS
+         ======================================================================= */
+      const tabStage = document.getElementById('tabStage');
+      const guideText = document.getElementById('guideText');
+      const stepCounter = document.getElementById('stepCounter');
+      const stepTitle = document.getElementById('stepTitle');
+      const btnPrev = document.getElementById('btnPrev');
+      const btnNext = document.getElementById('btnNext');
+      const soundToggle = document.getElementById('soundToggle');
+
+      function render() {
+        const t = state.activeTab;
+        const stepsArr = TAB_STEPS[t];
+        const sIdx = state.steps[t];
+        const curStep = stepsArr[sIdx];
+
+        document.querySelectorAll('.tab-btn').forEach((btn, idx) => {
+          const on = idx === t;
+          btn.classList.toggle('active', on);
+          btn.setAttribute('aria-selected', String(on));
+        });
+
+        if (guideText) guideText.innerHTML = curStep.guide;
+        if (stepCounter) stepCounter.textContent = `${sIdx + 1} / ${stepsArr.length}`;
+        if (stepTitle) stepTitle.textContent = curStep.title;
+        if (btnPrev) btnPrev.disabled = sIdx === 0;
+        if (btnNext) btnNext.disabled = sIdx === stepsArr.length - 1;
+
+        if (!tabStage) return;
+        if (t === 0) tabStage.innerHTML = renderTab1();
+        else if (t === 1) tabStage.innerHTML = renderTab2();
+        else if (t === 2) tabStage.innerHTML = renderTab3();
+        else if (t === 3) tabStage.innerHTML = renderTab4();
+        else if (t === 4) tabStage.innerHTML = renderTab5();
+
+        bindEvents();
+      }
+
+      function bindEvents() {
+        const t = state.activeTab;
+
+        // --- Eventos Aba 1 ---
+        if (t === 0) {
+          tabStage.querySelectorAll('[data-u1-den]').forEach(btn => {
+            btn.addEventListener('click', () => {
+              state.u1.den = Number(btn.dataset.u1Den);
+              state.u1.count = Math.min(state.u1.count, state.u1.den * state.u1.wholes);
+              SoundFX.click();
+              render();
+            });
+          });
+          tabStage.querySelectorAll('[data-u1-wholes]').forEach(btn => {
+            btn.addEventListener('click', () => {
+              state.u1.wholes = Number(btn.dataset.u1Wholes);
+              state.u1.count = Math.min(state.u1.count, state.u1.den * state.u1.wholes);
+              SoundFX.click();
+              render();
+            });
+          });
+          tabStage.querySelectorAll('[data-u1-click]').forEach(el => {
+            el.addEventListener('click', () => {
+              const target = Number(el.dataset.u1Click);
+              state.u1.count = (state.u1.count === target) ? target - 1 : target;
+              if (state.u1.count > 0 && state.u1.count % state.u1.den === 0) SoundFX.success();
+              else SoundFX.snap(state.u1.count);
+              render();
+            });
+          });
+          document.getElementById('u1Add')?.addEventListener('click', () => {
+            const maxC = state.u1.den * state.u1.wholes;
+            if (state.u1.count < maxC) {
+              state.u1.count++;
+              if (state.u1.count % state.u1.den === 0) SoundFX.success();
+              else SoundFX.snap(state.u1.count);
+              render();
+            }
+          });
+          document.getElementById('u1Sub')?.addEventListener('click', () => {
+            if (state.u1.count > 0) {
+              state.u1.count--;
+              SoundFX.click();
+              render();
+            }
+          });
+          document.getElementById('u1Clear')?.addEventListener('click', () => {
+            state.u1.count = 0;
+            SoundFX.click();
+            render();
+          });
+        }
+
+        // --- Eventos Aba 2 (Raio-X) ---
+        if (t === 1) {
+          tabStage.querySelectorAll('[data-xray-lvl]').forEach(btn => {
+            btn.addEventListener('click', () => {
+              const lvl = Number(btn.dataset.xrayLvl);
+              state.steps[1] = lvl - 1;
+              resetXray(lvl, 0);
+              SoundFX.tab();
+              render();
+            });
+          });
+
+          tabStage.querySelectorAll('[data-xray-l1]').forEach(btn => {
+            btn.addEventListener('click', () => {
+              const key = btn.dataset.xrayL1;
+              const [on, od] = key.split('/').map(Number);
+              const q = XRAY_L1[state.xray.idx % XRAY_L1.length];
+              if (on === 1 && od === q.d) {
+                state.xray.solved = true;
+                state.xray.score++;
+                state.xray.streak++;
+                state.xray.feedback = {
+                  ok: true,
+                  msg: `🎉 Isso mesmo! Em ${q.n}/${q.d}, cada peça unitária vale 1/${q.d} (${leituraExtenso(1, q.d, true)}).`
+                };
+                SoundFX.success();
+              } else {
+                state.xray.streak = 0;
+                state.xray.wrongKeys.push(key);
+                let hint = `Olhe o denominador (${q.d}): ele diz em quantas partes o inteiro foi dividido.`;
+                if (on === 1 && od === q.n) hint = `Pegadinha! ${q.n} é quantas peças temos (em cima). A unidade vem de baixo (${q.d})!`;
+                else if (od === 1) hint = `${on}/1 vale ${on} inteiros! Uma unidade fracionária sempre tem 1 em cima.`;
+                else if (on === od) hint = `${on}/${od} representa 1 inteiro todo, não apenas 1 peça unitária!`;
+                state.xray.feedback = { ok: false, msg: `💡 ${hint} Tente outra opção!` };
+                SoundFX.neutral();
+              }
+              render();
+            });
+          });
+
+          tabStage.querySelectorAll('[data-l2-step]').forEach(btn => {
+            btn.addEventListener('click', () => {
+              const [field, deltaStr] = btn.dataset.l2Step.split(':');
+              const delta = Number(deltaStr);
+              if (field === 'qty') state.xray.l2Qty = Math.max(1, Math.min(20, state.xray.l2Qty + delta));
+              else state.xray.l2Den = Math.max(2, Math.min(20, state.xray.l2Den + delta));
+              SoundFX.click();
+              render();
+            });
+          });
+
+          document.getElementById('xrayL2Check')?.addEventListener('click', () => {
+            const q = XRAY_L2[state.xray.idx % XRAY_L2.length];
+            if (state.xray.l2Qty === q.n && state.xray.l2Den === q.d) {
+              state.xray.solved = true;
+              state.xray.score++;
+              state.xray.streak++;
+              state.xray.feedback = {
+                ok: true,
+                msg: `🎉 Perfeito! ${q.n} × 1/${q.d} = ${q.n}/${q.d} (${leituraExtenso(q.n, q.d, true)}).`
+              };
+              SoundFX.success();
+            } else {
+              state.xray.streak = 0;
+              let hint = `O número de cima (${q.n}) diz quantas peças e o de baixo (${q.d}) diz o tamanho 1/${q.d}!`;
+              if (state.xray.l2Qty !== q.n && state.xray.l2Den === q.d) hint = `A unidade 1/${q.d} está certinha! Agora ajuste a quantidade de peças (${q.n}).`;
+              else if (state.xray.l2Qty === q.n && state.xray.l2Den !== q.d) hint = `As ${q.n} peças estão certinhas! Agora ajuste a unidade no denominador (${q.d}).`;
+              state.xray.feedback = { ok: false, msg: `💡 ${hint}` };
+              SoundFX.neutral();
+            }
+            render();
+          });
+
+          tabStage.querySelectorAll('[data-xray-l3]').forEach(btn => {
+            btn.addEventListener('click', () => {
+              const [fStr, kind] = btn.dataset.xrayL3.split(':');
+              const [pn, pd] = fStr.split('/').map(Number);
+              const q = XRAY_L3[state.xray.idx % XRAY_L3.length];
+              const tf = q.target;
+              state.xray.l3Picked = { n: pn, d: pd };
+
+              if (kind === 'ok') {
+                state.xray.solved = true;
+                state.xray.score++;
+                state.xray.streak++;
+                state.xray.feedback = {
+                  ok: true,
+                  msg: `🎉 Exato! ${tf.n}/${tf.d} e ${pn}/${pd} usam a mesma unidade 1/${tf.d} — dá até para somar direto (${tf.n + pn}/${tf.d})!`
+                };
+                SoundFX.success();
+              } else {
+                state.xray.streak = 0;
+                state.xray.wrongKeys.push(fStr);
+                let hint = `Compare as barras: 1/${tf.d} e 1/${pd} têm tamanhos diferentes.`;
+                if (kind === 'sameNum') hint = `Pegadinha do numerador igual! Mesmo com ${pn} peças, o tamanho delas é diferente (1/${tf.d} ≠ 1/${pd}).`;
+                else if (kind === 'inverted') hint = `Pegadinha da inversão! ${pn}/${pd} trocou numerador por denominador — sua unidade é 1/${pd}.`;
+                state.xray.feedback = { ok: false, msg: `💡 ${hint} Tente outra!` };
+                SoundFX.neutral();
+              }
+              render();
+            });
+          });
+
+          document.getElementById('xrayNext')?.addEventListener('click', () => {
+            resetXray(state.xray.level, state.xray.idx + 1);
+            SoundFX.step();
+            render();
+          });
+        }
+
+        // --- Eventos Aba 3 (No Dia a Dia) ---
+        if (t === 2) {
+          tabStage.querySelectorAll('[data-daily-mode]').forEach(btn => {
+            btn.addEventListener('click', () => {
+              const m = btn.dataset.dailyMode;
+              state.daily.mode = m;
+              state.steps[2] = m === 'clock' ? 0 : (m === 'jug' ? 1 : 2);
+              SoundFX.tab();
+              render();
+            });
+          });
+
+          tabStage.querySelectorAll('[data-clock-add]').forEach(btn => {
+            btn.addEventListener('click', () => {
+              const den = Number(btn.dataset.clockAdd);
+              const map = {
+                2: { den: 2, min: 30, color: '#2563EB', label: '1/2 h' },
+                4: { den: 4, min: 15, color: '#EA580C', label: '1/4 h' },
+                6: { den: 6, min: 10, color: '#7C3AED', label: '1/6 h' }
+              };
+              const cur = state.daily.clockSlices.reduce((s, x) => s + x.min, 0);
+              if (cur + map[den].min <= 60) {
+                state.daily.clockSlices.push(map[den]);
+                if (cur + map[den].min === 60) SoundFX.success();
+                else SoundFX.snap(state.daily.clockSlices.length);
+                render();
+              }
+            });
+          });
+          document.getElementById('clockUndo')?.addEventListener('click', () => {
+            state.daily.clockSlices.pop();
+            SoundFX.click();
+            render();
+          });
+          document.getElementById('clockClear')?.addEventListener('click', () => {
+            state.daily.clockSlices = [];
+            SoundFX.click();
+            render();
+          });
+
+          document.getElementById('jugAdd1')?.addEventListener('click', () => {
+            if (state.daily.jugTenths + 1 <= 10) {
+              state.daily.jugTenths += 1;
+              if (state.daily.jugTenths === 10) SoundFX.success();
+              else SoundFX.snap(state.daily.jugTenths);
+              render();
+            }
+          });
+          document.getElementById('jugAdd5')?.addEventListener('click', () => {
+            if (state.daily.jugTenths + 5 <= 10) {
+              state.daily.jugTenths += 5;
+              if (state.daily.jugTenths === 10) SoundFX.success();
+              else SoundFX.snap(state.daily.jugTenths);
+              render();
+            }
+          });
+          document.getElementById('jugSub1')?.addEventListener('click', () => {
+            if (state.daily.jugTenths > 0) {
+              state.daily.jugTenths -= 1;
+              SoundFX.click();
+              render();
+            }
+          });
+          document.getElementById('jugClear')?.addEventListener('click', () => {
+            state.daily.jugTenths = 0;
+            SoundFX.click();
+            render();
+          });
+
+          tabStage.querySelectorAll('[data-scale-add]').forEach(btn => {
+            btn.addEventListener('click', () => {
+              const den = Number(btn.dataset.scaleAdd);
+              const map = {
+                2:  { den: 2,  g: 500, color: '#2563EB', label: '1/2 kg' },
+                4:  { den: 4,  g: 250, color: '#EA580C', label: '1/4 kg' },
+                10: { den: 10, g: 100, color: '#059669', label: '1/10 kg' }
+              };
+              const cur = state.daily.scaleWeights.reduce((s, w) => s + w.g, 0);
+              if (cur + map[den].g <= 2000) {
+                state.daily.scaleWeights.push(map[den]);
+                if (cur + map[den].g === 1000 || cur + map[den].g === 2000) SoundFX.success();
+                else SoundFX.snap(state.daily.scaleWeights.length);
+                render();
+              }
+            });
+          });
+          document.getElementById('scaleUndo')?.addEventListener('click', () => {
+            state.daily.scaleWeights.pop();
+            SoundFX.click();
+            render();
+          });
+          document.getElementById('scaleClear')?.addEventListener('click', () => {
+            state.daily.scaleWeights = [];
+            SoundFX.click();
+            render();
+          });
+        }
+
+        // --- Eventos Aba 4 (Régua 1/10) ---
+        if (t === 3) {
+          tabStage.querySelectorAll('[data-ruler-obj]').forEach(btn => {
+            btn.addEventListener('click', () => {
+              const idx = Number(btn.dataset.rulerObj);
+              state.ruler.objIdx = idx;
+              state.ruler.mm = RULER_OBJECTS[idx].mm;
+              state.steps[3] = idx;
+              SoundFX.click();
+              render();
+            });
+          });
+          document.getElementById('rulerDec')?.addEventListener('click', () => {
+            if (state.ruler.mm > 0) {
+              state.ruler.mm--;
+              SoundFX.snap(state.ruler.mm);
+              render();
+            }
+          });
+          document.getElementById('rulerInc')?.addEventListener('click', () => {
+            if (state.ruler.mm < 30) {
+              state.ruler.mm++;
+              SoundFX.snap(state.ruler.mm);
+              render();
+            }
+          });
+
+          const svgEl = document.getElementById('rulerSvg');
+          if (svgEl) {
+            let dragging = false;
+            const updateFromClientX = (clientX, playSound) => {
+              const rect = svgEl.getBoundingClientRect();
+              if (!rect.width) return;
+              // Mapeia coordenadas da tela para o viewBox (x0=40 .. xMax=640 em W=680)
+              const relX = ((clientX - rect.left) / rect.width) * 680;
+              const rawMm = Math.round(((relX - 40) / 600) * 30);
+              const clamped = Math.max(0, Math.min(30, rawMm));
+              if (clamped !== state.ruler.mm) {
+                state.ruler.mm = clamped;
+                if (playSound) SoundFX.snap(clamped);
+                render();
+              }
+            };
+            svgEl.addEventListener('pointerdown', (e) => {
+              dragging = true;
+              try { svgEl.setPointerCapture(e.pointerId); } catch (_) {}
+              updateFromClientX(e.clientX, true);
+            });
+            svgEl.addEventListener('pointermove', (e) => {
+              if (!dragging) return;
+              updateFromClientX(e.clientX, false);
+            });
+            svgEl.addEventListener('pointerup', () => { dragging = false; });
+            svgEl.addEventListener('pointercancel', () => { dragging = false; });
+          }
+        }
+
+        // --- Eventos Aba 5 (Mesma Unidade) ---
+        if (t === 4) {
+          tabStage.querySelectorAll('[data-same-mode]').forEach(btn => {
+            btn.addEventListener('click', () => {
+              const m = btn.dataset.sameMode;
+              state.same.mode = m;
+              state.steps[4] = m === 'lab' ? 0 : 1;
+              SoundFX.tab();
+              render();
+            });
+          });
+
+          tabStage.querySelectorAll('[data-swap-preset]').forEach(btn => {
+            btn.addEventListener('click', () => {
+              state.same.presetIdx = Number(btn.dataset.swapPreset);
+              state.same.stage = 0;
+              SoundFX.click();
+              render();
+            });
+          });
+
+          document.getElementById('swapSubdiv')?.addEventListener('click', () => {
+            state.same.stage = 1;
+            SoundFX.snap(4);
+            render();
+          });
+          document.getElementById('swapJoin')?.addEventListener('click', () => {
+            state.same.stage = 2;
+            SoundFX.success();
+            render();
+          });
+          document.getElementById('swapReset')?.addEventListener('click', () => {
+            state.same.stage = 0;
+            SoundFX.click();
+            render();
+          });
+
+          tabStage.querySelectorAll('[data-quiz-opt]').forEach(btn => {
+            btn.addEventListener('click', () => {
+              if (state.same.quizAnswered) return;
+              const idx = Number(btn.dataset.quizOpt);
+              const q = QUIZ_QUESTIONS[state.same.quizIdx];
+              state.same.quizAnswered = true;
+              state.same.quizSelected = idx;
+              if (idx === q.correct) {
+                state.same.quizScore++;
+                SoundFX.success();
+              } else {
+                SoundFX.neutral();
+              }
+              render();
+            });
+          });
+
+          document.getElementById('quizNext')?.addEventListener('click', () => {
+            if (state.same.quizIdx + 1 < QUIZ_QUESTIONS.length) {
+              state.same.quizIdx++;
+              state.same.quizAnswered = false;
+              state.same.quizSelected = null;
+              SoundFX.step();
+            } else {
+              state.same.quizDone = true;
+              SoundFX.success();
+            }
+            render();
+          });
+
+          document.getElementById('quizRestart')?.addEventListener('click', () => {
+            state.same.quizIdx = 0;
+            state.same.quizScore = 0;
+            state.same.quizAnswered = false;
+            state.same.quizSelected = null;
+            state.same.quizDone = false;
+            SoundFX.tab();
+            render();
+          });
+        }
+      }
+
+      /* =======================================================================
+         7. CONTROLES GLOBAIS (ABAS, RODAPÉ ◀ 1/N ▶, SOM, TECLADO)
+         ======================================================================= */
+      document.querySelectorAll('.tab-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const idx = Number(btn.dataset.tab);
+          if (idx === state.activeTab) return;
+          state.activeTab = idx;
+          TAB_STEPS[idx][state.steps[idx]].apply();
+          SoundFX.tab();
+          render();
+        });
+      });
+
+      btnPrev?.addEventListener('click', () => {
+        const t = state.activeTab;
+        if (state.steps[t] > 0) {
+          state.steps[t]--;
+          TAB_STEPS[t][state.steps[t]].apply();
+          SoundFX.step();
+          render();
+        }
+      });
+
+      btnNext?.addEventListener('click', () => {
+        const t = state.activeTab;
+        if (state.steps[t] < TAB_STEPS[t].length - 1) {
+          state.steps[t]++;
+          TAB_STEPS[t][state.steps[t]].apply();
+          SoundFX.step();
+          render();
+        }
+      });
+
+      soundToggle?.addEventListener('click', () => {
+        const on = SoundFX.toggle();
+        soundToggle.textContent = on ? '🔊' : '🔇';
+        soundToggle.classList.toggle('muted', !on);
+      });
+
+      window.addEventListener('keydown', (e) => {
+        if (e.key === 'ArrowRight' && btnNext && !btnNext.disabled) btnNext.click();
+        if (e.key === 'ArrowLeft' && btnPrev && !btnPrev.disabled) btnPrev.click();
+      });
+
+      // Inicialização imediata da Aba 1
+      TAB_STEPS[0][0].apply();
+      render();
+    });
+  </script>
+<div id="autoriaTxt" onclick="this.classList.remove('on')" style="position:fixed;top:44px;right:8px;z-index:2147483000;max-width:260px;padding:8px 10px;border-radius:8px;background:#222;color:#fff;font:12px/1.35 sans-serif;display:none">© Ygor B. F. Ferreira · A Saga dos Reinos Matemáticos · Matematkês · uso livre em sala</div><style>#autoriaTxt.on{display:block!important}</style>
+</body>
+</html>

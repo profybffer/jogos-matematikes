@@ -1,0 +1,3015 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>Geoplano: Giros, Ângulos e Polígonos (6º Ano)</title>
+  <style>
+    /* =========================================================================
+       DESIGN TOKENS & RESET
+       ========================================================================= */
+    :root {
+      --bg-page: #ece6dc;
+      --bg-page-2: #ded5c5;
+      --mdf-base: #f4efe6;
+      --panel-bg: rgba(255, 255, 255, 0.95);
+      --panel-border: rgba(148, 163, 184, 0.30);
+      --text-main: #0f172a;
+      --text-muted: #475569;
+      --text-soft: #64748b;
+      --crimson: #9f1239;
+      --crimson-bright: #be185d;
+      --teal: #0f766e;
+      --teal-dark: #115e59;
+      --amber: #b45309;
+      --gold: #d4a017;
+      --purple: #6d28d9;
+      --emerald: #047857;
+      --radius-lg: 16px;
+      --radius-md: 12px;
+      --shadow-panel: 0 10px 28px rgba(15, 23, 42, 0.08);
+      --shadow-board: 0 16px 36px rgba(45, 35, 24, 0.16), 0 4px 10px rgba(45, 35, 24, 0.10);
+    }
+
+    * {
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    html, body {
+      margin: 0;
+      padding: 0;
+      width: 100%;
+      height: 100dvh;
+      overflow: hidden;
+      font-family: 'Segoe UI', system-ui, -apple-system, BlinkMacSystemFont, Roboto, Helvetica, Arial, sans-serif;
+      background: radial-gradient(circle at 24% 18%, var(--bg-page) 0%, var(--bg-page-2) 100%);
+      color: var(--text-main);
+      user-select: none;
+      -webkit-user-select: none;
+    }
+
+    /* =========================================================================
+       LAYOUT PRINCIPAL (100dvh, SEM ROLAGEM GLOBAL)
+       ========================================================================= */
+    .app-container {
+      display: flex;
+      flex-direction: column;
+      width: 100%;
+      height: 100dvh;
+      padding: 0.45rem;
+      gap: 0.45rem;
+    }
+
+    /* Cabeçalho compacto com 3 abas */
+    .app-header {
+      flex: 0 0 auto;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.45rem;
+      background: var(--panel-bg);
+      border: 1px solid var(--panel-border);
+      border-radius: 14px;
+      padding: 0.4rem 0.6rem;
+      box-shadow: 0 4px 14px rgba(15, 23, 42, 0.05);
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      min-width: 0;
+    }
+
+    .brand-icon {
+      width: 30px;
+      height: 30px;
+      border-radius: 9px;
+      background: linear-gradient(135deg, #0f766e 0%, #115e59 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #ffffff;
+      flex-shrink: 0;
+      box-shadow: 0 3px 8px rgba(15, 118, 110, 0.28);
+    }
+
+    .brand-text {
+      min-width: 0;
+    }
+
+    .brand-title {
+      margin: 0;
+      font-size: 0.86rem;
+      font-weight: 800;
+      letter-spacing: -0.015em;
+      color: var(--text-main);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .brand-sub {
+      display: none;
+      margin: 0;
+      font-size: 0.72rem;
+      color: var(--text-soft);
+    }
+
+    /* Abas das 3 Fases */
+    .phase-tabs {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      background: #f1f5f9;
+      border: 1px solid #e2e8f0;
+      border-radius: 11px;
+      padding: 3px;
+      gap: 3px;
+      width: 100%;
+    }
+
+    .phase-tab {
+      border: none;
+      background: transparent;
+      color: #475569;
+      font-family: inherit;
+      font-size: 0.72rem;
+      font-weight: 700;
+      padding: 0.38rem 0.4rem;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.16s ease;
+      white-space: nowrap;
+      text-align: center;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .phase-tab:hover:not(.active-p1):not(.active-p2):not(.active-p3) {
+      background: rgba(255, 255, 255, 0.75);
+      color: var(--text-main);
+    }
+
+    .phase-tab.active-p1 {
+      background: linear-gradient(135deg, #be185d 0%, #9f1239 100%);
+      color: #ffffff;
+      box-shadow: 0 3px 8px rgba(159, 18, 57, 0.26);
+    }
+
+    .phase-tab.active-p2 {
+      background: linear-gradient(135deg, #0f766e 0%, #115e59 100%);
+      color: #ffffff;
+      box-shadow: 0 3px 8px rgba(15, 118, 110, 0.26);
+    }
+
+    .phase-tab.active-p3 {
+      background: linear-gradient(135deg, #b45309 0%, #92400e 100%);
+      color: #ffffff;
+      box-shadow: 0 3px 8px rgba(180, 83, 9, 0.26);
+    }
+
+    /* Corpo principal: Palco + Painel */
+    .workspace {
+      flex: 1 1 auto;
+      min-height: 0;
+      min-width: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 0.45rem;
+    }
+
+    /* Palco do Geoplano SVG */
+    .stage-area {
+      flex: 1 1 auto;
+      min-height: 0;
+      min-width: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+    }
+
+    .board-frame {
+      position: relative;
+      height: 100%;
+      max-width: 100%;
+      aspect-ratio: 1 / 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    #geoboardSvg {
+      width: 100%;
+      height: 100%;
+      max-width: 100%;
+      max-height: 100%;
+      display: block;
+      touch-action: none;
+      border-radius: 18px;
+      box-shadow: var(--shadow-board);
+      background: var(--mdf-base);
+    }
+
+    /* Banner flutuante de aviso (ex: elásticos cruzados) */
+    .stage-toast {
+      position: absolute;
+      top: 10px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(153, 27, 27, 0.95);
+      color: #ffffff;
+      font-size: 0.78rem;
+      font-weight: 700;
+      padding: 0.48rem 0.9rem;
+      border-radius: 999px;
+      box-shadow: 0 8px 20px rgba(153, 27, 27, 0.30);
+      display: flex;
+      align-items: center;
+      gap: 0.45rem;
+      pointer-events: none;
+      z-index: 15;
+      max-width: 92%;
+      text-align: center;
+      transition: opacity 0.2s ease, transform 0.2s ease;
+    }
+
+    .stage-toast.hidden {
+      opacity: 0;
+      transform: translate(-50%, -8px);
+    }
+
+    /* Painel de Controles */
+    .control-panel {
+      flex: 0 0 auto;
+      background: var(--panel-bg);
+      border: 1px solid var(--panel-border);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-panel);
+      padding: 0.6rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+      overflow-y: auto;
+      max-height: 43dvh;
+    }
+
+    /* Responsividade PC / Projetor (>= 900px) */
+    @media (min-width: 900px) {
+      .app-container {
+        padding: 0.75rem 1rem;
+        gap: 0.75rem;
+      }
+
+      .app-header {
+        flex-wrap: nowrap;
+        padding: 0.52rem 1rem;
+      }
+
+      .brand-title {
+        font-size: 1.05rem;
+      }
+
+      .brand-sub {
+        display: block;
+      }
+
+      .phase-tabs {
+        width: auto;
+        display: flex;
+      }
+
+      .phase-tab {
+        font-size: 0.83rem;
+        padding: 0.46rem 0.9rem;
+      }
+
+      .workspace {
+        flex-direction: row;
+        gap: 1rem;
+        align-items: stretch;
+      }
+
+      .control-panel {
+        width: 345px;
+        max-height: 100%;
+        padding: 1rem;
+        gap: 0.7rem;
+      }
+    }
+
+    @media (min-width: 1280px) {
+      .control-panel {
+        width: 370px;
+      }
+    }
+
+    /* =========================================================================
+       COMPONENTES DO PAINEL
+       ========================================================================= */
+    .phase-pane {
+      display: flex;
+      flex-direction: column;
+      gap: 0.52rem;
+    }
+
+    .section-label {
+      font-size: 0.67rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--text-soft);
+      margin-bottom: 0.24rem;
+    }
+
+    .panel-row {
+      display: flex;
+      gap: 0.45rem;
+      align-items: stretch;
+    }
+
+    .grid-4 {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 0.35rem;
+    }
+
+    .grid-5 {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 0.3rem;
+    }
+
+    /* Botões */
+    .btn {
+      border: none;
+      border-radius: var(--radius-md);
+      font-family: inherit;
+      font-size: 0.8rem;
+      font-weight: 700;
+      padding: 0.58rem 0.7rem;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.38rem;
+      transition: transform 0.1s ease, filter 0.15s ease, background 0.15s ease, border-color 0.15s ease;
+      line-height: 1.15;
+    }
+
+    .btn:active {
+      transform: scale(0.97);
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, #0f766e 0%, #115e59 100%);
+      color: #ffffff;
+      box-shadow: 0 4px 12px rgba(15, 118, 110, 0.26);
+    }
+
+    .btn-primary:hover {
+      filter: brightness(1.06);
+    }
+
+    .btn-primary.crimson {
+      background: linear-gradient(135deg, #be185d 0%, #9f1239 100%);
+      box-shadow: 0 4px 12px rgba(159, 18, 57, 0.26);
+    }
+
+    .btn-primary.dark {
+      background: linear-gradient(135deg, #334155 0%, #1e293b 100%);
+      box-shadow: 0 4px 12px rgba(30, 41, 59, 0.24);
+    }
+
+    .btn-secondary {
+      background: #f8fafc;
+      color: var(--text-main);
+      border: 1px solid #cbd5e1;
+      box-shadow: 0 2px 4px rgba(15, 23, 42, 0.04);
+    }
+
+    .btn-secondary:hover {
+      background: #f1f5f9;
+      border-color: #94a3b8;
+    }
+
+    .btn-chip {
+      background: #f8fafc;
+      color: #334155;
+      border: 1px solid #cbd5e1;
+      border-radius: 10px;
+      padding: 0.4rem 0.2rem;
+      font-family: inherit;
+      font-size: 0.72rem;
+      font-weight: 700;
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 1px;
+      transition: all 0.15s ease;
+      min-height: 36px;
+    }
+
+    .btn-chip strong {
+      font-size: 0.85rem;
+    }
+
+    .btn-chip:hover {
+      background: #f1f5f9;
+    }
+
+    .btn-chip.active-crimson {
+      background: #fdf2f8;
+      border-color: #be185d;
+      color: #9f1239;
+      box-shadow: 0 2px 8px rgba(159, 18, 57, 0.14);
+    }
+
+    .btn-chip.active-amber {
+      background: #fffbeb;
+      border-color: #d97706;
+      color: #92400e;
+      box-shadow: 0 2px 8px rgba(180, 83, 9, 0.14);
+    }
+
+    .btn-shortcut {
+      background: #ffffff;
+      color: #1e293b;
+      border: 1px solid #cbd5e1;
+      border-radius: 9px;
+      padding: 0.42rem 0.18rem;
+      font-family: inherit;
+      font-size: 0.74rem;
+      font-weight: 800;
+      cursor: pointer;
+      transition: all 0.14s ease;
+      text-align: center;
+    }
+
+    .btn-shortcut:hover {
+      background: #fdf2f8;
+      border-color: #f9a8d4;
+      color: #9f1239;
+    }
+
+    .btn-shortcut.active {
+      background: #9f1239;
+      border-color: #9f1239;
+      color: #ffffff;
+    }
+
+    /* Interruptores (Toggles) */
+    .toggle-list {
+      display: flex;
+      flex-direction: column;
+      gap: 0.38rem;
+    }
+
+    @media (max-width: 899px) {
+      .toggle-list.compact-mobile {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 0.36rem;
+      }
+    }
+
+    .toggle-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.4rem;
+      padding: 0.44rem 0.6rem;
+      border-radius: 11px;
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      cursor: pointer;
+      transition: background 0.15s ease, border-color 0.15s ease;
+      font-size: 0.77rem;
+      font-weight: 600;
+      color: #1e293b;
+    }
+
+    .toggle-row:hover {
+      background: #f1f5f9;
+    }
+
+    .toggle-row.is-on-teal {
+      background: #f0fdfa;
+      border-color: #99f6e4;
+      color: #115e59;
+    }
+
+    .toggle-row.is-on-crimson {
+      background: #fdf2f8;
+      border-color: #fbcfe8;
+      color: #9f1239;
+    }
+
+    .toggle-row.is-on-amber {
+      background: #fffbeb;
+      border-color: #fde68a;
+      color: #92400e;
+    }
+
+    .switch-track {
+      width: 36px;
+      height: 20px;
+      border-radius: 999px;
+      background: #cbd5e1;
+      position: relative;
+      flex-shrink: 0;
+      transition: background 0.18s ease;
+    }
+
+    .toggle-row.is-on-teal .switch-track { background: #0f766e; }
+    .toggle-row.is-on-crimson .switch-track { background: #be185d; }
+    .toggle-row.is-on-amber .switch-track { background: #d97706; }
+
+    .switch-thumb {
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
+      background: #ffffff;
+      position: absolute;
+      top: 3px;
+      left: 3px;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.25);
+      transition: transform 0.18s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
+    .toggle-row.is-on-teal .switch-thumb,
+    .toggle-row.is-on-crimson .switch-thumb,
+    .toggle-row.is-on-amber .switch-thumb {
+      transform: translateX(16px);
+    }
+
+    /* Cartões de informação / leitura */
+    .info-card {
+      border-radius: var(--radius-md);
+      padding: 0.6rem 0.72rem;
+      border: 1px solid #e2e8f0;
+      background: #f8fafc;
+      transition: all 0.18s ease;
+    }
+
+    .info-card.tone-crimson { background: #fdf2f8; border-color: #fbcfe8; }
+    .info-card.tone-acute   { background: #eff6ff; border-color: #bfdbfe; }
+    .info-card.tone-right   { background: #fdf2f8; border-color: #fbcfe8; }
+    .info-card.tone-obtuse  { background: #fffbeb; border-color: #fde68a; }
+    .info-card.tone-straight{ background: #f5f3ff; border-color: #ddd6fe; }
+
+    .info-card-title {
+      font-size: 0.92rem;
+      font-weight: 800;
+      color: var(--text-main);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.4rem;
+      flex-wrap: wrap;
+    }
+
+    .info-card-desc {
+      font-size: 0.76rem;
+      color: var(--text-muted);
+      margin-top: 0.22rem;
+      line-height: 1.35;
+    }
+
+    .readout-line {
+      font-size: 0.88rem;
+      font-weight: 800;
+      color: #0f172a;
+      margin-top: 0.18rem;
+    }
+
+    .readout-line.crimson { color: #9f1239; }
+    .readout-line.teal { color: #0f766e; }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.25rem;
+      font-size: 0.68rem;
+      font-weight: 800;
+      padding: 0.18rem 0.48rem;
+      border-radius: 999px;
+      letter-spacing: 0.02em;
+    }
+
+    .badge-convex  { background: #d1fae5; color: #065f46; }
+    .badge-concave { background: #ede9fe; color: #5b21b6; }
+    .badge-acute   { background: #dbeafe; color: #1d4ed8; }
+    .badge-right   { background: #fce7f3; color: #9f1239; }
+    .badge-obtuse  { background: #fef3c7; color: #92400e; }
+    .badge-reflex  { background: #ede9fe; color: #6d28d9; }
+
+    .angle-counts {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.28rem;
+      margin-top: 0.4rem;
+    }
+
+    /* Caixa de Desafios (Fase 1 e Fase 3) */
+    .challenge-box {
+      border-radius: var(--radius-md);
+      border: 1.5px solid #cbd5e1;
+      background: #ffffff;
+      padding: 0.6rem 0.72rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.4rem;
+      box-shadow: 0 3px 10px rgba(15, 23, 42, 0.04);
+    }
+
+    .challenge-box.solved {
+      border-color: #10b981;
+      background: linear-gradient(180deg, #ecfdf5 0%, #ffffff 100%);
+    }
+
+    .challenge-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.4rem;
+    }
+
+    .challenge-nav {
+      display: flex;
+      align-items: center;
+      gap: 0.25rem;
+    }
+
+    .btn-mini {
+      border: 1px solid #cbd5e1;
+      background: #f8fafc;
+      color: #334155;
+      border-radius: 7px;
+      width: 26px;
+      height: 26px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-weight: 800;
+      font-size: 0.85rem;
+    }
+
+    .btn-mini:hover {
+      background: #e2e8f0;
+    }
+
+    .challenge-text {
+      font-size: 0.79rem;
+      color: #1e293b;
+      line-height: 1.35;
+      margin: 0;
+    }
+
+    .challenge-status {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.4rem;
+      font-size: 0.73rem;
+      font-weight: 700;
+    }
+
+    .status-ok {
+      color: #047857;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.3rem;
+      animation: popIn 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
+    .status-pending {
+      color: #64748b;
+    }
+
+    @keyframes popIn {
+      0% { transform: scale(0.85); opacity: 0; }
+      100% { transform: scale(1); opacity: 1; }
+    }
+
+    .hint-box {
+      font-size: 0.72rem;
+      color: var(--text-soft);
+      background: #f8fafc;
+      border: 1px dashed #cbd5e1;
+      border-radius: 10px;
+      padding: 0.48rem 0.62rem;
+      line-height: 1.36;
+    }
+
+    .hidden {
+      display: none !important;
+    }
+
+    /* Cursores no SVG */
+    .draggable-pin,
+    .draggable-handle,
+    .set-square-body,
+    .set-square-rotate {
+      cursor: grab;
+    }
+
+    .draggable-pin:active,
+    .draggable-handle:active,
+    .set-square-body:active,
+    .set-square-rotate:active {
+      cursor: grabbing;
+    }
+
+    @media (max-width: 899px) {
+      .desktop-only { display: none !important; }
+      .btn { padding: 0.48rem 0.55rem; font-size: 0.75rem; }
+      .toggle-row { padding: 0.38rem 0.48rem; font-size: 0.72rem; }
+    }
+  </style>
+</head>
+<body>
+  <div class="app-container">
+    <!-- CABEÇALHO COMPACTO COM 3 ABAS -->
+    <header class="app-header">
+      <div class="brand">
+        <div class="brand-icon" aria-hidden="true">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="9" />
+            <path d="M12 12 L21 12" />
+            <path d="M12 12 L12 3" />
+          </svg>
+        </div>
+        <div class="brand-text">
+          <h1 class="brand-title">Geoplano: Giros, Ângulos e Polígonos (6º Ano)</h1>
+          <p class="brand-sub">Da volta completa (360°) ao Esquadro de 90° e à Oficina de Polígonos</p>
+        </div>
+      </div>
+
+      <nav class="phase-tabs" role="tablist" aria-label="Fases do aplicativo">
+        <button id="tabPhase1" type="button" role="tab" aria-selected="true" class="phase-tab active-p1">
+          Fase 1 · Giros e Voltas
+        </button>
+        <button id="tabPhase2" type="button" role="tab" aria-selected="false" class="phase-tab">
+          Fase 2 · Esquadro (90°)
+        </button>
+        <button id="tabPhase3" type="button" role="tab" aria-selected="false" class="phase-tab">
+          Fase 3 · Polígonos
+        </button>
+      </nav>
+    <button id="autoriaBtn" type="button" aria-label="Autoria" onclick="document.getElementById('autoriaTxt').classList.toggle('on')" style="flex:0 0 auto;width:20px;height:20px;margin:0 4px;border-radius:50%;border:1px solid rgba(128,128,128,.5);background:transparent;color:inherit;font:11px/18px sans-serif;text-align:center;padding:0;cursor:pointer;opacity:.5">©</button></header>
+
+    <!-- ÁREA DE TRABALHO: TABULEIRO + PAINEL -->
+    <div class="workspace">
+      <!-- PALCO DO GEOPLANO SVG -->
+      <main class="stage-area">
+        <div class="board-frame">
+          <div id="stageToast" class="stage-toast hidden" role="status" aria-live="polite">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
+              <line x1="12" y1="9" x2="12" y2="13"/>
+              <line x1="12" y1="17" x2="12.01" y2="17"/>
+            </svg>
+            <span id="stageToastText">Elásticos cruzados: não forma polígono simples.</span>
+          </div>
+
+          <svg id="geoboardSvg" viewBox="0 0 600 600" aria-label="Geoplano Interativo de Oficina Matemática">
+            <defs>
+              <!-- Textura sutil de MDF claro (#f4efe6) -->
+              <radialGradient id="mdfSurface" cx="35%" cy="25%" r="82%">
+                <stop offset="0%" stop-color="#f9f5ee" />
+                <stop offset="65%" stop-color="#f4efe6" />
+                <stop offset="100%" stop-color="#e8dfd1" />
+              </radialGradient>
+
+              <pattern id="mdfGrain" width="40" height="40" patternUnits="userSpaceOnUse">
+                <circle cx="8" cy="11" r="0.8" fill="#cbbba3" fill-opacity="0.28" />
+                <circle cx="29" cy="6" r="0.7" fill="#cbbba3" fill-opacity="0.24" />
+                <circle cx="19" cy="27" r="0.9" fill="#cbbba3" fill-opacity="0.26" />
+                <circle cx="35" cy="33" r="0.7" fill="#cbbba3" fill-opacity="0.22" />
+                <line x1="0" y1="20" x2="40" y2="21" stroke="#d5c7b0" stroke-width="0.6" stroke-opacity="0.22" />
+              </pattern>
+
+              <!-- Gradiente 3D do pino de madeira -->
+              <radialGradient id="woodPeg" cx="32%" cy="30%" r="70%">
+                <stop offset="0%" stop-color="#f3dfc0" />
+                <stop offset="60%" stop-color="#c69d6b" />
+                <stop offset="100%" stop-color="#876238" />
+              </radialGradient>
+
+              <!-- Padrões hachurados estilo papel recortado / canetinha -->
+              <pattern id="hatchCrimson" width="7" height="7" patternUnits="userSpaceOnUse" patternTransform="rotate(35)">
+                <line x1="0" y1="0" x2="0" y2="7" stroke="#9f1239" stroke-width="1.5" stroke-opacity="0.45" />
+              </pattern>
+              <pattern id="hatchBlue" width="7" height="7" patternUnits="userSpaceOnUse" patternTransform="rotate(35)">
+                <line x1="0" y1="0" x2="0" y2="7" stroke="#1d4ed8" stroke-width="1.4" stroke-opacity="0.40" />
+              </pattern>
+              <pattern id="hatchAmber" width="7" height="7" patternUnits="userSpaceOnUse" patternTransform="rotate(35)">
+                <line x1="0" y1="0" x2="0" y2="7" stroke="#b45309" stroke-width="1.4" stroke-opacity="0.42" />
+              </pattern>
+              <pattern id="hatchPurple" width="7" height="7" patternUnits="userSpaceOnUse" patternTransform="rotate(35)">
+                <line x1="0" y1="0" x2="0" y2="7" stroke="#6d28d9" stroke-width="1.4" stroke-opacity="0.40" />
+              </pattern>
+
+              <filter id="esquadroShadow" x="-20%" y="-20%" width="140%" height="140%">
+                <feDropShadow dx="3" dy="5" stdDeviation="4" flood-color="#0f172a" flood-opacity="0.18" />
+              </filter>
+
+              <filter id="knobShadow" x="-30%" y="-30%" width="160%" height="160%">
+                <feDropShadow dx="1" dy="2.5" stdDeviation="2.2" flood-color="#0f172a" flood-opacity="0.25" />
+              </filter>
+            </defs>
+
+            <!-- Camada 1: Placa MDF Base (quadrada para Fases 2/3, circular destacada na Fase 1) -->
+            <g id="layerBoard">
+              <rect x="0" y="0" width="600" height="600" rx="18" fill="#cfb490" />
+              <rect x="9" y="9" width="582" height="582" rx="14" fill="url(#mdfSurface)" stroke="#e2d3bc" stroke-width="1.5" />
+              <rect x="9" y="9" width="582" height="582" rx="14" fill="url(#mdfGrain)" pointer-events="none" />
+            </g>
+
+            <!-- ===============================================================
+                 GRUPO DA FASE 1: TABULEIRO CIRCULAR DE GIROS E VOLTAS
+                 =============================================================== -->
+            <g id="scenePhase1">
+              <!-- Base circular do disco em MDF em relevo -->
+              <circle cx="300" cy="300" r="244" fill="rgba(60, 44, 24, 0.08)" transform="translate(3, 5)" />
+              <circle cx="300" cy="300" r="242" fill="#f7f2ea" stroke="#cbb28e" stroke-width="3" />
+              <circle cx="300" cy="300" r="242" fill="url(#mdfGrain)" pointer-events="none" />
+              <!-- Anel guia onde ficam os pinos da borda -->
+              <circle cx="300" cy="300" r="212" fill="none" stroke="#b8a182" stroke-width="1.3" stroke-dasharray="4 5" opacity="0.7" />
+              <g id="p1DivisionsLayer"></g>
+              <g id="p1SectorLayer"></g>
+              <g id="p1RimPinsLayer"></g>
+              <g id="p1HandsLayer"></g>
+              <g id="p1LabelsLayer"></g>
+            </g>
+
+            <!-- ===============================================================
+                 GRUPO DAS FASES 2 E 3: GEOPLANO QUADRADO 7x7 + ESQUADRO
+                 =============================================================== -->
+            <g id="sceneGrid" display="none">
+              <g id="layerGridGuides" opacity="0.32"></g>
+              <g id="layerPolyFill"></g>
+              <g id="layerSectors"></g>
+              <g id="layerBands"></g>
+              <g id="layerPins"></g>
+              <g id="layerVertices"></g>
+              <g id="layerDegreeLabels"></g>
+              <g id="layerSetSquare"></g>
+            </g>
+          </svg>
+        </div>
+      </main>
+
+      <!-- PAINEL DE CONTROLES -->
+      <aside class="control-panel">
+        <!-- ===================== CONTROLES FASE 1: GIROS E VOLTAS ===================== -->
+        <div id="panelPhase1" class="phase-pane">
+          <!-- Seletor "Fatiar volta" -->
+          <div>
+            <div class="section-label">Fatiar Volta</div>
+            <div class="grid-5" id="p1DivSelector">
+              <button type="button" class="btn-chip" data-div="0"><strong>Livre</strong></button>
+              <button type="button" class="btn-chip" data-div="2"><strong>2</strong><span>Meios</span></button>
+              <button type="button" class="btn-chip active-crimson" data-div="4"><strong>4</strong><span>Quartos</span></button>
+              <button type="button" class="btn-chip" data-div="8"><strong>8</strong><span>Oitavos</span></button>
+              <button type="button" class="btn-chip" data-div="12"><strong>12</strong><span>Relógio</span></button>
+            </div>
+          </div>
+
+          <!-- Atalhos rápidos de giro -->
+          <div>
+            <div class="section-label">Atalhos de Giro</div>
+            <div class="grid-5" id="p1ShortcutBar">
+              <button type="button" class="btn-shortcut" data-deg="0">0°</button>
+              <button type="button" class="btn-shortcut" data-deg="90">1/4</button>
+              <button type="button" class="btn-shortcut" data-deg="180">1/2</button>
+              <button type="button" class="btn-shortcut" data-deg="270">3/4</button>
+              <button type="button" class="btn-shortcut" data-deg="360">1 Volta</button>
+            </div>
+          </div>
+
+          <!-- Cartão de Leitura Progressiva (oculto no Modo Visual Puro) -->
+          <div id="p1ReadoutCard" class="info-card tone-crimson hidden">
+            <div id="p1ReadoutName" class="info-card-title hidden"></div>
+            <div id="p1ReadoutFrac" class="readout-line crimson hidden"></div>
+            <div id="p1ReadoutDeg" class="readout-line teal hidden"></div>
+          </div>
+
+          <!-- Interruptores Fase 1 (todos desligados por padrão = Modo Visual Puro) -->
+          <div>
+            <div class="section-label desktop-only">Camadas Didáticas</div>
+            <div class="toggle-list compact-mobile">
+              <div id="togP1Frac" class="toggle-row" role="switch" aria-checked="false" tabindex="0">
+                <span>Mostrar Fração</span>
+                <div class="switch-track"><div class="switch-thumb"></div></div>
+              </div>
+              <div id="togP1Deg" class="toggle-row" role="switch" aria-checked="false" tabindex="0">
+                <span>Mostrar Graus (°)</span>
+                <div class="switch-track"><div class="switch-thumb"></div></div>
+              </div>
+              <div id="togP1Name" class="toggle-row" role="switch" aria-checked="false" tabindex="0">
+                <span>Mostrar Nome</span>
+                <div class="switch-track"><div class="switch-thumb"></div></div>
+              </div>
+              <button id="btnP1ChalToggle" type="button" class="btn btn-secondary" style="padding:0.42rem 0.5rem;">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                  <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+                </svg>
+                <span id="labelP1ChalBtn">Desafios (0/5)</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Painel Colapsável: Desafios de Giro (5) -->
+          <div id="p1ChallengePanel" class="challenge-box hidden">
+            <div class="challenge-header">
+              <span style="font-size:0.71rem; font-weight:800; text-transform:uppercase; color:#9f1239;">
+                Desafio <span id="p1ChalIdx">1</span>/5 · <span id="p1ChalDone">0</span> concluídos
+              </span>
+              <div class="challenge-nav">
+                <button id="btnP1ChalPrev" type="button" class="btn-mini" title="Anterior" aria-label="Desafio anterior">&lsaquo;</button>
+                <button id="btnP1ChalNext" type="button" class="btn-mini" title="Próximo" aria-label="Próximo desafio">&rsaquo;</button>
+              </div>
+            </div>
+            <p id="p1ChalText" class="challenge-text"></p>
+            <div class="challenge-status">
+              <span id="p1ChalStatus" class="status-pending">Gire a haste móvel no sentido anti-horário...</span>
+              <button id="btnP1ChalNextDone" type="button" class="btn btn-primary crimson hidden" style="padding:0.26rem 0.55rem; font-size:0.71rem;">Próximo &rarr;</button>
+            </div>
+          </div>
+
+          <button id="btnResetP1" type="button" class="btn btn-secondary" style="width:100%; padding:0.46rem;">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M3 12a9 9 0 1 0 3-6.7L3 8" />
+              <path d="M3 3v5h5" />
+            </svg>
+            <span>Resetar Giro</span>
+          </button>
+
+          <div class="hint-box desktop-only">
+            <strong>Dica:</strong> arraste a haste dourada no sentido <strong>anti-horário</strong> até completar a volta inteira (360°) e compare o disco cheio com o disco vazio em 0°.
+          </div>
+        </div>
+
+        <!-- ===================== CONTROLES FASE 2: ESQUADRO (90°) ===================== -->
+        <div id="panelPhase2" class="phase-pane hidden">
+          <div class="panel-row">
+            <button id="btnSnapP2" type="button" class="btn btn-primary" style="flex:1.35;">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M4 20 L20 20 L4 4 Z" />
+                <path d="M4 14 L10 14 L10 20" />
+              </svg>
+              <span id="labelSnapP2">Encaixar Esquadro</span>
+            </button>
+            <button id="btnRandomAngle" type="button" class="btn btn-secondary" style="flex:1;">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="16 3 21 3 21 8"></polyline>
+                <line x1="4" y1="20" x2="21" y2="3"></line>
+                <polyline points="21 16 21 21 16 21"></polyline>
+                <line x1="15" y1="15" x2="21" y2="21"></line>
+                <line x1="4" y1="4" x2="9" y2="9"></line>
+              </svg>
+              <span>Sortear Ângulo</span>
+            </button>
+          </div>
+
+          <!-- Cartão de Classificação (oculto no Modo Visual Puro) -->
+          <div id="p2ClassCard" class="info-card hidden">
+            <div class="info-card-title">
+              <span id="p2ClassName">Ângulo Reto</span>
+              <span id="p2ClassDegBadge" class="badge badge-right hidden">90°</span>
+            </div>
+            <div id="p2ClassDesc" class="info-card-desc">Encaixa exato no esquadro de 90°.</div>
+          </div>
+
+          <!-- Cartão apenas de Medida -->
+          <div id="p2MeasureOnlyCard" class="info-card hidden" style="text-align:center;">
+            <div style="font-size:0.68rem; font-weight:800; text-transform:uppercase; color:#64748b;">Abertura em V</div>
+            <div id="p2MeasureOnlyVal" style="font-size:1.35rem; font-weight:800; color:#0f172a;">90°</div>
+          </div>
+
+          <div>
+            <div class="section-label desktop-only">Camadas Didáticas</div>
+            <div class="toggle-list compact-mobile">
+              <div id="togP2Square" class="toggle-row is-on-teal" role="switch" aria-checked="true" tabindex="0">
+                <span>Esquadro 90°</span>
+                <div class="switch-track"><div class="switch-thumb"></div></div>
+              </div>
+              <div id="togP2Class" class="toggle-row" role="switch" aria-checked="false" tabindex="0">
+                <span>Classificação</span>
+                <div class="switch-track"><div class="switch-thumb"></div></div>
+              </div>
+              <div id="togP2Measure" class="toggle-row" role="switch" aria-checked="false" tabindex="0">
+                <span>Medida (°)</span>
+                <div class="switch-track"><div class="switch-thumb"></div></div>
+              </div>
+              <button id="btnResetP2" type="button" class="btn btn-secondary" style="padding:0.44rem 0.55rem;">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M3 12a9 9 0 1 0 3-6.7L3 8" />
+                  <path d="M3 3v5h5" />
+                </svg>
+                <span>Resetar</span>
+              </button>
+            </div>
+          </div>
+
+          <div class="hint-box desktop-only">
+            <strong>Esquadro = 1/4 de volta:</strong> encaixe o esquadro em <strong>V</strong> (arrastando ou clicando em <em>Encaixar Esquadro</em>) para verificar se o ângulo é menor, igual ou maior que 90°.
+          </div>
+        </div>
+
+        <!-- ===================== CONTROLES FASE 3: POLÍGONOS ===================== -->
+        <div id="panelPhase3" class="phase-pane hidden">
+          <div>
+            <div class="section-label">Número de Lados</div>
+            <div class="grid-4" id="sidesSelector">
+              <button type="button" class="btn-chip active-amber" data-sides="3"><strong>3</strong><span>Triâng.</span></button>
+              <button type="button" class="btn-chip" data-sides="4"><strong>4</strong><span>Quadril.</span></button>
+              <button type="button" class="btn-chip" data-sides="5"><strong>5</strong><span>Pentág.</span></button>
+              <button type="button" class="btn-chip" data-sides="6"><strong>6</strong><span>Hexág.</span></button>
+            </div>
+          </div>
+
+          <div class="panel-row">
+            <button id="btnSnapP3" type="button" class="btn btn-primary" style="flex:1.25;">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M4 20 L20 20 L4 4 Z" />
+                <path d="M4 14 L10 14 L10 20" />
+              </svg>
+              <span id="labelSnapP3">Esquadro em V1</span>
+            </button>
+            <button id="btnP3ChalToggle" type="button" class="btn btn-secondary" style="flex:1;">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+              </svg>
+              <span id="labelP3ChalBtn">Desafios (0/6)</span>
+            </button>
+          </div>
+
+          <!-- Painel Colapsável: Desafios de Construção (6) -->
+          <div id="p3ChallengePanel" class="challenge-box hidden">
+            <div class="challenge-header">
+              <span style="font-size:0.71rem; font-weight:800; text-transform:uppercase; color:#b45309;">
+                Desafio <span id="p3ChalIdx">1</span>/6 · <span id="p3ChalDone">0</span> concluídos
+              </span>
+              <div class="challenge-nav">
+                <button id="btnP3ChalPrev" type="button" class="btn-mini" title="Anterior" aria-label="Desafio anterior">&lsaquo;</button>
+                <button id="btnP3ChalNext" type="button" class="btn-mini" title="Próximo" aria-label="Próximo desafio">&rsaquo;</button>
+              </div>
+            </div>
+            <p id="p3ChalText" class="challenge-text"></p>
+            <div class="challenge-status">
+              <span id="p3ChalStatus" class="status-pending">Arraste os vértices na grade...</span>
+              <button id="btnP3ChalNextDone" type="button" class="btn btn-primary hidden" style="padding:0.26rem 0.55rem; font-size:0.71rem;">Próximo &rarr;</button>
+            </div>
+          </div>
+
+          <!-- Cartão de Classificação do Polígono -->
+          <div id="p3ClassCard" class="info-card hidden">
+            <div class="info-card-title">
+              <span id="p3PolyName">Triângulo</span>
+              <span id="p3ConvexBadge" class="badge badge-convex">Convexo</span>
+            </div>
+            <div id="p3PolyDetails" class="info-card-desc"></div>
+            <div id="p3AngleCounts" class="angle-counts"></div>
+          </div>
+
+          <!-- Toggles Fase 3 -->
+          <div class="toggle-list compact-mobile">
+            <div id="togP3Class" class="toggle-row" role="switch" aria-checked="false" tabindex="0">
+              <span>Classificação</span>
+              <div class="switch-track"><div class="switch-thumb"></div></div>
+            </div>
+            <div id="togP3Angles" class="toggle-row" role="switch" aria-checked="false" tabindex="0">
+              <span>Ângulos Internos (°)</span>
+              <div class="switch-track"><div class="switch-thumb"></div></div>
+            </div>
+            <div id="togP3Square" class="toggle-row" role="switch" aria-checked="false" tabindex="0">
+              <span>Esquadro 90°</span>
+              <div class="switch-track"><div class="switch-thumb"></div></div>
+            </div>
+            <button id="btnResetP3" type="button" class="btn btn-secondary" style="padding:0.44rem 0.55rem;">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M3 12a9 9 0 1 0 3-6.7L3 8" />
+                <path d="M3 3v5h5" />
+              </svg>
+              <span>Resetar</span>
+            </button>
+          </div>
+
+          <div class="hint-box desktop-only">
+            <strong>Dica:</strong> toque em qualquer vértice (<strong>V1, V2...</strong>) para selecioná-lo e use o esquadro para conferir se o canto é de 90°.
+          </div>
+        </div>
+      </aside>
+    </div>
+  </div>
+
+  <script>
+    /**
+     * =========================================================================
+     * GEOPLANO: GIROS, ÂNGULOS E POLÍGONOS (6º ANO)
+     * =========================================================================
+     * Aplicativo educacional em arquivo único HTML (sem dependências externas).
+     * - Fase 1: Tabuleiro circular em MDF para giros contínuos de 0° a 360°,
+     *   fatiamento da volta (Livre, 2, 4, 8, 12), frações equivalentes, graus,
+     *   nomes e 5 desafios de giro verificados em tempo real.
+     * - Fase 2: Geoplano quadrado 7×7 com elásticos dourados e Esquadro-Teste
+     *   de 90° em acrílico azul-petróleo (alinhado ao lado interno de A-V-B).
+     * - Fase 3: Oficina de polígonos (3 a 6 lados) com detecção de cruzamento
+     *   de elásticos, orientação interna exata (incluindo côncavos > 180°),
+     *   classificação completa e 6 desafios de construção.
+     */
+    (function () {
+      'use strict';
+
+      // =======================================================================
+      // CONSTANTES GEOMÉTRICAS E PRESETS
+      // =======================================================================
+      const SVG_NS = 'http://www.w3.org/2000/svg';
+      const CX = 300;
+      const CY = 300;
+      const DISC_R = 212;         // Raio dos pinos na borda da Fase 1
+      const SECTOR_R = 166;       // Raio do setor hachurado na Fase 1
+
+      const GRID_N = 7;           // Grade 7×7 (0..6)
+      const BOARD_MARGIN = 66;
+      const GRID_STEP = (600 - BOARD_MARGIN * 2) / (GRID_N - 1); // 78px
+      const SQ_LEG = 188;         // Tamanho dos catetos do Esquadro de 90°
+      const SQ_HANDLE_DIST = SQ_LEG + 24;
+
+      const RIGHT_TOL = 0.1;
+      const STRAIGHT_TOL = 0.1;
+      const TWO_PI = Math.PI * 2;
+
+      // 5 Desafios de Giro (Fase 1)
+      const TURN_CHALLENGES = [
+        {
+          id: 1,
+          text: 'Mostre exatamente 1/4 de volta (90°).',
+          check: (deg) => Math.abs(deg - 90) < 0.5
+        },
+        {
+          id: 2,
+          text: 'Gire exatamente meia volta (180°).',
+          check: (deg) => Math.abs(deg - 180) < 0.5
+        },
+        {
+          id: 3,
+          text: 'Gire 3/4 de volta (270°).',
+          check: (deg) => Math.abs(deg - 270) < 0.5
+        },
+        {
+          id: 4,
+          text: 'Complete 1 volta inteira (360°, disco cheio — diferente de 0°!).',
+          check: (deg) => Math.abs(deg - 360) < 0.5
+        },
+        {
+          id: 5,
+          text: 'Faça exatamente 1/8 de volta (45° — dica: divida a volta em 8).',
+          check: (deg) => Math.abs(deg - 45) < 0.5
+        }
+      ];
+
+      // Casos curados para "Sortear Ângulo" na Fase 2 (incluindo retos inclinados na grade)
+      const ANGLE_PRESETS = [
+        { v: { x: 3, y: 4 }, a: { x: 5, y: 3 }, b: { x: 2, y: 2 } }, // Reto inclinado (2,-1)·(-1,-2)=0
+        { v: { x: 1, y: 5 }, a: { x: 5, y: 5 }, b: { x: 4, y: 2 } }, // Agudo (~45°)
+        { v: { x: 3, y: 4 }, a: { x: 6, y: 4 }, b: { x: 1, y: 2 } }, // Obtuso (135°)
+        { v: { x: 3, y: 5 }, a: { x: 5, y: 3 }, b: { x: 1, y: 3 } }, // Reto inclinado 45°
+        { v: { x: 3, y: 3 }, a: { x: 5, y: 2 }, b: { x: 1, y: 4 } }, // Raso inclinado (180°)
+        { v: { x: 1, y: 4 }, a: { x: 5, y: 4 }, b: { x: 5, y: 2 } }, // Agudo (~26.6°)
+        { v: { x: 2, y: 5 }, a: { x: 5, y: 5 }, b: { x: 2, y: 1 } }, // Reto nos eixos
+        { v: { x: 3, y: 5 }, a: { x: 6, y: 5 }, b: { x: 1, y: 2 } }, // Obtuso (~126.9°)
+        { v: { x: 3, y: 4 }, a: { x: 4, y: 2 }, b: { x: 1, y: 3 } }, // Reto inclinado (1,-2)·(-2,-1)=0
+        { v: { x: 2, y: 5 }, a: { x: 5, y: 5 }, b: { x: 4, y: 1 } }, // Agudo (~63.4°)
+        { v: { x: 3, y: 3 }, a: { x: 6, y: 3 }, b: { x: 0, y: 3 } }, // Raso horizontal (180°)
+        { v: { x: 3, y: 4 }, a: { x: 5, y: 5 }, b: { x: 0, y: 4 } }  // Obtuso (~153.4°)
+      ];
+
+      // Presets iniciais de polígonos na grade 7×7 (Fase 3)
+      const POLY_PRESETS = {
+        3: [{ x: 1, y: 5 }, { x: 5, y: 5 }, { x: 3, y: 1 }],
+        4: [{ x: 1, y: 5 }, { x: 5, y: 5 }, { x: 5, y: 2 }, { x: 2, y: 1 }],
+        5: [{ x: 2, y: 5 }, { x: 5, y: 5 }, { x: 6, y: 3 }, { x: 3, y: 1 }, { x: 1, y: 3 }],
+        6: [{ x: 2, y: 5 }, { x: 4, y: 5 }, { x: 6, y: 3 }, { x: 4, y: 1 }, { x: 2, y: 1 }, { x: 0, y: 3 }]
+      };
+
+      // 6 Desafios de Construção (Fase 3)
+      const POLY_CHALLENGES = [
+        {
+          id: 1,
+          text: 'Construa um Triângulo Retângulo (1 ângulo reto de 90°).',
+          suggestedSides: 3,
+          check: (info) => info.valid && info.n === 3 && info.counts.right === 1
+        },
+        {
+          id: 2,
+          text: 'Construa um Retângulo que NÃO seja quadrado (4 ângulos retos e lados diferentes).',
+          suggestedSides: 4,
+          check: (info) => info.valid && info.n === 4 && info.quadType === 'Retângulo'
+        },
+        {
+          id: 3,
+          text: 'Construa um Quadrado inclinado na grade (os 4 lados fora da horizontal e vertical).',
+          suggestedSides: 4,
+          check: (info) => info.valid && info.n === 4 && info.quadType === 'Quadrado' && info.allEdgesTilted
+        },
+        {
+          id: 4,
+          text: 'Construa um Trapézio (exatamente um par de lados paralelos).',
+          suggestedSides: 4,
+          check: (info) => info.valid && info.n === 4 && info.quadType === 'Trapézio'
+        },
+        {
+          id: 5,
+          text: 'Construa um Polígono Côncavo (pelo menos um ângulo interno maior que 180°).',
+          suggestedSides: 4,
+          check: (info) => info.valid && !info.isConvex
+        },
+        {
+          id: 6,
+          text: 'Construa um Hexágono Convexo (6 lados, sem nenhum vértice para dentro).',
+          suggestedSides: 6,
+          check: (info) => info.valid && info.n === 6 && info.isConvex && info.counts.straight === 0
+        }
+      ];
+
+      // =======================================================================
+      // REFERÊNCIAS DE DOM
+      // =======================================================================
+      const svg = document.getElementById('geoboardSvg');
+      const scenePhase1 = document.getElementById('scenePhase1');
+      const sceneGrid = document.getElementById('sceneGrid');
+
+      // Camadas Fase 1
+      const p1DivisionsLayer = document.getElementById('p1DivisionsLayer');
+      const p1SectorLayer = document.getElementById('p1SectorLayer');
+      const p1RimPinsLayer = document.getElementById('p1RimPinsLayer');
+      const p1HandsLayer = document.getElementById('p1HandsLayer');
+      const p1LabelsLayer = document.getElementById('p1LabelsLayer');
+
+      // Camadas Fases 2/3
+      const layerGridGuides = document.getElementById('layerGridGuides');
+      const layerPolyFill = document.getElementById('layerPolyFill');
+      const layerSectors = document.getElementById('layerSectors');
+      const layerBands = document.getElementById('layerBands');
+      const layerPins = document.getElementById('layerPins');
+      const layerVertices = document.getElementById('layerVertices');
+      const layerDegreeLabels = document.getElementById('layerDegreeLabels');
+      const layerSetSquare = document.getElementById('layerSetSquare');
+
+      // Cabeçalho e Toast
+      const tabPhase1 = document.getElementById('tabPhase1');
+      const tabPhase2 = document.getElementById('tabPhase2');
+      const tabPhase3 = document.getElementById('tabPhase3');
+      const panelPhase1 = document.getElementById('panelPhase1');
+      const panelPhase2 = document.getElementById('panelPhase2');
+      const panelPhase3 = document.getElementById('panelPhase3');
+      const stageToast = document.getElementById('stageToast');
+      const stageToastText = document.getElementById('stageToastText');
+
+      // Controles Fase 1
+      const p1DivSelector = document.getElementById('p1DivSelector');
+      const p1ShortcutBar = document.getElementById('p1ShortcutBar');
+      const p1ReadoutCard = document.getElementById('p1ReadoutCard');
+      const p1ReadoutName = document.getElementById('p1ReadoutName');
+      const p1ReadoutFrac = document.getElementById('p1ReadoutFrac');
+      const p1ReadoutDeg = document.getElementById('p1ReadoutDeg');
+      const togP1Frac = document.getElementById('togP1Frac');
+      const togP1Deg = document.getElementById('togP1Deg');
+      const togP1Name = document.getElementById('togP1Name');
+      const btnP1ChalToggle = document.getElementById('btnP1ChalToggle');
+      const labelP1ChalBtn = document.getElementById('labelP1ChalBtn');
+      const p1ChallengePanel = document.getElementById('p1ChallengePanel');
+      const p1ChalIdx = document.getElementById('p1ChalIdx');
+      const p1ChalDone = document.getElementById('p1ChalDone');
+      const p1ChalText = document.getElementById('p1ChalText');
+      const p1ChalStatus = document.getElementById('p1ChalStatus');
+      const btnP1ChalPrev = document.getElementById('btnP1ChalPrev');
+      const btnP1ChalNext = document.getElementById('btnP1ChalNext');
+      const btnP1ChalNextDone = document.getElementById('btnP1ChalNextDone');
+      const btnResetP1 = document.getElementById('btnResetP1');
+
+      // Controles Fase 2
+      const btnSnapP2 = document.getElementById('btnSnapP2');
+      const labelSnapP2 = document.getElementById('labelSnapP2');
+      const btnRandomAngle = document.getElementById('btnRandomAngle');
+      const btnResetP2 = document.getElementById('btnResetP2');
+      const togP2Square = document.getElementById('togP2Square');
+      const togP2Class = document.getElementById('togP2Class');
+      const togP2Measure = document.getElementById('togP2Measure');
+      const p2ClassCard = document.getElementById('p2ClassCard');
+      const p2ClassName = document.getElementById('p2ClassName');
+      const p2ClassDegBadge = document.getElementById('p2ClassDegBadge');
+      const p2ClassDesc = document.getElementById('p2ClassDesc');
+      const p2MeasureOnlyCard = document.getElementById('p2MeasureOnlyCard');
+      const p2MeasureOnlyVal = document.getElementById('p2MeasureOnlyVal');
+
+      // Controles Fase 3
+      const sidesSelector = document.getElementById('sidesSelector');
+      const btnSnapP3 = document.getElementById('btnSnapP3');
+      const labelSnapP3 = document.getElementById('labelSnapP3');
+      const btnP3ChalToggle = document.getElementById('btnP3ChalToggle');
+      const labelP3ChalBtn = document.getElementById('labelP3ChalBtn');
+      const p3ChallengePanel = document.getElementById('p3ChallengePanel');
+      const p3ChalIdx = document.getElementById('p3ChalIdx');
+      const p3ChalDone = document.getElementById('p3ChalDone');
+      const p3ChalText = document.getElementById('p3ChalText');
+      const p3ChalStatus = document.getElementById('p3ChalStatus');
+      const btnP3ChalPrev = document.getElementById('btnP3ChalPrev');
+      const btnP3ChalNext = document.getElementById('btnP3ChalNext');
+      const btnP3ChalNextDone = document.getElementById('btnP3ChalNextDone');
+      const p3ClassCard = document.getElementById('p3ClassCard');
+      const p3PolyName = document.getElementById('p3PolyName');
+      const p3ConvexBadge = document.getElementById('p3ConvexBadge');
+      const p3PolyDetails = document.getElementById('p3PolyDetails');
+      const p3AngleCounts = document.getElementById('p3AngleCounts');
+      const togP3Class = document.getElementById('togP3Class');
+      const togP3Angles = document.getElementById('togP3Angles');
+      const togP3Square = document.getElementById('togP3Square');
+      const btnResetP3 = document.getElementById('btnResetP3');
+
+      // =======================================================================
+      // ESTADO DA APLICAÇÃO
+      // =======================================================================
+      const state = {
+        phase: 1, // 1 = Giros e Voltas | 2 = Esquadro (90°) | 3 = Polígonos
+
+        // Fase 1: Giros contínuos (0° a 360°)
+        p1: {
+          divisions: 4,       // 0 (Livre), 2, 4 (padrão), 8, 12
+          rawDeg: 90,         // Valor contínuo acumulado em [0, 360]
+          deg: 90,            // Valor exibido após snap da divisão
+          showFrac: false,    // Modo Visual Puro por padrão
+          showDeg: false,
+          showName: false,
+          challengeOpen: false,
+          challengeIdx: 0,
+          solvedIds: new Set()
+        },
+
+        // Fase 2: Ângulos com Esquadro (90°)
+        p2: {
+          v: { x: 2, y: 5 },
+          a: { x: 5, y: 5 },
+          b: { x: 4, y: 2 },
+          showSquare: true,   // Esquadro ON por padrão na Fase 2
+          showClass: false,   // Modo Visual Puro por padrão
+          showMeasure: false,
+          lastPresetIdx: -1
+        },
+
+        // Fase 3: Oficina de Polígonos
+        p3: {
+          sides: 3,
+          vertices: POLY_PRESETS[3].map(p => ({ ...p })),
+          selectedIdx: 0,
+          showClass: false,
+          showAngles: false,
+          showSquare: false,  // Opcional na Fase 3
+          challengeOpen: false,
+          challengeIdx: 0,
+          solvedIds: new Set()
+        },
+
+        // Posição/rotação do Esquadro-Teste de 90°
+        square: {
+          x: 350,
+          y: 250,
+          angle: 0.22,
+          anim: null
+        },
+
+        // Controle de arraste (Pointer Events)
+        drag: null
+      };
+
+      // =======================================================================
+      // UTILITÁRIOS SVG E MATEMÁTICOS
+      // =======================================================================
+      function el(tag, attrs = {}, parent = null) {
+        const node = document.createElementNS(SVG_NS, tag);
+        for (const [k, v] of Object.entries(attrs)) {
+          node.setAttribute(k, v);
+        }
+        if (parent) parent.appendChild(node);
+        return node;
+      }
+
+      function gcd(a, b) {
+        a = Math.abs(Math.round(a));
+        b = Math.abs(Math.round(b));
+        while (b) {
+          const t = b;
+          b = a % b;
+          a = t;
+        }
+        return a || 1;
+      }
+
+      function mod(n, m) {
+        return ((n % m) + m) % m;
+      }
+
+      function clamp(val, min, max) {
+        return Math.max(min, Math.min(max, val));
+      }
+
+      function shortestAngleDiffRad(a1, a2) {
+        let diff = mod(a2 - a1 + Math.PI, TWO_PI) - Math.PI;
+        if (diff <= -Math.PI) diff += TWO_PI;
+        return diff;
+      }
+
+      function shortestAngleDiffDeg(a1, a2) {
+        let diff = mod(a2 - a1 + 180, 360) - 180;
+        if (diff <= -180) diff += 360;
+        return diff;
+      }
+
+      function radToDeg(r) {
+        return (r * 180) / Math.PI;
+      }
+
+      function degToRad(d) {
+        return (d * Math.PI) / 180;
+      }
+
+      function formatDeg(deg) {
+        const rounded = Math.round(deg * 10) / 10;
+        if (Math.abs(rounded - Math.round(rounded)) < 0.05) {
+          return `${Math.round(rounded)}°`;
+        }
+        return `${rounded.toFixed(1).replace('.', ',')}°`;
+      }
+
+      function gridToSvg(gx, gy) {
+        return {
+          x: BOARD_MARGIN + gx * GRID_STEP,
+          y: BOARD_MARGIN + gy * GRID_STEP
+        };
+      }
+
+      function svgToNearestGrid(sx, sy) {
+        return {
+          x: clamp(Math.round((sx - BOARD_MARGIN) / GRID_STEP), 0, GRID_N - 1),
+          y: clamp(Math.round((sy - BOARD_MARGIN) / GRID_STEP), 0, GRID_N - 1)
+        };
+      }
+
+      function dist(p1, p2) {
+        return Math.hypot(p2.x - p1.x, p2.y - p1.y);
+      }
+
+      function easeOutCubic(t) {
+        return 1 - Math.pow(1 - t, 3);
+      }
+
+      function getSvgPoint(e) {
+        const rect = svg.getBoundingClientRect();
+        return {
+          x: ((e.clientX - rect.left) / rect.width) * 600,
+          y: ((e.clientY - rect.top) / rect.height) * 600
+        };
+      }
+
+      // =======================================================================
+      // LÓGICA DA FASE 1: GIROS, FRAÇÕES EQUIVALENTES E NOMES
+      // =======================================================================
+      function snapTurnAngle(rawDeg, divisions) {
+        const clamped = clamp(rawDeg, 0, 360);
+        if (divisions > 0) {
+          const step = 360 / divisions;
+          return clamp(Math.round(clamped / step) * step, 0, 360);
+        }
+        // Modo Livre: passo de 1° com leve imã (±2°) nos múltiplos de 45°
+        const rounded = Math.round(clamped);
+        const nearest45 = Math.round(rounded / 45) * 45;
+        if (Math.abs(rounded - nearest45) <= 2) {
+          return clamp(nearest45, 0, 360);
+        }
+        return rounded;
+      }
+
+      function getTurnInfo(deg, divisions) {
+        const d = Math.round(deg);
+
+        // Nome do ângulo
+        let name;
+        if (d === 0) name = 'Ângulo Nulo';
+        else if (d < 90) name = 'Ângulo Agudo';
+        else if (d === 90) name = 'Ângulo Reto';
+        else if (d < 180) name = 'Ângulo Obtuso';
+        else if (d === 180) name = 'Ângulo Raso';
+        else if (d < 360) name = 'Ângulo Côncavo (Reflexo)';
+        else name = 'Volta Completa';
+
+        // Fração da volta e relação com 360°
+        let fracText = '';
+        let degFormula = `${d}°`;
+
+        if (d === 0) {
+          fracText = '0 voltas';
+          degFormula = '0° (sem giro)';
+        } else if (d === 360) {
+          fracText = '1 volta completa';
+          degFormula = '1 volta = 360°';
+        } else {
+          const g360 = gcd(d, 360);
+          const simpNum = d / g360;
+          const simpDen = 360 / g360;
+          const simpStr = `${simpNum}/${simpDen}`;
+          const unitWord = (simpNum === 1 && simpDen === 2) ? 'volta' : 'de volta';
+
+          if (divisions > 0) {
+            const step = 360 / divisions;
+            const k = Math.round(d / step);
+            const rawStr = `${k}/${divisions}`;
+            if (divisions !== simpDen) {
+              fracText = `${rawStr} = ${simpStr} ${unitWord}`;
+            } else {
+              fracText = `${simpStr} ${unitWord}`;
+            }
+            degFormula = `${simpStr} de 360° = ${d}°`;
+          } else {
+            // Modo Livre
+            if (simpDen <= 12) {
+              fracText = `${simpStr} ${unitWord}`;
+              degFormula = `${simpStr} de 360° = ${d}°`;
+            } else {
+              fracText = `${simpStr} de volta`;
+              degFormula = `${d}° de 360°`;
+            }
+          }
+        }
+
+        return { deg: d, name, fracText, degFormula };
+      }
+
+      // =======================================================================
+      // GEOMETRIA DA FASE 2 (ÂNGULO EM V + ENCAIXE DO ESQUADRO)
+      // =======================================================================
+      function computePhase2Angle() {
+        const pV = gridToSvg(state.p2.v.x, state.p2.v.y);
+        const pA = gridToSvg(state.p2.a.x, state.p2.a.y);
+        const pB = gridToSvg(state.p2.b.x, state.p2.b.y);
+
+        const angA = Math.atan2(pA.y - pV.y, pA.x - pV.x);
+        const angB = Math.atan2(pB.y - pV.y, pB.x - pV.x);
+
+        const cwAB = mod(angB - angA, TWO_PI);
+        let startAngle, sweepRad, bestSquareAngle;
+
+        if (cwAB <= Math.PI + 1e-6) {
+          // Interior vai no sentido horário (SVG) de angA até angB:
+          // Cateto -Y do esquadro alinha em V-A (angle - PI/2 = angA => angle = angA + PI/2)
+          startAngle = angA;
+          sweepRad = Math.min(Math.PI, cwAB);
+          bestSquareAngle = angA + Math.PI / 2;
+        } else {
+          // Interior vai no sentido anti-horário (SVG) de angA até angB:
+          // Cateto +X do esquadro alinha em V-A (angle = angA), abrindo anti-horário para V-B
+          startAngle = angB;
+          sweepRad = Math.min(Math.PI, TWO_PI - cwAB);
+          bestSquareAngle = angA;
+        }
+
+        const deg = radToDeg(sweepRad);
+        let type, label, desc, tone;
+
+        if (Math.abs(deg - 90) <= RIGHT_TOL) {
+          type = 'right';
+          label = 'Ângulo Reto';
+          desc = 'Encaixa exato no esquadro de 90°.';
+          tone = 'tone-right';
+        } else if (Math.abs(deg - 180) <= STRAIGHT_TOL) {
+          type = 'straight';
+          label = 'Ângulo Raso';
+          desc = 'Forma linha reta (equivale a dois esquadros = 180°).';
+          tone = 'tone-straight';
+        } else if (deg < 90) {
+          type = 'acute';
+          label = 'Ângulo Agudo';
+          desc = 'Cabe dentro do esquadro (menor que 90°).';
+          tone = 'tone-acute';
+        } else {
+          type = 'obtuse';
+          label = 'Ângulo Obtuso';
+          desc = 'Passa do esquadro (maior que 90° e menor que 180°).';
+          tone = 'tone-obtuse';
+        }
+
+        return { pV, pA, pB, startAngle, sweepRad, deg, type, label, desc, tone, bestSquareAngle };
+      }
+
+      // =======================================================================
+      // GEOMETRIA DA FASE 3 (POLÍGONOS, CRUZAMENTOS, ORIENTAÇÃO E CLASSIFICAÇÃO)
+      // =======================================================================
+      function cross2D(ax, ay, bx, by) {
+        return ax * by - ay * bx;
+      }
+
+      function onSegment(p, q, r) {
+        return (
+          q.x <= Math.max(p.x, r.x) + 1e-6 &&
+          q.x >= Math.min(p.x, r.x) - 1e-6 &&
+          q.y <= Math.max(p.y, r.y) + 1e-6 &&
+          q.y >= Math.min(p.y, r.y) - 1e-6
+        );
+      }
+
+      function segmentsIntersect(p1, q1, p2, q2) {
+        const o1 = cross2D(q1.x - p1.x, q1.y - p1.y, p2.x - p1.x, p2.y - p1.y);
+        const o2 = cross2D(q1.x - p1.x, q1.y - p1.y, q2.x - p1.x, q2.y - p1.y);
+        const o3 = cross2D(q2.x - p2.x, q2.y - p2.y, p1.x - p2.x, p1.y - p2.y);
+        const o4 = cross2D(q2.x - p2.x, q2.y - p2.y, q1.x - p2.x, q1.y - p2.y);
+
+        const s1 = Math.abs(o1) < 1e-6 ? 0 : Math.sign(o1);
+        const s2 = Math.abs(o2) < 1e-6 ? 0 : Math.sign(o2);
+        const s3 = Math.abs(o3) < 1e-6 ? 0 : Math.sign(o3);
+        const s4 = Math.abs(o4) < 1e-6 ? 0 : Math.sign(o4);
+
+        if (s1 !== s2 && s3 !== s4) return true;
+        if (s1 === 0 && onSegment(p1, p2, q1)) return true;
+        if (s2 === 0 && onSegment(p1, q2, q1)) return true;
+        if (s3 === 0 && onSegment(p2, p1, q2)) return true;
+        if (s4 === 0 && onSegment(p2, q1, q2)) return true;
+        return false;
+      }
+
+      function checkPolygonSelfIntersection(pts) {
+        const n = pts.length;
+        for (let i = 0; i < n; i++) {
+          const a1 = pts[i];
+          const a2 = pts[(i + 1) % n];
+          for (let j = i + 1; j < n; j++) {
+            const b1 = pts[j];
+            const b2 = pts[(j + 1) % n];
+
+            const adjacent = (j === i + 1) || (i === 0 && j === n - 1);
+            if (adjacent) {
+              const common = (j === i + 1) ? a2 : a1;
+              const other1 = (j === i + 1) ? a1 : a2;
+              const other2 = (j === i + 1) ? b2 : b1;
+              const v1x = other1.x - common.x, v1y = other1.y - common.y;
+              const v2x = other2.x - common.x, v2y = other2.y - common.y;
+              const c = cross2D(v1x, v1y, v2x, v2y);
+              const dot = v1x * v2x + v1y * v2y;
+              if (Math.abs(c) < 1e-6 && dot > 0) return true;
+              continue;
+            }
+            if (segmentsIntersect(a1, a2, b1, b2)) return true;
+          }
+        }
+        return false;
+      }
+
+      function analyzePolygon() {
+        const gPts = state.p3.vertices;
+        const n = gPts.length;
+        const sPts = gPts.map(p => gridToSvg(p.x, p.y));
+
+        const selfIntersects = checkPolygonSelfIntersection(gPts);
+
+        // Área assinada (Shoelace) em coordenadas SVG (Y para baixo)
+        let area2 = 0;
+        for (let i = 0; i < n; i++) {
+          const p = sPts[i];
+          const q = sPts[(i + 1) % n];
+          area2 += p.x * q.y - q.x * p.y;
+        }
+        const degenerateArea = Math.abs(area2) < 1;
+        const isClockwise = area2 > 0;
+
+        const angles = [];
+        const counts = { acute: 0, right: 0, obtuse: 0, reflex: 0, straight: 0 };
+
+        for (let i = 0; i < n; i++) {
+          const prev = sPts[(i - 1 + n) % n];
+          const curr = sPts[i];
+          const next = sPts[(i + 1) % n];
+
+          const aPrev = Math.atan2(prev.y - curr.y, prev.x - curr.x);
+          const aNext = Math.atan2(next.y - curr.y, next.x - curr.x);
+
+          const startAngle = isClockwise ? aNext : aPrev;
+          const endAngle = isClockwise ? aPrev : aNext;
+          const sweepRad = mod(endAngle - startAngle, TWO_PI);
+          const deg = radToDeg(sweepRad);
+
+          let type = 'acute';
+          if (Math.abs(deg - 90) <= RIGHT_TOL) {
+            type = 'right';
+            counts.right++;
+          } else if (Math.abs(deg - 180) <= STRAIGHT_TOL) {
+            type = 'straight';
+            counts.straight++;
+          } else if (deg > 180 + STRAIGHT_TOL) {
+            type = 'reflex';
+            counts.reflex++;
+          } else if (deg > 90 + RIGHT_TOL) {
+            type = 'obtuse';
+            counts.obtuse++;
+          } else {
+            type = 'acute';
+            counts.acute++;
+          }
+
+          const bestSquareAngle = startAngle + Math.PI / 2;
+          angles.push({ curr, startAngle, sweepRad, deg, type, bestSquareAngle });
+        }
+
+        const hasStraightVertex = counts.straight > 0;
+        const valid = !selfIntersects && !degenerateArea;
+        const isConvex = valid && counts.reflex === 0;
+
+        const lengths = [];
+        let allEdgesTilted = true;
+        for (let i = 0; i < n; i++) {
+          const a = gPts[i];
+          const b = gPts[(i + 1) % n];
+          const dx = b.x - a.x;
+          const dy = b.y - a.y;
+          if (dx === 0 || dy === 0) allEdgesTilted = false;
+          lengths.push(Math.hypot(dx, dy));
+        }
+
+        const baseNames = { 3: 'Triângulo', 4: 'Quadrilátero', 5: 'Pentágono', 6: 'Hexágono' };
+        const baseName = baseNames[n] || `${n}-ágono`;
+
+        let details = '';
+        let quadType = null;
+
+        if (valid) {
+          if (n === 3) {
+            const angClass =
+              counts.right > 0 ? 'Retângulo' :
+              counts.obtuse > 0 ? 'Obtusângulo' : 'Acutângulo';
+
+            const eq01 = Math.abs(lengths[0] - lengths[1]) < 1e-4;
+            const eq12 = Math.abs(lengths[1] - lengths[2]) < 1e-4;
+            const eq02 = Math.abs(lengths[0] - lengths[2]) < 1e-4;
+            const sideClass =
+              (eq01 && eq12) ? 'Equilátero' :
+              (eq01 || eq12 || eq02) ? 'Isósceles' : 'Escaleno';
+
+            details = `Pelos ângulos: <strong>${angClass}</strong> · Pelos lados: <strong>${sideClass}</strong>.`;
+          } else if (n === 4 && isConvex && !hasStraightVertex) {
+            const allEqual = lengths.every(l => Math.abs(l - lengths[0]) < 1e-4);
+            const allRight = counts.right === 4;
+
+            const v0 = { x: gPts[1].x - gPts[0].x, y: gPts[1].y - gPts[0].y };
+            const v1 = { x: gPts[2].x - gPts[1].x, y: gPts[2].y - gPts[1].y };
+            const v2 = { x: gPts[3].x - gPts[2].x, y: gPts[3].y - gPts[2].y };
+            const v3 = { x: gPts[0].x - gPts[3].x, y: gPts[0].y - gPts[3].y };
+
+            const p02 = Math.abs(cross2D(v0.x, v0.y, v2.x, v2.y)) < 1e-4;
+            const p13 = Math.abs(cross2D(v1.x, v1.y, v3.x, v3.y)) < 1e-4;
+
+            if (allRight && allEqual) quadType = 'Quadrado';
+            else if (allRight) quadType = 'Retângulo';
+            else if (allEqual) quadType = 'Losango';
+            else if (p02 && p13) quadType = 'Paralelogramo';
+            else if (p02 || p13) quadType = 'Trapézio';
+            else quadType = 'Quadrilátero qualquer';
+
+            details = `Classificação: <strong>${quadType}</strong>${allEdgesTilted && (quadType === 'Quadrado' || quadType === 'Losango') ? ' (inclinado na grade!)' : ''}.`;
+          } else if (n === 4 && !isConvex) {
+            details = 'Polígono côncavo: possui um ângulo interno maior que 180° (vértice voltado para dentro).';
+          } else {
+            const soma = (n - 2) * 180;
+            details = isConvex
+              ? `Polígono convexo de ${n} lados (soma dos ângulos internos = ${soma}°).`
+              : `Polígono côncavo de ${n} lados: há pelo menos um ângulo interno maior que 180°.`;
+          }
+
+          if (hasStraightVertex) {
+            details += ' <em>(Há vértice alinhado de 180° sobre um lado.)</em>';
+          }
+        }
+
+        return {
+          n, gPts, sPts, valid, selfIntersects, degenerateArea,
+          isConvex, angles, counts, lengths, baseName, details, quadType, allEdgesTilted
+        };
+      }
+
+      // =======================================================================
+      // CONSTRUÇÃO ESTÁTICA DA GRADE 7×7 E DO ESQUADRO DE 90°
+      // =======================================================================
+      function buildStaticGrid() {
+        layerGridGuides.innerHTML = '';
+        layerPins.innerHTML = '';
+
+        for (let i = 0; i < GRID_N; i++) {
+          const pos = BOARD_MARGIN + i * GRID_STEP;
+          el('line', {
+            x1: BOARD_MARGIN, y1: pos, x2: 600 - BOARD_MARGIN, y2: pos,
+            stroke: '#94a3b8', 'stroke-width': 1, 'stroke-dasharray': '2 5'
+          }, layerGridGuides);
+          el('line', {
+            x1: pos, y1: BOARD_MARGIN, x2: pos, y2: 600 - BOARD_MARGIN,
+            stroke: '#94a3b8', 'stroke-width': 1, 'stroke-dasharray': '2 5'
+          }, layerGridGuides);
+        }
+
+        for (let gx = 0; gx < GRID_N; gx++) {
+          for (let gy = 0; gy < GRID_N; gy++) {
+            const p = gridToSvg(gx, gy);
+            drawWoodPegSvg(p.x, p.y, 5.2, layerPins);
+          }
+        }
+      }
+
+      function drawWoodPegSvg(x, y, r, parent) {
+        el('circle', {
+          cx: x + r * 0.42, cy: y + r * 0.52, r: r * 1.05,
+          fill: 'rgba(55, 40, 22, 0.24)'
+        }, parent);
+        el('circle', {
+          cx: x, cy: y, r: r,
+          fill: 'url(#woodPeg)',
+          stroke: '#7c5830',
+          'stroke-width': 0.65
+        }, parent);
+      }
+
+      function buildSetSquareDom() {
+        layerSetSquare.innerHTML = '';
+        const g = el('g', { id: 'setSquareGroup', filter: 'url(#esquadroShadow)' }, layerSetSquare);
+
+        const L = SQ_LEG;
+        const m = 34;
+        const innerOuter = L - 52;
+        const bodyPath = [
+          `M 0 0 L ${L} 0 L 0 ${-L} Z`,
+          `M ${m} ${-m} L ${innerOuter} ${-m} L ${m} ${-innerOuter} Z`
+        ].join(' ');
+
+        const body = el('path', {
+          d: bodyPath,
+          'fill-rule': 'evenodd',
+          fill: 'rgba(15, 118, 110, 0.24)',
+          stroke: '#0f766e',
+          'stroke-width': 2.3,
+          'stroke-linejoin': 'round',
+          class: 'set-square-body'
+        }, g);
+
+        // Brilho de acrílico na hipotenusa
+        el('line', {
+          x1: L - 3, y1: -3, x2: 3, y2: -L + 3,
+          stroke: 'rgba(255, 255, 255, 0.65)', 'stroke-width': 1.5, 'pointer-events': 'none'
+        }, g);
+
+        // Marcação de 90° no canto reto
+        const sqSize = 22;
+        el('path', {
+          d: `M 0 ${-sqSize} L ${sqSize} ${-sqSize} L ${sqSize} 0`,
+          fill: 'rgba(159, 18, 57, 0.14)',
+          stroke: '#9f1239',
+          'stroke-width': 2.1,
+          'pointer-events': 'none'
+        }, g);
+        el('circle', { cx: sqSize / 2, cy: -sqSize / 2, r: 2.3, fill: '#9f1239', 'pointer-events': 'none' }, g);
+
+        const txt90 = el('text', {
+          x: 28, y: -11,
+          fill: '#9f1239', 'font-size': '11', 'font-weight': '800', 'pointer-events': 'none'
+        }, g);
+        txt90.textContent = '90°';
+
+        // Marcações de régua nos catetos
+        for (let d = 15; d <= L - 15; d += 10) {
+          const isMajor = (d % 30 === 0);
+          const len = isMajor ? 10 : 6;
+          el('line', {
+            x1: d, y1: 0, x2: d, y2: -len,
+            stroke: '#115e59', 'stroke-width': isMajor ? 1.4 : 0.9, 'stroke-opacity': 0.72, 'pointer-events': 'none'
+          }, g);
+          el('line', {
+            x1: 0, y1: -d, x2: len, y2: -d,
+            stroke: '#115e59', 'stroke-width': isMajor ? 1.4 : 0.9, 'stroke-opacity': 0.72, 'pointer-events': 'none'
+          }, g);
+        }
+
+        // Mira no canto de 90°
+        el('circle', {
+          cx: 0, cy: 0, r: 5.5,
+          fill: 'rgba(255,255,255,0.88)', stroke: '#9f1239', 'stroke-width': 1.8, 'pointer-events': 'none'
+        }, g);
+
+        // Haste e alça de rotação
+        el('line', {
+          x1: L, y1: 0, x2: SQ_HANDLE_DIST, y2: 0,
+          stroke: '#0f766e', 'stroke-width': 2.2, 'pointer-events': 'none'
+        }, g);
+
+        const rotGroup = el('g', {
+          transform: `translate(${SQ_HANDLE_DIST}, 0)`,
+          class: 'set-square-rotate'
+        }, g);
+
+        el('circle', { cx: 0, cy: 0, r: 26, fill: 'transparent' }, rotGroup);
+        el('circle', {
+          cx: 0, cy: 0, r: 14,
+          fill: '#ffffff', stroke: '#0f766e', 'stroke-width': 2.4
+        }, rotGroup);
+        el('path', {
+          d: 'M -5 -2 A 5.5 5.5 0 1 1 2 5',
+          fill: 'none', stroke: '#0f766e', 'stroke-width': 2, 'stroke-linecap': 'round'
+        }, rotGroup);
+        el('polyline', {
+          points: '-7.5,-3 -5,-1.5 -3.5,-4.5',
+          fill: 'none', stroke: '#0f766e', 'stroke-width': 1.8, 'stroke-linecap': 'round', 'stroke-linejoin': 'round'
+        }, rotGroup);
+
+        body.addEventListener('pointerdown', (e) => startSquareDrag(e, 'sq-move'));
+        rotGroup.addEventListener('pointerdown', (e) => startSquareDrag(e, 'sq-rot'));
+      }
+
+      function isSquareVisibleNow() {
+        if (state.phase === 2) return state.p2.showSquare;
+        if (state.phase === 3) return state.p3.showSquare;
+        return false;
+      }
+
+      function updateSetSquareTransform() {
+        const g = document.getElementById('setSquareGroup');
+        if (!g) return;
+        if (!isSquareVisibleNow()) {
+          g.setAttribute('display', 'none');
+          return;
+        }
+        g.removeAttribute('display');
+        const deg = radToDeg(state.square.angle);
+        g.setAttribute('transform', `translate(${state.square.x.toFixed(2)}, ${state.square.y.toFixed(2)}) rotate(${deg.toFixed(2)})`);
+      }
+
+      function animateSetSquareTo(targetX, targetY, targetAng) {
+        if (state.phase === 2) state.p2.showSquare = true;
+        if (state.phase === 3) state.p3.showSquare = true;
+        state.square.anim = {
+          startX: state.square.x,
+          startY: state.square.y,
+          startAng: state.square.angle,
+          targetX,
+          targetY,
+          targetAng: state.square.angle + shortestAngleDiffRad(state.square.angle, targetAng),
+          startTime: performance.now(),
+          duration: 380
+        };
+        syncUI();
+      }
+
+      // =======================================================================
+      // RENDERIZAÇÃO DA FASE 1: GIROS E FRAÇÕES DE VOLTA
+      // =======================================================================
+      function renderPhase1() {
+        p1DivisionsLayer.innerHTML = '';
+        p1SectorLayer.innerHTML = '';
+        p1RimPinsLayer.innerHTML = '';
+        p1HandsLayer.innerHTML = '';
+        p1LabelsLayer.innerHTML = '';
+
+        const deg = state.p1.deg;
+        const divs = state.p1.divisions;
+        const info = getTurnInfo(deg, divs);
+
+        // 1. Linhas radiais tracejadas e pinos na borda conforme divisão escolhida
+        const numPins = divs > 0 ? divs : 12;
+        for (let i = 0; i < numPins; i++) {
+          const aDeg = (i * 360) / numPins;
+          const aRad = degToRad(aDeg);
+          const xRim = CX + Math.cos(aRad) * DISC_R;
+          const yRim = CY - Math.sin(aRad) * DISC_R;
+
+          if (divs > 0) {
+            el('line', {
+              x1: CX, y1: CY, x2: xRim, y2: yRim,
+              stroke: '#94a3b8',
+              'stroke-width': (aDeg % 90 === 0) ? 1.6 : 1.1,
+              'stroke-dasharray': '4 5',
+              opacity: (aDeg % 90 === 0) ? 0.72 : 0.45
+            }, p1DivisionsLayer);
+          }
+
+          // Pinos de madeira na borda (destaque maior no ponto 0°/360°)
+          drawWoodPegSvg(xRim, yRim, i === 0 ? 6.4 : (divs > 0 ? 5.2 : 4.0), p1RimPinsLayer);
+        }
+
+        // 2. Setor hachurado vinho/carmesim (distinção visual clara entre 0° e 360°)
+        if (deg >= 360) {
+          // Volta inteira: disco completo preenchido + seta circular completa
+          el('circle', { cx: CX, cy: CY, r: SECTOR_R, fill: 'rgba(255, 255, 255, 0.88)' }, p1SectorLayer);
+          el('circle', { cx: CX, cy: CY, r: SECTOR_R, fill: 'rgba(159, 18, 57, 0.13)' }, p1SectorLayer);
+          el('circle', {
+            cx: CX, cy: CY, r: SECTOR_R,
+            fill: 'url(#hatchCrimson)',
+            stroke: '#9f1239',
+            'stroke-width': 2.4
+          }, p1SectorLayer);
+
+          // Seta circular completa (quase 360° para mostrar a ponta da seta fechando a volta)
+          const arrowR = SECTOR_R + 18;
+          const endRad = degToRad(352);
+          const ax = CX + Math.cos(endRad) * arrowR;
+          const ay = CY - Math.sin(endRad) * arrowR;
+          el('path', {
+            d: `M ${CX + arrowR} ${CY} A ${arrowR} ${arrowR} 0 1 0 ${ax.toFixed(2)} ${ay.toFixed(2)}`,
+            fill: 'none',
+            stroke: '#9f1239',
+            'stroke-width': 2.8,
+            'stroke-linecap': 'round'
+          }, p1SectorLayer);
+
+          // Ponta da seta fechando a volta
+          el('polygon', {
+            points: `${CX + arrowR},${CY - 1} ${CX + arrowR - 6},${CY + 10} ${CX + arrowR + 6},${CY + 10}`,
+            fill: '#9f1239'
+          }, p1SectorLayer);
+        } else if (deg > 0) {
+          const rad = degToRad(deg);
+          const xEnd = CX + Math.cos(rad) * SECTOR_R;
+          const yEnd = CY - Math.sin(rad) * SECTOR_R;
+          const largeArc = deg > 180 ? 1 : 0;
+
+          // Arco anti-horário (sweep-flag = 0)
+          const dPath = `M ${CX} ${CY} L ${CX + SECTOR_R} ${CY} A ${SECTOR_R} ${SECTOR_R} 0 ${largeArc} 0 ${xEnd.toFixed(2)} ${yEnd.toFixed(2)} Z`;
+
+          el('path', { d: dPath, fill: 'rgba(255, 255, 255, 0.88)' }, p1SectorLayer);
+          el('path', { d: dPath, fill: 'rgba(159, 18, 57, 0.13)' }, p1SectorLayer);
+          el('path', {
+            d: dPath,
+            fill: 'url(#hatchCrimson)',
+            stroke: '#9f1239',
+            'stroke-width': 2.2
+          }, p1SectorLayer);
+
+          // Seta curva externa indicando o sentido anti-horário do giro
+          if (deg >= 12) {
+            const arrowR = SECTOR_R + 18;
+            const xA = CX + Math.cos(rad) * arrowR;
+            const yA = CY - Math.sin(rad) * arrowR;
+            el('path', {
+              d: `M ${CX + arrowR} ${CY} A ${arrowR} ${arrowR} 0 ${largeArc} 0 ${xA.toFixed(2)} ${yA.toFixed(2)}`,
+              fill: 'none',
+              stroke: '#9f1239',
+              'stroke-width': 2.4,
+              'stroke-linecap': 'round'
+            }, p1SectorLayer);
+
+            // Ponta da seta tangente ao giro anti-horário
+            const tx = -Math.sin(rad);
+            const ty = -Math.cos(rad);
+            const nx = Math.cos(rad);
+            const ny = -Math.sin(rad);
+            const tipX = xA + tx * 3;
+            const tipY = yA + ty * 3;
+            const b1x = xA - tx * 9 + nx * 5;
+            const b1y = yA - ty * 9 + ny * 5;
+            const b2x = xA - tx * 9 - nx * 5;
+            const b2y = yA - ty * 9 - ny * 5;
+            el('polygon', {
+              points: `${tipX.toFixed(1)},${tipY.toFixed(1)} ${b1x.toFixed(1)},${b1y.toFixed(1)} ${b2x.toFixed(1)},${b2y.toFixed(1)}`,
+              fill: '#9f1239'
+            }, p1SectorLayer);
+          }
+        }
+
+        // 3. Haste fixa na posição inicial (0°, apontando para a direita)
+        const fixedEnd = { x: CX + DISC_R, y: CY };
+        drawRubberBandSvg({ x: CX, y: CY }, fixedEnd, p1HandsLayer, true);
+
+        // Etiqueta discreta "Início" na direita
+        const startLbl = el('text', {
+          x: CX + DISC_R + 18, y: CY + 1,
+          fill: '#64748b', 'font-size': '11', 'font-weight': '800',
+          'text-anchor': 'start', 'dominant-baseline': 'middle'
+        }, p1LabelsLayer);
+        startLbl.textContent = state.p1.showDeg ? '0°' : '•';
+
+        // 4. Haste móvel arrastável (gira anti-horário de 0° a 360°)
+        const mRad = degToRad(deg);
+        const mobEnd = {
+          x: CX + Math.cos(mRad) * DISC_R,
+          y: CY - Math.sin(mRad) * DISC_R
+        };
+        drawRubberBandSvg({ x: CX, y: CY }, mobEnd, p1HandsLayer, false);
+
+        // Pino central em madeira (por cima do encontro das hastes)
+        drawWoodPegSvg(CX, CY, 8.5, p1HandsLayer);
+
+        // Alça arrastável na ponta da haste móvel (área de toque generosa)
+        const handleG = el('g', {
+          transform: `translate(${mobEnd.x.toFixed(2)}, ${mobEnd.y.toFixed(2)})`,
+          class: 'draggable-handle',
+          filter: 'url(#knobShadow)'
+        }, p1HandsLayer);
+
+        // Área de toque invisível 34px de raio
+        el('circle', { cx: 0, cy: 0, r: 34, fill: 'transparent' }, handleG);
+        // Anel de convite visual
+        el('circle', {
+          cx: 0, cy: 0, r: 17,
+          fill: '#9f1239', 'fill-opacity': 0.16,
+          stroke: '#9f1239', 'stroke-width': 2.5
+        }, handleG);
+        // Botão central da alça
+        el('circle', {
+          cx: 0, cy: 0, r: 9.5,
+          fill: '#9f1239', stroke: '#ffffff', 'stroke-width': 2.2
+        }, handleG);
+
+        handleG.addEventListener('pointerdown', startTurnDrag);
+
+        // 5. Pílula central/flutuante no disco quando Fração ou Graus estiverem ligados
+        if (state.p1.showFrac || state.p1.showDeg) {
+          let pillText = '';
+          if (state.p1.showFrac && state.p1.showDeg) {
+            pillText = deg === 0 ? '0°' : (deg === 360 ? '1 volta = 360°' : info.degFormula);
+          } else if (state.p1.showDeg) {
+            pillText = `${info.deg}°`;
+          } else {
+            pillText = info.fracText;
+          }
+
+          // Posiciona a pílula no meio do setor (ou acima do centro se 0° ou 360°)
+          let lx = CX;
+          let ly = CY - 92;
+          if (deg > 25 && deg < 340) {
+            const midRad = degToRad(deg / 2);
+            lx = CX + Math.cos(midRad) * (SECTOR_R * 0.56);
+            ly = CY - Math.sin(midRad) * (SECTOR_R * 0.56);
+          } else if (deg === 360) {
+            lx = CX;
+            ly = CY - 78;
+          } else {
+            lx = CX + 95;
+            ly = CY - 34;
+          }
+          drawDegreePillSvg(lx, ly, pillText, '#9f1239', p1LabelsLayer);
+        }
+      }
+
+      // =======================================================================
+      // AUXILIARES DE DESENHO (ELÁSTICOS, SETORES, PÍLULAS, VÉRTICES)
+      // =======================================================================
+      function drawRubberBandSvg(p1, p2, parent, isFixedBase = false) {
+        // Sombra projetada
+        el('line', {
+          x1: p1.x + 2, y1: p1.y + 3, x2: p2.x + 2, y2: p2.y + 3,
+          stroke: 'rgba(62, 46, 20, 0.16)',
+          'stroke-width': isFixedBase ? 5.2 : 6.6,
+          'stroke-linecap': 'round'
+        }, parent);
+        // Corpo dourado (#d4a017) ou base fixa mais discreta
+        el('line', {
+          x1: p1.x, y1: p1.y, x2: p2.x, y2: p2.y,
+          stroke: isFixedBase ? '#94a3b8' : '#d4a017',
+          'stroke-width': isFixedBase ? 4.4 : 5.6,
+          'stroke-linecap': 'round'
+        }, parent);
+        // Brilho superior
+        el('line', {
+          x1: p1.x, y1: p1.y, x2: p2.x, y2: p2.y,
+          stroke: isFixedBase ? '#e2e8f0' : '#f7e4a3',
+          'stroke-width': 1.7,
+          'stroke-linecap': 'round'
+        }, parent);
+      }
+
+      function getAngleVisualStyle(type) {
+        switch (type) {
+          case 'acute':
+            return { pattern: 'url(#hatchBlue)', stroke: '#1d4ed8', tint: 'rgba(29, 78, 216, 0.12)' };
+          case 'right':
+            return { pattern: 'url(#hatchCrimson)', stroke: '#9f1239', tint: 'rgba(159, 18, 57, 0.14)' };
+          case 'obtuse':
+            return { pattern: 'url(#hatchAmber)', stroke: '#b45309', tint: 'rgba(180, 83, 9, 0.13)' };
+          case 'reflex':
+          case 'straight':
+            return { pattern: 'url(#hatchPurple)', stroke: '#6d28d9', tint: 'rgba(109, 40, 217, 0.13)' };
+          default:
+            return { pattern: 'url(#hatchCrimson)', stroke: '#9f1239', tint: 'rgba(159, 18, 57, 0.12)' };
+        }
+      }
+
+      function drawAngleSectorSvg(opts, parent) {
+        const {
+          cx, cy, radius, startAngle, sweepRad,
+          fillPattern, strokeColor, fillTint, isRightSquare
+        } = opts;
+
+        if (sweepRad <= 0.005) return;
+
+        if (isRightSquare) {
+          const s = Math.min(24, radius * 0.62);
+          const ux = Math.cos(startAngle) * s;
+          const uy = Math.sin(startAngle) * s;
+          const endA = startAngle + Math.PI / 2;
+          const vx = Math.cos(endA) * s;
+          const vy = Math.sin(endA) * s;
+
+          const sqD = `M ${cx} ${cy} L ${cx + ux} ${cy + uy} L ${cx + ux + vx} ${cy + uy + vy} L ${cx + vx} ${cy + vy} Z`;
+          el('path', { d: sqD, fill: 'rgba(255, 255, 255, 0.90)', stroke: strokeColor, 'stroke-width': 2 }, parent);
+          el('path', { d: sqD, fill: fillTint, stroke: 'none' }, parent);
+          el('circle', { cx: cx + (ux + vx) * 0.5, cy: cy + (uy + vy) * 0.5, r: 2.3, fill: strokeColor }, parent);
+          return;
+        }
+
+        const endAngle = startAngle + sweepRad;
+        const x1 = cx + Math.cos(startAngle) * radius;
+        const y1 = cy + Math.sin(startAngle) * radius;
+        const x2 = cx + Math.cos(endAngle) * radius;
+        const y2 = cy + Math.sin(endAngle) * radius;
+        const largeArc = sweepRad > Math.PI ? 1 : 0;
+
+        const d = `M ${cx} ${cy} L ${x1} ${y1} A ${radius} ${radius} 0 ${largeArc} 1 ${x2} ${y2} Z`;
+        el('path', { d, fill: 'rgba(255, 255, 255, 0.88)' }, parent);
+        el('path', { d, fill: fillTint }, parent);
+        el('path', { d, fill: fillPattern, stroke: strokeColor, 'stroke-width': 1.8 }, parent);
+      }
+
+      function drawDegreePillSvg(x, y, text, color, parent) {
+        const g = el('g', { transform: `translate(${x.toFixed(1)}, ${y.toFixed(1)})`, 'pointer-events': 'none' }, parent);
+        const w = Math.max(40, text.length * 7.6 + 16);
+        el('rect', {
+          x: -w / 2, y: -12, width: w, height: 24, rx: 12,
+          fill: 'rgba(255, 255, 255, 0.96)',
+          stroke: color,
+          'stroke-width': 1.7
+        }, g);
+        const t = el('text', {
+          x: 0, y: 1,
+          fill: '#0f172a',
+          'font-size': '11.5',
+          'font-weight': '800',
+          'text-anchor': 'middle',
+          'dominant-baseline': 'middle'
+        }, g);
+        t.textContent = text;
+      }
+
+      function drawInteractiveVertexSvg(opts, parent) {
+        const { x, y, label, color, isSelected, onDown } = opts;
+        const g = el('g', { class: 'draggable-pin' }, parent);
+
+        if (isSelected) {
+          el('circle', {
+            cx: x, cy: y, r: 17,
+            fill: 'none', stroke: color, 'stroke-width': 2.2, 'stroke-dasharray': '4 3', opacity: '0.85'
+          }, g);
+        }
+
+        el('circle', {
+          cx: x, cy: y, r: 12.5,
+          fill: color, 'fill-opacity': 0.16, stroke: color, 'stroke-width': 2.5
+        }, g);
+
+        const lx = x > 510 ? x - 20 : x + 20;
+        const ly = y < 90 ? y + 20 : y - 18;
+        el('circle', { cx: lx, cy: ly, r: 11, fill: color }, g);
+        const txt = el('text', {
+          x: lx, y: ly + 0.8,
+          fill: '#ffffff',
+          'font-size': label.length > 1 ? '10' : '11.5',
+          'font-weight': '800',
+          'text-anchor': 'middle',
+          'dominant-baseline': 'middle',
+          'pointer-events': 'none'
+        }, g);
+        txt.textContent = label;
+
+        const hit = el('circle', { cx: x, cy: y, r: 26, fill: 'transparent' }, g);
+        hit.addEventListener('pointerdown', onDown);
+      }
+
+      // =======================================================================
+      // RENDERIZAÇÃO DA FASE 2 E DA FASE 3
+      // =======================================================================
+      function renderPhase2() {
+        const a = computePhase2Angle();
+        stageToast.classList.add('hidden');
+
+        const minSide = Math.min(dist(a.pV, a.pA), dist(a.pV, a.pB));
+        const sectorR = clamp(minSide * 0.45, 36, 68);
+
+        // No Modo Visual Puro, nunca entrega o quadradinho de 90° nem cor classificatória
+        const revealMode = state.p2.showClass || state.p2.showMeasure;
+        const revealRight = revealMode && a.type === 'right';
+        const sectorStyle = getAngleVisualStyle(revealMode ? a.type : 'neutral');
+
+        drawAngleSectorSvg({
+          cx: a.pV.x, cy: a.pV.y,
+          radius: sectorR,
+          startAngle: a.startAngle,
+          sweepRad: a.sweepRad,
+          fillPattern: sectorStyle.pattern,
+          strokeColor: sectorStyle.stroke,
+          fillTint: sectorStyle.tint,
+          isRightSquare: revealRight
+        }, layerSectors);
+
+        drawRubberBandSvg(a.pV, a.pA, layerBands);
+        drawRubberBandSvg(a.pV, a.pB, layerBands);
+
+        if (state.p2.showMeasure) {
+          const midA = a.startAngle + a.sweepRad / 2;
+          const distLabel = revealRight ? 42 : sectorR + 22;
+          const lx = clamp(a.pV.x + Math.cos(midA) * distLabel, 34, 566);
+          const ly = clamp(a.pV.y + Math.sin(midA) * distLabel, 24, 576);
+          drawDegreePillSvg(lx, ly, formatDeg(a.deg), sectorStyle.stroke, layerDegreeLabels);
+        }
+
+        drawInteractiveVertexSvg({
+          x: a.pA.x, y: a.pA.y, label: 'A', color: '#0f766e', isSelected: false,
+          onDown: (e) => startPinDrag(e, 'pin-p2', 'a')
+        }, layerVertices);
+
+        drawInteractiveVertexSvg({
+          x: a.pB.x, y: a.pB.y, label: 'B', color: '#0f766e', isSelected: false,
+          onDown: (e) => startPinDrag(e, 'pin-p2', 'b')
+        }, layerVertices);
+
+        drawInteractiveVertexSvg({
+          x: a.pV.x, y: a.pV.y, label: 'V', color: '#9f1239', isSelected: true,
+          onDown: (e) => startPinDrag(e, 'pin-p2', 'v')
+        }, layerVertices);
+      }
+
+      function renderPhase3() {
+        const info = analyzePolygon();
+
+        if (info.selfIntersects) {
+          stageToastText.textContent = 'Elásticos cruzados: não forma polígono simples.';
+          stageToast.classList.remove('hidden');
+        } else if (info.degenerateArea) {
+          stageToastText.textContent = 'Todos os vértices ficaram alinhados! Mova um pino para abrir o polígono.';
+          stageToast.classList.remove('hidden');
+        } else {
+          stageToast.classList.add('hidden');
+        }
+
+        // Preenchimento suave do polígono
+        const polyPoints = info.sPts.map(p => `${p.x},${p.y}`).join(' ');
+        el('polygon', {
+          points: polyPoints,
+          fill: info.valid ? 'rgba(212, 160, 23, 0.14)' : 'rgba(220, 38, 38, 0.08)',
+          stroke: 'none'
+        }, layerPolyFill);
+
+        // Setores dos ângulos internos (sempre pelo lado de dentro, inclusive > 180°)
+        if (info.valid && state.p3.showAngles) {
+          info.angles.forEach((ang, idx) => {
+            const prev = info.sPts[(idx - 1 + info.n) % info.n];
+            const next = info.sPts[(idx + 1) % info.n];
+            const minEdge = Math.min(dist(ang.curr, prev), dist(ang.curr, next));
+            const r = clamp(minEdge * 0.36, 24, 44);
+            const st = getAngleVisualStyle(ang.type);
+
+            drawAngleSectorSvg({
+              cx: ang.curr.x, cy: ang.curr.y,
+              radius: r,
+              startAngle: ang.startAngle,
+              sweepRad: ang.sweepRad,
+              fillPattern: st.pattern,
+              strokeColor: st.stroke,
+              fillTint: st.tint,
+              isRightSquare: ang.type === 'right'
+            }, layerSectors);
+          });
+        }
+
+        // Elásticos fechados
+        for (let i = 0; i < info.n; i++) {
+          drawRubberBandSvg(info.sPts[i], info.sPts[(i + 1) % info.n], layerBands);
+        }
+
+        // Medidas em graus dos ângulos internos
+        if (info.valid && state.p3.showAngles) {
+          info.angles.forEach((ang) => {
+            const midA = ang.startAngle + ang.sweepRad / 2;
+            const st = getAngleVisualStyle(ang.type);
+            const distLbl = ang.type === 'reflex' ? 38 : 44;
+            const lx = clamp(ang.curr.x + Math.cos(midA) * distLbl, 34, 566);
+            const ly = clamp(ang.curr.y + Math.sin(midA) * distLbl, 24, 576);
+            drawDegreePillSvg(lx, ly, formatDeg(ang.deg), st.stroke, layerDegreeLabels);
+          });
+        }
+
+        // Vértices V1..Vn
+        info.sPts.forEach((pt, idx) => {
+          const isSel = idx === state.p3.selectedIdx;
+          drawInteractiveVertexSvg({
+            x: pt.x, y: pt.y,
+            label: `V${idx + 1}`,
+            color: isSel ? '#9f1239' : '#b45309',
+            isSelected: isSel,
+            onDown: (e) => {
+              state.p3.selectedIdx = idx;
+              syncUI();
+              renderScene();
+              startPinDrag(e, 'pin-p3', idx);
+            }
+          }, layerVertices);
+        });
+      }
+
+      function renderScene() {
+        const isP1 = state.phase === 1;
+        scenePhase1.setAttribute('display', isP1 ? 'inline' : 'none');
+        sceneGrid.setAttribute('display', isP1 ? 'none' : 'inline');
+
+        if (isP1) {
+          stageToast.classList.add('hidden');
+          renderPhase1();
+        } else {
+          layerPolyFill.innerHTML = '';
+          layerSectors.innerHTML = '';
+          layerBands.innerHTML = '';
+          layerVertices.innerHTML = '';
+          layerDegreeLabels.innerHTML = '';
+
+          if (state.phase === 2) {
+            renderPhase2();
+          } else {
+            renderPhase3();
+          }
+          updateSetSquareTransform();
+        }
+      }
+
+      // =======================================================================
+      // SINCRONIZAÇÃO DA INTERFACE (PAINEL LATERAL / INFERIOR)
+      // =======================================================================
+      function setToggleVisual(node, isOn, colorClass) {
+        node.classList.remove('is-on-teal', 'is-on-crimson', 'is-on-amber');
+        if (isOn) node.classList.add(colorClass);
+        node.setAttribute('aria-checked', String(isOn));
+      }
+
+      function syncUI() {
+        const p = state.phase;
+
+        // Abas do cabeçalho
+        tabPhase1.className = 'phase-tab' + (p === 1 ? ' active-p1' : '');
+        tabPhase1.setAttribute('aria-selected', String(p === 1));
+        tabPhase2.className = 'phase-tab' + (p === 2 ? ' active-p2' : '');
+        tabPhase2.setAttribute('aria-selected', String(p === 2));
+        tabPhase3.className = 'phase-tab' + (p === 3 ? ' active-p3' : '');
+        tabPhase3.setAttribute('aria-selected', String(p === 3));
+
+        panelPhase1.classList.toggle('hidden', p !== 1);
+        panelPhase2.classList.toggle('hidden', p !== 2);
+        panelPhase3.classList.toggle('hidden', p !== 3);
+
+        // --- SINCRONIZAÇÃO FASE 1 ---
+        if (p === 1) {
+          const info = getTurnInfo(state.p1.deg, state.p1.divisions);
+
+          p1DivSelector.querySelectorAll('.btn-chip').forEach(btn => {
+            btn.classList.toggle('active-crimson', Number(btn.dataset.div) === state.p1.divisions);
+          });
+
+          p1ShortcutBar.querySelectorAll('.btn-shortcut').forEach(btn => {
+            btn.classList.toggle('active', Math.abs(Number(btn.dataset.deg) - state.p1.deg) < 0.5);
+          });
+
+          setToggleVisual(togP1Frac, state.p1.showFrac, 'is-on-crimson');
+          setToggleVisual(togP1Deg, state.p1.showDeg, 'is-on-crimson');
+          setToggleVisual(togP1Name, state.p1.showName, 'is-on-crimson');
+
+          const anyReadout = state.p1.showFrac || state.p1.showDeg || state.p1.showName;
+          p1ReadoutCard.classList.toggle('hidden', !anyReadout);
+
+          p1ReadoutName.classList.toggle('hidden', !state.p1.showName);
+          p1ReadoutName.textContent = info.name;
+
+          p1ReadoutFrac.classList.toggle('hidden', !state.p1.showFrac);
+          p1ReadoutFrac.textContent = info.fracText;
+
+          p1ReadoutDeg.classList.toggle('hidden', !state.p1.showDeg);
+          p1ReadoutDeg.textContent = info.degFormula;
+
+          // Desafios de Giro (5)
+          btnP1ChalToggle.style.borderColor = state.p1.challengeOpen ? '#be185d' : '';
+          btnP1ChalToggle.style.background = state.p1.challengeOpen ? '#fdf2f8' : '';
+          btnP1ChalToggle.style.color = state.p1.challengeOpen ? '#9f1239' : '';
+
+          p1ChallengePanel.classList.toggle('hidden', !state.p1.challengeOpen);
+          if (state.p1.challengeOpen) {
+            const chal = TURN_CHALLENGES[state.p1.challengeIdx];
+            const passedNow = chal.check(state.p1.deg);
+            if (passedNow) state.p1.solvedIds.add(chal.id);
+
+            p1ChalIdx.textContent = String(state.p1.challengeIdx + 1);
+            p1ChalDone.textContent = String(state.p1.solvedIds.size);
+            p1ChalText.textContent = chal.text;
+
+            p1ChallengePanel.classList.toggle('solved', passedNow);
+            if (passedNow) {
+              p1ChalStatus.className = 'status-ok';
+              p1ChalStatus.innerHTML = '&#10004; Desafio cumprido!';
+              btnP1ChalNextDone.classList.toggle('hidden', state.p1.challengeIdx >= TURN_CHALLENGES.length - 1);
+            } else {
+              p1ChalStatus.className = 'status-pending';
+              p1ChalStatus.textContent = state.p1.solvedIds.has(chal.id)
+                ? 'Já concluído antes — gire para validar novamente.'
+                : 'Arraste a haste móvel no sentido anti-horário...';
+              btnP1ChalNextDone.classList.add('hidden');
+            }
+          }
+          labelP1ChalBtn.textContent = `Desafios (${state.p1.solvedIds.size}/5)`;
+        }
+
+        // --- SINCRONIZAÇÃO FASE 2 ---
+        if (p === 2) {
+          const a = computePhase2Angle();
+          const isSnapped =
+            state.p2.showSquare &&
+            Math.hypot(state.square.x - a.pV.x, state.square.y - a.pV.y) < 4;
+
+          btnSnapP2.classList.toggle('dark', isSnapped);
+          labelSnapP2.textContent = isSnapped ? 'Recolher Esquadro' : 'Encaixar Esquadro';
+
+          setToggleVisual(togP2Square, state.p2.showSquare, 'is-on-teal');
+          setToggleVisual(togP2Class, state.p2.showClass, 'is-on-teal');
+          setToggleVisual(togP2Measure, state.p2.showMeasure, 'is-on-teal');
+
+          if (state.p2.showClass) {
+            p2ClassCard.className = `info-card ${a.tone}`;
+            p2ClassName.textContent = a.label;
+            p2ClassDesc.textContent = a.desc;
+            if (state.p2.showMeasure) {
+              p2ClassDegBadge.classList.remove('hidden');
+              p2ClassDegBadge.textContent = formatDeg(a.deg);
+              p2ClassDegBadge.className = 'badge ' + (
+                a.type === 'acute' ? 'badge-acute' :
+                a.type === 'right' ? 'badge-right' :
+                a.type === 'obtuse' ? 'badge-obtuse' : 'badge-reflex'
+              );
+            } else {
+              p2ClassDegBadge.classList.add('hidden');
+            }
+            p2MeasureOnlyCard.classList.add('hidden');
+          } else {
+            p2ClassCard.classList.add('hidden');
+            if (state.p2.showMeasure) {
+              p2MeasureOnlyCard.classList.remove('hidden');
+              p2MeasureOnlyVal.textContent = formatDeg(a.deg);
+            } else {
+              p2MeasureOnlyCard.classList.add('hidden');
+            }
+          }
+        }
+
+        // --- SINCRONIZAÇÃO FASE 3 ---
+        if (p === 3) {
+          const info = analyzePolygon();
+
+          sidesSelector.querySelectorAll('.btn-chip').forEach(btn => {
+            btn.classList.toggle('active-amber', Number(btn.dataset.sides) === state.p3.sides);
+          });
+
+          const selPt = info.sPts[state.p3.selectedIdx];
+          const isSnapped =
+            state.p3.showSquare &&
+            Math.hypot(state.square.x - selPt.x, state.square.y - selPt.y) < 4;
+
+          btnSnapP3.classList.toggle('dark', isSnapped);
+          labelSnapP3.textContent = isSnapped
+            ? 'Recolher Esquadro'
+            : `Esquadro em V${state.p3.selectedIdx + 1}`;
+
+          btnP3ChalToggle.style.borderColor = state.p3.challengeOpen ? '#d97706' : '';
+          btnP3ChalToggle.style.background = state.p3.challengeOpen ? '#fffbeb' : '';
+          btnP3ChalToggle.style.color = state.p3.challengeOpen ? '#92400e' : '';
+
+          setToggleVisual(togP3Class, state.p3.showClass, 'is-on-amber');
+          setToggleVisual(togP3Angles, state.p3.showAngles, 'is-on-amber');
+          setToggleVisual(togP3Square, state.p3.showSquare, 'is-on-teal');
+
+          if (state.p3.showClass && info.valid) {
+            p3ClassCard.classList.remove('hidden');
+            p3PolyName.textContent = info.quadType && info.quadType !== 'Quadrilátero qualquer'
+              ? `${info.baseName} (${info.quadType})`
+              : info.baseName;
+
+            p3ConvexBadge.textContent = info.isConvex ? 'Convexo' : 'Côncavo';
+            p3ConvexBadge.className = 'badge ' + (info.isConvex ? 'badge-convex' : 'badge-concave');
+            p3PolyDetails.innerHTML = info.details;
+
+            const badges = [];
+            if (info.counts.acute > 0) badges.push(`<span class="badge badge-acute">${info.counts.acute} agudo${info.counts.acute > 1 ? 's' : ''}</span>`);
+            if (info.counts.right > 0) badges.push(`<span class="badge badge-right">${info.counts.right} reto${info.counts.right > 1 ? 's' : ''}</span>`);
+            if (info.counts.obtuse > 0) badges.push(`<span class="badge badge-obtuse">${info.counts.obtuse} obtuso${info.counts.obtuse > 1 ? 's' : ''}</span>`);
+            if (info.counts.reflex > 0) badges.push(`<span class="badge badge-reflex">${info.counts.reflex} &gt; 180°</span>`);
+            p3AngleCounts.innerHTML = badges.join('');
+          } else {
+            p3ClassCard.classList.add('hidden');
+          }
+
+          // Desafios de Construção (6)
+          p3ChallengePanel.classList.toggle('hidden', !state.p3.challengeOpen);
+          if (state.p3.challengeOpen) {
+            const chal = POLY_CHALLENGES[state.p3.challengeIdx];
+            const passedNow = chal.check(info);
+            if (passedNow) state.p3.solvedIds.add(chal.id);
+
+            p3ChalIdx.textContent = String(state.p3.challengeIdx + 1);
+            p3ChalDone.textContent = String(state.p3.solvedIds.size);
+            p3ChalText.textContent = chal.text;
+
+            p3ChallengePanel.classList.toggle('solved', passedNow);
+            if (passedNow) {
+              p3ChalStatus.className = 'status-ok';
+              p3ChalStatus.innerHTML = '&#10004; Desafio cumprido!';
+              btnP3ChalNextDone.classList.toggle('hidden', state.p3.challengeIdx >= POLY_CHALLENGES.length - 1);
+            } else {
+              p3ChalStatus.className = 'status-pending';
+              p3ChalStatus.textContent = state.p3.solvedIds.has(chal.id)
+                ? 'Já concluído antes — ajuste para validar novamente.'
+                : 'Arraste os vértices na grade para cumprir...';
+              btnP3ChalNextDone.classList.add('hidden');
+            }
+          }
+          labelP3ChalBtn.textContent = `Desafios (${state.p3.solvedIds.size}/6)`;
+        }
+      }
+
+      // =======================================================================
+      // INTERAÇÕES (POINTER EVENTS: GIRO CONTÍNUO, PINOS E ESQUADRO)
+      // =======================================================================
+      function pointerAngleCCWDeg(pt) {
+        // Ângulo matemático anti-horário em [0, 360) a partir da direita (+X)
+        return mod(radToDeg(Math.atan2(CY - pt.y, pt.x - CX)), 360);
+      }
+
+      function startTurnDrag(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        if (state.drag) return;
+        const pt = getSvgPoint(e);
+        state.drag = {
+          type: 'turn-hand',
+          pointerId: e.pointerId,
+          lastPtrDeg: pointerAngleCCWDeg(pt)
+        };
+        svg.setPointerCapture(e.pointerId);
+      }
+
+      function startPinDrag(e, type, key) {
+        e.preventDefault();
+        e.stopPropagation();
+        if (state.drag) return;
+        state.drag = { type, key, pointerId: e.pointerId };
+        svg.setPointerCapture(e.pointerId);
+      }
+
+      function startSquareDrag(e, type) {
+        e.preventDefault();
+        e.stopPropagation();
+        if (state.drag) return;
+        state.square.anim = null;
+        const pt = getSvgPoint(e);
+        state.drag = {
+          type,
+          pointerId: e.pointerId,
+          offsetX: pt.x - state.square.x,
+          offsetY: pt.y - state.square.y
+        };
+        svg.setPointerCapture(e.pointerId);
+      }
+
+      svg.addEventListener('pointermove', (e) => {
+        if (!state.drag || e.pointerId !== state.drag.pointerId) return;
+        const pt = getSvgPoint(e);
+
+        if (state.drag.type === 'turn-hand') {
+          // Rastreia delta angular contínuo para distinguir 0° de 360° sem salto
+          if (Math.hypot(pt.x - CX, pt.y - CY) < 14) return;
+          const currPtrDeg = pointerAngleCCWDeg(pt);
+          const delta = shortestAngleDiffDeg(state.drag.lastPtrDeg, currPtrDeg);
+          state.drag.lastPtrDeg = currPtrDeg;
+
+          state.p1.rawDeg = clamp(state.p1.rawDeg + delta, 0, 360);
+          const snapped = snapTurnAngle(state.p1.rawDeg, state.p1.divisions);
+          if (snapped !== state.p1.deg) {
+            state.p1.deg = snapped;
+            renderScene();
+            syncUI();
+          }
+        } else if (state.drag.type === 'pin-p2') {
+          const g = svgToNearestGrid(pt.x, pt.y);
+          const key = state.drag.key;
+          const others = ['a', 'v', 'b'].filter(k => k !== key).map(k => state.p2[k]);
+          if (others.some(o => o.x === g.x && o.y === g.y)) return;
+
+          if (state.p2[key].x !== g.x || state.p2[key].y !== g.y) {
+            state.p2[key] = g;
+            renderScene();
+            syncUI();
+          }
+        } else if (state.drag.type === 'pin-p3') {
+          const g = svgToNearestGrid(pt.x, pt.y);
+          const idx = state.drag.key;
+          const occupied = state.p3.vertices.some((v, i) => i !== idx && v.x === g.x && v.y === g.y);
+          if (occupied) return;
+
+          if (state.p3.vertices[idx].x !== g.x || state.p3.vertices[idx].y !== g.y) {
+            state.p3.vertices[idx] = g;
+            renderScene();
+            syncUI();
+          }
+        } else if (state.drag.type === 'sq-move') {
+          let nx = clamp(pt.x - state.drag.offsetX, 20, 580);
+          let ny = clamp(pt.y - state.drag.offsetY, 20, 580);
+
+          // Imã suave nos vértices ativos e nos pinos da grade
+          const priorityTargets = state.phase === 2
+            ? [gridToSvg(state.p2.v.x, state.p2.v.y)]
+            : state.p3.vertices.map(v => gridToSvg(v.x, v.y));
+
+          let snapped = false;
+          for (const t of priorityTargets) {
+            if (Math.hypot(nx - t.x, ny - t.y) <= 22) {
+              nx = t.x;
+              ny = t.y;
+              snapped = true;
+              break;
+            }
+          }
+          if (!snapped) {
+            const gNear = svgToNearestGrid(nx, ny);
+            const gp = gridToSvg(gNear.x, gNear.y);
+            if (Math.hypot(nx - gp.x, ny - gp.y) <= 12) {
+              nx = gp.x;
+              ny = gp.y;
+            }
+          }
+
+          state.square.x = nx;
+          state.square.y = ny;
+          updateSetSquareTransform();
+          syncUI();
+        } else if (state.drag.type === 'sq-rot') {
+          const dx = pt.x - state.square.x;
+          const dy = pt.y - state.square.y;
+          if (Math.hypot(dx, dy) > 8) {
+            state.square.angle = Math.atan2(dy, dx);
+            updateSetSquareTransform();
+          }
+        }
+      });
+
+      function endDrag(e) {
+        if (!state.drag || e.pointerId !== state.drag.pointerId) return;
+        // Ao soltar na Fase 1, sincroniza rawDeg com o valor encaixado
+        if (state.drag.type === 'turn-hand') {
+          state.p1.rawDeg = state.p1.deg;
+        }
+        state.drag = null;
+      }
+
+      svg.addEventListener('pointerup', endDrag);
+      svg.addEventListener('pointercancel', endDrag);
+
+      // =======================================================================
+      // LOOP DE ANIMAÇÃO DO ESQUADRO
+      // =======================================================================
+      function tick(now) {
+        if (state.square.anim) {
+          const a = state.square.anim;
+          const t = Math.min(1, (now - a.startTime) / a.duration);
+          const k = easeOutCubic(t);
+
+          state.square.x = a.startX + (a.targetX - a.startX) * k;
+          state.square.y = a.startY + (a.targetY - a.startY) * k;
+          state.square.angle = a.startAng + (a.targetAng - a.startAng) * k;
+          updateSetSquareTransform();
+
+          if (t >= 1) {
+            state.square.anim = null;
+            syncUI();
+          }
+        }
+        requestAnimationFrame(tick);
+      }
+
+      // =======================================================================
+      // EVENTOS DOS BOTÕES E INTERRUPTORES
+      // =======================================================================
+      function switchPhase(nextPhase) {
+        if (state.phase === nextPhase) return;
+        state.phase = nextPhase;
+        state.square.anim = null;
+        renderScene();
+        syncUI();
+      }
+
+      tabPhase1.addEventListener('click', () => switchPhase(1));
+      tabPhase2.addEventListener('click', () => switchPhase(2));
+      tabPhase3.addEventListener('click', () => switchPhase(3));
+
+      // --- Eventos Fase 1 ---
+      p1DivSelector.addEventListener('click', (e) => {
+        const btn = e.target.closest('.btn-chip');
+        if (!btn) return;
+        state.p1.divisions = Number(btn.dataset.div);
+        state.p1.deg = snapTurnAngle(state.p1.rawDeg, state.p1.divisions);
+        state.p1.rawDeg = state.p1.deg;
+        renderScene();
+        syncUI();
+      });
+
+      p1ShortcutBar.addEventListener('click', (e) => {
+        const btn = e.target.closest('.btn-shortcut');
+        if (!btn) return;
+        const targetDeg = Number(btn.dataset.deg);
+        state.p1.rawDeg = targetDeg;
+        state.p1.deg = targetDeg;
+        renderScene();
+        syncUI();
+      });
+
+      btnP1ChalToggle.addEventListener('click', () => {
+        state.p1.challengeOpen = !state.p1.challengeOpen;
+        syncUI();
+      });
+
+      btnP1ChalPrev.addEventListener('click', () => {
+        state.p1.challengeIdx = mod(state.p1.challengeIdx - 1, TURN_CHALLENGES.length);
+        syncUI();
+      });
+
+      btnP1ChalNext.addEventListener('click', () => {
+        state.p1.challengeIdx = mod(state.p1.challengeIdx + 1, TURN_CHALLENGES.length);
+        syncUI();
+      });
+
+      btnP1ChalNextDone.addEventListener('click', () => {
+        state.p1.challengeIdx = mod(state.p1.challengeIdx + 1, TURN_CHALLENGES.length);
+        syncUI();
+      });
+
+      btnResetP1.addEventListener('click', () => {
+        state.p1.divisions = 4;
+        state.p1.rawDeg = 90;
+        state.p1.deg = 90;
+        state.p1.showFrac = false;
+        state.p1.showDeg = false;
+        state.p1.showName = false;
+        renderScene();
+        syncUI();
+      });
+
+      // --- Eventos Fase 2 ---
+      btnSnapP2.addEventListener('click', () => {
+        const a = computePhase2Angle();
+        const isSnapped =
+          state.p2.showSquare &&
+          Math.hypot(state.square.x - a.pV.x, state.square.y - a.pV.y) < 4;
+
+        if (isSnapped) {
+          animateSetSquareTo(370, 250, 0.22);
+        } else {
+          animateSetSquareTo(a.pV.x, a.pV.y, a.bestSquareAngle);
+        }
+      });
+
+      btnRandomAngle.addEventListener('click', () => {
+        let idx = Math.floor(Math.random() * ANGLE_PRESETS.length);
+        if (idx === state.p2.lastPresetIdx) idx = (idx + 1) % ANGLE_PRESETS.length;
+        state.p2.lastPresetIdx = idx;
+        const p = ANGLE_PRESETS[idx];
+        state.p2.v = { ...p.v };
+        state.p2.a = { ...p.a };
+        state.p2.b = { ...p.b };
+        animateSetSquareTo(385, 235, 0.18);
+        renderScene();
+        syncUI();
+      });
+
+      btnResetP2.addEventListener('click', () => {
+        state.p2.v = { x: 2, y: 5 };
+        state.p2.a = { x: 5, y: 5 };
+        state.p2.b = { x: 4, y: 2 };
+        state.p2.showSquare = true;
+        state.p2.showClass = false;
+        state.p2.showMeasure = false;
+        animateSetSquareTo(350, 250, 0.22);
+        renderScene();
+        syncUI();
+      });
+
+      // --- Eventos Fase 3 ---
+      sidesSelector.addEventListener('click', (e) => {
+        const btn = e.target.closest('.btn-chip');
+        if (!btn) return;
+        const n = Number(btn.dataset.sides);
+        if (!POLY_PRESETS[n]) return;
+        state.p3.sides = n;
+        state.p3.vertices = POLY_PRESETS[n].map(p => ({ ...p }));
+        state.p3.selectedIdx = 0;
+        renderScene();
+        syncUI();
+      });
+
+      btnSnapP3.addEventListener('click', () => {
+        const info = analyzePolygon();
+        const selIdx = state.p3.selectedIdx;
+        const selPt = info.sPts[selIdx];
+        const isSnapped =
+          state.p3.showSquare &&
+          Math.hypot(state.square.x - selPt.x, state.square.y - selPt.y) < 4;
+
+        if (isSnapped) {
+          animateSetSquareTo(380, 235, 0.2);
+        } else {
+          animateSetSquareTo(selPt.x, selPt.y, info.angles[selIdx].bestSquareAngle);
+        }
+      });
+
+      btnP3ChalToggle.addEventListener('click', () => {
+        state.p3.challengeOpen = !state.p3.challengeOpen;
+        syncUI();
+      });
+
+      function goToPolyChallenge(newIdx) {
+        state.p3.challengeIdx = mod(newIdx, POLY_CHALLENGES.length);
+        const chal = POLY_CHALLENGES[state.p3.challengeIdx];
+        if (chal.suggestedSides && state.p3.sides !== chal.suggestedSides) {
+          state.p3.sides = chal.suggestedSides;
+          state.p3.vertices = POLY_PRESETS[chal.suggestedSides].map(p => ({ ...p }));
+          state.p3.selectedIdx = 0;
+          renderScene();
+        }
+        syncUI();
+      }
+
+      btnP3ChalPrev.addEventListener('click', () => goToPolyChallenge(state.p3.challengeIdx - 1));
+      btnP3ChalNext.addEventListener('click', () => goToPolyChallenge(state.p3.challengeIdx + 1));
+      btnP3ChalNextDone.addEventListener('click', () => goToPolyChallenge(state.p3.challengeIdx + 1));
+
+      btnResetP3.addEventListener('click', () => {
+        state.p3.vertices = POLY_PRESETS[state.p3.sides].map(p => ({ ...p }));
+        state.p3.selectedIdx = 0;
+        state.p3.showClass = false;
+        state.p3.showAngles = false;
+        state.p3.showSquare = false;
+        renderScene();
+        syncUI();
+      });
+
+      // Helper para toggles (clique + teclado)
+      function bindToggle(node, fn) {
+        node.addEventListener('click', () => {
+          fn();
+          renderScene();
+          syncUI();
+        });
+        node.addEventListener('keydown', (e) => {
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            fn();
+            renderScene();
+            syncUI();
+          }
+        });
+      }
+
+      bindToggle(togP1Frac, () => { state.p1.showFrac = !state.p1.showFrac; });
+      bindToggle(togP1Deg, () => { state.p1.showDeg = !state.p1.showDeg; });
+      bindToggle(togP1Name, () => { state.p1.showName = !state.p1.showName; });
+
+      bindToggle(togP2Square, () => { state.p2.showSquare = !state.p2.showSquare; });
+      bindToggle(togP2Class, () => { state.p2.showClass = !state.p2.showClass; });
+      bindToggle(togP2Measure, () => { state.p2.showMeasure = !state.p2.showMeasure; });
+
+      bindToggle(togP3Class, () => { state.p3.showClass = !state.p3.showClass; });
+      bindToggle(togP3Angles, () => { state.p3.showAngles = !state.p3.showAngles; });
+      bindToggle(togP3Square, () => { state.p3.showSquare = !state.p3.showSquare; });
+
+      // =======================================================================
+      // INICIALIZAÇÃO
+      // =======================================================================
+      window.onload = function () {
+        buildStaticGrid();
+        buildSetSquareDom();
+        renderScene();
+        syncUI();
+        requestAnimationFrame(tick);
+      };
+    })();
+  </script>
+<div id="autoriaTxt" onclick="this.classList.remove('on')" style="position:fixed;top:44px;right:8px;z-index:2147483000;max-width:260px;padding:8px 10px;border-radius:8px;background:#222;color:#fff;font:12px/1.35 sans-serif;display:none">© Ygor B. F. Ferreira · A Saga dos Reinos Matemáticos · Matematkês · uso livre em sala</div><style>#autoriaTxt.on{display:block!important}</style>
+</body>
+</html>

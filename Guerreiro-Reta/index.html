@@ -1,0 +1,4194 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Guerreiro da Reta Numerada — Matéria & Antimatéria</title>
+  <style>
+    /* =====================================================================
+       DESIGN SYSTEM — ALTO CONTRASTE E COMPACTO (Celular, PC e Chat Preview)
+       ===================================================================== */
+    :root {
+      --bg-deep: #0b1120;
+      --bg-main: #0f172a;
+      --bg-card: #1e293b;
+      --bg-soft: #162033;
+      --border: #334155;
+      --border-light: #475569;
+
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+      --text-dim: #64748b;
+
+      --pos: #38bdf8;         /* Matéria (+): Azul-ciano */
+      --pos-bg: rgba(56, 189, 248, 0.14);
+      --pos-border: rgba(56, 189, 248, 0.52);
+
+      --neg: #fb923c;         /* Antimatéria (−): Laranja vibrante */
+      --neg-bg: rgba(251, 146, 60, 0.14);
+      --neg-border: rgba(251, 146, 60, 0.52);
+
+      --gold: #facc15;        /* Origem (0) e Portal */
+      --mage: #c084fc;        /* Mago 1 (Elemento Neutro) */
+      --mage-bg: rgba(192, 132, 252, 0.16);
+      --mage-border: rgba(192, 132, 252, 0.5);
+
+      --success: #4ade80;
+      --danger: #f87171;
+
+      --radius: 12px;
+      --radius-sm: 9px;
+      --shadow: 0 8px 24px rgba(0, 0, 0, 0.36);
+      --font: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html, body {
+      min-height: 100dvh;
+      font-family: var(--font);
+      background: radial-gradient(circle at top, #172554 0%, var(--bg-main) 48%, var(--bg-deep) 100%);
+      color: var(--text-main);
+      line-height: 1.35;
+      overflow-x: hidden;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* =====================================================================
+       LAYOUT FLEXBOX VERTICAL COMPACTO
+       ===================================================================== */
+    .app-shell {
+      width: 100%;
+      max-width: 1040px;
+      min-height: 100dvh;
+      margin: 0 auto;
+      padding: clamp(6px, 1.2vh, 12px) clamp(8px, 1.5vw, 14px);
+      display: flex;
+      flex-direction: column;
+      gap: clamp(6px, 1.1vh, 10px);
+    }
+
+    /* Cabeçalho compacto em 1 linha */
+    .top-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      background: rgba(30, 41, 59, 0.9);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 6px 12px;
+      box-shadow: var(--shadow);
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      min-width: 0;
+    }
+
+    .brand-shield {
+      width: 30px;
+      height: 30px;
+      border-radius: 9px;
+      background: linear-gradient(135deg, #0369a1, #1e3a8a);
+      border: 1.5px solid rgba(56, 189, 248, 0.55);
+      display: grid;
+      place-items: center;
+      flex-shrink: 0;
+    }
+
+    .brand h1 {
+      font-size: clamp(0.88rem, 1.8vw, 1.14rem);
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .top-utils {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      flex-shrink: 0;
+    }
+
+    .icon-btn {
+      background: var(--bg-soft);
+      color: var(--text-muted);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 5px 9px;
+      font-family: inherit;
+      font-size: 0.78rem;
+      font-weight: 700;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      transition: all 0.16s ease;
+      min-height: 30px;
+    }
+
+    .icon-btn:hover {
+      color: var(--text-main);
+      border-color: var(--border-light);
+      background: #243249;
+    }
+
+    .icon-btn.active {
+      background: var(--mage-bg);
+      border-color: var(--mage-border);
+      color: #f3e8ff;
+    }
+
+    /* Abas secundárias discretas no topo (6 módulos) */
+    .tabs-bar {
+      display: grid;
+      grid-template-columns: repeat(6, 1fr);
+      gap: 5px;
+    }
+
+    .tab-btn {
+      background: rgba(30, 41, 59, 0.78);
+      color: var(--text-muted);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 6px 6px;
+      font-family: inherit;
+      font-size: clamp(0.71rem, 1.2vw, 0.83rem);
+      font-weight: 700;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 4px;
+      transition: all 0.16s ease;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .tab-btn:hover {
+      color: var(--text-main);
+      border-color: var(--border-light);
+    }
+
+    .tab-btn.active {
+      background: linear-gradient(135deg, rgba(56, 189, 248, 0.22), rgba(30, 41, 59, 0.96));
+      border-color: var(--pos);
+      color: var(--text-main);
+      box-shadow: 0 0 0 1px rgba(56, 189, 248, 0.22);
+    }
+
+    /* =====================================================================
+       PALCO DA RETA NUMERADA (SVG RESPONSIVO)
+       ===================================================================== */
+    .stage-card {
+      background: linear-gradient(180deg, #131c31 0%, #0f172a 100%);
+      border: 1.5px solid var(--border);
+      border-radius: var(--radius);
+      padding: 8px 10px 7px;
+      box-shadow: var(--shadow);
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+      position: relative;
+    }
+
+    .stage-top-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      background: rgba(30, 41, 59, 0.85);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 6px 10px;
+      min-height: 36px;
+    }
+
+    .narration-wrap {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex: 1;
+      min-width: 0;
+      font-size: clamp(0.78rem, 1.45vw, 0.94rem);
+      font-weight: 600;
+      color: var(--text-main);
+    }
+
+    .status-pill {
+      padding: 2px 8px;
+      border-radius: 999px;
+      font-size: 0.7rem;
+      font-weight: 800;
+      letter-spacing: 0.03em;
+      text-transform: uppercase;
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+
+    .status-pill.info { background: rgba(148, 163, 184, 0.2); color: #e2e8f0; }
+    .status-pill.pos { background: var(--pos-bg); color: var(--pos); border: 1px solid var(--pos-border); }
+    .status-pill.neg { background: var(--neg-bg); color: var(--neg); border: 1px solid var(--neg-border); }
+    .status-pill.invert {
+      background: rgba(244, 63, 94, 0.24);
+      color: #fda4af;
+      border: 1px solid rgba(244, 63, 94, 0.65);
+      animation: pulsePill 0.6s ease-in-out 2;
+    }
+    .status-pill.success { background: rgba(74, 222, 128, 0.18); color: var(--success); border: 1px solid rgba(74, 222, 128, 0.5); }
+
+    @keyframes pulsePill {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.06); }
+    }
+
+    .stage-right-meta {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      flex-shrink: 0;
+    }
+
+    .pos-chip {
+      font-size: 0.78rem;
+      font-weight: 700;
+      color: var(--text-muted);
+      background: rgba(15, 23, 42, 0.85);
+      border: 1px solid var(--border);
+      padding: 3px 9px;
+      border-radius: 999px;
+      white-space: nowrap;
+    }
+
+    .pos-chip strong {
+      color: var(--gold);
+      margin-left: 3px;
+      font-size: 0.88rem;
+    }
+
+    /* Container do SVG com altura adaptada para caber sem rolagem */
+    .svg-box {
+      width: 100%;
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      user-select: none;
+    }
+
+    #numberline-svg {
+      width: 100%;
+      height: auto;
+      max-height: clamp(175px, 34dvh, 270px);
+      display: block;
+      overflow: visible;
+    }
+
+    /* Botões discretos nos cantos do palco (Demo counter / Mago 1 / Reset) */
+    .stage-corner-badge {
+      position: absolute;
+      top: 2px;
+      left: 4px;
+      font-size: 0.72rem;
+      font-weight: 800;
+      color: var(--gold);
+      background: rgba(15, 23, 42, 0.82);
+      border: 1px solid rgba(250, 204, 21, 0.35);
+      padding: 2px 8px;
+      border-radius: 999px;
+      pointer-events: none;
+      display: none;
+    }
+
+    .stage-corner-actions {
+      position: absolute;
+      top: 2px;
+      right: 4px;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      z-index: 3;
+    }
+
+    .mini-corner-btn {
+      background: rgba(15, 23, 42, 0.86);
+      color: var(--text-muted);
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      padding: 2px 8px;
+      font-family: inherit;
+      font-size: 0.72rem;
+      font-weight: 800;
+      cursor: pointer;
+      transition: all 0.16s ease;
+    }
+
+    .mini-corner-btn:hover {
+      color: var(--text-main);
+      border-color: var(--border-light);
+    }
+
+    .mini-corner-btn.mage-on {
+      background: var(--mage-bg);
+      color: #f3e8ff;
+      border-color: var(--mage-border);
+      box-shadow: 0 0 10px rgba(192, 132, 252, 0.35);
+    }
+
+    /* Animações SVG */
+    .warrior-flip {
+      transition: transform 0.45s cubic-bezier(0.34, 1.56, 0.64, 1);
+      transform-box: fill-box;
+      transform-origin: center;
+    }
+
+    .warrior-bob {
+      animation: warriorWalk 0.25s ease-in-out infinite alternate;
+    }
+
+    @keyframes warriorWalk {
+      from { transform: translateY(0px); }
+      to { transform: translateY(-3.5px); }
+    }
+
+    .warrior-win {
+      animation: warriorJump 0.42s ease-out 3;
+    }
+
+    @keyframes warriorJump {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-13px); }
+    }
+
+    .shield-pulse-active {
+      animation: shieldEnergyPulse 0.72s ease-out forwards;
+      transform-box: fill-box;
+      transform-origin: center;
+    }
+
+    @keyframes shieldEnergyPulse {
+      0% { opacity: 0.95; transform: scale(0.35); stroke-width: 4.5; }
+      60% { opacity: 0.75; transform: scale(1.9); stroke-width: 2.5; }
+      100% { opacity: 0; transform: scale(2.6); stroke-width: 1; }
+    }
+
+    .portal-spin {
+      transform-box: fill-box;
+      transform-origin: center;
+      animation: spinSlow 4s linear infinite;
+    }
+
+    @keyframes spinSlow {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+
+    /* Legenda ultra-compacta */
+    .legend-bar {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: center;
+      gap: 14px;
+      padding-top: 5px;
+      border-top: 1px solid rgba(51, 65, 85, 0.7);
+      font-size: 0.76rem;
+      font-weight: 700;
+      color: var(--text-muted);
+    }
+
+    .legend-item {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .legend-dot-gold {
+      width: 9px;
+      height: 9px;
+      border-radius: 50%;
+      background: var(--gold);
+      box-shadow: 0 0 6px rgba(250, 204, 21, 0.65);
+    }
+
+    /* =====================================================================
+       PAINÉIS DAS ABAS
+       ===================================================================== */
+    .panel {
+      display: none;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .panel.active {
+      display: flex;
+    }
+
+    .card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: clamp(10px, 1.5vh, 14px) clamp(11px, 1.8vw, 16px);
+      box-shadow: var(--shadow);
+    }
+
+    /* Display da Expressão Matemática */
+    .expr-display {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      background: var(--bg-main);
+      border: 1.5px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 8px 12px;
+      min-height: 48px;
+      font-size: clamp(1.15rem, 2.5vw, 1.65rem);
+      font-weight: 900;
+    }
+
+    .expr-token {
+      display: inline-flex;
+      align-items: center;
+      gap: 2px;
+      padding: 3px 8px;
+      border-radius: 8px;
+      border: 1.5px solid transparent;
+      transition: all 0.22s ease;
+    }
+
+    .expr-token.start-tok {
+      background: rgba(30, 41, 59, 0.9);
+      border-color: var(--border);
+    }
+
+    .expr-token.op-tok {
+      background: rgba(30, 41, 59, 0.9);
+      border-color: var(--border);
+    }
+
+    .expr-token.active-step {
+      background: rgba(56, 189, 248, 0.16);
+      border-color: var(--pos);
+      box-shadow: 0 0 12px rgba(56, 189, 248, 0.24);
+      transform: scale(1.03);
+    }
+
+    .expr-token.done-step { opacity: 0.72; }
+
+    .expr-token.result-tok {
+      background: rgba(74, 222, 128, 0.16);
+      border-color: rgba(74, 222, 128, 0.55);
+      color: #86efac;
+    }
+
+    .expr-token .del-op {
+      margin-left: 5px;
+      background: rgba(248, 113, 113, 0.18);
+      color: #fca5a5;
+      border: none;
+      border-radius: 5px;
+      width: 20px;
+      height: 20px;
+      font-size: 0.82rem;
+      font-weight: 800;
+      cursor: pointer;
+      display: inline-grid;
+      place-items: center;
+    }
+
+    .expr-token .del-op:hover {
+      background: rgba(248, 113, 113, 0.38);
+      color: #fff;
+    }
+
+    .sign-ext { font-weight: 900; padding: 0 2px; }
+    .sign-ext.is-plus { color: #93c5fd; }
+    .sign-ext.is-minus { color: #fda4af; }
+
+    .paren-val.is-pos { color: var(--pos); }
+    .paren-val.is-neg { color: var(--neg); }
+
+    /* Mago 1 animado */
+    .mage-one {
+      display: inline-flex;
+      align-items: center;
+      color: var(--mage);
+      font-weight: 900;
+      max-width: 0;
+      opacity: 0;
+      overflow: hidden;
+      white-space: nowrap;
+      transition: max-width 0.32s ease, opacity 0.28s ease, margin 0.28s ease;
+    }
+
+    .mage-active .mage-one {
+      max-width: 48px;
+      opacity: 1;
+      margin: 0 2px;
+      text-shadow: 0 0 10px rgba(192, 132, 252, 0.65);
+    }
+
+    /* =====================================================================
+       ABA 1 — DEMONSTRAÇÃO (LIMPA, APENAS BOTÃO "PRÓXIMO")
+       ===================================================================== */
+    .demo-card {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 9px;
+      text-align: center;
+    }
+
+    .demo-title-line {
+      font-size: clamp(0.84rem, 1.5vw, 0.98rem);
+      font-weight: 800;
+      color: var(--gold);
+      letter-spacing: 0.01em;
+    }
+
+    .demo-caption {
+      font-size: clamp(0.8rem, 1.4vw, 0.92rem);
+      color: #cbd5e1;
+      max-width: 780px;
+      min-height: 22px;
+    }
+
+    .btn-next-hero {
+      width: 100%;
+      max-width: 340px;
+      min-height: 46px;
+      padding: 11px 24px;
+      border-radius: 12px;
+      border: 1.5px solid #7dd3fc;
+      background: linear-gradient(135deg, #0284c7, #2563eb);
+      color: #fff;
+      font-family: inherit;
+      font-size: clamp(0.96rem, 1.8vw, 1.08rem);
+      font-weight: 800;
+      letter-spacing: 0.01em;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      box-shadow: 0 6px 20px rgba(2, 132, 199, 0.42);
+      transition: transform 0.16s ease, box-shadow 0.16s ease, filter 0.16s ease;
+    }
+
+    .btn-next-hero:hover:not(:disabled) {
+      transform: translateY(-1px);
+      filter: brightness(1.08);
+      box-shadow: 0 8px 24px rgba(14, 165, 233, 0.48);
+    }
+
+    .btn-next-hero:active:not(:disabled) {
+      transform: translateY(0);
+    }
+
+    .btn-next-hero:disabled {
+      opacity: 0.55;
+      cursor: not-allowed;
+    }
+
+    .btn-next-hero.is-finish {
+      background: linear-gradient(135deg, #059669, #10b981);
+      border-color: #6ee7b7;
+      box-shadow: 0 6px 20px rgba(16, 185, 129, 0.38);
+    }
+
+    /* =====================================================================
+       BOTÕES E CONTROLES DAS ABAS LIVRES
+       ===================================================================== */
+    .btn {
+      font-family: inherit;
+      font-weight: 700;
+      font-size: 0.85rem;
+      border-radius: var(--radius-sm);
+      padding: 8px 13px;
+      border: 1.5px solid var(--border);
+      background: var(--bg-soft);
+      color: var(--text-main);
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      transition: all 0.16s ease;
+      min-height: 38px;
+    }
+
+    .btn:hover:not(:disabled) {
+      border-color: var(--border-light);
+      background: #243249;
+    }
+
+    .btn:disabled {
+      opacity: 0.45;
+      cursor: not-allowed;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, #0284c7, #2563eb);
+      border-color: #38bdf8;
+      color: #fff;
+    }
+
+    .btn-step {
+      background: linear-gradient(135deg, #0f766e, #0d9488);
+      border-color: #2dd4bf;
+      color: #fff;
+    }
+
+    .btn-mage {
+      background: rgba(192, 132, 252, 0.12);
+      border-color: var(--mage-border);
+      color: #e9d5ff;
+    }
+
+    .btn-mage.active {
+      background: linear-gradient(135deg, #7e22ce, #a855f7);
+      border-color: #d8b4fe;
+      color: #fff;
+    }
+
+    .controls-row {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      margin-top: 8px;
+    }
+
+    .btn-group {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 6px;
+    }
+
+    /* Construtor Oficina Soma / Oposto */
+    .builder-grid {
+      display: grid;
+      grid-template-columns: 1fr 1.6fr;
+      gap: 10px;
+      margin-top: 8px;
+    }
+
+    .builder-box {
+      background: var(--bg-main);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 9px 10px;
+      display: flex;
+      flex-direction: column;
+      gap: 7px;
+      align-items: center;
+    }
+
+    .role-label {
+      font-size: 0.72rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--text-muted);
+      text-align: center;
+    }
+
+    .sign-toggle-pair {
+      display: inline-flex;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 9px;
+      padding: 3px;
+      gap: 3px;
+    }
+
+    .sign-pill {
+      min-width: 40px;
+      height: 34px;
+      padding: 0 9px;
+      border-radius: 7px;
+      border: none;
+      background: transparent;
+      color: var(--text-muted);
+      font-family: inherit;
+      font-size: 0.8rem;
+      font-weight: 800;
+      cursor: pointer;
+      transition: all 0.14s;
+    }
+
+    .sign-pill.selected-plus {
+      background: var(--pos-bg);
+      color: var(--pos);
+      box-shadow: inset 0 0 0 1.5px var(--pos);
+    }
+
+    .sign-pill.selected-minus {
+      background: var(--neg-bg);
+      color: var(--neg);
+      box-shadow: inset 0 0 0 1.5px var(--neg);
+    }
+
+    .sign-pill.selected-ext-plus {
+      background: rgba(59, 130, 246, 0.22);
+      color: #93c5fd;
+      box-shadow: inset 0 0 0 1.5px #60a5fa;
+    }
+
+    .sign-pill.selected-ext-minus {
+      background: rgba(244, 63, 94, 0.22);
+      color: #fda4af;
+      box-shadow: inset 0 0 0 1.5px #fb7185;
+    }
+
+    .num-pills {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 4px;
+    }
+
+    .num-pill {
+      min-width: 31px;
+      height: 32px;
+      border-radius: 7px;
+      border: 1px solid var(--border);
+      background: var(--bg-card);
+      color: var(--text-main);
+      font-weight: 800;
+      font-size: 0.85rem;
+      cursor: pointer;
+    }
+
+    .num-pill.selected {
+      background: var(--pos);
+      color: #082f49;
+      border-color: var(--pos);
+    }
+
+    .inline-wrap {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: center;
+      gap: 7px;
+    }
+
+    /* Oficina Multiplicação */
+    .mult-grid {
+      display: grid;
+      grid-template-columns: 1fr auto 1fr;
+      gap: 10px;
+      align-items: center;
+      margin-top: 8px;
+    }
+
+    .factor-box {
+      background: var(--bg-main);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 9px 10px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 7px;
+      text-align: center;
+    }
+
+    .factor-box.is-m1 { border-color: rgba(192, 132, 252, 0.45); }
+    .factor-box.is-m2 { border-color: rgba(56, 189, 248, 0.45); }
+
+    /* Módulo Divisão e Módulo Expressões */
+    .expr-token.focus-gold {
+      background: rgba(250, 204, 21, 0.18);
+      border-color: var(--gold);
+      box-shadow: 0 0 14px rgba(250, 204, 21, 0.3);
+      transform: scale(1.04);
+    }
+
+    .expr-simp-line {
+      margin-top: 6px;
+      padding: 6px 10px;
+      background: rgba(15, 23, 42, 0.75);
+      border: 1px dashed var(--border-light);
+      border-radius: var(--radius-sm);
+      font-size: clamp(0.84rem, 1.5vw, 1.02rem);
+      font-weight: 800;
+      color: #e2e8f0;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      min-height: 34px;
+    }
+
+    .simp-arrow {
+      color: var(--gold);
+      font-weight: 900;
+    }
+
+    .preset-bar {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 5px;
+      margin-top: 8px;
+    }
+
+    .preset-chip {
+      padding: 5px 9px;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      background: var(--bg-main);
+      color: var(--text-muted);
+      font-family: inherit;
+      font-size: 0.77rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+
+    .preset-chip:hover {
+      color: var(--text-main);
+      border-color: var(--border-light);
+    }
+
+    .preset-chip.active {
+      background: rgba(56, 189, 248, 0.18);
+      border-color: var(--pos);
+      color: var(--text-main);
+    }
+
+    .custom-expr-panel {
+      display: none;
+      margin-top: 8px;
+      padding: 9px;
+      background: var(--bg-main);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      gap: 8px;
+      flex-direction: column;
+    }
+
+    .custom-expr-panel.open {
+      display: flex;
+    }
+
+    .custom-expr-row {
+      display: grid;
+      grid-template-columns: 1fr auto 1fr;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .custom-term-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 7px 8px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .custom-select-row {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .mini-select {
+      background: var(--bg-main);
+      color: var(--text-main);
+      border: 1px solid var(--border-light);
+      border-radius: 7px;
+      padding: 4px 7px;
+      font-family: inherit;
+      font-size: 0.78rem;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    .div-mage-hint {
+      font-size: 0.76rem;
+      font-weight: 700;
+      color: #e9d5ff;
+      background: var(--mage-bg);
+      border: 1px solid var(--mage-border);
+      border-radius: 8px;
+      padding: 4px 9px;
+      display: none;
+    }
+
+    .div-mage-hint.show {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    /* Modo Missão */
+    .mission-top {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      margin-bottom: 8px;
+    }
+
+    .level-btn {
+      padding: 5px 10px;
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      background: var(--bg-main);
+      color: var(--text-muted);
+      font-family: inherit;
+      font-size: 0.78rem;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    .level-btn.active {
+      background: rgba(250, 204, 21, 0.16);
+      border-color: var(--gold);
+      color: var(--gold);
+    }
+
+    .score-chip {
+      background: var(--bg-main);
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      padding: 4px 10px;
+      font-size: 0.78rem;
+      font-weight: 700;
+      color: var(--text-muted);
+    }
+
+    .score-chip strong { color: var(--text-main); margin-left: 3px; }
+
+    .mission-box {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 9px;
+      text-align: center;
+    }
+
+    .mission-eq {
+      font-size: clamp(1.25rem, 2.6vw, 1.75rem);
+      font-weight: 900;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: center;
+      gap: 7px;
+    }
+
+    .mystery-slot {
+      display: inline-grid;
+      place-items: center;
+      min-width: 42px;
+      height: 40px;
+      padding: 0 9px;
+      border-radius: 10px;
+      border: 2px dashed var(--gold);
+      background: rgba(250, 204, 21, 0.1);
+      color: var(--gold);
+      font-size: 1.35rem;
+    }
+
+    .mystery-slot.ok { border-style: solid; border-color: var(--success); background: rgba(74, 222, 128, 0.18); color: var(--success); }
+    .mystery-slot.err { border-style: solid; border-color: var(--danger); background: rgba(248, 113, 113, 0.18); color: var(--danger); }
+
+    .mission-choices {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 10px;
+      width: 100%;
+    }
+
+    .choice-btn {
+      flex: 1;
+      min-width: 155px;
+      max-width: 240px;
+      padding: 10px 14px;
+      border-radius: 11px;
+      border: 1.5px solid var(--border-light);
+      background: var(--bg-main);
+      color: var(--text-main);
+      font-family: inherit;
+      font-size: 0.98rem;
+      font-weight: 800;
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 2px;
+      transition: all 0.16s ease;
+    }
+
+    .choice-btn:hover:not(:disabled) {
+      border-color: var(--pos);
+      background: #243249;
+      transform: translateY(-1px);
+    }
+
+    .choice-btn small { font-size: 0.72rem; font-weight: 600; color: var(--text-muted); }
+    .choice-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+    .mission-feedback {
+      width: 100%;
+      padding: 8px 12px;
+      border-radius: var(--radius-sm);
+      font-weight: 700;
+      font-size: 0.85rem;
+      display: none;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 8px;
+      text-align: left;
+    }
+
+    .mission-feedback.ok {
+      display: flex;
+      background: rgba(74, 222, 128, 0.14);
+      border: 1px solid rgba(74, 222, 128, 0.55);
+      color: #bbf7d0;
+    }
+
+    .mission-feedback.err {
+      display: flex;
+      background: rgba(248, 113, 113, 0.14);
+      border: 1px solid rgba(248, 113, 113, 0.55);
+      color: #fecaca;
+    }
+
+    /* =====================================================================
+       RESPONSIVIDADE PARA CELULARES (360px+) E JANELAS DE PREVIEW
+       ===================================================================== */
+    @media (max-width: 760px) {
+      .tabs-bar { grid-template-columns: repeat(3, 1fr); }
+      .builder-grid { grid-template-columns: 1fr; }
+      .mult-grid { grid-template-columns: 1fr; }
+      .mult-times-symbol { display: none; }
+      .custom-expr-row { grid-template-columns: 1fr; }
+    }
+
+    @media (max-width: 560px) {
+      .tabs-bar { grid-template-columns: repeat(3, 1fr); }
+      .stage-top-row { flex-direction: column; align-items: flex-start; gap: 5px; }
+      .stage-right-meta { width: 100%; justify-content: flex-end; }
+      .top-bar { padding: 6px 9px; }
+      .brand h1 { font-size: 0.86rem; }
+      .icon-btn span.lbl-hide-sm { display: none; }
+      .legend-bar { gap: 10px; font-size: 0.71rem; }
+    }
+  </style>
+</head>
+<body>
+  <div class="app-shell">
+    <!-- CABEÇALHO COMPACTO -->
+    <header class="top-bar">
+      <div class="brand">
+        <div class="brand-shield" aria-hidden="true">
+          <svg width="19" height="19" viewBox="0 0 32 32" fill="none">
+            <path d="M16 3.5L26 7.8V15.2C26 21.8 21.6 26.6 16 28.5C10.4 26.6 6 21.8 6 15.2V7.8L16 3.5Z" fill="#38bdf8" fill-opacity="0.25" stroke="#38bdf8" stroke-width="2.4"/>
+            <circle cx="16" cy="15.5" r="4.5" fill="#facc15" fill-opacity="0.35" stroke="#facc15" stroke-width="2.2"/>
+          </svg>
+        </div>
+        <h1>Guerreiro da Reta — Matéria &amp; Antimatéria</h1>
+      </div>
+
+      <div class="top-utils">
+        <button id="btn-speed" class="icon-btn" title="Alternar velocidade">
+          ⏱️ <span class="lbl-hide-sm">Normal</span>
+        </button>
+        <button id="btn-sound" class="icon-btn" title="Ativar ou silenciar som">
+          🔊 <span class="lbl-hide-sm">Som</span>
+        </button>
+      </div>
+    </header>
+
+    <!-- ABAS SECUNDÁRIAS DISCRETAS NO TOPO -->
+    <nav class="tabs-bar" role="tablist">
+      <button class="tab-btn active" data-tab="demo" role="tab" aria-selected="true">1. Demo</button>
+      <button class="tab-btn" data-tab="addsub" role="tab" aria-selected="false">2. Soma/Oposto</button>
+      <button class="tab-btn" data-tab="mult" role="tab" aria-selected="false">3. Multiplicação</button>
+      <button class="tab-btn" data-tab="div" role="tab" aria-selected="false">4. Divisão</button>
+      <button class="tab-btn" data-tab="expr" role="tab" aria-selected="false">5. Expressões</button>
+      <button class="tab-btn" data-tab="mission" role="tab" aria-selected="false">6. Missão</button>
+    </nav>
+
+    <!-- PALCO DA RETA NUMERADA (SVG RESPONSIVO) -->
+    <section class="stage-card" aria-label="Reta Numerada Interativa">
+      <div class="stage-top-row">
+        <div class="narration-wrap">
+          <span id="status-pill" class="status-pill info">Origem</span>
+          <span id="narration-msg">Guerreiro na origem (0). Clique em <strong>Próximo</strong> para iniciar.</span>
+        </div>
+        <div class="stage-right-meta">
+          <span class="pos-chip">Posição: <strong id="warrior-pos-label">0</strong></span>
+        </div>
+      </div>
+
+      <div class="svg-box">
+        <!-- Contador discreto da Demo no canto esquerdo do palco -->
+        <div id="demo-counter-badge" class="stage-corner-badge">Demo 1/8</div>
+        <div id="stage-corner-actions" class="stage-corner-actions">
+          <button id="corner-mage-btn" class="mini-corner-btn" title="Mostrar ou ocultar o Mago 1 (elemento neutro 1)">1· Mago 1</button>
+          <button id="corner-demo-reset" class="mini-corner-btn" title="Reiniciar esta demonstração no zero">↺</button>
+        </div>
+
+        <svg id="numberline-svg" viewBox="0 0 1000 265" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <filter id="glow-gold" x="-40%" y="-40%" width="180%" height="180%">
+              <feGaussianBlur stdDeviation="3.5" result="blur" />
+              <feMerge>
+                <feMergeNode in="blur" />
+                <feMergeNode in="SourceGraphic" />
+              </feMerge>
+            </filter>
+            <filter id="glow-invert" x="-40%" y="-40%" width="180%" height="180%">
+              <feGaussianBlur stdDeviation="4" result="blur" />
+              <feMerge>
+                <feMergeNode in="blur" />
+                <feMergeNode in="SourceGraphic" />
+              </feMerge>
+            </filter>
+          </defs>
+
+          <g id="layer-grid"></g>
+          <g id="layer-guides"></g>
+          <g id="layer-portal"></g>
+          <g id="layer-segments"></g>
+          <g id="layer-ghost"></g>
+          <g id="layer-numberline"></g>
+          <g id="layer-warrior"></g>
+        </svg>
+      </div>
+
+      <div class="legend-bar">
+        <span class="legend-item" style="color:var(--pos);">
+          <svg width="28" height="12" viewBox="0 0 28 12"><circle cx="4" cy="6" r="3.2" fill="#38bdf8"/><line x1="7" y1="6" x2="21" y2="6" stroke="#38bdf8" stroke-width="2.6"/><polygon points="27,6 19,2 19,10" fill="#38bdf8"/></svg>
+          Matéria (+)
+        </span>
+        <span class="legend-item" style="color:var(--neg);">
+          <svg width="28" height="12" viewBox="0 0 28 12"><circle cx="24" cy="6" r="3.2" fill="#fb923c"/><line x1="21" y1="6" x2="7" y2="6" stroke="#fb923c" stroke-width="2.6"/><polygon points="1,6 9,2 9,10" fill="#fb923c"/></svg>
+          Antimatéria (−)
+        </span>
+        <span class="legend-item" style="color:#cbd5e1;">
+          <svg width="28" height="12" viewBox="0 0 28 12"><line x1="3" y1="6" x2="22" y2="6" stroke="#94a3b8" stroke-width="2.4" stroke-dasharray="4 3"/><polygon points="27,6 20,2.5 20,9.5" fill="#94a3b8"/></svg>
+          Passo Original
+        </span>
+        <span class="legend-item" style="color:var(--gold);">
+          <span class="legend-dot-gold"></span>
+          Origem (0)
+        </span>
+      </div>
+    </section>
+
+    <!-- =================================================================
+         ABA 1: DEMONSTRAÇÃO (ABERTA POR PADRÃO — APENAS BOTÃO "PRÓXIMO")
+         ================================================================= -->
+    <section id="panel-demo" class="panel active">
+      <div class="card demo-card">
+        <div id="demo-title" class="demo-title-line">Matéria + Matéria</div>
+        <div id="demo-expr" class="expr-display" aria-live="polite" style="width:100%;"></div>
+        <div id="demo-caption" class="demo-caption"></div>
+        <button id="demo-next-btn" class="btn-next-hero">Próximo ▶</button>
+      </div>
+    </section>
+
+    <!-- =================================================================
+         ABA 2: OFICINA (+ / −) — SEMPRE COMEÇANDO DO 0
+         ================================================================= -->
+    <section id="panel-addsub" class="panel">
+      <div class="card">
+        <div id="addsub-expr" class="expr-display" aria-live="polite"></div>
+
+        <div class="controls-row">
+          <div class="btn-group">
+            <button id="as-run" class="btn btn-primary">▶ Animar</button>
+            <button id="as-step" class="btn btn-step">⏭ Passo a Passo</button>
+            <button id="as-reset" class="btn">↺ Zerar</button>
+          </div>
+          <div class="btn-group">
+            <button id="as-mage-btn" class="btn btn-mage">1· Mago 1</button>
+            <button id="as-clear" class="btn">🗑 Limpar passos</button>
+          </div>
+        </div>
+
+        <div class="builder-grid">
+          <!-- 1º Termo (também animado saindo do 0) -->
+          <div class="builder-box">
+            <span class="role-label">1º Termo (sai do 0)</span>
+            <div class="sign-toggle-pair">
+              <button id="t1-plus" class="sign-pill selected-plus">+ Matéria</button>
+              <button id="t1-minus" class="sign-pill">− Antimatéria</button>
+            </div>
+            <div id="t1-mags" class="num-pills"></div>
+          </div>
+
+          <!-- Adicionar próximos passos (até 3 passos extras) -->
+          <div class="builder-box">
+            <span class="role-label">Próximo Passo (até 3) — Fora: Operação / Dentro: Direção</span>
+            <div class="inline-wrap">
+              <div class="sign-toggle-pair">
+                <button id="ext-plus" class="sign-pill">+ Mantém</button>
+                <button id="ext-minus" class="sign-pill selected-ext-minus">− Inverte</button>
+              </div>
+              <div class="sign-toggle-pair">
+                <button id="int-plus" class="sign-pill">+ Matéria</button>
+                <button id="int-minus" class="sign-pill selected-minus">− Antimatéria</button>
+              </div>
+            </div>
+            <div class="inline-wrap">
+              <div id="op-mags" class="num-pills"></div>
+              <button id="as-add-op" class="btn btn-primary" style="min-height:34px; padding:5px 11px;">+ Adicionar</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- =================================================================
+         ABA 3: MULTIPLICAÇÃO (MULTIPLICADOR × MULTIPLICANDO, SAINDO DO 0)
+         ================================================================= -->
+    <section id="panel-mult" class="panel">
+      <div class="card">
+        <div id="mult-expr" class="expr-display" aria-live="polite"></div>
+
+        <div class="controls-row">
+          <div class="btn-group">
+            <button id="m-run" class="btn btn-primary">▶ Animar</button>
+            <button id="m-step" class="btn btn-step">⏭ Passo a Passo</button>
+            <button id="m-reset" class="btn">↺ Zerar</button>
+          </div>
+          <span id="m-summary" style="font-size:0.8rem; color:var(--text-muted); font-weight:600;"></span>
+        </div>
+
+        <div class="mult-grid">
+          <div class="factor-box is-m1">
+            <span class="role-label" style="color:var(--mage);">Multiplicador (Comandante · 0 a 5)</span>
+            <div class="sign-toggle-pair">
+              <button id="m1-pos" class="sign-pill">+ Direto</button>
+              <button id="m1-neg" class="sign-pill selected-ext-minus">− Inversor</button>
+            </div>
+            <div id="m1-mags" class="num-pills"></div>
+          </div>
+
+          <div class="mult-times-symbol" style="font-size:1.7rem; font-weight:900; color:var(--text-muted);">×</div>
+
+          <div class="factor-box is-m2">
+            <span class="role-label" style="color:var(--pos);">Multiplicando (Passo-base · 0 a 5)</span>
+            <div class="sign-toggle-pair">
+              <button id="m2-pos" class="sign-pill">+ Matéria</button>
+              <button id="m2-neg" class="sign-pill selected-minus">− Antimatéria</button>
+            </div>
+            <div id="m2-mags" class="num-pills"></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- =================================================================
+         ABA 4: DIVISÃO (PARTIÇÃO + INVERSOR, SAINDO DO 0)
+         ================================================================= -->
+    <section id="panel-div" class="panel">
+      <div class="card">
+        <div id="div-expr" class="expr-display" aria-live="polite"></div>
+
+        <div class="controls-row">
+          <div class="btn-group">
+            <button id="d-run" class="btn btn-primary">▶ Animar</button>
+            <button id="d-step" class="btn btn-step">⏭ Passo a Passo</button>
+            <button id="d-reset" class="btn">↺ Zerar</button>
+          </div>
+          <div class="btn-group">
+            <span id="d-mage-hint" class="div-mage-hint">1· Divisor ±1: tamanho do passo não muda!</span>
+            <span id="d-summary" style="font-size:0.8rem; color:var(--text-muted); font-weight:600;"></span>
+          </div>
+        </div>
+
+        <div class="mult-grid">
+          <div class="factor-box is-m2">
+            <span class="role-label" style="color:var(--pos);">Dividendo (Segmento Total · múltiplo exato)</span>
+            <div class="sign-toggle-pair">
+              <button id="d1-pos" class="sign-pill">+ Matéria</button>
+              <button id="d1-neg" class="sign-pill selected-minus">− Antimatéria</button>
+            </div>
+            <div id="d1-mags" class="num-pills"></div>
+          </div>
+
+          <div class="mult-times-symbol" style="font-size:1.7rem; font-weight:900; color:var(--text-muted);">÷</div>
+
+          <div class="factor-box is-m1">
+            <span class="role-label" style="color:var(--mage);">Divisor (Partes + Inversor · 1 a 5)</span>
+            <div class="sign-toggle-pair">
+              <button id="d2-pos" class="sign-pill">+ Direto</button>
+              <button id="d2-neg" class="sign-pill selected-ext-minus">− Inversor</button>
+            </div>
+            <div id="d2-mags" class="num-pills"></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- =================================================================
+         ABA 5: EXPRESSÕES NUMÉRICAS (ORDEM DAS OPERAÇÕES NA RETA)
+         ================================================================= -->
+    <section id="panel-expr" class="panel">
+      <div class="card">
+        <div id="expr-main-display" class="expr-display" aria-live="polite"></div>
+        <div id="expr-simp-line" class="expr-simp-line"></div>
+
+        <div class="controls-row">
+          <div class="btn-group">
+            <button id="ex-run" class="btn btn-primary">▶ Resolver Tudo</button>
+            <button id="ex-step" class="btn btn-step">⏭ Próximo Passo</button>
+            <button id="ex-reset" class="btn">↺ Zerar</button>
+          </div>
+          <div class="btn-group">
+            <button id="ex-toggle-custom" class="btn">🛠️ Montar Expressão</button>
+          </div>
+        </div>
+
+        <div id="expr-presets" class="preset-bar"></div>
+
+        <!-- Montador personalizado: [Termo A] [op] [Termo B] -->
+        <div id="expr-custom-panel" class="custom-expr-panel">
+          <div class="custom-expr-row">
+            <div class="custom-term-card">
+              <span class="role-label">Termo A</span>
+              <div class="custom-select-row">
+                <select id="ca-kind" class="mini-select">
+                  <option value="num">Número / Oposto</option>
+                  <option value="mult">Multiplicação (×)</option>
+                  <option value="div">Divisão exata (÷)</option>
+                </select>
+                <select id="ca-v1" class="mini-select"></select>
+                <span id="ca-op-lbl" style="font-weight:900; color:var(--text-muted);"></span>
+                <select id="ca-v2" class="mini-select"></select>
+              </div>
+            </div>
+
+            <div style="display:flex; flex-direction:column; align-items:center; gap:4px;">
+              <span class="role-label">Operação</span>
+              <div class="sign-toggle-pair">
+                <button id="cop-plus" class="sign-pill selected-ext-plus">+</button>
+                <button id="cop-minus" class="sign-pill">−</button>
+              </div>
+            </div>
+
+            <div class="custom-term-card">
+              <span class="role-label">Termo B</span>
+              <div class="custom-select-row">
+                <select id="cb-kind" class="mini-select">
+                  <option value="num">Número / Oposto</option>
+                  <option value="mult" selected>Multiplicação (×)</option>
+                  <option value="div">Divisão exata (÷)</option>
+                </select>
+                <select id="cb-v1" class="mini-select"></select>
+                <span id="cb-op-lbl" style="font-weight:900; color:var(--text-muted);"></span>
+                <select id="cb-v2" class="mini-select"></select>
+              </div>
+            </div>
+          </div>
+          <div style="display:flex; justify-content:center;">
+            <button id="ex-apply-custom" class="btn btn-primary" style="min-height:34px;">Aplicar Expressão Personalizada</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- =================================================================
+         ABA 6: MISSÃO (PORTAL DOURADO — GUERREIRO SEMPRE PARTE DO 0)
+         ================================================================= -->
+    <section id="panel-mission" class="panel">
+      <div class="card">
+        <div class="mission-top">
+          <div class="btn-group">
+            <button class="level-btn active" data-level="1">Nível 1: Oposto</button>
+            <button class="level-btn" data-level="2">Nível 2: Multiplicação</button>
+            <button class="level-btn" data-level="3">Nível 3: Divisão</button>
+            <button class="level-btn" data-level="4">Nível 4: Expressões</button>
+          </div>
+          <div class="btn-group">
+            <span class="score-chip">Pontos: <strong id="score-pts">0</strong></span>
+            <span class="score-chip">Sequência: <strong id="score-streak">0</strong> 🔥</span>
+          </div>
+        </div>
+
+        <div class="mission-box">
+          <div id="mission-subtitle" style="font-size:0.84rem; color:var(--text-muted); font-weight:600;"></div>
+          <div id="mission-eq" class="mission-eq"></div>
+          <div id="mission-choices" class="mission-choices"></div>
+
+          <div id="mission-feedback" class="mission-feedback">
+            <span id="mission-feedback-text"></span>
+            <div class="btn-group">
+              <button id="mission-retry" class="btn" style="display:none; min-height:34px;">↺ Tentar de Novo</button>
+              <button id="mission-next" class="btn btn-primary" style="display:none; min-height:34px;">Próxima Missão ▶</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <script>
+    /* =====================================================================
+       MOTOR DE ÁUDIO SINTETIZADO (Web Audio API — sem arquivos externos)
+       ===================================================================== */
+    const SoundFX = (() => {
+      let ctx = null;
+      let enabled = true;
+
+      function ensureCtx() {
+        if (!enabled) return null;
+        try {
+          if (!ctx) {
+            const AudioCtx = window.AudioContext || window.webkitAudioContext;
+            if (AudioCtx) ctx = new AudioCtx();
+          }
+          if (ctx && ctx.state === 'suspended') ctx.resume();
+          return ctx;
+        } catch (e) {
+          return null;
+        }
+      }
+
+      function tone(freq, dur, type = 'sine', vol = 0.07, delay = 0) {
+        const c = ensureCtx();
+        if (!c) return;
+        const t = c.currentTime + delay;
+        const osc = c.createOscillator();
+        const gain = c.createGain();
+        osc.type = type;
+        osc.frequency.setValueAtTime(freq, t);
+        gain.gain.setValueAtTime(0.0001, t);
+        gain.gain.exponentialRampToValueAtTime(vol, t + 0.015);
+        gain.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+        osc.connect(gain);
+        gain.connect(c.destination);
+        osc.start(t);
+        osc.stop(t + dur + 0.02);
+      }
+
+      return {
+        toggle() {
+          enabled = !enabled;
+          return enabled;
+        },
+        ghost() { tone(392, 0.11, 'triangle', 0.055); },
+        invert() {
+          tone(330, 0.11, 'sawtooth', 0.04, 0);
+          tone(523.25, 0.17, 'triangle', 0.065, 0.08);
+        },
+        step() { tone(523.25, 0.1, 'sine', 0.06); },
+        win() {
+          tone(523.25, 0.12, 'triangle', 0.08, 0);
+          tone(659.25, 0.12, 'triangle', 0.08, 0.09);
+          tone(783.99, 0.22, 'triangle', 0.09, 0.18);
+        },
+        err() {
+          tone(240, 0.15, 'sawtooth', 0.05, 0);
+          tone(185, 0.2, 'sawtooth', 0.05, 0.12);
+        }
+      };
+    })();
+
+    /* =====================================================================
+       UTILITÁRIOS MATEMÁTICOS E TERMINOLOGIA (MATÉRIA / ANTIMATÉRIA)
+       ===================================================================== */
+    const SVG_NS = 'http://www.w3.org/2000/svg';
+    const POS_COLOR = '#38bdf8';
+    const NEG_COLOR = '#fb923c';
+    const GOLD_COLOR = '#facc15';
+
+    function fmtSigned(n) {
+      if (n > 0) return '+' + n;
+      if (n < 0) return '−' + Math.abs(n);
+      return '0';
+    }
+
+    function dirName(n) {
+      if (n > 0) return 'Matéria';
+      if (n < 0) return 'Antimatéria';
+      return 'Origem';
+    }
+
+    function dirNameHtml(n) {
+      if (n > 0) return `<strong style="color:var(--pos);">Matéria (${fmtSigned(n)})</strong>`;
+      if (n < 0) return `<strong style="color:var(--neg);">Antimatéria (${fmtSigned(n)})</strong>`;
+      return `<strong style="color:var(--gold);">0</strong>`;
+    }
+
+    function el(tag, attrs = {}, parent = null) {
+      const node = document.createElementNS(SVG_NS, tag);
+      for (const [k, v] of Object.entries(attrs)) {
+        node.setAttribute(k, v);
+      }
+      if (parent) parent.appendChild(node);
+      return node;
+    }
+
+    /* =====================================================================
+       ESTADO GLOBAL
+       ===================================================================== */
+    let slowMode = false;
+    let mageVisible = false;
+    let activeTab = 'demo';
+    let animToken = 0;
+
+    function delayMs(base) {
+      return slowMode ? Math.round(base * 1.6) : base;
+    }
+
+    function sleep(ms, token) {
+      return new Promise((resolve) => {
+        setTimeout(() => resolve(token === animToken), ms);
+      });
+    }
+
+    /* =====================================================================
+       PALCO DA RETA NUMERADA (SVG RESPONSIVO — PADRÃO -10 A +10)
+       ===================================================================== */
+    const Stage = (() => {
+      const VIEW_W = 1000;
+      const PAD_X = 46;
+      const LINE_Y = 222;
+
+      const layers = {
+        grid: document.getElementById('layer-grid'),
+        guides: document.getElementById('layer-guides'),
+        portal: document.getElementById('layer-portal'),
+        segments: document.getElementById('layer-segments'),
+        ghost: document.getElementById('layer-ghost'),
+        numberline: document.getElementById('layer-numberline'),
+        warrior: document.getElementById('layer-warrior')
+      };
+
+      const statusPill = document.getElementById('status-pill');
+      const narrationMsg = document.getElementById('narration-msg');
+      const posLabel = document.getElementById('warrior-pos-label');
+
+      let range = 12; // Padrão: -12 a +12 (expande automaticamente se passar de 12)
+      let warriorFacing = 1;
+      let warriorRoot = null;
+      let warriorFlipGroup = null;
+      let warriorBodyGroup = null;
+      let invertBadgeGroup = null;
+      let shieldPulseRing = null;
+      let shieldPulseRing2 = null;
+      let shieldFillNode = null;
+
+      function xOf(val) {
+        const usableW = VIEW_W - PAD_X * 2;
+        return PAD_X + ((val + range) / (range * 2)) * usableW;
+      }
+
+      function setNarration(pillText, pillType, message) {
+        statusPill.textContent = pillText;
+        statusPill.className = 'status-pill ' + pillType;
+        narrationMsg.innerHTML = message;
+      }
+
+      function setRangeForValues(values) {
+        let maxAbs = 12;
+        for (const v of values) {
+          if (Math.abs(v) > maxAbs) maxAbs = Math.abs(v);
+        }
+        const nextRange = maxAbs <= 12 ? 12 : Math.min(26, Math.ceil(maxAbs / 2) * 2);
+        if (nextRange !== range || layers.numberline.childNodes.length === 0) {
+          range = nextRange;
+          drawNumberLine();
+        }
+      }
+
+      function drawNumberLine() {
+        layers.grid.innerHTML = '';
+        layers.numberline.innerHTML = '';
+
+        // Linha principal
+        el('line', {
+          x1: PAD_X - 22, y1: LINE_Y,
+          x2: VIEW_W - PAD_X + 22, y2: LINE_Y,
+          stroke: '#64748b', 'stroke-width': 3, 'stroke-linecap': 'round'
+        }, layers.numberline);
+
+        // Setas das extremidades
+        el('polygon', {
+          points: `${PAD_X - 28},${LINE_Y} ${PAD_X - 17},${LINE_Y - 5.5} ${PAD_X - 17},${LINE_Y + 5.5}`,
+          fill: NEG_COLOR, opacity: '0.85'
+        }, layers.numberline);
+        el('polygon', {
+          points: `${VIEW_W - PAD_X + 28},${LINE_Y} ${VIEW_W - PAD_X + 17},${LINE_Y - 5.5} ${VIEW_W - PAD_X + 17},${LINE_Y + 5.5}`,
+          fill: POS_COLOR, opacity: '0.85'
+        }, layers.numberline);
+
+        // Guia vertical dourada no Zero (Origem)
+        const x0 = xOf(0);
+        el('line', {
+          x1: x0, y1: 18, x2: x0, y2: LINE_Y,
+          stroke: 'rgba(250, 204, 21, 0.25)', 'stroke-width': 1.8, 'stroke-dasharray': '5 5'
+        }, layers.grid);
+
+        const showEveryTwo = range > 16;
+
+        for (let n = -range; n <= range; n++) {
+          const x = xOf(n);
+          const isZero = n === 0;
+          const tickH = isZero ? 13 : (n % 2 === 0 ? 8.5 : 5);
+
+          if (!isZero) {
+            el('line', {
+              x1: x, y1: 24, x2: x, y2: LINE_Y,
+              stroke: 'rgba(148, 163, 184, 0.055)', 'stroke-width': 1
+            }, layers.grid);
+          }
+
+          el('line', {
+            x1: x, y1: LINE_Y - tickH, x2: x, y2: LINE_Y + tickH,
+            stroke: isZero ? GOLD_COLOR : '#94a3b8',
+            'stroke-width': isZero ? 3.4 : 1.6,
+            'stroke-linecap': 'round'
+          }, layers.numberline);
+
+          if (isZero) {
+            el('circle', {
+              cx: x, cy: LINE_Y, r: 5.5,
+              fill: GOLD_COLOR, filter: 'url(#glow-gold)'
+            }, layers.numberline);
+          }
+
+          if (!showEveryTwo || n % 2 === 0) {
+            const fontSize = range > 14 ? (isZero ? 15 : 11.5) : (isZero ? 16.5 : 13.5);
+            const lbl = el('text', {
+              x, y: LINE_Y + 28,
+              'text-anchor': 'middle',
+              'font-size': fontSize,
+              'font-weight': isZero ? '900' : '700',
+              fill: isZero ? GOLD_COLOR : (n > 0 ? '#bae6fd' : '#fed7aa')
+            }, layers.numberline);
+            lbl.textContent = n > 0 ? '+' + n : (n < 0 ? '−' + Math.abs(n) : '0');
+          }
+        }
+      }
+
+      function clearDynamic() {
+        layers.guides.innerHTML = '';
+        layers.segments.innerHTML = '';
+        layers.ghost.innerHTML = '';
+        layers.portal.innerHTML = '';
+      }
+
+      function clearGhost() {
+        layers.ghost.innerHTML = '';
+      }
+
+      function drawPortal(targetVal) {
+        layers.portal.innerHTML = '';
+        if (targetVal === null || targetVal === undefined) return;
+        const x = xOf(targetVal);
+        const y = LINE_Y - 24;
+        const g = el('g', { transform: `translate(${x}, ${y})` }, layers.portal);
+
+        el('circle', {
+          cx: 0, cy: 0, r: 19,
+          fill: 'rgba(250, 204, 21, 0.14)',
+          stroke: GOLD_COLOR, 'stroke-width': 2.2,
+          'stroke-dasharray': '7 4',
+          class: 'portal-spin',
+          filter: 'url(#glow-gold)'
+        }, g);
+
+        el('circle', {
+          cx: 0, cy: 0, r: 11,
+          fill: 'rgba(250, 204, 21, 0.25)',
+          stroke: '#fef08a', 'stroke-width': 1.8
+        }, g);
+
+        const star = el('text', {
+          x: 0, y: 4.5, 'text-anchor': 'middle',
+          'font-size': 14, fill: '#fef9c3', 'font-weight': '900'
+        }, g);
+        star.textContent = '★';
+
+        const tag = el('text', {
+          x: 0, y: -24, 'text-anchor': 'middle',
+          'font-size': 11, 'font-weight': '900',
+          fill: GOLD_COLOR, letterSpacing: '0.05em'
+        }, g);
+        tag.textContent = `PORTAL (${fmtSigned(targetVal)})`;
+      }
+
+      function drawGuideLine(val, yTop, yBottom = LINE_Y, color = 'rgba(148, 163, 184, 0.45)') {
+        const x = xOf(val);
+        el('line', {
+          x1: x, y1: yTop, x2: x, y2: yBottom,
+          stroke: color, 'stroke-width': 1.5, 'stroke-dasharray': '4 4'
+        }, layers.guides);
+      }
+
+      /* Segmento acima da reta: bolinha na origem, ponta de seta na extremidade */
+      function drawSegment({ fromVal, toVal, y, isGhost = false, label = '', subLabel = '', parent = null }) {
+        const targetLayer = parent || (isGhost ? layers.ghost : layers.segments);
+        const x1 = xOf(fromVal);
+        const x2 = xOf(toVal);
+        const diff = toVal - fromVal;
+        const g = el('g', {}, targetLayer);
+
+        if (Math.abs(diff) < 0.001) {
+          el('circle', {
+            cx: x1, cy: y, r: 5.5,
+            fill: GOLD_COLOR, stroke: '#0f172a', 'stroke-width': 2
+          }, g);
+          return g;
+        }
+
+        const isPos = diff > 0;
+        const dir = isPos ? 1 : -1;
+        const color = isPos ? POS_COLOR : NEG_COLOR;
+        const arrowLen = Math.min(12, Math.abs(x2 - x1) * 0.45);
+        const lineEndX = x2 - dir * (arrowLen - 1);
+
+        const lineAttrs = {
+          x1, y1: y, x2: lineEndX, y2: y,
+          stroke: color,
+          'stroke-width': isGhost ? 4 : 5.4,
+          'stroke-linecap': 'round'
+        };
+        if (isGhost) {
+          lineAttrs['stroke-dasharray'] = '8 5';
+          lineAttrs['opacity'] = '0.9';
+        }
+        el('line', lineAttrs, g);
+
+        // Bolinha na origem
+        el('circle', {
+          cx: x1, cy: y, r: isGhost ? 4.8 : 5.5,
+          fill: isGhost ? '#0f172a' : color,
+          stroke: color,
+          'stroke-width': isGhost ? 2.5 : 1.8
+        }, g);
+
+        // Seta na extremidade
+        const tipX = x2;
+        const baseX = x2 - dir * arrowLen;
+        el('polygon', {
+          points: `${tipX},${y} ${baseX},${y - 6.8} ${baseX},${y + 6.8}`,
+          fill: color,
+          opacity: isGhost ? '0.92' : '1'
+        }, g);
+
+        if (label) {
+          const midX = (x1 + x2) / 2;
+          const pillW = Math.max(36, label.length * 8.6 + 14);
+          el('rect', {
+            x: midX - pillW / 2, y: y - 24,
+            width: pillW, height: 18, rx: 6,
+            fill: isGhost ? 'rgba(15, 23, 42, 0.9)' : '#0f172a',
+            stroke: color, 'stroke-width': isGhost ? 1.2 : 1.5,
+            'stroke-dasharray': isGhost ? '3 2' : 'none'
+          }, g);
+
+          const txt = el('text', {
+            x: midX, y: y - 11.5,
+            'text-anchor': 'middle',
+            'font-size': 11.8, 'font-weight': '900',
+            fill: color
+          }, g);
+          txt.textContent = label;
+        }
+
+        if (subLabel) {
+          const midX = (x1 + x2) / 2;
+          const st = el('text', {
+            x: midX, y: y + 15,
+            'text-anchor': 'middle',
+            'font-size': 10.5, 'font-weight': '800',
+            fill: '#cbd5e1'
+          }, g);
+          st.textContent = subLabel;
+        }
+
+        return g;
+      }
+
+      /* Marcadores de Partição sobre o segmento total do Dividendo (Divisão) */
+      function drawPartitionMarks({ totalVal, parts, y }) {
+        const g = el('g', {}, layers.guides);
+        if (parts <= 0 || totalVal === 0) return g;
+        const partVal = totalVal / parts;
+
+        for (let i = 1; i < parts; i++) {
+          const cutX = xOf(partVal * i);
+          el('line', {
+            x1: cutX, y1: y - 10, x2: cutX, y2: y + 10,
+            stroke: GOLD_COLOR, 'stroke-width': 2.2, 'stroke-linecap': 'round'
+          }, g);
+        }
+
+        // Numera discretamente cada parte abaixo do segmento total
+        for (let i = 0; i < parts; i++) {
+          const midX = (xOf(partVal * i) + xOf(partVal * (i + 1))) / 2;
+          const lbl = el('text', {
+            x: midX, y: y + 17,
+            'text-anchor': 'middle',
+            'font-size': 10, 'font-weight': '800',
+            fill: i === 0 ? GOLD_COLOR : '#94a3b8'
+          }, g);
+          lbl.textContent = i === 0 ? `1ª (${fmtSigned(partVal)})` : `${i + 1}ª`;
+        }
+        return g;
+      }
+
+      /* Avatar SVG do Guerreiro: APENAS ESCUDO (sem espada, sem capa) */
+      function buildWarrior() {
+        layers.warrior.innerHTML = '';
+        warriorRoot = el('g', { id: 'warrior-root' }, layers.warrior);
+
+        // Badge flutuante de inversão
+        invertBadgeGroup = el('g', { opacity: '0', transform: 'translate(0, -56)' }, warriorRoot);
+        el('rect', {
+          x: -58, y: -13, width: 116, height: 21, rx: 10.5,
+          fill: '#be123c', stroke: '#fda4af', 'stroke-width': 1.6,
+          filter: 'url(#glow-invert)'
+        }, invertBadgeGroup);
+        const invTxt = el('text', {
+          x: 0, y: 1, 'text-anchor': 'middle',
+          'font-size': 10.2, 'font-weight': '900', fill: '#fff'
+        }, invertBadgeGroup);
+        invTxt.textContent = '↻ INVERSÃO 180°';
+
+        warriorBodyGroup = el('g', {}, warriorRoot);
+        warriorFlipGroup = el('g', { class: 'warrior-flip' }, warriorBodyGroup);
+
+        // Sombra no chão
+        el('ellipse', { cx: 0, cy: -1, rx: 11.5, ry: 3, fill: 'rgba(0,0,0,0.45)' }, warriorFlipGroup);
+
+        // Pernas
+        el('rect', { x: -6.5, y: -11, width: 4.8, height: 10, rx: 2, fill: '#475569' }, warriorFlipGroup);
+        el('rect', { x: 1.5, y: -11, width: 4.8, height: 10, rx: 2, fill: '#334155' }, warriorFlipGroup);
+
+        // Armadura estilizada limpa (sem capa, sem arma)
+        el('rect', {
+          x: -8.5, y: -26, width: 16.5, height: 16.5, rx: 5.5,
+          fill: '#1e293b', stroke: '#94a3b8', 'stroke-width': 1.5
+        }, warriorFlipGroup);
+        el('path', { d: 'M -6 -23 L 5 -13', stroke: '#38bdf8', 'stroke-width': 2, 'stroke-linecap': 'round' }, warriorFlipGroup);
+
+        // Braço segurando o escudo à frente
+        el('rect', { x: 3.5, y: -21.5, width: 7.5, height: 4, rx: 2, fill: '#64748b' }, warriorFlipGroup);
+
+        // Cabeça e elmo limpo voltado para a direção do olhar
+        el('circle', { cx: -0.5, cy: -34, r: 8.8, fill: '#e2e8f0', stroke: '#64748b', 'stroke-width': 1.4 }, warriorFlipGroup);
+        el('path', { d: 'M -4.5 -42 Q 0 -47 5.5 -42 Z', fill: '#facc15' }, warriorFlipGroup);
+        el('rect', { x: 0.5, y: -36.5, width: 7.8, height: 4.4, rx: 2, fill: '#0f172a' }, warriorFlipGroup);
+        el('circle', { cx: 5.6, cy: -34.3, r: 1.25, fill: '#38bdf8' }, warriorFlipGroup);
+
+        // ESCUDO PROTAGONISTA à frente do corpo
+        const shieldGroup = el('g', { transform: 'translate(12, -19)' }, warriorFlipGroup);
+
+        // Pulso circular de Energia Lógica no escudo
+        shieldPulseRing = el('circle', {
+          cx: 0, cy: 0, r: 10,
+          fill: 'none', stroke: '#facc15', 'stroke-width': 3,
+          opacity: '0'
+        }, shieldGroup);
+        shieldPulseRing2 = el('circle', {
+          cx: 0, cy: 0, r: 6.5,
+          fill: 'none', stroke: '#38bdf8', 'stroke-width': 2.4,
+          opacity: '0'
+        }, shieldGroup);
+
+        // Corpo do escudo
+        shieldFillNode = el('path', {
+          d: 'M -5 -10 L 5 -8.5 L 5.5 2 Q 2 10 -5 11 Z',
+          fill: '#0284c7', stroke: '#facc15', 'stroke-width': 1.9, 'stroke-linejoin': 'round'
+        }, shieldGroup);
+
+        el('circle', { cx: 0.4, cy: 0, r: 2.8, fill: '#facc15' }, shieldGroup);
+      }
+
+      function updateShieldTint(dir) {
+        if (!shieldFillNode) return;
+        shieldFillNode.setAttribute('fill', dir >= 0 ? '#0284c7' : '#ea580c');
+      }
+
+      function triggerShieldEnergyPulse(nextDir) {
+        if (!shieldPulseRing || !shieldPulseRing2) return;
+        const pulseColor = nextDir >= 0 ? POS_COLOR : NEG_COLOR;
+        shieldPulseRing.setAttribute('stroke', GOLD_COLOR);
+        shieldPulseRing2.setAttribute('stroke', pulseColor);
+
+        shieldPulseRing.classList.remove('shield-pulse-active');
+        shieldPulseRing2.classList.remove('shield-pulse-active');
+        void shieldPulseRing.offsetWidth;
+        shieldPulseRing.classList.add('shield-pulse-active');
+        shieldPulseRing2.classList.add('shield-pulse-active');
+      }
+
+      function placeWarrior(val, y = LINE_Y, facing = null) {
+        if (!warriorRoot) buildWarrior();
+        if (facing !== null) {
+          warriorFacing = facing >= 0 ? 1 : -1;
+          updateShieldTint(warriorFacing);
+        }
+        const x = xOf(val);
+        warriorRoot.setAttribute('transform', `translate(${x}, ${y})`);
+        warriorFlipGroup.style.transform = `scaleX(${warriorFacing})`;
+        posLabel.textContent = fmtSigned(Math.round(val));
+      }
+
+      function setWarriorFacing(dir) {
+        warriorFacing = dir >= 0 ? 1 : -1;
+        updateShieldTint(warriorFacing);
+        if (warriorFlipGroup) {
+          warriorFlipGroup.style.transform = `scaleX(${warriorFacing})`;
+        }
+      }
+
+      function showInvertBadge(show) {
+        if (!invertBadgeGroup) return;
+        invertBadgeGroup.setAttribute('opacity', show ? '1' : '0');
+      }
+
+      function celebrateWarrior() {
+        if (!warriorBodyGroup) return;
+        warriorBodyGroup.classList.remove('warrior-win');
+        void warriorBodyGroup.offsetWidth;
+        warriorBodyGroup.classList.add('warrior-win');
+      }
+
+      /* Espelhamento do segmento fantasma + giro 180° + pulso de Energia Lógica no escudo */
+      function animateGhostFlip(fromVal, oldDelta, y, durationMs) {
+        return new Promise((resolve) => {
+          const start = performance.now();
+          const newDelta = -oldDelta;
+          const nextDir = newDelta >= 0 ? 1 : -1;
+
+          showInvertBadge(true);
+          triggerShieldEnergyPulse(nextDir);
+          setWarriorFacing(nextDir);
+          SoundFX.invert();
+
+          function frame(now) {
+            const t = Math.min(1, (now - start) / durationMs);
+            const ease = t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+            const curDelta = oldDelta + (newDelta - oldDelta) * ease;
+            layers.ghost.innerHTML = '';
+            const lbl = t > 0.5 ? fmtSigned(newDelta) : fmtSigned(oldDelta);
+            drawSegment({
+              fromVal,
+              toVal: fromVal + curDelta,
+              y,
+              isGhost: true,
+              label: Math.abs(curDelta) > 0.25 ? lbl : ''
+            });
+            if (t < 1) {
+              requestAnimationFrame(frame);
+            } else {
+              setTimeout(() => {
+                showInvertBadge(false);
+                resolve();
+              }, 160);
+            }
+          }
+          requestAnimationFrame(frame);
+        });
+      }
+
+      /* Caminhada suave desenhando o segmento sólido */
+      function animateWalkSegment({ fromVal, toVal, y, label, subLabel = '', durationMs }) {
+        return new Promise((resolve) => {
+          const start = performance.now();
+          const dir = toVal >= fromVal ? 1 : -1;
+          setWarriorFacing(dir);
+          if (warriorBodyGroup) warriorBodyGroup.classList.add('warrior-bob');
+          SoundFX.step();
+
+          const liveGroup = el('g', {}, layers.segments);
+
+          function frame(now) {
+            const t = Math.min(1, (now - start) / durationMs);
+            const ease = 1 - Math.pow(1 - t, 2);
+            const curVal = fromVal + (toVal - fromVal) * ease;
+
+            liveGroup.innerHTML = '';
+            drawSegment({
+              fromVal,
+              toVal: curVal,
+              y,
+              isGhost: false,
+              label: t > 0.22 ? label : '',
+              subLabel: t >= 1 ? subLabel : '',
+              parent: liveGroup
+            });
+
+            placeWarrior(curVal, y, dir);
+
+            if (t < 1) {
+              requestAnimationFrame(frame);
+            } else {
+              if (warriorBodyGroup) warriorBodyGroup.classList.remove('warrior-bob');
+              placeWarrior(toVal, y, dir);
+              resolve();
+            }
+          }
+          requestAnimationFrame(frame);
+        });
+      }
+
+      drawNumberLine();
+      buildWarrior();
+      placeWarrior(0, LINE_Y, 1);
+
+      return {
+        LINE_Y,
+        setNarration,
+        setRangeForValues,
+        clearDynamic,
+        clearGhost,
+        drawPortal,
+        drawGuideLine,
+        drawSegment,
+        drawPartitionMarks,
+        placeWarrior,
+        setWarriorFacing,
+        celebrateWarrior,
+        animateGhostFlip,
+        animateWalkSegment
+      };
+    })();
+
+    /* =====================================================================
+       CONTROLES GLOBAIS (MAGO 1, VELOCIDADE, SOM, ABAS)
+       ===================================================================== */
+    const cornerMageBtn = document.getElementById('corner-mage-btn');
+    const cornerDemoReset = document.getElementById('corner-demo-reset');
+    const demoCounterBadge = document.getElementById('demo-counter-badge');
+    const asMageBtn = document.getElementById('as-mage-btn');
+
+    function syncMageUI() {
+      cornerMageBtn.classList.toggle('mage-on', mageVisible);
+      asMageBtn.classList.toggle('active', mageVisible);
+      asMageBtn.textContent = mageVisible ? '1· Ocultar Mago 1' : '1· Mago 1';
+      DemoModule.renderExpression();
+      AddSubModule.renderExpression();
+      DivModule.renderControls();
+      ExprModule.renderDisplay();
+    }
+
+    cornerMageBtn.addEventListener('click', () => {
+      mageVisible = !mageVisible;
+      syncMageUI();
+    });
+
+    asMageBtn.addEventListener('click', () => {
+      mageVisible = !mageVisible;
+      syncMageUI();
+    });
+
+    document.getElementById('btn-speed').addEventListener('click', (e) => {
+      slowMode = !slowMode;
+      e.currentTarget.innerHTML = slowMode
+        ? '🐢 <span class="lbl-hide-sm">Devagar</span>'
+        : '⏱️ <span class="lbl-hide-sm">Normal</span>';
+    });
+
+    document.getElementById('btn-sound').addEventListener('click', (e) => {
+      const on = SoundFX.toggle();
+      e.currentTarget.innerHTML = on
+        ? '🔊 <span class="lbl-hide-sm">Som</span>'
+        : '🔇 <span class="lbl-hide-sm">Mudo</span>';
+    });
+
+    function switchTab(next) {
+      if (next === activeTab) return;
+      animToken++;
+      activeTab = next;
+
+      document.querySelectorAll('.tab-btn').forEach((b) => {
+        const isAct = b.dataset.tab === next;
+        b.classList.toggle('active', isAct);
+        b.setAttribute('aria-selected', String(isAct));
+      });
+
+      document.querySelectorAll('.panel').forEach((p) => {
+        p.classList.toggle('active', p.id === 'panel-' + next);
+      });
+
+      const isDemo = next === 'demo';
+      demoCounterBadge.style.display = isDemo ? 'block' : 'none';
+      cornerDemoReset.style.display = isDemo ? 'inline-block' : 'none';
+      cornerMageBtn.style.display = (isDemo || next === 'addsub' || next === 'div' || next === 'expr') ? 'inline-block' : 'none';
+
+      if (next === 'demo') DemoModule.resetCurrentDemo();
+      if (next === 'addsub') AddSubModule.resetView();
+      if (next === 'mult') MultModule.resetView();
+      if (next === 'div') DivModule.resetView();
+      if (next === 'expr') ExprModule.resetView();
+      if (next === 'mission') MissionModule.enterTab();
+    }
+
+    document.querySelectorAll('.tab-btn').forEach((btn) => {
+      btn.addEventListener('click', () => switchTab(btn.dataset.tab));
+    });
+
+    /* =====================================================================
+       ABA 1: DEMONSTRAÇÃO (8 CONTAS SEQUENCIAIS — APENAS BOTÃO "PRÓXIMO")
+       Sempre inicia na origem 0!
+       ===================================================================== */
+    const DemoModule = (() => {
+      const DEMOS = [
+        {
+          id: 1,
+          title: 'Matéria + Matéria',
+          type: 'addsub',
+          t1: 3,
+          ext: 1,
+          t2: 2,
+          caption: 'Dois passos de Matéria se somam no mesmo sentido (azul), partindo do zero.'
+        },
+        {
+          id: 2,
+          title: 'Matéria + Antimatéria',
+          type: 'addsub',
+          t1: 4,
+          ext: 1,
+          t2: -3,
+          caption: 'Após avançar em Matéria (+4), o passo de Antimatéria (−3) recua no sentido contrário.'
+        },
+        {
+          id: 3,
+          title: 'Inversão da Matéria: −(+3)',
+          type: 'unary',
+          ext: -1,
+          val: 3,
+          caption: 'O sinal de menos fora dos parênteses aciona Energia lógica no escudo e inverte Matéria (+3) em Antimatéria (−3).'
+        },
+        {
+          id: 4,
+          title: 'Inversão da Antimatéria: −(−4)',
+          type: 'unary',
+          ext: -1,
+          val: -4,
+          caption: 'O Mago 1 revela −1 · (−4): o escudo gira 180° e inverte Antimatéria (−4) em Matéria (+4).'
+        },
+        {
+          id: 5,
+          title: 'Multiplicação Direta (Multiplicador × Multiplicando)',
+          type: 'mult',
+          f1: 3,
+          f2: -2,
+          caption: 'Multiplicador positivo (+3) mantém o sentido: 3 passos repetidos de Antimatéria (−2) saindo do zero.'
+        },
+        {
+          id: 6,
+          title: 'Multiplicação com Inversor (Multiplicador × Multiplicando)',
+          type: 'mult',
+          f1: -3,
+          f2: -2,
+          caption: 'Multiplicador negativo (−3) aciona o escudo, inverte o passo-base (−2) para Matéria (+2) e repete 3 vezes.'
+        },
+        {
+          id: 7,
+          title: 'Divisão Direta (Partição)',
+          type: 'div',
+          dividend: -6,
+          divisor: 2,
+          caption: 'Traçamos o segmento total (−6) e o dividimos em 2 partes iguais de −3. Divisor positivo mantém o sentido.'
+        },
+        {
+          id: 8,
+          title: 'Divisão com Inversor (Partição + Inversor)',
+          type: 'div',
+          dividend: -6,
+          divisor: -2,
+          caption: 'Dividimos (−6) em 2 partes de −3; como o divisor é negativo (−2), o escudo inverte a parte para Matéria (+3)!'
+        }
+      ];
+
+      const state = {
+        idx: 0,
+        step: 0,
+        busy: false
+      };
+
+      const titleEl = document.getElementById('demo-title');
+      const exprEl = document.getElementById('demo-expr');
+      const captionEl = document.getElementById('demo-caption');
+      const nextBtn = document.getElementById('demo-next-btn');
+
+      const Y1 = Stage.LINE_Y - 46;
+      const Y2 = Stage.LINE_Y - 94;
+
+      function currentDemo() {
+        return DEMOS[state.idx];
+      }
+
+      function maxStepOf(d) {
+        if (d.type === 'addsub') return d.ext < 0 ? 4 : 3;
+        if (d.type === 'unary') return 3; // 0->1 fantasma, 1->2 giro 180°, 2->3 caminhada
+        if (d.type === 'mult') return 2 + Math.abs(d.f1);
+        if (d.type === 'div') return d.divisor < 0 ? 4 : 3; // 0->1 total, 1->2 partição, (2->3 inversão se <0), final->caminhada
+        return 3;
+      }
+
+      function isDemoDone() {
+        return state.step >= maxStepOf(currentDemo());
+      }
+
+      function renderExpression() {
+        const d = currentDemo();
+        const done = isDemoDone();
+        titleEl.textContent = d.title;
+        captionEl.textContent = d.caption;
+        demoCounterBadge.textContent = `Demo ${d.id}/${DEMOS.length}`;
+
+        exprEl.innerHTML = '';
+        exprEl.classList.toggle('mage-active', mageVisible);
+
+        if (d.type === 'addsub') {
+          const t1Cls = d.t1 > 0 ? 'is-pos' : 'is-neg';
+          const extSym = d.ext > 0 ? '+' : '−';
+          const extCls = d.ext > 0 ? 'is-plus' : 'is-minus';
+          const t2Cls = d.t2 > 0 ? 'is-pos' : 'is-neg';
+          const res = d.t1 + d.ext * d.t2;
+
+          exprEl.innerHTML = `
+            <span class="expr-token start-tok ${state.step === 1 ? 'active-step' : (state.step > 1 ? 'done-step' : '')}">
+              <span class="paren-val ${t1Cls}">(${fmtSigned(d.t1)})</span>
+            </span>
+            <span class="expr-token op-tok ${state.step >= 2 && !done ? 'active-step' : ''}">
+              <span class="sign-ext ${extCls}">${extSym}</span>
+              <span class="mage-one">1 ·</span>
+              <span class="paren-val ${t2Cls}">(${fmtSigned(d.t2)})</span>
+            </span>
+            ${done ? `<span class="expr-token result-tok">= ${fmtSigned(res)}</span>` : ''}
+          `;
+        } else if (d.type === 'unary') {
+          const valCls = d.val > 0 ? 'is-pos' : 'is-neg';
+          const res = d.ext * d.val;
+
+          exprEl.innerHTML = `
+            <span class="expr-token op-tok ${state.step >= 1 && !done ? 'active-step' : ''}">
+              <span class="sign-ext is-minus">−</span>
+              <span class="mage-one">1 ·</span>
+              <span class="paren-val ${valCls}">(${fmtSigned(d.val)})</span>
+            </span>
+            ${done ? `<span class="expr-token result-tok">= ${fmtSigned(res)}</span>` : ''}
+          `;
+        } else if (d.type === 'mult') {
+          const f1Cls = d.f1 > 0 ? 'is-pos' : 'is-neg';
+          const f2Cls = d.f2 > 0 ? 'is-pos' : 'is-neg';
+          const res = d.f1 * d.f2;
+
+          exprEl.innerHTML = `
+            <span class="expr-token op-tok ${state.step === 2 ? 'active-step' : ''}" style="border-color:rgba(192,132,252,0.5);">
+              <span class="paren-val ${f1Cls}">(${fmtSigned(d.f1)})</span>
+            </span>
+            <span style="color:var(--text-muted);">×</span>
+            <span class="expr-token op-tok ${state.step === 1 ? 'active-step' : ''}" style="border-color:rgba(56,189,248,0.5);">
+              <span class="paren-val ${f2Cls}">(${fmtSigned(d.f2)})</span>
+            </span>
+            ${done ? `<span class="expr-token result-tok">= ${fmtSigned(res)}</span>` : ''}
+          `;
+        } else if (d.type === 'div') {
+          const d1Cls = d.dividend > 0 ? 'is-pos' : 'is-neg';
+          const d2Cls = d.divisor > 0 ? 'is-pos' : 'is-neg';
+          const res = d.dividend / d.divisor;
+
+          exprEl.innerHTML = `
+            <span class="expr-token op-tok ${state.step === 1 ? 'active-step' : ''}" style="border-color:rgba(56,189,248,0.5);">
+              <span class="paren-val ${d1Cls}">(${fmtSigned(d.dividend)})</span>
+            </span>
+            <span style="color:var(--text-muted);">÷</span>
+            <span class="expr-token op-tok ${state.step >= 2 && !done ? 'active-step' : ''}" style="border-color:rgba(192,132,252,0.5);">
+              <span class="paren-val ${d2Cls}">(${fmtSigned(d.divisor)})</span>
+            </span>
+            ${done ? `<span class="expr-token result-tok">= ${fmtSigned(res)}</span>` : ''}
+          `;
+        }
+
+        const isLastAndDone = state.idx === DEMOS.length - 1 && done;
+        nextBtn.classList.toggle('is-finish', isLastAndDone);
+        nextBtn.textContent = isLastAndDone ? 'Ir para Oficina Livre ▶' : 'Próximo ▶';
+      }
+
+      function resetCurrentDemo() {
+        animToken++;
+        state.step = 0;
+        state.busy = false;
+        nextBtn.disabled = false;
+
+        const d = currentDemo();
+        mageVisible = (d.id === 4);
+        cornerMageBtn.classList.toggle('mage-on', mageVisible);
+
+        if (d.type === 'addsub') {
+          const res = d.t1 + d.ext * d.t2;
+          Stage.setRangeForValues([0, d.t1, d.t1 + d.t2, res]);
+        } else if (d.type === 'unary') {
+          Stage.setRangeForValues([0, d.val, -d.val]);
+        } else if (d.type === 'mult') {
+          Stage.setRangeForValues([0, d.f2, -d.f2, d.f1 * d.f2]);
+        } else if (d.type === 'div') {
+          Stage.setRangeForValues([0, d.dividend, d.dividend / d.divisor]);
+        }
+
+        Stage.clearDynamic();
+        Stage.placeWarrior(0, Stage.LINE_Y, 1);
+        Stage.setNarration(
+          `Demo ${d.id}/${DEMOS.length}`,
+          'info',
+          `Guerreiro na origem <strong>0</strong>. Clique em <strong>Próximo</strong> para avançar etapa por etapa.`
+        );
+
+        renderExpression();
+      }
+
+      async function handleNextClick() {
+        if (state.busy) return;
+        const d = currentDemo();
+
+        if (isDemoDone()) {
+          if (state.idx < DEMOS.length - 1) {
+            state.idx++;
+            resetCurrentDemo();
+          } else {
+            switchTab('addsub');
+          }
+          return;
+        }
+
+        const myToken = ++animToken;
+        state.busy = true;
+        nextBtn.disabled = true;
+
+        if (d.type === 'addsub') {
+          const eff = d.ext * d.t2;
+
+          if (state.step === 0) {
+            Stage.drawGuideLine(0, Y1, Stage.LINE_Y, 'rgba(250, 204, 21, 0.5)');
+            Stage.placeWarrior(0, Y1, d.t1 >= 0 ? 1 : -1);
+            Stage.setNarration('1º Termo', d.t1 > 0 ? 'pos' : 'neg', `Saindo do <strong>0</strong>, o guerreiro avança em ${dirNameHtml(d.t1)}.`);
+            await Stage.animateWalkSegment({ fromVal: 0, toVal: d.t1, y: Y1, label: fmtSigned(d.t1), durationMs: delayMs(600) });
+            if (myToken !== animToken) return;
+            state.step = 1;
+          } else if (state.step === 1) {
+            Stage.drawGuideLine(d.t1, Y2, Y1);
+            Stage.placeWarrior(d.t1, Y2, d.t2 >= 0 ? 1 : -1);
+            Stage.drawSegment({ fromVal: d.t1, toVal: d.t1 + d.t2, y: Y2, isGhost: true, label: fmtSigned(d.t2) });
+            SoundFX.ghost();
+            Stage.setNarration('Dentro dos Parênteses', d.t2 > 0 ? 'pos' : 'neg', `Passo original: ${dirNameHtml(d.t2)} (segmento pontilhado).`);
+            state.step = 2;
+          } else if (state.step === 2 && d.ext < 0) {
+            Stage.setNarration('Energia lógica · Inversão!', 'invert', `Sinal externo <strong>−</strong>: escudo gira 180° e inverte para ${dirNameHtml(eff)}!`);
+            await Stage.animateGhostFlip(d.t1, d.t2, Y2, delayMs(700));
+            if (myToken !== animToken) return;
+            state.step = 3;
+          } else {
+            Stage.clearGhost();
+            const target = d.t1 + eff;
+            Stage.setNarration('Caminhada Final', eff > 0 ? 'pos' : 'neg', `Percorrendo ${dirNameHtml(eff)} até <strong>${fmtSigned(target)}</strong>.`);
+            await Stage.animateWalkSegment({ fromVal: d.t1, toVal: target, y: Y2, label: fmtSigned(eff), durationMs: delayMs(620) });
+            if (myToken !== animToken) return;
+            Stage.drawGuideLine(target, Y2, Stage.LINE_Y);
+            state.step = maxStepOf(d);
+            Stage.setNarration('Resultado', 'success', `<strong>(${fmtSigned(d.t1)}) ${d.ext > 0 ? '+' : '−'} (${fmtSigned(d.t2)}) = ${fmtSigned(target)}</strong>.`);
+            SoundFX.win();
+          }
+        } else if (d.type === 'unary') {
+          const eff = d.ext * d.val;
+
+          if (state.step === 0) {
+            Stage.drawGuideLine(0, Y1, Stage.LINE_Y, 'rgba(250, 204, 21, 0.5)');
+            Stage.placeWarrior(0, Y1, d.val >= 0 ? 1 : -1);
+            Stage.drawSegment({ fromVal: 0, toVal: d.val, y: Y1, isGhost: true, label: fmtSigned(d.val) });
+            SoundFX.ghost();
+            Stage.setNarration('Dentro dos Parênteses', d.val > 0 ? 'pos' : 'neg', `Passo original saindo do <strong>0</strong>: ${dirNameHtml(d.val)}.`);
+            state.step = 1;
+          } else if (state.step === 1) {
+            const mageNote = mageVisible ? ` (Mago 1: <strong>−1 · (${fmtSigned(d.val)})</strong>)` : '';
+            Stage.setNarration('Energia lógica · Inversão!', 'invert', `Sinal externo <strong>−</strong>${mageNote}: escudo gira 180° e inverte para ${dirNameHtml(eff)}!`);
+            await Stage.animateGhostFlip(0, d.val, Y1, delayMs(720));
+            if (myToken !== animToken) return;
+            state.step = 2;
+          } else {
+            Stage.clearGhost();
+            Stage.setNarration('Caminhada Final', eff > 0 ? 'pos' : 'neg', `Percorrendo ${dirNameHtml(eff)} a partir do <strong>0</strong>.`);
+            await Stage.animateWalkSegment({ fromVal: 0, toVal: eff, y: Y1, label: fmtSigned(eff), durationMs: delayMs(620) });
+            if (myToken !== animToken) return;
+            Stage.drawGuideLine(eff, Y1, Stage.LINE_Y);
+            state.step = 3;
+            Stage.setNarration('Resultado', 'success', `<strong>−(${fmtSigned(d.val)}) = ${fmtSigned(eff)}</strong>.`);
+            SoundFX.win();
+          }
+        } else if (d.type === 'mult') {
+          const reps = Math.abs(d.f1);
+          const base = d.f2;
+          const eff = d.f1 < 0 ? -base : base;
+
+          if (state.step === 0) {
+            Stage.drawGuideLine(0, Y1, Stage.LINE_Y, 'rgba(250, 204, 21, 0.5)');
+            Stage.placeWarrior(0, Y1, base >= 0 ? 1 : -1);
+            Stage.drawSegment({ fromVal: 0, toVal: base, y: Y1, isGhost: true, label: `Base: ${fmtSigned(base)}` });
+            SoundFX.ghost();
+            Stage.setNarration('Passo-Base', base > 0 ? 'pos' : 'neg', `O Multiplicando define o passo-base de ${dirNameHtml(base)} saindo do <strong>0</strong>.`);
+            state.step = 1;
+          } else if (state.step === 1) {
+            if (d.f1 < 0) {
+              Stage.setNarration('Multiplicador Inversor!', 'invert', `Multiplicador <strong>(${fmtSigned(d.f1)})</strong>: Energia lógica no escudo gira 180° e inverte a base para ${dirNameHtml(eff)}!`);
+              await Stage.animateGhostFlip(0, base, Y1, delayMs(720));
+              if (myToken !== animToken) return;
+            } else {
+              Stage.setNarration('Multiplicador Direto', eff > 0 ? 'pos' : 'neg', `Multiplicador <strong>(${fmtSigned(d.f1)})</strong>: mantém o sentido do passo-base ${dirNameHtml(eff)}.`);
+              SoundFX.ghost();
+            }
+            state.step = 2;
+          } else {
+            Stage.clearGhost();
+            const iterIdx = state.step - 2;
+            const fromV = iterIdx * eff;
+            const toV = (iterIdx + 1) * eff;
+            const nStep = iterIdx + 1;
+
+            Stage.setNarration(`Passo ${nStep} de ${reps}`, eff > 0 ? 'pos' : 'neg', `Somando o ${nStep}º segmento de ${dirNameHtml(eff)} até <strong>${fmtSigned(toV)}</strong>.`);
+            await Stage.animateWalkSegment({ fromVal: fromV, toVal: toV, y: Y1, label: fmtSigned(eff), subLabel: `${nStep}º`, durationMs: delayMs(500) });
+            if (myToken !== animToken) return;
+
+            state.step++;
+            if (isDemoDone()) {
+              Stage.drawGuideLine(toV, Y1, Stage.LINE_Y);
+              Stage.setNarration('Resultado', 'success', `<strong>(${fmtSigned(d.f1)}) × (${fmtSigned(d.f2)}) = ${fmtSigned(toV)}</strong>!`);
+              SoundFX.win();
+            }
+          }
+        } else if (d.type === 'div') {
+          const parts = Math.abs(d.divisor);
+          const partRaw = d.dividend / parts;
+          const finalQ = d.dividend / d.divisor;
+
+          if (state.step === 0) {
+            // Etapa 1: Segmento total do Dividendo na altura superior (Y2)
+            Stage.drawGuideLine(0, Y2, Stage.LINE_Y, 'rgba(250, 204, 21, 0.5)');
+            Stage.placeWarrior(0, Y2, d.dividend >= 0 ? 1 : -1);
+            Stage.setNarration('Dividendo Total', d.dividend > 0 ? 'pos' : 'neg', `Traçando o segmento total do dividendo: ${dirNameHtml(d.dividend)} a partir do <strong>0</strong>.`);
+            await Stage.animateWalkSegment({ fromVal: 0, toVal: d.dividend, y: Y2, label: `Total: ${fmtSigned(d.dividend)}`, durationMs: delayMs(640) });
+            if (myToken !== animToken) return;
+            state.step = 1;
+          } else if (state.step === 1) {
+            // Etapa 2: Partição em |Divisor| partes iguais + 1ª parte destacada no degrau Y1
+            Stage.drawPartitionMarks({ totalVal: d.dividend, parts, y: Y2 });
+            Stage.placeWarrior(0, Y1, partRaw >= 0 ? 1 : -1);
+            Stage.drawSegment({ fromVal: 0, toVal: partRaw, y: Y1, isGhost: true, label: `1 parte: ${fmtSigned(partRaw)}` });
+            SoundFX.ghost();
+            Stage.setNarration('Partição', partRaw > 0 ? 'pos' : 'neg', `Dividindo em <strong>${parts} partes iguais</strong>: cada parte vale ${dirNameHtml(partRaw)}.`);
+            state.step = 2;
+          } else if (state.step === 2 && d.divisor < 0) {
+            // Etapa 3 (se divisor negativo): Energia lógica no escudo + giro 180°
+            Stage.setNarration('Divisor Inversor!', 'invert', `Divisor negativo <strong>(${fmtSigned(d.divisor)})</strong> aciona Energia lógica no escudo e inverte ${dirNameHtml(partRaw)} para ${dirNameHtml(finalQ)}!`);
+            await Stage.animateGhostFlip(0, partRaw, Y1, delayMs(720));
+            if (myToken !== animToken) return;
+            state.step = 3;
+          } else {
+            // Etapa Final: Caminha do 0 até o Quociente
+            Stage.clearGhost();
+            Stage.setNarration('Quociente Final', finalQ > 0 ? 'pos' : 'neg', `Saindo do <strong>0</strong>, o guerreiro percorre o quociente ${dirNameHtml(finalQ)}.`);
+            await Stage.animateWalkSegment({ fromVal: 0, toVal: finalQ, y: Y1, label: fmtSigned(finalQ), durationMs: delayMs(600) });
+            if (myToken !== animToken) return;
+            Stage.drawGuideLine(finalQ, Y1, Stage.LINE_Y);
+            state.step = maxStepOf(d);
+            Stage.setNarration('Resultado', 'success', `<strong>(${fmtSigned(d.dividend)}) ÷ (${fmtSigned(d.divisor)}) = ${fmtSigned(finalQ)}</strong>!`);
+            SoundFX.win();
+          }
+        }
+
+        if (myToken === animToken) {
+          state.busy = false;
+          nextBtn.disabled = false;
+          renderExpression();
+        }
+      }
+
+      nextBtn.addEventListener('click', handleNextClick);
+      cornerDemoReset.addEventListener('click', () => {
+        if (activeTab === 'demo') resetCurrentDemo();
+      });
+
+      return { resetCurrentDemo, renderExpression };
+    })();
+
+    /* =====================================================================
+       ABA 2: OFICINA (+ / −) — SEMPRE COMEÇANDO DO 0 (1º TERMO ANIMADO)
+       ===================================================================== */
+    const AddSubModule = (() => {
+      const state = {
+        t1Sign: 1,
+        t1Mag: 3,
+        ops: [
+          { ext: -1, intSign: -1, mag: 4 }
+        ],
+        bExt: -1,
+        bInt: -1,
+        bMag: 3,
+        // Execução passo a passo:
+        // t1Done=false => próximo clique anima o 1º termo do 0 até t1
+        t1Done: false,
+        opIdx: 0,
+        subStep: 0, // 0=fantasma, 1=mantém/inverte, 2=caminhada
+        curVal: 0,
+        running: false
+      };
+
+      const exprEl = document.getElementById('addsub-expr');
+      const btnStep = document.getElementById('as-step');
+      const btnRun = document.getElementById('as-run');
+      const t1MagsWrap = document.getElementById('t1-mags');
+      const opMagsWrap = document.getElementById('op-mags');
+
+      function t1Val() { return state.t1Sign * state.t1Mag; }
+
+      function stepY(degrau) {
+        return Stage.LINE_Y - 40 - degrau * 38;
+      }
+
+      function buildMagPills(container, currentVal, onSelect) {
+        container.innerHTML = '';
+        for (let n = 1; n <= 8; n++) {
+          const b = document.createElement('button');
+          b.className = 'num-pill' + (n === currentVal ? ' selected' : '');
+          b.textContent = n;
+          b.addEventListener('click', () => onSelect(n));
+          container.appendChild(b);
+        }
+      }
+
+      function computeAllValues() {
+        const t1 = t1Val();
+        const vals = [0, t1];
+        let v = t1;
+        for (const op of state.ops) {
+          const internal = op.intSign * op.mag;
+          vals.push(v + internal);
+          v += op.ext * internal;
+          vals.push(v);
+        }
+        return vals;
+      }
+
+      function isFinished() {
+        return state.t1Done && state.opIdx >= state.ops.length;
+      }
+
+      function renderExpression() {
+        exprEl.innerHTML = '';
+        exprEl.classList.toggle('mage-active', mageVisible);
+
+        const t1 = t1Val();
+        const t1Cls = t1 > 0 ? 'is-pos' : 'is-neg';
+        const t1Span = document.createElement('span');
+        t1Span.className = 'expr-token start-tok' + (!state.t1Done && state.running ? ' active-step' : (state.t1Done ? ' done-step' : ''));
+        t1Span.innerHTML = `<span class="paren-val ${t1Cls}">(${fmtSigned(t1)})</span>`;
+        exprEl.appendChild(t1Span);
+
+        state.ops.forEach((op, idx) => {
+          const tok = document.createElement('span');
+          tok.className = 'expr-token op-tok';
+          if (state.t1Done && idx === state.opIdx && !isFinished() && (state.subStep > 0 || state.running)) {
+            tok.classList.add('active-step');
+          } else if (state.t1Done && idx < state.opIdx) {
+            tok.classList.add('done-step');
+          }
+
+          const extSym = op.ext > 0 ? '+' : '−';
+          const extCls = op.ext > 0 ? 'is-plus' : 'is-minus';
+          const intVal = op.intSign * op.mag;
+          const intCls = intVal > 0 ? 'is-pos' : 'is-neg';
+
+          tok.innerHTML = `
+            <span class="sign-ext ${extCls}">${extSym}</span>
+            <span class="mage-one">1 ·</span>
+            <span class="paren-val ${intCls}">(${fmtSigned(intVal)})</span>
+            <button class="del-op" title="Remover passo" aria-label="Remover passo">×</button>
+          `;
+
+          tok.querySelector('.del-op').addEventListener('click', () => {
+            if (state.running) return;
+            state.ops.splice(idx, 1);
+            resetView();
+          });
+
+          exprEl.appendChild(tok);
+        });
+
+        if (isFinished()) {
+          const resTok = document.createElement('span');
+          resTok.className = 'expr-token result-tok';
+          resTok.textContent = `= ${fmtSigned(state.curVal)}`;
+          exprEl.appendChild(resTok);
+        }
+      }
+
+      function updateButtons() {
+        btnRun.disabled = state.running;
+        btnStep.disabled = state.running || isFinished();
+      }
+
+      function renderBuilder() {
+        document.getElementById('t1-plus').className = 'sign-pill' + (state.t1Sign > 0 ? ' selected-plus' : '');
+        document.getElementById('t1-minus').className = 'sign-pill' + (state.t1Sign < 0 ? ' selected-minus' : '');
+        buildMagPills(t1MagsWrap, state.t1Mag, (n) => { state.t1Mag = n; resetView(); });
+        buildMagPills(opMagsWrap, state.bMag, (n) => { state.bMag = n; renderBuilder(); });
+      }
+
+      function resetView() {
+        animToken++;
+        state.running = false;
+        state.t1Done = false;
+        state.opIdx = 0;
+        state.subStep = 0;
+        state.curVal = 0;
+
+        Stage.setRangeForValues(computeAllValues());
+        Stage.clearDynamic();
+        // SEMPRE inicia na origem 0, voltado para a direita (Matéria)
+        Stage.placeWarrior(0, Stage.LINE_Y, 1);
+        Stage.setNarration(
+          'Origem (0)',
+          'info',
+          `Guerreiro na origem <strong>0</strong>. Clique em <strong>Passo a Passo</strong> ou <strong>Executar</strong> para iniciar.`
+        );
+
+        renderBuilder();
+        renderExpression();
+        updateButtons();
+      }
+
+      async function advanceSubStep(token) {
+        // Etapa inicial: anima o 1º termo saindo do 0!
+        if (!state.t1Done) {
+          const t1 = t1Val();
+          const y0 = stepY(0);
+          Stage.drawGuideLine(0, y0, Stage.LINE_Y, 'rgba(250, 204, 21, 0.5)');
+          Stage.placeWarrior(0, y0, t1 >= 0 ? 1 : -1);
+          Stage.setNarration('1º Termo', t1 > 0 ? 'pos' : 'neg', `Saindo do <strong>0</strong> em ${dirNameHtml(t1)}.`);
+
+          await Stage.animateWalkSegment({
+            fromVal: 0,
+            toVal: t1,
+            y: y0,
+            label: fmtSigned(t1),
+            durationMs: delayMs(600)
+          });
+          if (token !== animToken) return false;
+
+          state.curVal = t1;
+          state.t1Done = true;
+          if (state.ops.length === 0) {
+            Stage.drawGuideLine(t1, y0, Stage.LINE_Y);
+            Stage.setNarration('Concluído', 'success', `Posição final: <strong>${fmtSigned(t1)}</strong>.`);
+            SoundFX.win();
+          }
+          renderExpression();
+          return true;
+        }
+
+        if (state.opIdx >= state.ops.length) return false;
+
+        const op = state.ops[state.opIdx];
+        const internal = op.intSign * op.mag;
+        const effective = op.ext * internal;
+        const y = stepY(state.opIdx + 1);
+        const prevY = stepY(state.opIdx);
+
+        renderExpression();
+
+        if (state.subStep === 0) {
+          Stage.clearGhost();
+          Stage.drawGuideLine(state.curVal, y, prevY);
+          Stage.placeWarrior(state.curVal, y, internal >= 0 ? 1 : -1);
+          Stage.drawSegment({
+            fromVal: state.curVal,
+            toVal: state.curVal + internal,
+            y,
+            isGhost: true,
+            label: fmtSigned(internal)
+          });
+          SoundFX.ghost();
+          Stage.setNarration(
+            `Passo ${state.opIdx + 1} · Parênteses`,
+            internal > 0 ? 'pos' : 'neg',
+            `Passo original dentro dos parênteses: ${dirNameHtml(internal)}.`
+          );
+          state.subStep = 1;
+          return true;
+        }
+
+        if (state.subStep === 1) {
+          if (op.ext < 0) {
+            const mageTxt = mageVisible ? ' (fator <strong>−1</strong>)' : '';
+            Stage.setNarration(
+              'Energia Lógica · Inversão!',
+              'invert',
+              `Sinal externo <strong>−</strong>${mageTxt}: escudo gira 180° e inverte para ${dirNameHtml(effective)}!`
+            );
+            await Stage.animateGhostFlip(state.curVal, internal, y, delayMs(700));
+            if (token !== animToken) return false;
+          } else {
+            const mageTxt = mageVisible ? ' (fator <strong>+1</strong>)' : '';
+            Stage.setNarration(
+              'Mantém Sentido',
+              effective > 0 ? 'pos' : 'neg',
+              `Sinal externo <strong>+</strong>${mageTxt}: mantém ${dirNameHtml(effective)}.`
+            );
+            SoundFX.ghost();
+            await sleep(delayMs(300), token);
+            if (token !== animToken) return false;
+          }
+          state.subStep = 2;
+          return true;
+        }
+
+        if (state.subStep === 2) {
+          Stage.clearGhost();
+          const nextVal = state.curVal + effective;
+          Stage.setNarration(
+            'Caminhando',
+            effective > 0 ? 'pos' : 'neg',
+            `Avançando em ${dirNameHtml(effective)} até <strong>${fmtSigned(nextVal)}</strong>.`
+          );
+          await Stage.animateWalkSegment({
+            fromVal: state.curVal,
+            toVal: nextVal,
+            y,
+            label: fmtSigned(effective),
+            durationMs: delayMs(620)
+          });
+          if (token !== animToken) return false;
+
+          Stage.drawGuideLine(nextVal, y, Stage.LINE_Y);
+          state.curVal = nextVal;
+          state.opIdx++;
+          state.subStep = 0;
+
+          if (isFinished()) {
+            Stage.setNarration('Trajeto Concluído!', 'success', `Resultado final na reta: <strong>${fmtSigned(state.curVal)}</strong>.`);
+            SoundFX.win();
+          }
+          renderExpression();
+          return true;
+        }
+
+        return false;
+      }
+
+      async function runAll() {
+        if (state.running) return;
+        if (isFinished()) resetView();
+        const myToken = ++animToken;
+        state.running = true;
+        updateButtons();
+
+        while (!isFinished()) {
+          const ok = await advanceSubStep(myToken);
+          if (!ok || myToken !== animToken) break;
+          if (!(await sleep(delayMs(440), myToken))) break;
+        }
+
+        if (myToken === animToken) {
+          state.running = false;
+          updateButtons();
+        }
+      }
+
+      async function runOneStep() {
+        if (state.running || isFinished()) return;
+        const myToken = ++animToken;
+        state.running = true;
+        updateButtons();
+        await advanceSubStep(myToken);
+        if (myToken === animToken) {
+          state.running = false;
+          updateButtons();
+        }
+      }
+
+      btnRun.addEventListener('click', runAll);
+      btnStep.addEventListener('click', runOneStep);
+      document.getElementById('as-reset').addEventListener('click', resetView);
+      document.getElementById('as-clear').addEventListener('click', () => { state.ops = []; resetView(); });
+
+      document.getElementById('t1-plus').addEventListener('click', () => { state.t1Sign = 1; resetView(); });
+      document.getElementById('t1-minus').addEventListener('click', () => { state.t1Sign = -1; resetView(); });
+
+      const extPlus = document.getElementById('ext-plus');
+      const extMinus = document.getElementById('ext-minus');
+      extPlus.addEventListener('click', () => {
+        state.bExt = 1;
+        extPlus.className = 'sign-pill selected-ext-plus';
+        extMinus.className = 'sign-pill';
+      });
+      extMinus.addEventListener('click', () => {
+        state.bExt = -1;
+        extMinus.className = 'sign-pill selected-ext-minus';
+        extPlus.className = 'sign-pill';
+      });
+
+      const intPlus = document.getElementById('int-plus');
+      const intMinus = document.getElementById('int-minus');
+      intPlus.addEventListener('click', () => {
+        state.bInt = 1;
+        intPlus.className = 'sign-pill selected-plus';
+        intMinus.className = 'sign-pill';
+      });
+      intMinus.addEventListener('click', () => {
+        state.bInt = -1;
+        intMinus.className = 'sign-pill selected-minus';
+        intPlus.className = 'sign-pill';
+      });
+
+      document.getElementById('as-add-op').addEventListener('click', () => {
+        if (state.ops.length >= 3) {
+          Stage.setNarration('Limite de 3 passos', 'info', 'Máximo de 3 passos adicionais para manter a escadinha sempre visível.');
+          return;
+        }
+        state.ops.push({ ext: state.bExt, intSign: state.bInt, mag: state.bMag });
+        resetView();
+      });
+
+      return { resetView, renderExpression };
+    })();
+
+    /* =====================================================================
+       ABA 3: MULTIPLICAÇÃO (MULTIPLICADOR × MULTIPLICANDO, SEMPRE DO 0)
+       ===================================================================== */
+    const MultModule = (() => {
+      const state = {
+        s1: -1, m1: 3,
+        s2: -1, m2: 2,
+        phase: 0,
+        iterDone: 0,
+        running: false
+      };
+
+      const exprEl = document.getElementById('mult-expr');
+      const summaryEl = document.getElementById('m-summary');
+      const m1MagsWrap = document.getElementById('m1-mags');
+      const m2MagsWrap = document.getElementById('m2-mags');
+      const btnStep = document.getElementById('m-step');
+      const btnRun = document.getElementById('m-run');
+
+      const MULT_Y = Stage.LINE_Y - 52;
+
+      function f1Val() { return state.m1 === 0 ? 0 : state.s1 * state.m1; }
+      function f2Val() { return state.m2 === 0 ? 0 : state.s2 * state.m2; }
+
+      function isFinished() {
+        const f1 = f1Val(), f2 = f2Val();
+        if (f1 === 0 || f2 === 0) return state.phase >= 1;
+        return state.phase >= 2 && state.iterDone >= Math.abs(f1);
+      }
+
+      function renderControls() {
+        document.getElementById('m1-pos').className = 'sign-pill' + (state.s1 > 0 ? ' selected-ext-plus' : '');
+        document.getElementById('m1-neg').className = 'sign-pill' + (state.s1 < 0 ? ' selected-ext-minus' : '');
+        document.getElementById('m2-pos').className = 'sign-pill' + (state.s2 > 0 ? ' selected-plus' : '');
+        document.getElementById('m2-neg').className = 'sign-pill' + (state.s2 < 0 ? ' selected-minus' : '');
+
+        m1MagsWrap.innerHTML = '';
+        for (let n = 0; n <= 5; n++) {
+          const b = document.createElement('button');
+          b.className = 'num-pill' + (n === state.m1 ? ' selected' : '');
+          b.textContent = n;
+          b.addEventListener('click', () => { state.m1 = n; resetView(); });
+          m1MagsWrap.appendChild(b);
+        }
+
+        m2MagsWrap.innerHTML = '';
+        for (let n = 0; n <= 5; n++) {
+          const b = document.createElement('button');
+          b.className = 'num-pill' + (n === state.m2 ? ' selected' : '');
+          b.textContent = n;
+          b.addEventListener('click', () => { state.m2 = n; resetView(); });
+          m2MagsWrap.appendChild(b);
+        }
+
+        const f1 = f1Val(), f2 = f2Val(), prod = f1 * f2;
+        const f1Cls = f1 > 0 ? 'is-pos' : (f1 < 0 ? 'is-neg' : '');
+        const f2Cls = f2 > 0 ? 'is-pos' : (f2 < 0 ? 'is-neg' : '');
+
+        exprEl.innerHTML = `
+          <span class="expr-token op-tok" style="border-color:rgba(192,132,252,0.5);">
+            <span class="paren-val ${f1Cls}">(${fmtSigned(f1)})</span>
+          </span>
+          <span style="color:var(--text-muted);">×</span>
+          <span class="expr-token op-tok" style="border-color:rgba(56,189,248,0.5);">
+            <span class="paren-val ${f2Cls}">(${fmtSigned(f2)})</span>
+          </span>
+          ${isFinished() ? `<span class="expr-token result-tok">= ${fmtSigned(prod)}</span>` : ''}
+        `;
+
+        summaryEl.textContent = (f1 === 0 || f2 === 0)
+          ? 'Zero repetições ou passo nulo: permanece na origem (0).'
+          : `${f1 < 0 ? 'Inverte e repete' : 'Mantém e repete'} ${state.m1}× o passo de ${dirName(f2)} (${fmtSigned(f2)}).`;
+      }
+
+      function updateButtons() {
+        btnRun.disabled = state.running;
+        btnStep.disabled = state.running || isFinished();
+      }
+
+      function resetView() {
+        animToken++;
+        state.running = false;
+        state.phase = 0;
+        state.iterDone = 0;
+
+        const f1 = f1Val(), f2 = f2Val();
+        Stage.setRangeForValues([0, f2, -f2, f1 * f2]);
+        Stage.clearDynamic();
+        // SEMPRE inicia na origem 0 voltado para a direita (Matéria)
+        Stage.placeWarrior(0, Stage.LINE_Y, 1);
+        Stage.setNarration(
+          'Origem (0)',
+          'info',
+          `Guerreiro no <strong>0</strong>. Clique em <strong>Passo a Passo</strong> ou <strong>Executar</strong> para ver <strong>(${fmtSigned(f1)}) × (${fmtSigned(f2)})</strong>.`
+        );
+
+        renderControls();
+        updateButtons();
+      }
+
+      async function advanceStep(token) {
+        const f1 = f1Val(), f2 = f2Val();
+        const reps = Math.abs(f1);
+        const effStep = f1 < 0 ? -f2 : f2;
+
+        if (f1 === 0 || f2 === 0) {
+          Stage.drawGuideLine(0, MULT_Y, Stage.LINE_Y, 'rgba(250, 204, 21, 0.5)');
+          Stage.placeWarrior(0, MULT_Y, 1);
+          Stage.drawSegment({ fromVal: 0, toVal: 0, y: MULT_Y, isGhost: false });
+          Stage.setNarration('Resultado Zero', 'success', 'O guerreiro permanece na origem <strong>0</strong>!');
+          SoundFX.win();
+          state.phase = 1;
+          renderControls();
+          return true;
+        }
+
+        if (state.phase === 0) {
+          Stage.drawGuideLine(0, MULT_Y, Stage.LINE_Y, 'rgba(250, 204, 21, 0.5)');
+          Stage.placeWarrior(0, MULT_Y, f2 >= 0 ? 1 : -1);
+          Stage.drawSegment({ fromVal: 0, toVal: f2, y: MULT_Y, isGhost: true, label: `Base: ${fmtSigned(f2)}` });
+          SoundFX.ghost();
+          Stage.setNarration('Passo-Base', f2 > 0 ? 'pos' : 'neg', `Passo-base do Multiplicando: ${dirNameHtml(f2)}.`);
+          state.phase = 1;
+          return true;
+        }
+
+        if (state.phase === 1) {
+          if (f1 < 0) {
+            Stage.setNarration('Energia Lógica · Inversor!', 'invert', `Multiplicador <strong>(${fmtSigned(f1)})</strong> inverte o passo-base para ${dirNameHtml(effStep)}!`);
+            await Stage.animateGhostFlip(0, f2, MULT_Y, delayMs(700));
+            if (token !== animToken) return false;
+          } else {
+            Stage.setNarration('Multiplicador Direto', effStep > 0 ? 'pos' : 'neg', `Multiplicador <strong>(${fmtSigned(f1)})</strong> mantém ${dirNameHtml(effStep)}.`);
+            SoundFX.ghost();
+            await sleep(delayMs(320), token);
+            if (token !== animToken) return false;
+          }
+          state.phase = 2;
+          return true;
+        }
+
+        if (state.phase >= 2 && state.iterDone < reps) {
+          Stage.clearGhost();
+          const fromV = state.iterDone * effStep;
+          const toV = (state.iterDone + 1) * effStep;
+          const nStep = state.iterDone + 1;
+
+          Stage.setNarration(`Passo ${nStep} de ${reps}`, effStep > 0 ? 'pos' : 'neg', `Repetindo ${dirNameHtml(effStep)} até <strong>${fmtSigned(toV)}</strong>.`);
+          await Stage.animateWalkSegment({
+            fromVal: fromV,
+            toVal: toV,
+            y: MULT_Y,
+            label: fmtSigned(effStep),
+            subLabel: `${nStep}º`,
+            durationMs: delayMs(500)
+          });
+          if (token !== animToken) return false;
+
+          state.iterDone++;
+          if (state.iterDone >= reps) {
+            Stage.drawGuideLine(toV, MULT_Y, Stage.LINE_Y);
+            Stage.setNarration('Produto Encontrado!', 'success', `<strong>(${fmtSigned(f1)}) × (${fmtSigned(f2)}) = ${fmtSigned(toV)}</strong>!`);
+            SoundFX.win();
+            renderControls();
+          }
+          return true;
+        }
+        return false;
+      }
+
+      async function runAll() {
+        if (state.running) return;
+        if (isFinished()) resetView();
+        const myToken = ++animToken;
+        state.running = true;
+        updateButtons();
+
+        while (!isFinished()) {
+          const ok = await advanceStep(myToken);
+          if (!ok || myToken !== animToken) break;
+          if (!(await sleep(delayMs(420), myToken))) break;
+        }
+
+        if (myToken === animToken) {
+          state.running = false;
+          updateButtons();
+        }
+      }
+
+      async function runOneStep() {
+        if (state.running || isFinished()) return;
+        const myToken = ++animToken;
+        state.running = true;
+        updateButtons();
+        await advanceStep(myToken);
+        if (myToken === animToken) {
+          state.running = false;
+          updateButtons();
+        }
+      }
+
+      document.getElementById('m1-pos').addEventListener('click', () => { state.s1 = 1; resetView(); });
+      document.getElementById('m1-neg').addEventListener('click', () => { state.s1 = -1; resetView(); });
+      document.getElementById('m2-pos').addEventListener('click', () => { state.s2 = 1; resetView(); });
+      document.getElementById('m2-neg').addEventListener('click', () => { state.s2 = -1; resetView(); });
+      btnRun.addEventListener('click', runAll);
+      btnStep.addEventListener('click', runOneStep);
+      document.getElementById('m-reset').addEventListener('click', resetView);
+
+      return { resetView };
+    })();
+
+    /* =====================================================================
+       ABA 4: DIVISÃO (PARTIÇÃO + INVERSOR — SEMPRE SAINDO DO 0)
+       ===================================================================== */
+    const DivModule = (() => {
+      const state = {
+        s1: -1, // sinal do dividendo
+        s2: -1, // sinal do divisor (+ Direto, - Inversor)
+        divMag: 2, // |divisor| de 1 a 5
+        qMag: 3,   // |quociente| para garantir dividendo múltiplo exato até ±15
+        phase: 0,  // 0=total, 1=partição, 2=inversão/mantém, 3=caminhada final
+        running: false
+      };
+
+      const exprEl = document.getElementById('div-expr');
+      const summaryEl = document.getElementById('d-summary');
+      const mageHintEl = document.getElementById('d-mage-hint');
+      const d1MagsWrap = document.getElementById('d1-mags');
+      const d2MagsWrap = document.getElementById('d2-mags');
+      const btnRun = document.getElementById('d-run');
+      const btnStep = document.getElementById('d-step');
+
+      const Y_TOP = Stage.LINE_Y - 98;
+      const Y_RES = Stage.LINE_Y - 46;
+
+      function dividendVal() { return state.s1 * (state.divMag * state.qMag); }
+      function divisorVal() { return state.s2 * state.divMag; }
+      function quotientVal() { return dividendVal() / divisorVal(); }
+      function maxQFor(divMag) { return Math.min(5, Math.floor(15 / divMag)); }
+      function isFinished() { return state.phase >= 4; }
+
+      function renderControls() {
+        const maxQ = maxQFor(state.divMag);
+        if (state.qMag > maxQ) state.qMag = maxQ;
+
+        document.getElementById('d1-pos').className = 'sign-pill' + (state.s1 > 0 ? ' selected-plus' : '');
+        document.getElementById('d1-neg').className = 'sign-pill' + (state.s1 < 0 ? ' selected-minus' : '');
+        document.getElementById('d2-pos').className = 'sign-pill' + (state.s2 > 0 ? ' selected-ext-plus' : '');
+        document.getElementById('d2-neg').className = 'sign-pill' + (state.s2 < 0 ? ' selected-ext-minus' : '');
+
+        // Múltiplos exatos do divisor atual (até ±15)
+        d1MagsWrap.innerHTML = '';
+        for (let q = 1; q <= maxQ; q++) {
+          const multVal = q * state.divMag;
+          const b = document.createElement('button');
+          b.className = 'num-pill' + (q === state.qMag ? ' selected' : '');
+          b.textContent = multVal;
+          b.addEventListener('click', () => { state.qMag = q; resetView(); });
+          d1MagsWrap.appendChild(b);
+        }
+
+        // Divisor de 1 a 5 (incluindo 1 para evidenciar o Mago 1)
+        d2MagsWrap.innerHTML = '';
+        for (let d = 1; d <= 5; d++) {
+          const b = document.createElement('button');
+          b.className = 'num-pill' + (d === state.divMag ? ' selected' : '');
+          b.textContent = d;
+          b.addEventListener('click', () => {
+            state.divMag = d;
+            if (state.qMag > maxQFor(d)) state.qMag = maxQFor(d);
+            resetView();
+          });
+          d2MagsWrap.appendChild(b);
+        }
+
+        const d1 = dividendVal();
+        const d2 = divisorVal();
+        const q = quotientVal();
+        const d1Cls = d1 > 0 ? 'is-pos' : 'is-neg';
+        const d2Cls = d2 > 0 ? 'is-pos' : 'is-neg';
+
+        exprEl.innerHTML = `
+          <span class="expr-token op-tok ${state.phase === 1 ? 'active-step' : ''}" style="border-color:rgba(56,189,248,0.5);">
+            <span class="paren-val ${d1Cls}">(${fmtSigned(d1)})</span>
+          </span>
+          <span style="color:var(--text-muted);">÷</span>
+          <span class="expr-token op-tok ${state.phase === 2 || state.phase === 3 ? 'active-step' : ''}" style="border-color:rgba(192,132,252,0.5);">
+            <span class="paren-val ${d2Cls}">(${fmtSigned(d2)})</span>
+          </span>
+          ${isFinished() ? `<span class="expr-token result-tok">= ${fmtSigned(q)}</span>` : ''}
+        `;
+
+        const showMageOneDiv = state.divMag === 1 && mageVisible;
+        mageHintEl.classList.toggle('show', showMageOneDiv);
+        if (state.divMag === 1) {
+          mageHintEl.textContent = state.s2 < 0
+            ? '1· Mago 1 (−1): mantém o tamanho do passo e apenas aciona o inversor!'
+            : '1· Mago 1 (+1): mantém o tamanho e o sentido do passo!';
+        }
+
+        summaryEl.textContent = state.divMag === 1
+          ? `1 parte inteira de ${fmtSigned(d1)} · Divisor ${state.s2 < 0 ? 'inverte' : 'mantém'} o sentido.`
+          : `Partição em ${state.divMag} partes de ${fmtSigned(d1 / state.divMag)} · Divisor ${state.s2 < 0 ? 'inverte' : 'mantém'}.`;
+      }
+
+      function updateButtons() {
+        btnRun.disabled = state.running;
+        btnStep.disabled = state.running || isFinished();
+      }
+
+      function resetView() {
+        animToken++;
+        state.running = false;
+        state.phase = 0;
+
+        const d1 = dividendVal();
+        const q = quotientVal();
+        Stage.setRangeForValues([0, d1, q, -q]);
+        Stage.clearDynamic();
+        Stage.placeWarrior(0, Stage.LINE_Y, 1);
+        Stage.setNarration(
+          'Origem (0)',
+          'info',
+          `Guerreiro no <strong>0</strong>. Clique em <strong>Passo a Passo</strong> ou <strong>Animar</strong> para ver <strong>(${fmtSigned(d1)}) ÷ (${fmtSigned(divisorVal())})</strong>.`
+        );
+
+        renderControls();
+        updateButtons();
+      }
+
+      async function advanceStep(token) {
+        const d1 = dividendVal();
+        const d2 = divisorVal();
+        const parts = state.divMag;
+        const partRaw = d1 / parts;
+        const finalQ = quotientVal();
+
+        if (state.phase === 0) {
+          Stage.drawGuideLine(0, Y_TOP, Stage.LINE_Y, 'rgba(250, 204, 21, 0.5)');
+          Stage.placeWarrior(0, Y_TOP, d1 >= 0 ? 1 : -1);
+          Stage.setNarration('1. Dividendo Total', d1 > 0 ? 'pos' : 'neg', `Traçando o segmento total ${dirNameHtml(d1)} saindo do <strong>0</strong>.`);
+          await Stage.animateWalkSegment({ fromVal: 0, toVal: d1, y: Y_TOP, label: `Total: ${fmtSigned(d1)}`, durationMs: delayMs(620) });
+          if (token !== animToken) return false;
+          state.phase = 1;
+          renderControls();
+          return true;
+        }
+
+        if (state.phase === 1) {
+          Stage.drawPartitionMarks({ totalVal: d1, parts, y: Y_TOP });
+          Stage.placeWarrior(0, Y_RES, partRaw >= 0 ? 1 : -1);
+          Stage.drawSegment({ fromVal: 0, toVal: partRaw, y: Y_RES, isGhost: true, label: `1 parte: ${fmtSigned(partRaw)}` });
+          SoundFX.ghost();
+          const partTxt = parts === 1
+            ? `Divisor com módulo <strong>1</strong> (Mago 1): o segmento inteiro (${dirNameHtml(partRaw)}) forma 1 única parte.`
+            : `Segmento dividido em <strong>${parts} partes iguais</strong>: a 1ª parte destacada vale ${dirNameHtml(partRaw)}.`;
+          Stage.setNarration('2. Partição', partRaw > 0 ? 'pos' : 'neg', partTxt);
+          state.phase = 2;
+          renderControls();
+          return true;
+        }
+
+        if (state.phase === 2) {
+          if (d2 < 0) {
+            Stage.setNarration('3. Divisor Inversor!', 'invert', `Divisor <strong>(${fmtSigned(d2)})</strong> aciona Energia lógica no escudo, gira 180° e inverte ${dirNameHtml(partRaw)} para ${dirNameHtml(finalQ)}!`);
+            await Stage.animateGhostFlip(0, partRaw, Y_RES, delayMs(720));
+            if (token !== animToken) return false;
+          } else {
+            Stage.setNarration('3. Divisor Direto', finalQ > 0 ? 'pos' : 'neg', `Divisor <strong>(${fmtSigned(d2)})</strong> é positivo: mantém o sentido de ${dirNameHtml(finalQ)}.`);
+            SoundFX.ghost();
+            await sleep(delayMs(320), token);
+            if (token !== animToken) return false;
+          }
+          state.phase = 3;
+          renderControls();
+          return true;
+        }
+
+        if (state.phase === 3) {
+          Stage.clearGhost();
+          Stage.setNarration('4. Quociente Final', finalQ > 0 ? 'pos' : 'neg', `Percorrendo a partir do <strong>0</strong> o quociente ${dirNameHtml(finalQ)}.`);
+          await Stage.animateWalkSegment({ fromVal: 0, toVal: finalQ, y: Y_RES, label: fmtSigned(finalQ), durationMs: delayMs(600) });
+          if (token !== animToken) return false;
+          Stage.drawGuideLine(finalQ, Y_RES, Stage.LINE_Y);
+          state.phase = 4;
+          Stage.setNarration('Quociente Encontrado!', 'success', `<strong>(${fmtSigned(d1)}) ÷ (${fmtSigned(d2)}) = ${fmtSigned(finalQ)}</strong>!`);
+          SoundFX.win();
+          renderControls();
+          return true;
+        }
+
+        return false;
+      }
+
+      async function runAll() {
+        if (state.running) return;
+        if (isFinished()) resetView();
+        const myToken = ++animToken;
+        state.running = true;
+        updateButtons();
+
+        while (!isFinished()) {
+          const ok = await advanceStep(myToken);
+          if (!ok || myToken !== animToken) break;
+          if (!(await sleep(delayMs(440), myToken))) break;
+        }
+
+        if (myToken === animToken) {
+          state.running = false;
+          updateButtons();
+        }
+      }
+
+      async function runOneStep() {
+        if (state.running || isFinished()) return;
+        const myToken = ++animToken;
+        state.running = true;
+        updateButtons();
+        await advanceStep(myToken);
+        if (myToken === animToken) {
+          state.running = false;
+          updateButtons();
+        }
+      }
+
+      document.getElementById('d1-pos').addEventListener('click', () => { state.s1 = 1; resetView(); });
+      document.getElementById('d1-neg').addEventListener('click', () => { state.s1 = -1; resetView(); });
+      document.getElementById('d2-pos').addEventListener('click', () => { state.s2 = 1; resetView(); });
+      document.getElementById('d2-neg').addEventListener('click', () => { state.s2 = -1; resetView(); });
+      btnRun.addEventListener('click', runAll);
+      btnStep.addEventListener('click', runOneStep);
+      document.getElementById('d-reset').addEventListener('click', resetView);
+
+      return { resetView, renderControls };
+    })();
+
+    /* =====================================================================
+       ABA 5: EXPRESSÕES NUMÉRICAS (ORDEM DAS OPERAÇÕES + PERSONALIZADA)
+       Formato interno unificado: Termo A [op (+ ou −)] Termo B
+       Cada termo pode ser:
+         - { kind: 'num', ext: 1|-1, val: int }  (ex: (+2) ou −(−3))
+         - { kind: 'mult', a: int, b: int }     (ex: (−3)·(+2))
+         - { kind: 'div', a: int, b: int }      (ex: (−6)÷(−2))
+       ===================================================================== */
+    const ExprModule = (() => {
+      const PRESETS = [
+        {
+          label: '(+2) + (−3)·(+2)',
+          termA: { kind: 'num', ext: 1, val: 2 },
+          op: 1,
+          termB: { kind: 'mult', a: -3, b: 2 }
+        },
+        {
+          label: '(−6)÷(−2) − (+4)',
+          termA: { kind: 'div', a: -6, b: -2 },
+          op: -1,
+          termB: { kind: 'num', ext: 1, val: 4 }
+        },
+        {
+          label: '−(−3) + (+2)·(−4)',
+          termA: { kind: 'num', ext: -1, val: -3 },
+          op: 1,
+          termB: { kind: 'mult', a: 2, b: -4 }
+        },
+        {
+          label: '(−8)÷(+2) − (−5)',
+          termA: { kind: 'div', a: -8, b: 2 },
+          op: -1,
+          termB: { kind: 'num', ext: 1, val: -5 }
+        },
+        {
+          label: '(−2)·(−3) + (−6)÷(+3)',
+          termA: { kind: 'mult', a: -2, b: -3 },
+          op: 1,
+          termB: { kind: 'div', a: -6, b: 3 }
+        },
+        {
+          label: '−(+4) − (−2)·(−3)',
+          termA: { kind: 'num', ext: -1, val: 4 },
+          op: -1,
+          termB: { kind: 'mult', a: -2, b: -3 }
+        }
+      ];
+
+      const state = {
+        presetIdx: 0,
+        expr: PRESETS[0],
+        stepIdx: 0,
+        steps: [],
+        resolvedA: null,
+        resolvedB: null,
+        effB: null,
+        finalVal: null,
+        focusBlock: null, // 'A' | 'B' | 'OP' | 'SUM' | null
+        running: false,
+        customOp: 1
+      };
+
+      const mainDisplay = document.getElementById('expr-main-display');
+      const simpLine = document.getElementById('expr-simp-line');
+      const presetsWrap = document.getElementById('expr-presets');
+      const customPanel = document.getElementById('expr-custom-panel');
+      const btnRun = document.getElementById('ex-run');
+      const btnStep = document.getElementById('ex-step');
+
+      const Y1 = Stage.LINE_Y - 44;
+      const Y2 = Stage.LINE_Y - 92;
+
+      function evalTerm(t) {
+        if (t.kind === 'num') return t.ext * t.val;
+        if (t.kind === 'mult') return t.a * t.b;
+        if (t.kind === 'div') return t.a / t.b;
+        return 0;
+      }
+
+      function formatTermHtml(t) {
+        if (t.kind === 'num') {
+          const vCls = t.val > 0 ? 'is-pos' : 'is-neg';
+          if (t.ext < 0) {
+            return `<span class="sign-ext is-minus">−</span><span class="mage-one">1 ·</span><span class="paren-val ${vCls}">(${fmtSigned(t.val)})</span>`;
+          }
+          return `<span class="paren-val ${vCls}">(${fmtSigned(t.val)})</span>`;
+        }
+        if (t.kind === 'mult') {
+          const aCls = t.a > 0 ? 'is-pos' : 'is-neg';
+          const bCls = t.b > 0 ? 'is-pos' : 'is-neg';
+          return `<span class="paren-val ${aCls}">(${fmtSigned(t.a)})</span><span style="color:var(--text-muted); margin:0 2px;">·</span><span class="paren-val ${bCls}">(${fmtSigned(t.b)})</span>`;
+        }
+        if (t.kind === 'div') {
+          const aCls = t.a > 0 ? 'is-pos' : 'is-neg';
+          const bCls = t.b > 0 ? 'is-pos' : 'is-neg';
+          return `<span class="paren-val ${aCls}">(${fmtSigned(t.a)})</span><span style="color:var(--text-muted); margin:0 2px;">÷</span><span class="paren-val ${bCls}">(${fmtSigned(t.b)})</span>`;
+        }
+        return '';
+      }
+
+      function formatTermPlain(t) {
+        if (t.kind === 'num') return (t.ext < 0 ? '−' : '') + `(${fmtSigned(t.val)})`;
+        if (t.kind === 'mult') return `(${fmtSigned(t.a)})·(${fmtSigned(t.b)})`;
+        if (t.kind === 'div') return `(${fmtSigned(t.a)})÷(${fmtSigned(t.b)})`;
+        return '';
+      }
+
+      function needsPriority(t) {
+        return t.kind === 'mult' || t.kind === 'div' || (t.kind === 'num' && t.ext < 0);
+      }
+
+      /* Constrói a fila didática respeitando a ordem das operações:
+         1) Resolve Termo A (se for mult, div ou oposto) ou marca seu valor
+         2) Resolve Termo B (se for mult, div ou oposto)
+         3) Caminha Termo A na reta saindo do 0 (degrau 1)
+         4) Aplica operação (+ ou −) sobre Termo B (com inversão no escudo se op < 0) e caminha no degrau 2 */
+      function buildSteps(ex) {
+        const list = [];
+        if (needsPriority(ex.termA)) list.push({ action: 'evalA' });
+        if (needsPriority(ex.termB)) list.push({ action: 'evalB' });
+        list.push({ action: 'walkA' });
+        list.push({ action: 'applyB' });
+        return list;
+      }
+
+      function isFinished() {
+        return state.stepIdx >= state.steps.length;
+      }
+
+      function renderPresets() {
+        presetsWrap.innerHTML = '';
+        PRESETS.forEach((p, idx) => {
+          const b = document.createElement('button');
+          b.className = 'preset-chip' + (state.presetIdx === idx ? ' active' : '');
+          b.textContent = `${idx + 1}. ${p.label}`;
+          b.addEventListener('click', () => {
+            state.presetIdx = idx;
+            state.expr = PRESETS[idx];
+            resetView();
+          });
+          presetsWrap.appendChild(b);
+        });
+      }
+
+      function renderDisplay() {
+        const ex = state.expr;
+        const opSym = ex.op > 0 ? '+' : '−';
+        const opCls = ex.op > 0 ? 'is-plus' : 'is-minus';
+
+        mainDisplay.classList.toggle('mage-active', mageVisible);
+        mainDisplay.innerHTML = `
+          <span class="expr-token op-tok ${state.focusBlock === 'A' ? 'focus-gold' : ''}">
+            ${formatTermHtml(ex.termA)}
+          </span>
+          <span class="expr-token op-tok ${state.focusBlock === 'OP' ? 'focus-gold' : ''}" style="padding:3px 7px;">
+            <span class="sign-ext ${opCls}">${opSym}</span>
+            <span class="mage-one">1 ·</span>
+          </span>
+          <span class="expr-token op-tok ${state.focusBlock === 'B' ? 'focus-gold' : ''}">
+            ${formatTermHtml(ex.termB)}
+          </span>
+          ${state.finalVal !== null ? `<span class="expr-token result-tok">= ${fmtSigned(state.finalVal)}</span>` : ''}
+        `;
+
+        // Linha de simplificação progressiva
+        const parts = [];
+        const origTxt = `${formatTermPlain(ex.termA)} ${opSym} ${formatTermPlain(ex.termB)}`;
+        parts.push(`<span>${origTxt}</span>`);
+
+        const valA = state.resolvedA !== null ? `(${fmtSigned(state.resolvedA)})` : formatTermPlain(ex.termA);
+        const valB = state.resolvedB !== null ? `(${fmtSigned(state.resolvedB)})` : formatTermPlain(ex.termB);
+
+        if (state.resolvedA !== null || state.resolvedB !== null) {
+          const midTxt = `${valA} ${opSym} ${valB}`;
+          if (midTxt !== origTxt) {
+            parts.push(`<span class="simp-arrow">→</span><span style="color:#fde68a;">${midTxt}</span>`);
+          }
+        }
+
+        if (state.effB !== null && ex.op < 0) {
+          parts.push(`<span class="simp-arrow">→</span><span style="color:#bae6fd;">(${fmtSigned(state.resolvedA)}) + (${fmtSigned(state.effB)})</span>`);
+        }
+
+        if (state.finalVal !== null) {
+          parts.push(`<span class="simp-arrow">=</span><span style="color:var(--success);">${fmtSigned(state.finalVal)}</span>`);
+        }
+
+        simpLine.innerHTML = parts.join('');
+      }
+
+      function updateButtons() {
+        btnRun.disabled = state.running;
+        btnStep.disabled = state.running || isFinished();
+      }
+
+      function resetView() {
+        animToken++;
+        state.running = false;
+        state.stepIdx = 0;
+        state.steps = buildSteps(state.expr);
+        state.resolvedA = needsPriority(state.expr.termA) ? null : evalTerm(state.expr.termA);
+        state.resolvedB = needsPriority(state.expr.termB) ? null : evalTerm(state.expr.termB);
+        state.effB = null;
+        state.finalVal = null;
+        state.focusBlock = null;
+
+        const vA = evalTerm(state.expr.termA);
+        const vB = evalTerm(state.expr.termB);
+        const total = vA + state.expr.op * vB;
+        const extras = [0, vA, vB, vA + vB, total];
+        if (state.expr.termA.kind === 'div') extras.push(state.expr.termA.a);
+        if (state.expr.termB.kind === 'div') extras.push(state.expr.termB.a);
+
+        Stage.setRangeForValues(extras);
+        Stage.clearDynamic();
+        Stage.placeWarrior(0, Stage.LINE_Y, 1);
+        Stage.setNarration(
+          'Ordem das Operações',
+          'info',
+          'Guerreiro no <strong>0</strong>. Primeiro resolvemos multiplicações, divisões e opostos; depois somamos na reta!'
+        );
+
+        renderPresets();
+        renderDisplay();
+        updateButtons();
+      }
+
+      async function animatePriorityTerm(term, blockTag, token) {
+        const res = evalTerm(term);
+        state.focusBlock = blockTag;
+        renderDisplay();
+
+        Stage.clearGhost();
+        Stage.drawGuideLine(0, Y1, Stage.LINE_Y, 'rgba(250, 204, 21, 0.45)');
+
+        if (term.kind === 'num' && term.ext < 0) {
+          Stage.placeWarrior(0, Y1, term.val >= 0 ? 1 : -1);
+          Stage.drawSegment({ fromVal: 0, toVal: term.val, y: Y1, isGhost: true, label: fmtSigned(term.val) });
+          SoundFX.ghost();
+          Stage.setNarration('Prioridade · Oposto', 'invert', `Resolvendo <strong>−(${fmtSigned(term.val)})</strong>: Energia lógica no escudo inverte para ${dirNameHtml(res)}!`);
+          if (!(await sleep(delayMs(420), token))) return false;
+          await Stage.animateGhostFlip(0, term.val, Y1, delayMs(640));
+          if (token !== animToken) return false;
+          Stage.clearGhost();
+          Stage.placeWarrior(0, Stage.LINE_Y, 1);
+        } else if (term.kind === 'mult') {
+          const eff = term.a < 0 ? -term.b : term.b;
+          Stage.placeWarrior(0, Y1, term.b >= 0 ? 1 : -1);
+          Stage.drawSegment({ fromVal: 0, toVal: term.b, y: Y1, isGhost: true, label: `Base: ${fmtSigned(term.b)}` });
+          SoundFX.ghost();
+          Stage.setNarration('Prioridade · Multiplicação', 'info', `Resolvendo <strong>(${fmtSigned(term.a)})·(${fmtSigned(term.b)})</strong>: ${Math.abs(term.a)}× ${term.a < 0 ? 'invertendo' : 'mantendo'} ${dirNameHtml(term.b)}.`);
+          if (!(await sleep(delayMs(450), token))) return false;
+          if (term.a < 0) {
+            await Stage.animateGhostFlip(0, term.b, Y1, delayMs(620));
+            if (token !== animToken) return false;
+          }
+          Stage.clearGhost();
+          Stage.drawSegment({ fromVal: 0, toVal: res, y: Y1, isGhost: true, label: `= ${fmtSigned(res)}` });
+          SoundFX.step();
+          if (!(await sleep(delayMs(520), token))) return false;
+          Stage.clearGhost();
+          Stage.placeWarrior(0, Stage.LINE_Y, 1);
+        } else if (term.kind === 'div') {
+          const parts = Math.abs(term.b);
+          const partRaw = term.a / parts;
+          Stage.placeWarrior(0, Y1, term.a >= 0 ? 1 : -1);
+          Stage.drawSegment({ fromVal: 0, toVal: term.a, y: Y1, isGhost: true, label: `Total: ${fmtSigned(term.a)}` });
+          SoundFX.ghost();
+          Stage.setNarration('Prioridade · Divisão', 'info', `Resolvendo <strong>(${fmtSigned(term.a)})÷(${fmtSigned(term.b)})</strong>: dividindo em ${parts} partes de ${dirNameHtml(partRaw)}.`);
+          if (!(await sleep(delayMs(520), token))) return false;
+          Stage.clearGhost();
+          Stage.drawSegment({ fromVal: 0, toVal: partRaw, y: Y1, isGhost: true, label: fmtSigned(partRaw) });
+          if (term.b < 0) {
+            Stage.setNarration('Divisor Inversor!', 'invert', `Divisor <strong>(${fmtSigned(term.b)})</strong> inverte ${dirNameHtml(partRaw)} para ${dirNameHtml(res)}!`);
+            await Stage.animateGhostFlip(0, partRaw, Y1, delayMs(640));
+            if (token !== animToken) return false;
+          } else {
+            if (!(await sleep(delayMs(450), token))) return false;
+          }
+          Stage.clearGhost();
+          Stage.placeWarrior(0, Stage.LINE_Y, 1);
+        }
+
+        if (blockTag === 'A') state.resolvedA = res;
+        if (blockTag === 'B') state.resolvedB = res;
+        renderDisplay();
+        return true;
+      }
+
+      async function advanceStep(token) {
+        if (isFinished()) return false;
+        const step = state.steps[state.stepIdx];
+        const ex = state.expr;
+
+        if (step.action === 'evalA') {
+          const ok = await animatePriorityTerm(ex.termA, 'A', token);
+          if (!ok) return false;
+          state.stepIdx++;
+          return true;
+        }
+
+        if (step.action === 'evalB') {
+          const ok = await animatePriorityTerm(ex.termB, 'B', token);
+          if (!ok) return false;
+          state.stepIdx++;
+          return true;
+        }
+
+        if (step.action === 'walkA') {
+          const vA = evalTerm(ex.termA);
+          state.resolvedA = vA;
+          state.focusBlock = 'A';
+          renderDisplay();
+
+          Stage.clearDynamic();
+          Stage.drawGuideLine(0, Y1, Stage.LINE_Y, 'rgba(250, 204, 21, 0.5)');
+          Stage.placeWarrior(0, Y1, vA >= 0 ? 1 : -1);
+          Stage.setNarration('1º Bloco na Reta', vA > 0 ? 'pos' : 'neg', `Partindo do <strong>0</strong>, o guerreiro percorre o 1º termo: ${dirNameHtml(vA)}.`);
+          await Stage.animateWalkSegment({ fromVal: 0, toVal: vA, y: Y1, label: fmtSigned(vA), durationMs: delayMs(600) });
+          if (token !== animToken) return false;
+          state.stepIdx++;
+          return true;
+        }
+
+        if (step.action === 'applyB') {
+          const vA = evalTerm(ex.termA);
+          const vB = evalTerm(ex.termB);
+          const effB = ex.op * vB;
+          const total = vA + effB;
+
+          state.resolvedB = vB;
+          state.focusBlock = 'OP';
+          renderDisplay();
+
+          Stage.drawGuideLine(vA, Y2, Y1);
+          Stage.placeWarrior(vA, Y2, vB >= 0 ? 1 : -1);
+          Stage.drawSegment({ fromVal: vA, toVal: vA + vB, y: Y2, isGhost: true, label: fmtSigned(vB) });
+          SoundFX.ghost();
+          if (!(await sleep(delayMs(460), token))) return false;
+
+          if (ex.op < 0) {
+            Stage.setNarration('Energia lógica · Subtração!', 'invert', `Sinal <strong>−</strong> entre os termos inverte ${dirNameHtml(vB)} para ${dirNameHtml(effB)}!`);
+            await Stage.animateGhostFlip(vA, vB, Y2, delayMs(680));
+            if (token !== animToken) return false;
+          } else {
+            Stage.setNarration('Soma na Reta', effB > 0 ? 'pos' : 'neg', `Sinal <strong>+</strong> mantém ${dirNameHtml(effB)}.`);
+            if (!(await sleep(delayMs(320), token))) return false;
+          }
+
+          state.effB = effB;
+          renderDisplay();
+
+          Stage.clearGhost();
+          await Stage.animateWalkSegment({ fromVal: vA, toVal: total, y: Y2, label: fmtSigned(effB), durationMs: delayMs(620) });
+          if (token !== animToken) return false;
+
+          Stage.drawGuideLine(total, Y2, Stage.LINE_Y);
+          state.finalVal = total;
+          state.focusBlock = null;
+          state.stepIdx++;
+          Stage.setNarration('Expressão Resolvida!', 'success', `Resultado final na reta numerada: <strong>${fmtSigned(total)}</strong>!`);
+          SoundFX.win();
+          renderDisplay();
+          return true;
+        }
+
+        return false;
+      }
+
+      async function runAll() {
+        if (state.running) return;
+        if (isFinished()) resetView();
+        const myToken = ++animToken;
+        state.running = true;
+        updateButtons();
+
+        while (!isFinished()) {
+          const ok = await advanceStep(myToken);
+          if (!ok || myToken !== animToken) break;
+          if (!(await sleep(delayMs(460), myToken))) break;
+        }
+
+        if (myToken === animToken) {
+          state.running = false;
+          updateButtons();
+        }
+      }
+
+      async function runOneStep() {
+        if (state.running || isFinished()) return;
+        const myToken = ++animToken;
+        state.running = true;
+        updateButtons();
+        await advanceStep(myToken);
+        if (myToken === animToken) {
+          state.running = false;
+          updateButtons();
+        }
+      }
+
+      /* Montador Personalizado [Termo A] [op] [Termo B] */
+      function populateCustomTerm(prefix) {
+        const kindSel = document.getElementById(`${prefix}-kind`);
+        const v1Sel = document.getElementById(`${prefix}-v1`);
+        const v2Sel = document.getElementById(`${prefix}-v2`);
+        const opLbl = document.getElementById(`${prefix}-op-lbl`);
+        const kind = kindSel.value;
+
+        v1Sel.innerHTML = '';
+        v2Sel.innerHTML = '';
+
+        if (kind === 'num') {
+          opLbl.textContent = '';
+          [
+            { val: '1', txt: 'Direto (+)' },
+            { val: '-1', txt: 'Oposto (−)' }
+          ].forEach((o) => {
+            const opt = document.createElement('option');
+            opt.value = o.val; opt.textContent = o.txt;
+            v1Sel.appendChild(opt);
+          });
+          [-6, -5, -4, -3, -2, -1, 1, 2, 3, 4, 5, 6].forEach((n) => {
+            const opt = document.createElement('option');
+            opt.value = String(n); opt.textContent = `(${fmtSigned(n)})`;
+            if (n === 3) opt.selected = true;
+            v2Sel.appendChild(opt);
+          });
+        } else if (kind === 'mult') {
+          opLbl.textContent = '×';
+          [-4, -3, -2, -1, 1, 2, 3, 4].forEach((n) => {
+            const opt = document.createElement('option');
+            opt.value = String(n); opt.textContent = `(${fmtSigned(n)})`;
+            if (n === -2) opt.selected = true;
+            v1Sel.appendChild(opt);
+          });
+          [-4, -3, -2, -1, 1, 2, 3, 4].forEach((n) => {
+            const opt = document.createElement('option');
+            opt.value = String(n); opt.textContent = `(${fmtSigned(n)})`;
+            if (n === 3) opt.selected = true;
+            v2Sel.appendChild(opt);
+          });
+        } else {
+          // Divisão exata (pares pré-validados)
+          opLbl.textContent = '÷';
+          [-12, -9, -8, -6, -4, 4, 6, 8, 9, 12].forEach((n) => {
+            const opt = document.createElement('option');
+            opt.value = String(n); opt.textContent = `(${fmtSigned(n)})`;
+            if (n === -6) opt.selected = true;
+            v1Sel.appendChild(opt);
+          });
+          updateDivisorsForCustom(prefix);
+        }
+      }
+
+      function updateDivisorsForCustom(prefix) {
+        const kindSel = document.getElementById(`${prefix}-kind`);
+        if (kindSel.value !== 'div') return;
+        const v1 = Number(document.getElementById(`${prefix}-v1`).value);
+        const v2Sel = document.getElementById(`${prefix}-v2`);
+        v2Sel.innerHTML = '';
+        [-4, -3, -2, -1, 1, 2, 3, 4].forEach((d) => {
+          if (v1 % d === 0) {
+            const opt = document.createElement('option');
+            opt.value = String(d); opt.textContent = `(${fmtSigned(d)})`;
+            if (d === -2) opt.selected = true;
+            v2Sel.appendChild(opt);
+          }
+        });
+      }
+
+      function readCustomTerm(prefix) {
+        const kind = document.getElementById(`${prefix}-kind`).value;
+        const v1 = Number(document.getElementById(`${prefix}-v1`).value);
+        const v2 = Number(document.getElementById(`${prefix}-v2`).value);
+        if (kind === 'num') return { kind: 'num', ext: v1, val: v2 };
+        if (kind === 'mult') return { kind: 'mult', a: v1, b: v2 };
+        return { kind: 'div', a: v1, b: v2 };
+      }
+
+      ['ca', 'cb'].forEach((p) => {
+        populateCustomTerm(p);
+        document.getElementById(`${p}-kind`).addEventListener('change', () => populateCustomTerm(p));
+        document.getElementById(`${p}-v1`).addEventListener('change', () => updateDivisorsForCustom(p));
+      });
+
+      const copPlus = document.getElementById('cop-plus');
+      const copMinus = document.getElementById('cop-minus');
+      copPlus.addEventListener('click', () => {
+        state.customOp = 1;
+        copPlus.className = 'sign-pill selected-ext-plus';
+        copMinus.className = 'sign-pill';
+      });
+      copMinus.addEventListener('click', () => {
+        state.customOp = -1;
+        copMinus.className = 'sign-pill selected-ext-minus';
+        copPlus.className = 'sign-pill';
+      });
+
+      document.getElementById('ex-toggle-custom').addEventListener('click', () => {
+        customPanel.classList.toggle('open');
+      });
+
+      document.getElementById('ex-apply-custom').addEventListener('click', () => {
+        state.presetIdx = -1;
+        state.expr = {
+          label: 'Personalizada',
+          termA: readCustomTerm('ca'),
+          op: state.customOp,
+          termB: readCustomTerm('cb')
+        };
+        customPanel.classList.remove('open');
+        resetView();
+      });
+
+      btnRun.addEventListener('click', runAll);
+      btnStep.addEventListener('click', runOneStep);
+      document.getElementById('ex-reset').addEventListener('click', resetView);
+
+      return { resetView, renderDisplay };
+    })();
+
+    /* =====================================================================
+       ABA 6: MISSÃO — 4 NÍVEIS (OPOSTO, MULTIPLICAÇÃO, DIVISÃO, EXPRESSÕES)
+       Guerreiro sempre começa no 0 e anima o trajeto inteiro mesmo em erro!
+       ===================================================================== */
+    const MissionModule = (() => {
+      const state = {
+        level: 1,
+        score: 0,
+        streak: 0,
+        current: null,
+        locked: false
+      };
+
+      const eqEl = document.getElementById('mission-eq');
+      const choicesEl = document.getElementById('mission-choices');
+      const subtitleEl = document.getElementById('mission-subtitle');
+      const feedbackEl = document.getElementById('mission-feedback');
+      const feedbackText = document.getElementById('mission-feedback-text');
+      const btnRetry = document.getElementById('mission-retry');
+      const btnNext = document.getElementById('mission-next');
+      const scorePtsEl = document.getElementById('score-pts');
+      const scoreStreakEl = document.getElementById('score-streak');
+
+      function randInt(min, max) {
+        return Math.floor(Math.random() * (max - min + 1)) + min;
+      }
+
+      function generateMission() {
+        const type = state.level === 1 ? 'addsub'
+          : state.level === 2 ? 'mult'
+          : state.level === 3 ? 'div'
+          : 'expr';
+
+        if (type === 'addsub') {
+          const t1 = (Math.random() < 0.5 ? -1 : 1) * randInt(1, 5);
+          const mag2 = randInt(2, 5);
+          const intSign = Math.random() < 0.5 ? -1 : 1;
+          const extSign = Math.random() < 0.5 ? -1 : 1;
+          const t2 = intSign * mag2;
+          const target = t1 + extSign * t2;
+          const wrongTarget = t1 + (-extSign) * t2;
+          if (Math.abs(target) > 12 || Math.abs(wrongTarget) > 12 || target === t1) return generateMission();
+          return { type: 'addsub', t1, t2, correctSign: extSign, target };
+        }
+
+        if (type === 'mult') {
+          const mag1 = randInt(2, 4);
+          const sign1 = Math.random() < 0.5 ? -1 : 1;
+          const mag2 = randInt(1, 3);
+          const sign2 = Math.random() < 0.5 ? -1 : 1;
+          const f2 = sign2 * mag2;
+          const target = (sign1 * mag1) * f2;
+          if (Math.abs(target) > 12) return generateMission();
+          return { type: 'mult', mag1, f2, correctSign: sign1, target };
+        }
+
+        if (type === 'div') {
+          const divMag = randInt(2, 4);
+          const qMag = randInt(2, 3);
+          const s1 = Math.random() < 0.5 ? -1 : 1;
+          const s2 = Math.random() < 0.5 ? -1 : 1;
+          const dividend = s1 * (divMag * qMag);
+          const target = (s1 * s2) * qMag;
+          if (Math.abs(dividend) > 12) return generateMission();
+          return { type: 'div', dividend, divMag, correctSign: s2, target };
+        }
+
+        // Nível 4: Expressões (Termo A = multiplicação ou divisão exata; escolha a operação + ou − antes do Termo B)
+        const useDiv = Math.random() < 0.5;
+        let aLabel, vA, extraRange = 0;
+        if (useDiv) {
+          const dMag = randInt(2, 3);
+          const qMag = randInt(2, 3);
+          const s1 = Math.random() < 0.5 ? -1 : 1;
+          const s2 = Math.random() < 0.5 ? -1 : 1;
+          const dd = s1 * dMag * qMag;
+          const dv = s2 * dMag;
+          vA = dd / dv;
+          aLabel = `(${fmtSigned(dd)})÷(${fmtSigned(dv)})`;
+          extraRange = dd;
+        } else {
+          const m1 = (Math.random() < 0.5 ? -1 : 1) * randInt(2, 3);
+          const m2 = (Math.random() < 0.5 ? -1 : 1) * randInt(2, 3);
+          vA = m1 * m2;
+          aLabel = `(${fmtSigned(m1)})·(${fmtSigned(m2)})`;
+          extraRange = vA;
+        }
+        const vB = (Math.random() < 0.5 ? -1 : 1) * randInt(2, 4);
+        const opSign = Math.random() < 0.5 ? -1 : 1;
+        const target = vA + opSign * vB;
+        if (Math.abs(target) > 12 || Math.abs(vA - opSign * vB) > 12) return generateMission();
+        return { type: 'expr', aLabel, vA, vB, correctSign: opSign, target, extraRange };
+      }
+
+      function renderUI(chosenSign = null, outcome = null) {
+        const m = state.current;
+        feedbackEl.className = 'mission-feedback';
+        btnRetry.style.display = 'none';
+        btnNext.style.display = 'none';
+
+        let slotTxt = '?';
+        let slotCls = 'mystery-slot';
+        if (chosenSign !== null) {
+          slotTxt = chosenSign > 0 ? '+' : '−';
+          if (outcome === 'ok') slotCls += ' ok';
+          if (outcome === 'err') slotCls += ' err';
+        }
+
+        if (m.type === 'addsub') {
+          subtitleEl.innerHTML = `Saindo do <strong>0</strong>, escolha a <strong>operação externa</strong> para alcançar o portal em <strong style="color:var(--gold);">${fmtSigned(m.target)}</strong>:`;
+          eqEl.innerHTML = `
+            <span class="paren-val ${m.t1 > 0 ? 'is-pos' : 'is-neg'}">(${fmtSigned(m.t1)})</span>
+            <span class="${slotCls}">${slotTxt}</span>
+            <span class="paren-val ${m.t2 > 0 ? 'is-pos' : 'is-neg'}">(${fmtSigned(m.t2)})</span>
+            <span style="color:var(--text-muted);">=</span>
+            <span style="color:var(--gold);">${fmtSigned(m.target)}</span>
+          `;
+        } else if (m.type === 'mult') {
+          subtitleEl.innerHTML = `Saindo do <strong>0</strong>, escolha o <strong>sinal do Multiplicador</strong> para alcançar o portal em <strong style="color:var(--gold);">${fmtSigned(m.target)}</strong>:`;
+          eqEl.innerHTML = `
+            <span>(</span><span class="${slotCls}">${slotTxt}</span><span>${m.mag1})</span>
+            <span style="color:var(--text-muted);">×</span>
+            <span class="paren-val ${m.f2 > 0 ? 'is-pos' : 'is-neg'}">(${fmtSigned(m.f2)})</span>
+            <span style="color:var(--text-muted);">=</span>
+            <span style="color:var(--gold);">${fmtSigned(m.target)}</span>
+          `;
+        } else if (m.type === 'div') {
+          subtitleEl.innerHTML = `Saindo do <strong>0</strong>, escolha o <strong>sinal do Divisor</strong> para alcançar o portal em <strong style="color:var(--gold);">${fmtSigned(m.target)}</strong>:`;
+          eqEl.innerHTML = `
+            <span class="paren-val ${m.dividend > 0 ? 'is-pos' : 'is-neg'}">(${fmtSigned(m.dividend)})</span>
+            <span style="color:var(--text-muted);">÷</span>
+            <span>(</span><span class="${slotCls}">${slotTxt}</span><span>${m.divMag})</span>
+            <span style="color:var(--text-muted);">=</span>
+            <span style="color:var(--gold);">${fmtSigned(m.target)}</span>
+          `;
+        } else {
+          subtitleEl.innerHTML = `Resolva o 1º bloco e escolha o <strong>sinal entre os termos</strong> para atingir o portal em <strong style="color:var(--gold);">${fmtSigned(m.target)}</strong>:`;
+          eqEl.innerHTML = `
+            <span style="color:#e2e8f0;">${m.aLabel}</span>
+            <span class="${slotCls}">${slotTxt}</span>
+            <span class="paren-val ${m.vB > 0 ? 'is-pos' : 'is-neg'}">(${fmtSigned(m.vB)})</span>
+            <span style="color:var(--text-muted);">=</span>
+            <span style="color:var(--gold);">${fmtSigned(m.target)}</span>
+          `;
+        }
+
+        const descPlus = m.type === 'mult' ? 'Multiplicador Direto'
+          : m.type === 'div' ? 'Divisor Direto (mantém)'
+          : 'Mantém o sentido';
+        const descMinus = m.type === 'mult' ? 'Multiplicador Inversor'
+          : m.type === 'div' ? 'Divisor Inversor (gira 180°)'
+          : 'Inverte no escudo (Oposto)';
+
+        choicesEl.innerHTML = '';
+        [
+          { sign: 1, title: 'Sinal  +', desc: descPlus },
+          { sign: -1, title: 'Sinal  −', desc: descMinus }
+        ].forEach((opt) => {
+          const btn = document.createElement('button');
+          btn.className = 'choice-btn';
+          btn.disabled = state.locked;
+          btn.innerHTML = `<span>${opt.title}</span><small>${opt.desc}</small>`;
+          btn.addEventListener('click', () => handleAnswer(opt.sign));
+          choicesEl.appendChild(btn);
+        });
+      }
+
+      function setupStage() {
+        const m = state.current;
+        Stage.setRangeForValues([0, m.target, -m.target, m.t1 || 0, m.dividend || 0, m.extraRange || 0]);
+        Stage.clearDynamic();
+        Stage.drawPortal(m.target);
+        Stage.placeWarrior(0, Stage.LINE_Y, 1);
+        Stage.setNarration(
+          `Missão Nível ${state.level}`,
+          'info',
+          `Escolha o sinal abaixo para guiar o guerreiro do <strong>0</strong> até o portal em <strong>${fmtSigned(m.target)}</strong>.`
+        );
+      }
+
+      async function handleAnswer(chosenSign) {
+        if (state.locked) return;
+        const myToken = ++animToken;
+        state.locked = true;
+        renderUI(chosenSign, null);
+
+        const m = state.current;
+        const Y1 = Stage.LINE_Y - 46;
+        const Y2 = Stage.LINE_Y - 94;
+
+        Stage.clearDynamic();
+        Stage.drawPortal(m.target);
+        Stage.drawGuideLine(0, Y1, Stage.LINE_Y, 'rgba(250, 204, 21, 0.5)');
+
+        let landedVal = 0;
+
+        if (m.type === 'addsub' || m.type === 'expr') {
+          const startVal = m.type === 'addsub' ? m.t1 : m.vA;
+          const stepVal = m.type === 'addsub' ? m.t2 : m.vB;
+
+          Stage.placeWarrior(0, Y1, startVal >= 0 ? 1 : -1);
+          Stage.setNarration('1º Bloco', startVal > 0 ? 'pos' : 'neg', `Saindo do <strong>0</strong> em ${dirNameHtml(startVal)}.`);
+          await Stage.animateWalkSegment({ fromVal: 0, toVal: startVal, y: Y1, label: fmtSigned(startVal), durationMs: delayMs(520) });
+          if (myToken !== animToken) return;
+
+          Stage.drawGuideLine(startVal, Y2, Y1);
+          Stage.placeWarrior(startVal, Y2, stepVal >= 0 ? 1 : -1);
+          Stage.drawSegment({ fromVal: startVal, toVal: startVal + stepVal, y: Y2, isGhost: true, label: fmtSigned(stepVal) });
+          SoundFX.ghost();
+          if (!(await sleep(delayMs(440), myToken))) return;
+
+          const eff = chosenSign * stepVal;
+          if (chosenSign < 0) {
+            Stage.setNarration('Energia lógica · Inversão!', 'invert', `Sinal <strong>−</strong> gira o escudo e inverte para ${dirNameHtml(eff)}!`);
+            await Stage.animateGhostFlip(startVal, stepVal, Y2, delayMs(640));
+            if (myToken !== animToken) return;
+          } else {
+            Stage.setNarration('Mantém Sentido', eff > 0 ? 'pos' : 'neg', `Sinal <strong>+</strong> mantém ${dirNameHtml(eff)}.`);
+            if (!(await sleep(delayMs(300), myToken))) return;
+          }
+
+          Stage.clearGhost();
+          landedVal = startVal + eff;
+          await Stage.animateWalkSegment({ fromVal: startVal, toVal: landedVal, y: Y2, label: fmtSigned(eff), durationMs: delayMs(560) });
+          if (myToken !== animToken) return;
+          Stage.drawGuideLine(landedVal, Y2, Stage.LINE_Y);
+        } else if (m.type === 'mult') {
+          const base = m.f2;
+          const eff = chosenSign < 0 ? -base : base;
+
+          Stage.placeWarrior(0, Y1, base >= 0 ? 1 : -1);
+          Stage.drawSegment({ fromVal: 0, toVal: base, y: Y1, isGhost: true, label: `Base: ${fmtSigned(base)}` });
+          SoundFX.ghost();
+          if (!(await sleep(delayMs(440), myToken))) return;
+
+          if (chosenSign < 0) {
+            Stage.setNarration('Multiplicador Inversor!', 'invert', `Sinal <strong>−</strong> inverte o passo-base para ${dirNameHtml(eff)}!`);
+            await Stage.animateGhostFlip(0, base, Y1, delayMs(640));
+            if (myToken !== animToken) return;
+          } else {
+            Stage.setNarration('Multiplicador Direto', eff > 0 ? 'pos' : 'neg', `Sinal <strong>+</strong> mantém ${dirNameHtml(eff)}.`);
+            if (!(await sleep(delayMs(300), myToken))) return;
+          }
+
+          Stage.clearGhost();
+          for (let i = 0; i < m.mag1; i++) {
+            const fromV = i * eff;
+            const toV = (i + 1) * eff;
+            await Stage.animateWalkSegment({ fromVal: fromV, toVal: toV, y: Y1, label: fmtSigned(eff), subLabel: `${i + 1}º`, durationMs: delayMs(420) });
+            if (myToken !== animToken) return;
+            landedVal = toV;
+          }
+          Stage.drawGuideLine(landedVal, Y1, Stage.LINE_Y);
+        } else if (m.type === 'div') {
+          const partRaw = m.dividend / m.divMag;
+          landedVal = chosenSign < 0 ? -partRaw : partRaw;
+
+          Stage.drawGuideLine(0, Y2, Stage.LINE_Y, 'rgba(250, 204, 21, 0.5)');
+          Stage.placeWarrior(0, Y2, m.dividend >= 0 ? 1 : -1);
+          Stage.setNarration('Dividendo Total', m.dividend > 0 ? 'pos' : 'neg', `Traçando o total ${dirNameHtml(m.dividend)}.`);
+          await Stage.animateWalkSegment({ fromVal: 0, toVal: m.dividend, y: Y2, label: fmtSigned(m.dividend), durationMs: delayMs(520) });
+          if (myToken !== animToken) return;
+
+          Stage.drawPartitionMarks({ totalVal: m.dividend, parts: m.divMag, y: Y2 });
+          Stage.placeWarrior(0, Y1, partRaw >= 0 ? 1 : -1);
+          Stage.drawSegment({ fromVal: 0, toVal: partRaw, y: Y1, isGhost: true, label: `1 parte: ${fmtSigned(partRaw)}` });
+          SoundFX.ghost();
+          if (!(await sleep(delayMs(460), myToken))) return;
+
+          if (chosenSign < 0) {
+            Stage.setNarration('Divisor Inversor!', 'invert', `Sinal <strong>−</strong> no divisor inverte ${dirNameHtml(partRaw)} para ${dirNameHtml(landedVal)}!`);
+            await Stage.animateGhostFlip(0, partRaw, Y1, delayMs(640));
+            if (myToken !== animToken) return;
+          } else {
+            Stage.setNarration('Divisor Direto', landedVal > 0 ? 'pos' : 'neg', `Sinal <strong>+</strong> mantém ${dirNameHtml(landedVal)}.`);
+            if (!(await sleep(delayMs(300), myToken))) return;
+          }
+
+          Stage.clearGhost();
+          await Stage.animateWalkSegment({ fromVal: 0, toVal: landedVal, y: Y1, label: fmtSigned(landedVal), durationMs: delayMs(540) });
+          if (myToken !== animToken) return;
+          Stage.drawGuideLine(landedVal, Y1, Stage.LINE_Y);
+        }
+
+        const isCorrect = landedVal === m.target;
+        renderUI(chosenSign, isCorrect ? 'ok' : 'err');
+
+        if (isCorrect) {
+          state.score += 10;
+          state.streak += 1;
+          scorePtsEl.textContent = state.score;
+          scoreStreakEl.textContent = state.streak;
+          Stage.celebrateWarrior();
+          SoundFX.win();
+          Stage.setNarration('Portal Alcançado!', 'success', `Acertou! O guerreiro chegou em <strong>${fmtSigned(m.target)}</strong>.`);
+          feedbackEl.className = 'mission-feedback ok';
+          feedbackText.innerHTML = `✅ Excelente! Portal em <strong>${fmtSigned(m.target)}</strong> alcançado (+10 pontos).`;
+          btnNext.style.display = 'inline-flex';
+        } else {
+          state.streak = 0;
+          scoreStreakEl.textContent = '0';
+          SoundFX.err();
+          Stage.setNarration('Tente de Novo', 'neg', `O guerreiro parou em <strong>${fmtSigned(landedVal)}</strong>; o portal está em <strong>${fmtSigned(m.target)}</strong>.`);
+          feedbackEl.className = 'mission-feedback err';
+          feedbackText.innerHTML = `❌ O guerreiro foi para <strong>${fmtSigned(landedVal)}</strong> (portal em <strong>${fmtSigned(m.target)}</strong>). Observe o efeito do sinal e tente de novo!`;
+          btnRetry.style.display = 'inline-flex';
+          btnNext.style.display = 'inline-flex';
+        }
+      }
+
+      function nextMission() {
+        animToken++;
+        state.locked = false;
+        state.current = generateMission();
+        setupStage();
+        renderUI();
+      }
+
+      function retryMission() {
+        animToken++;
+        state.locked = false;
+        setupStage();
+        renderUI();
+      }
+
+      function enterTab() {
+        if (!state.current) nextMission();
+        else retryMission();
+      }
+
+      document.querySelectorAll('.level-btn').forEach((btn) => {
+        btn.addEventListener('click', () => {
+          state.level = Number(btn.dataset.level);
+          document.querySelectorAll('.level-btn').forEach((b) => {
+            b.classList.toggle('active', Number(b.dataset.level) === state.level);
+          });
+          nextMission();
+        });
+      });
+
+      btnRetry.addEventListener('click', retryMission);
+      btnNext.addEventListener('click', nextMission);
+
+      return { enterTab };
+    })();
+
+    /* Inicializa diretamente na Aba 1 (Demo) com o guerreiro na Origem (0) */
+    demoCounterBadge.style.display = 'block';
+    DemoModule.resetCurrentDemo();
+  </script>
+<style>#autoriaBtn{position:fixed;left:6px;bottom:6px;z-index:2147483000;width:22px;height:22px;border-radius:50%;border:1px solid rgba(128,128,128,.5);background:rgba(255,255,255,.75);color:#333;font:12px/20px sans-serif;text-align:center;padding:0;cursor:pointer;opacity:.5}#autoriaBtn:hover,#autoriaBtn:focus{opacity:1}#autoriaTxt{position:fixed;left:6px;bottom:34px;z-index:2147483000;max-width:260px;padding:8px 10px;border-radius:8px;background:#222;color:#fff;font:12px/1.35 sans-serif;display:none}#autoriaTxt.on{display:block}</style><button id="autoriaBtn" type="button" aria-label="Autoria" onclick="document.getElementById('autoriaTxt').classList.toggle('on')">©</button><div id="autoriaTxt" onclick="this.classList.remove('on')">© Ygor B. F. Ferreira · A Saga dos Reinos Matemáticos · Matematkês · uso livre em sala</div>
+</body>
+</html>
